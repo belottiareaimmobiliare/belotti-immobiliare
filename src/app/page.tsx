@@ -99,7 +99,7 @@ export default function Home() {
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <a
-                href="#immobili"
+                href="/immobili"
                 className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/90"
               >
                 Esplora gli immobili
