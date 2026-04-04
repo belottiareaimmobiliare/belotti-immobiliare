@@ -294,9 +294,12 @@ export default function ImmobiliPage() {
 
                       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex gap-3">
-                          <button className="rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black transition hover:bg-white/90">
-                            Scopri di più
-                          </button>
+                            <a
+                                href="/immobili/attico-con-terrazza-panoramica"
+                                className="rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black transition hover:bg-white/90"
+                            >
+                                Scopri di più
+                            </a>
                           <button className="rounded-full border border-white/10 px-5 py-2.5 text-sm text-white/75 transition hover:border-white/20 hover:bg-white/[0.04]">
                             Salva
                           </button>
