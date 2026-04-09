@@ -1,26 +1,77 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+html,
+body {
+  margin: 0;
+  padding: 0;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #0a0f1a;
+  color: white;
+}
+
+.home-hero-sticky {
+  position: sticky;
+  top: 0;
+}
+
+.independent-scroll-layout {
+  height: calc(100vh - 73px);
+  overflow: hidden;
+}
+
+.independent-scroll-column {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.independent-scroll-column::-webkit-scrollbar {
+  width: 10px;
+}
+
+.independent-scroll-column::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+}
+
+.independent-scroll-column::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@keyframes hero-slide-in-right {
+  0% {
+    transform: translate3d(100%, 0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes hero-slide-out-left {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(-100%, 0, 0);
+    opacity: 1;
+  }
+}
+
+.animate-hero-slide-in-right {
+  animation: hero-slide-in-right 1.1s ease-in-out forwards;
+}
+
+.animate-hero-slide-out-left {
+  animation: hero-slide-out-left 1.1s ease-in-out forwards;
 }
