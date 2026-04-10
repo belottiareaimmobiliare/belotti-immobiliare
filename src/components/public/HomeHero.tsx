@@ -104,7 +104,7 @@ export default function HomeHero() {
             trovare la soluzione giusta senza rumore inutile.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 hidden flex-wrap gap-3 md:flex">
             <Link
               href="/immobili"
               className="rounded-2xl bg-white px-6 py-3.5 text-sm font-semibold text-black transition hover:opacity-90"
