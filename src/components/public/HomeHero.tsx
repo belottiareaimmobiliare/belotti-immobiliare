@@ -81,8 +81,8 @@ export default function HomeHero() {
           />
         </div>
 
-        <div className="absolute inset-0 bg-[#06101d]/55" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.16),transparent_24%),linear-gradient(90deg,rgba(5,10,22,0.86)_0%,rgba(5,10,22,0.52)_38%,rgba(5,10,22,0.76)_100%)]" />
+        <div className="absolute inset-0 bg-black/28" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(255,255,255,0.12),transparent_30%),radial-gradient(circle_at_82%_18%,rgba(255,255,255,0.08),transparent_22%),linear-gradient(90deg,rgba(4,10,18,0.42)_0%,rgba(4,10,18,0.18)_38%,rgba(4,10,18,0.34)_100%)]" />
       </div>
 
       <div className="relative grid min-h-[92vh] w-full items-center gap-12 px-6 py-12 xl:grid-cols-[1.15fr_0.85fr] xl:px-10 2xl:px-14">
@@ -90,7 +90,7 @@ export default function HomeHero() {
           style={textStyle}
           className="max-w-[920px] transition-[opacity,transform] duration-150"
         >
-          <p className="text-sm font-medium uppercase tracking-[0.34em] text-white/55">
+          <p className="text-sm font-medium uppercase tracking-[0.34em] text-white/72">
             Area Immobiliare dal 1980
           </p>
 
@@ -98,7 +98,7 @@ export default function HomeHero() {
             Bergamo, case e scelte immobiliari lette con esperienza vera.
           </h1>
 
-          <p className="mt-7 max-w-[760px] text-base leading-8 text-white/72 md:text-lg xl:text-[1.15rem]">
+          <p className="mt-7 max-w-[760px] text-base leading-8 text-white/82 md:text-lg xl:text-[1.15rem]">
             Un approccio più chiaro, più solido e più umano alla compravendita e
             alla locazione. Analisi, verifica e conoscenza del territorio per
             trovare la soluzione giusta senza rumore inutile.
@@ -114,29 +114,29 @@ export default function HomeHero() {
 
             <Link
               href="/immobili/mappa-area"
-              className="rounded-2xl border border-white/12 bg-white/6 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/10"
+              className="rounded-2xl border border-white/20 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/16"
             >
               Disegna la tua area
             </Link>
 
             <Link
               href="/chi-siamo"
-              className="rounded-2xl border border-white/12 bg-transparent px-6 py-3.5 text-sm font-semibold text-white/86 transition hover:bg-white/6 hover:text-white"
+              className="rounded-2xl border border-white/18 bg-transparent px-6 py-3.5 text-sm font-semibold text-white/90 transition hover:bg-white/8 hover:text-white"
             >
               Scopri Area Immobiliare
             </Link>
           </div>
 
           <div className="mt-10 grid gap-4 md:grid-cols-3">
-            <div className="rounded-[24px] border border-white/10 bg-white/[0.04] px-5 py-5 backdrop-blur-md">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">
+            <div className="rounded-[24px] border border-white/18 bg-white/[0.10] px-5 py-5 backdrop-blur-md">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-white/60">
                 Storia
               </p>
               <p className="mt-2 text-2xl font-semibold text-white">Dal 1980</p>
             </div>
 
-            <div className="rounded-[24px] border border-white/10 bg-white/[0.04] px-5 py-5 backdrop-blur-md">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">
+            <div className="rounded-[24px] border border-white/18 bg-white/[0.10] px-5 py-5 backdrop-blur-md">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-white/60">
                 Territorio
               </p>
               <p className="mt-2 text-2xl font-semibold text-white">
@@ -144,8 +144,8 @@ export default function HomeHero() {
               </p>
             </div>
 
-            <div className="rounded-[24px] border border-white/10 bg-white/[0.04] px-5 py-5 backdrop-blur-md">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">
+            <div className="rounded-[24px] border border-white/18 bg-white/[0.10] px-5 py-5 backdrop-blur-md">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-white/60">
                 Metodo
               </p>
               <p className="mt-2 text-2xl font-semibold text-white">
@@ -160,12 +160,13 @@ export default function HomeHero() {
           className="hidden xl:flex xl:justify-end xl:self-end"
         >
           <div className="relative w-full max-w-[540px]">
-            <div className="absolute -left-8 top-10 h-32 w-32 rounded-full bg-sky-400/18 blur-3xl" />
-            <div className="absolute -right-6 bottom-4 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
+            <div className="absolute -left-8 top-10 h-32 w-32 rounded-full bg-white/18 blur-3xl" />
+            <div className="absolute -right-6 bottom-4 h-40 w-40 rounded-full bg-white/12 blur-3xl" />
 
-            <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[#09111d]/62 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.34)] backdrop-blur-2xl">
-              <div className="grid gap-4">
-                <div className="overflow-hidden rounded-[26px] border border-white/10">
+            <div className="relative overflow-hidden rounded-[34px] border border-white/20 bg-white/[0.08] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.26)] backdrop-blur-md">
+              <div className="absolute inset-0 bg-white/[0.06]" />
+              <div className="relative grid gap-4">
+                <div className="overflow-hidden rounded-[26px] border border-white/18">
                   <div
                     className="h-[240px] w-full bg-cover bg-center"
                     style={{ backgroundImage: "url('/images/bergamo-2.jpg')" }}
@@ -173,14 +174,14 @@ export default function HomeHero() {
                 </div>
 
                 <div className="grid grid-cols-[1.1fr_0.9fr] gap-4">
-                  <div className="rounded-[24px] border border-white/10 bg-white/[0.04] p-4">
-                    <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">
+                  <div className="rounded-[24px] border border-white/18 bg-white/[0.10] p-4 backdrop-blur-sm">
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-white/62">
                       Ricerca su mappa
                     </p>
                     <p className="mt-2 text-2xl font-semibold text-white">
                       Zone precise
                     </p>
-                    <p className="mt-3 text-sm leading-7 text-white/62">
+                    <p className="mt-3 text-sm leading-7 text-white/76">
                       Disegna l’area che ti interessa e concentrati solo sugli
                       immobili coerenti con la tua ricerca.
                     </p>
@@ -188,15 +189,15 @@ export default function HomeHero() {
 
                   <Link
                     href="/immobili/mappa-area"
-                    className="group relative overflow-hidden rounded-[24px] border border-white/10"
+                    className="group relative overflow-hidden rounded-[24px] border border-white/18"
                   >
                     <div className="absolute inset-0 bg-[url('/images/map-card-bg.jpg')] bg-cover bg-center opacity-100" />
-                    <div className="absolute inset-0 bg-white/28 backdrop-blur-[1.5px]" />
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.24)_0%,rgba(255,255,255,0.04)_100%)]" />
+                    <div className="absolute inset-0 bg-white/68 backdrop-blur-[4px]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.34)_0%,rgba(255,255,255,0.14)_100%)]" />
 
                     <div className="relative flex h-full flex-col justify-between p-4">
                       <div>
-                        <p className="text-[11px] uppercase tracking-[0.22em] text-black/50">
+                        <p className="text-[11px] uppercase tracking-[0.22em] text-black/55">
                           Mappa interattiva
                         </p>
                         <p className="mt-2 text-xl font-semibold text-black">
