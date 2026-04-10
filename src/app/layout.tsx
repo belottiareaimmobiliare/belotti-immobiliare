@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import CookieBanner from '@/components/public/CookieBanner'
+import WhatsAppChatButton from '@/components/public/WhatsAppChatButton'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -31,6 +32,7 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-[#050b16] text-white">
         {children}
+        <WhatsAppChatButton />
         <CookieBanner />
       </body>
     </html>
