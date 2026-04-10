@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 
 const partnerLogos = [
@@ -20,6 +22,10 @@ const partnerLogos = [
 ]
 
 export default function Footer() {
+  const handleOpenCookieBanner = () => {
+    window.dispatchEvent(new Event('open-cookie-banner'))
+  }
+
   return (
     <footer className="w-full bg-[#010409] px-6 py-14 xl:px-10 2xl:px-14">
       <p className="text-xs uppercase tracking-[0.3em] text-white/30">
@@ -84,6 +90,19 @@ export default function Footer() {
             <Link href="/cookie" className="transition hover:text-white">
               Cookie Policy
             </Link>
+            <Link
+              href="/preferenze-cookie"
+              className="transition hover:text-white"
+            >
+              Preferenze cookie
+            </Link>
+            <button
+              type="button"
+              onClick={handleOpenCookieBanner}
+              className="text-left text-white/72 transition hover:text-white"
+            >
+              Modifica preferenze cookie
+            </button>
           </div>
         </div>
 
