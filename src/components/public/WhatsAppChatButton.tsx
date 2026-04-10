@@ -40,10 +40,10 @@ export default function WhatsAppChatButton() {
     const propertyPage = pathname.startsWith('/immobili/') && pathname !== '/immobili/mappa-area'
 
     if (propertyPage && siteOrigin) {
-      return `Ciao, sono interessato a questo immobile: ${siteOrigin}${pathname}. Vorrei ricevere maggiori informazioni.`
+      return `Ciao, ho visto questo immobile sul vostro sito Area Immobiliare: ${siteOrigin}${pathname}. Vorrei ricevere maggiori informazioni. Grazie.`
     }
 
-    return 'Ciao, vorrei ricevere informazioni su un immobile pubblicato sul vostro sito.'
+    return 'Ciao, ho visto il vostro sito Area Immobiliare e vorrei ricevere informazioni su un immobile. Grazie.'
   }, [pathname, siteOrigin])
 
   const whatsappHref = useMemo(() => {
