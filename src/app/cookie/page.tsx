@@ -1,6 +1,7 @@
 import SiteHeader from '@/components/public/SiteHeader'
 import Footer from '@/components/public/Footer'
 import FooterReveal from '@/components/public/FooterReveal'
+import Link from 'next/link'
 
 export default function CookiePage() {
   return (
@@ -15,58 +16,178 @@ export default function CookiePage() {
 
         <div className="mt-10 space-y-10 text-white/72">
           <section>
-            <h2 className="text-2xl font-semibold text-white">1. Cosa sono i cookie</h2>
+            <h2 className="text-2xl font-semibold text-white">
+              1. Cosa sono i cookie
+            </h2>
             <p className="mt-4 leading-8">
-              I cookie sono piccoli file di testo che il sito può memorizzare sul dispositivo
-              dell’utente per consentire funzioni tecniche, memorizzare preferenze o, ove previsto,
-              raccogliere informazioni statistiche o di profilazione.
+              I cookie sono piccoli file di testo che i siti visitati inviano al
+              dispositivo dell’utente, dove vengono memorizzati per essere poi
+              ritrasmessi agli stessi siti alla visita successiva.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white">2. Cookie tecnici</h2>
+            <h2 className="text-2xl font-semibold text-white">
+              2. Tipologie di cookie utilizzati
+            </h2>
+
             <p className="mt-4 leading-8">
-              Il sito utilizza cookie tecnici o strumenti equivalenti necessari al funzionamento
-              della navigazione, alla sicurezza del servizio e alla memorizzazione delle preferenze
-              essenziali, inclusa la gestione della scelta sui cookie.
+              Questo sito utilizza principalmente:
+            </p>
+
+            <ul className="mt-4 space-y-3 leading-8">
+              <li>
+                <strong>Cookie tecnici:</strong> necessari al funzionamento del
+                sito, non richiedono consenso.
+              </li>
+              <li>
+                <strong>Cookie facoltativi:</strong> attivati solo previo consenso
+                dell’utente, per contenuti esterni o funzionalità aggiuntive.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white">
+              3. Cookie di terze parti
+            </h2>
+            <p className="mt-4 leading-8">
+              Il sito può integrare contenuti di terze parti, come mappe
+              interattive. Tali contenuti vengono caricati solo dopo una scelta
+              esplicita dell’utente e possono comportare il trattamento di dati da
+              parte dei rispettivi fornitori.
+            </p>
+
+            <p className="mt-4 leading-8">
+              Per maggiori informazioni si invita a consultare le informative
+              privacy dei rispettivi servizi esterni.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white">3. Cookie analitici e marketing</h2>
+            <h2 className="text-2xl font-semibold text-white">
+              4. Gestione del consenso
+            </h2>
             <p className="mt-4 leading-8">
-              Eventuali cookie analitici non anonimizzati o strumenti di marketing non vengono attivati
-              in modo predefinito e richiedono una scelta positiva dell’utente tramite banner o area
-              preferenze, quando presenti nel sito.
+              Al primo accesso al sito, l’utente può scegliere se accettare o
+              rifiutare i cookie facoltativi tramite il banner dedicato.
+            </p>
+
+            <p className="mt-4 leading-8">
+              È sempre possibile modificare la propria scelta in qualsiasi momento
+              attraverso il pulsante dedicato oppure dalla pagina{' '}
+              <Link
+                href="/preferenze-cookie"
+                className="text-white underline underline-offset-4"
+              >
+                Preferenze cookie
+              </Link>
+              .
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white">4. Gestione del consenso</h2>
+            <h2 className="text-2xl font-semibold text-white">
+              5. Conservazione delle preferenze
+            </h2>
             <p className="mt-4 leading-8">
-              L’utente può accettare tutti i cookie facoltativi, rifiutarli o personalizzare le preferenze.
-              Le preferenze possono essere riviste successivamente dall’apposita area dedicata.
+              Le preferenze sui cookie vengono memorizzate per consentire al sito
+              di ricordare le scelte dell’utente e non riproporre il banner ad ogni
+              visita, salvo modifiche manuali.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white">5. Come modificare le preferenze</h2>
+            <h2 className="text-2xl font-semibold text-white">
+              6. Come gestire o cancellare i cookie
+            </h2>
             <p className="mt-4 leading-8">
-              Le preferenze possono essere modificate dalla pagina “Preferenze cookie” oppure intervenendo
-              direttamente sulle impostazioni del browser, tenendo conto che la disattivazione dei cookie
-              tecnici può compromettere il corretto funzionamento del sito.
+              L’utente può gestire o disabilitare i cookie anche tramite le
+              impostazioni del proprio browser. Di seguito alcuni link utili alle
+              guide ufficiali dei principali browser:
+            </p>
+
+            <ul className="mt-4 space-y-2 leading-8">
+              <li>
+                <a
+                  href="https://support.google.com/chrome/answer/95647"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-white underline underline-offset-4"
+                >
+                  Google Chrome
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://support.mozilla.org/it/kb/Gestione%20dei%20cookie"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-white underline underline-offset-4"
+                >
+                  Mozilla Firefox
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://support.apple.com/it-it/guide/safari/sfri11471/mac"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-white underline underline-offset-4"
+                >
+                  Safari
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://support.microsoft.com/it-it/help/4027947"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-white underline underline-offset-4"
+                >
+                  Microsoft Edge
+                </a>
+              </li>
+            </ul>
+
+            <p className="mt-4 leading-8">
+              La disattivazione dei cookie tecnici potrebbe compromettere il
+              corretto funzionamento del sito.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-white">6. Aggiornamenti</h2>
+            <h2 className="text-2xl font-semibold text-white">
+              7. Log tecnici e sicurezza
+            </h2>
             <p className="mt-4 leading-8">
-              La presente Cookie Policy può essere aggiornata nel tempo in caso di modifiche tecniche,
-              normative o di nuovi strumenti utilizzati sul sito.
+              Per esigenze tecniche e di sicurezza, i sistemi che ospitano il sito
+              possono registrare informazioni tecniche di accesso e funzionamento,
+              come log di sistema, indirizzi IP, dati di errore e richieste
+              ricevute dal server. Tali informazioni vengono trattate per garantire
+              stabilità, sicurezza e continuità del servizio.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white">
+              8. Collegamenti utili
+            </h2>
+            <p className="mt-4 leading-8">
+              Per ulteriori informazioni sul trattamento dei dati personali,
+              consulta la{' '}
+              <Link
+                href="/privacy"
+                className="text-white underline underline-offset-4"
+              >
+                Privacy Policy
+              </Link>
+              .
             </p>
           </section>
         </div>
       </section>
+
       <FooterReveal>
         <Footer />
       </FooterReveal>
