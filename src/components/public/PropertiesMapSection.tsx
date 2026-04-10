@@ -31,17 +31,14 @@ type PolygonValue = {
 
 const provinces = (italyLocations.provinces || []) as ProvinceItem[]
 
-const PropertiesMap = dynamic(
-  () => import('@/components/public/PropertiesMap'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-full min-h-[260px] items-center justify-center rounded-[28px] border border-white/10 bg-black/20 text-white/45">
-        Caricamento mappa...
-      </div>
-    ),
-  }
-)
+const PropertiesMap = dynamic(() => import('@/components/public/PropertiesMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full min-h-[260px] items-center justify-center rounded-[28px] border border-white/10 bg-black/20 text-white/45">
+      Caricamento mappa...
+    </div>
+  ),
+})
 
 type Props = {
   properties: MapProperty[]
@@ -154,6 +151,11 @@ export default function PropertiesMapSection({
     setShowZonePicker(false)
   }
 
+  const goToMapView = () => {
+    const params = new URLSearchParams(searchParams.toString())
+    router.push(`/immobili/mappa-area?${params.toString()}`)
+  }
+
   return (
     <div className="relative">
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -161,9 +163,7 @@ export default function PropertiesMapSection({
           <p className="text-xs uppercase tracking-[0.25em] text-white/35">
             Area mappa
           </p>
-          <h2 className="mt-2 text-2xl font-semibold">
-            Vista risultati su mappa
-          </h2>
+          <h2 className="mt-2 text-2xl font-semibold">Vista risultati su mappa</h2>
           <p className="mt-2 text-sm text-white/55">
             {properties.length > 0
               ? `${properties.length} immobili con posizione disponibile`
@@ -182,10 +182,13 @@ export default function PropertiesMapSection({
 
           <button
             type="button"
-            onClick={() => router.push('/immobili/mappa-area')}
+            onClick={goToMapView}
             className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75 transition hover:bg-white/10"
           >
-            {hasActivePolygon ? 'Ridisegna area su mappa' : 'Disegna area su mappa'}
+            <span className="hidden md:inline">
+              {hasActivePolygon ? 'Ridisegna area su mappa' : 'Disegna area su mappa'}
+            </span>
+            <span className="md:hidden">Vedi su mappa</span>
           </button>
         </div>
       </div>
@@ -273,9 +276,7 @@ export default function PropertiesMapSection({
             </div>
 
             <div className="w-full lg:w-[320px]">
-              <p className="text-sm font-medium text-white">
-                Comuni selezionati
-              </p>
+              <p className="text-sm font-medium text-white">Comuni selezionati</p>
               <p className="mt-1 text-sm text-white/55">
                 {selectedComuni.length}/8 scelti
               </p>

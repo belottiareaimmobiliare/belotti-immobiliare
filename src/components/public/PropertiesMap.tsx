@@ -1,13 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import {
-  MapContainer,
-  Marker,
-  Polygon,
-  TileLayer,
-  useMap,
-} from 'react-leaflet'
+import { MapContainer, Marker, Polygon, TileLayer, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import Link from 'next/link'
 
@@ -172,9 +166,9 @@ export default function PropertiesMap({
       <MapContainer
         center={defaultCenter}
         zoom={10}
-        scrollWheelZoom={true}
-        dragging={true}
-        doubleClickZoom={true}
+        scrollWheelZoom
+        dragging
+        doubleClickZoom
         className="h-full w-full"
         style={{ height: '100%', width: '100%', background: '#dbe7f2' }}
       >
@@ -213,10 +207,10 @@ export default function PropertiesMap({
       </MapContainer>
 
       {selectedProperty && (
-        <div className="absolute left-1/2 top-4 z-[500] w-[min(92%,560px)] -translate-x-1/2">
+        <div className="absolute left-1/2 top-4 z-[500] w-[min(92%,560px)] -translate-x-1/2 md:w-[min(92%,560px)]">
           <div className="overflow-hidden rounded-[22px] bg-white text-slate-900 shadow-[0_18px_40px_rgba(2,6,23,0.16)]">
-            <div className="grid min-h-[170px] grid-cols-[1.1fr_1fr] bg-white">
-              <div className="flex min-w-0 flex-col justify-between px-5 py-5">
+            <div className="grid min-h-[170px] grid-cols-1 bg-white md:grid-cols-[1.1fr_1fr]">
+              <div className="order-2 flex min-w-0 flex-col justify-between px-5 py-5 md:order-1">
                 <div>
                   <h3 className="line-clamp-2 text-[1.05rem] font-semibold leading-6 text-slate-800">
                     {selectedProperty.title || 'Immobile'}
@@ -228,7 +222,7 @@ export default function PropertiesMap({
                 </div>
 
                 <div className="mt-4">
-                  <p className="text-[2rem] font-semibold leading-none text-slate-900">
+                  <p className="text-[1.65rem] font-semibold leading-none text-slate-900 md:text-[2rem]">
                     {formatPrice(selectedProperty.price)}
                   </p>
                 </div>
@@ -247,14 +241,14 @@ export default function PropertiesMap({
                 </div>
               </div>
 
-              <div className="relative overflow-hidden rounded-l-[18px]">
+              <div className="relative order-1 overflow-hidden md:order-2 md:rounded-l-[18px]">
                 {selectedProperty.coverImage ? (
                   <div
-                    className="h-full min-h-[170px] w-full bg-cover bg-center"
+                    className="h-[160px] w-full bg-cover bg-center md:h-full md:min-h-[170px]"
                     style={{ backgroundImage: `url('${selectedProperty.coverImage}')` }}
                   />
                 ) : (
-                  <div className="flex h-full min-h-[170px] w-full items-center justify-center bg-slate-200 text-[11px] text-slate-500">
+                  <div className="flex h-[160px] w-full items-center justify-center bg-slate-200 text-[11px] text-slate-500 md:h-full md:min-h-[170px]">
                     Nessuna immagine
                   </div>
                 )}
@@ -280,7 +274,7 @@ export default function PropertiesMap({
       )}
 
       {polygonPositions && (
-        <div className="pointer-events-none absolute left-4 bottom-4 z-[450] rounded-2xl border border-sky-400/20 bg-sky-500/85 px-4 py-3 text-sm text-white shadow-xl backdrop-blur">
+        <div className="pointer-events-none absolute bottom-4 left-4 z-[450] rounded-2xl border border-sky-400/20 bg-sky-500/85 px-4 py-3 text-sm text-white shadow-xl backdrop-blur">
           Area selezionata attiva sulla mappa
         </div>
       )}
