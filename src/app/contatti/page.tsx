@@ -1,11 +1,30 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import SiteHeader from '@/components/public/SiteHeader'
 import Footer from '@/components/public/Footer'
 import FooterReveal from '@/components/public/FooterReveal'
+import { readCookiePreferences } from '@/lib/cookie-consent'
 
 const googleMapsQuery = encodeURIComponent('Via A. Locatelli 62, 24121 Bergamo')
 const googleMapsHref = `https://www.google.com/maps/search/?api=1&query=${googleMapsQuery}`
 
 export default function ContattiPage() {
+  const [canLoadExternalMap, setCanLoadExternalMap] = useState(false)
+
+  useEffect(() => {
+    const preferences = readCookiePreferences()
+
+    if (!preferences) {
+      setCanLoadExternalMap(false)
+      return
+    }
+
+    setCanLoadExternalMap(
+      preferences.analytics === true || preferences.marketing === true
+    )
+  }, [])
+
   return (
     <main className="min-h-screen bg-[#0a0f1a] text-white">
       <SiteHeader />
@@ -91,13 +110,39 @@ export default function ContattiPage() {
 
           <section className="rounded-[30px] border border-white/10 bg-white/[0.03] p-4 md:p-5">
             <div className="overflow-hidden rounded-[24px] border border-white/10">
-              <iframe
-                title="Mappa Area Immobiliare"
-                src={`https://www.google.com/maps?q=${googleMapsQuery}&z=16&output=embed`}
-                className="h-[620px] w-full border-0"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
+              {canLoadExternalMap ? (
+                <iframe
+                  title="Mappa Area Immobiliare"
+                  src={`https://www.google.com/maps?q=${googleMapsQuery}&z=16&output=embed`}
+                  className="h-[620px] w-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              ) : (
+                <div className="flex h-[620px] flex-col items-center justify-center px-6 text-center">
+                  <p className="text-sm uppercase tracking-[0.24em] text-white/35">
+                    Contenuto esterno
+                  </p>
+                  <h3 className="mt-3 text-2xl font-semibold text-white">
+                    La mappa è disattivata finché non scegli i cookie facoltativi
+                  </h3>
+                  <p className="mt-4 max-w-xl text-sm leading-7 text-white/65">
+                    Per visualizzare la mappa incorporata di Google è necessario
+                    abilitare almeno i cookie facoltativi collegati a contenuti
+                    esterni. In alternativa puoi aprire direttamente la posizione
+                    su Google Maps con il pulsante dedicato.
+                  </p>
+
+                  <a
+                    href={googleMapsHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-6 inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+                  >
+                    Apri su Google Maps
+                  </a>
+                </div>
+              )}
             </div>
           </section>
         </div>
