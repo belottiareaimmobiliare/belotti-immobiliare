@@ -6,15 +6,12 @@ import { MessageCircle } from 'lucide-react'
 import { readCookiePreferences } from '@/lib/cookie-consent'
 
 const WHATSAPP_NUMBER = '393938149279'
-// SOSTITUISCI con il numero WhatsApp reale in formato internazionale senza +
-// esempio: 393471234567
-
-const DEFAULT_MESSAGE =
-  'Ciao, vorrei avere informazioni su un immobile pubblicato sul vostro sito.'
+// SOSTITUISCI con il numero reale in formato internazionale senza +
 
 export default function WhatsAppChatButton() {
   const pathname = usePathname()
   const [hasCookieChoice, setHasCookieChoice] = useState(true)
+  const [siteOrigin, setSiteOrigin] = useState('')
 
   useEffect(() => {
     const syncCookieState = () => {
@@ -23,6 +20,10 @@ export default function WhatsAppChatButton() {
     }
 
     syncCookieState()
+
+    if (typeof window !== 'undefined') {
+      setSiteOrigin(window.location.origin)
+    }
 
     window.addEventListener('cookie-preferences-updated', syncCookieState)
 
@@ -35,10 +36,19 @@ export default function WhatsAppChatButton() {
     return !pathname.startsWith('/admin')
   }, [pathname])
 
+  const messageText = useMemo(() => {
+    const propertyPage = pathname.startsWith('/immobili/') && pathname !== '/immobili/mappa-area'
+
+    if (propertyPage && siteOrigin) {
+      return `Ciao, sono interessato a questo immobile: ${siteOrigin}${pathname}. Vorrei ricevere maggiori informazioni.`
+    }
+
+    return 'Ciao, vorrei ricevere informazioni su un immobile pubblicato sul vostro sito.'
+  }, [pathname, siteOrigin])
+
   const whatsappHref = useMemo(() => {
-    const text = encodeURIComponent(DEFAULT_MESSAGE)
-    return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`
-  }, [])
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(messageText)}`
+  }, [messageText])
 
   if (!isPublicPage) return null
 
@@ -61,6 +71,9 @@ export default function WhatsAppChatButton() {
           WhatsApp
         </p>
         <p className="text-sm font-semibold text-black">Chatta con noi</p>
+        <p className="text-[11px] text-black/70">
+          Ti rispondiamo il prima possibile
+        </p>
       </div>
     </a>
   )
