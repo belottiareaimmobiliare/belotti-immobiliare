@@ -1,3 +1,5 @@
+import Footer from '@/components/public/Footer'
+import FooterReveal from '@/components/public/FooterReveal'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -420,6 +422,9 @@ export default async function PropertyDetailPage({ params }: PageProps) {
           </aside>
         </div>
       </section>
+      <FooterReveal>
+  <Footer />
+</FooterReveal>
     </main>
   )
 }

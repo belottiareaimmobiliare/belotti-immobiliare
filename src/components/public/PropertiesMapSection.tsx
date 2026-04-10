@@ -36,7 +36,7 @@ const PropertiesMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full min-h-[420px] items-center justify-center rounded-[28px] border border-white/10 bg-black/20 text-white/45">
+      <div className="flex h-full min-h-[260px] items-center justify-center rounded-[28px] border border-white/10 bg-black/20 text-white/45">
         Caricamento mappa...
       </div>
     ),
@@ -131,6 +131,7 @@ export default function PropertiesMapSection({
     params.delete('comune')
     params.delete('polygon')
     params.delete('mapMode')
+    params.delete('page')
 
     selectedComuni.forEach((comune) => {
       params.append('comune', comune)
@@ -145,6 +146,7 @@ export default function PropertiesMapSection({
     params.delete('comune')
     params.delete('polygon')
     params.delete('mapMode')
+    params.delete('page')
 
     router.push(`${pathname}?${params.toString()}`)
     setSelectedComuni([])
@@ -326,7 +328,7 @@ export default function PropertiesMapSection({
         polygon={initialPolygon}
         enableDrawing={false}
         emptyInsidePolygon={emptyInsidePolygon}
-        heightClassName="h-[420px]"
+        heightClassName="h-[250px] md:h-[280px]"
       />
     </div>
   )

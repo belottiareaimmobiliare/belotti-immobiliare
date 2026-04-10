@@ -1,3 +1,5 @@
+import Footer from '@/components/public/Footer'
+import FooterReveal from '@/components/public/FooterReveal'
 import Image from 'next/image'
 import Link from 'next/link'
 import SiteHeader from '@/components/public/SiteHeader'
@@ -8,9 +10,9 @@ export default function ChiSiamoPage() {
       <SiteHeader />
 
       <section className="border-b border-white/10 bg-[#0d1321]">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 lg:grid-cols-[380px_minmax(0,1fr)] lg:items-center">
-          <div className="overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.03]">
-            <div className="relative aspect-[4/3] w-full">
+        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-center">
+          <div className="flex items-center justify-center lg:justify-start">
+            <div className="relative h-[270px] w-[270px] overflow-hidden rounded-full border-2 border-white/15 bg-white/[0.03] shadow-[0_0_50px_rgba(255,255,255,0.06)]">
               <Image
                 src="/images/gianfederico-belotti.jpg"
                 alt="Gianfederico Belotti"
@@ -192,6 +194,10 @@ export default function ChiSiamoPage() {
           </aside>
         </div>
       </section>
+
+      <FooterReveal>
+        <Footer />
+      </FooterReveal>
     </main>
   )
 }

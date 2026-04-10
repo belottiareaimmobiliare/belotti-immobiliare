@@ -1,4 +1,6 @@
-import Link from 'next/link'
+import SiteHeader from '@/components/public/SiteHeader'
+import Footer from '@/components/public/Footer'
+import FooterReveal from '@/components/public/FooterReveal'
 
 const googleMapsQuery = encodeURIComponent('Via A. Locatelli 62, 24121 Bergamo')
 const googleMapsHref = `https://www.google.com/maps/search/?api=1&query=${googleMapsQuery}`
@@ -6,38 +8,7 @@ const googleMapsHref = `https://www.google.com/maps/search/?api=1&query=${google
 export default function ContattiPage() {
   return (
     <main className="min-h-screen bg-[#0a0f1a] text-white">
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0a0f1a]/85 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link href="/" className="block">
-            <p className="text-lg font-semibold uppercase tracking-[0.2em]">
-              Belotti
-            </p>
-            <p className="text-xs text-white/50">Area Immobiliare</p>
-          </Link>
-
-          <nav className="hidden gap-8 text-sm text-white/70 md:flex">
-            <Link href="/" className="transition hover:text-white">
-              Home
-            </Link>
-            <Link href="/immobili" className="transition hover:text-white">
-              Immobili
-            </Link>
-            <Link href="/chi-siamo" className="transition hover:text-white">
-              Chi siamo
-            </Link>
-            <Link href="/contatti" className="text-white">
-              Contatti
-            </Link>
-          </nav>
-
-          <a
-            href="tel:035221206"
-            className="rounded-full border border-white/15 px-4 py-2 text-sm text-white transition hover:border-white/30 hover:bg-white/5"
-          >
-            035 221206
-          </a>
-        </div>
-      </header>
+      <SiteHeader />
 
       <section className="border-b border-white/10 bg-[#0d1321]">
         <div className="mx-auto max-w-7xl px-6 py-16">
@@ -108,7 +79,9 @@ export default function ContattiPage() {
             </div>
 
             <div className="rounded-[30px] border border-white/10 bg-white/[0.03] p-7">
-              <h2 className="text-xl font-semibold">Un contatto diretto e professionale</h2>
+              <h2 className="text-xl font-semibold">
+                Un contatto diretto e professionale
+              </h2>
               <p className="mt-4 text-sm leading-7 text-white/65">
                 Ogni richiesta viene valutata con attenzione, compatibilmente con
                 le attività in corso e con le priorità operative dell’agenzia.
@@ -129,6 +102,10 @@ export default function ContattiPage() {
           </section>
         </div>
       </section>
+
+      <FooterReveal>
+        <Footer />
+      </FooterReveal>
     </main>
   )
 }

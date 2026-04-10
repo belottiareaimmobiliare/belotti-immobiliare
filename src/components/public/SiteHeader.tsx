@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -14,16 +15,20 @@ export default function SiteHeader() {
   const pathname = usePathname()
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0a0f1a]/85 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link href="/" className="block">
-          <p className="text-lg font-semibold uppercase tracking-[0.2em] text-white">
-            Belotti
-          </p>
-          <p className="text-xs text-white/50">Area Immobiliare</p>
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050b16]/78 backdrop-blur-xl">
+      <div className="flex w-full items-center justify-between px-6 py-4 xl:px-10 2xl:px-14">
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/images/brand/areaimmobiliare.png"
+            alt="Area Immobiliare"
+            width={190}
+            height={60}
+            priority
+            className="h-[54px] w-auto object-contain brightness-0 invert opacity-95"
+          />
         </Link>
 
-        <nav className="hidden gap-8 text-sm md:flex">
+        <nav className="hidden items-center gap-8 text-sm md:flex lg:gap-10">
           {links.map((item) => {
             const active =
               item.href === '/'
@@ -35,7 +40,7 @@ export default function SiteHeader() {
                 key={item.href}
                 href={item.href}
                 className={`transition ${
-                  active ? 'text-white' : 'text-white/70 hover:text-white'
+                  active ? 'text-white' : 'text-white/68 hover:text-white'
                 }`}
               >
                 {item.label}
@@ -44,10 +49,10 @@ export default function SiteHeader() {
           })}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-4 md:flex">
           <a
             href="mailto:info@areaimmobiliare.com"
-            className="text-sm text-white/70 transition hover:text-white"
+            className="text-sm text-white/65 transition hover:text-white"
           >
             info@areaimmobiliare.com
           </a>

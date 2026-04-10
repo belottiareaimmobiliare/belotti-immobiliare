@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import SiteHeader from '@/components/public/SiteHeader'
 import PropertiesFiltersSidebar from '@/components/public/PropertiesFiltersSidebar'
 import PropertiesMapSection from '@/components/public/PropertiesMapSection'
+import Footer from '@/components/public/Footer'
+import FooterReveal from '@/components/public/FooterReveal'
 import Link from 'next/link'
 
 type SearchParams = Promise<{
@@ -22,6 +24,8 @@ type SearchParams = Promise<{
   comune?: string | string[]
   mapMode?: string
   polygon?: string
+  page?: string
+  limit?: string
 }>
 
 type PropertyMediaItem = {
@@ -129,6 +133,34 @@ function getCoverImage(property: PropertyWithMedia): string | null {
   return images.find((item) => item.is_cover)?.file_url || images[0]?.file_url || null
 }
 
+function buildUrl(
+  params: Record<string, string | string[] | undefined>,
+  overrides: Record<string, string | undefined>
+) {
+  const search = new URLSearchParams()
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (!value) return
+
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        if (item) search.append(key, item)
+      })
+      return
+    }
+
+    search.set(key, value)
+  })
+
+  Object.entries(overrides).forEach(([key, value]) => {
+    search.delete(key)
+    if (value) search.set(key, value)
+  })
+
+  const qs = search.toString()
+  return qs ? `/immobili?${qs}` : '/immobili'
+}
+
 export default async function PropertiesPage({
   searchParams,
 }: {
@@ -165,6 +197,10 @@ export default async function PropertiesPage({
   const minSurfaceNumber = minSurface ? Number(minSurface) : null
   const maxSurfaceNumber = maxSurface ? Number(maxSurface) : null
   const minBathroomsNumber = minBathrooms ? Number(minBathrooms) : null
+
+  const limitOptions = [5, 10, 20]
+  const limit = limitOptions.includes(Number(params.limit)) ? Number(params.limit) : 10
+  const currentPage = Math.max(Number(params.page || '1') || 1, 1)
 
   const supabase = await createClient()
 
@@ -288,6 +324,34 @@ export default async function PropertiesPage({
 
   const hasActivePolygon = Boolean(polygon)
 
+  const totalResults = polygonFilteredProperties.length
+  const totalPages = Math.max(Math.ceil(totalResults / limit), 1)
+  const safePage = Math.min(currentPage, totalPages)
+  const startIndex = (safePage - 1) * limit
+  const endIndex = startIndex + limit
+  const visibleResults = polygonFilteredProperties.slice(startIndex, endIndex)
+
+  const baseParams = {
+    q: q || undefined,
+    maxPrice: maxPrice || undefined,
+    minRooms: minRooms || undefined,
+    contractType: contractType || undefined,
+    propertyType: propertyType || undefined,
+    hasGarage: hasGarage ? 'true' : undefined,
+    hasParking: hasParking ? 'true' : undefined,
+    hasGarden: hasGarden ? 'true' : undefined,
+    hasElevator: hasElevator ? 'true' : undefined,
+    isAuction: isAuction ? 'true' : undefined,
+    minSurface: minSurface || undefined,
+    maxSurface: maxSurface || undefined,
+    minBathrooms: minBathrooms || undefined,
+    province: province || undefined,
+    comune: comuni.length > 0 ? comuni : undefined,
+    mapMode: params.mapMode || undefined,
+    polygon: params.polygon || undefined,
+    limit: String(limit),
+  }
+
   return (
     <main className="min-h-screen bg-[#0a0f1a] text-white">
       <SiteHeader />
@@ -338,8 +402,8 @@ export default async function PropertiesPage({
           </div>
         )}
 
-        <div className="independent-scroll-layout grid gap-8 xl:grid-cols-[320px_minmax(0,1fr)]">
-          <aside className="independent-scroll-column pr-2">
+        <div className="grid gap-8 xl:grid-cols-[320px_minmax(0,1fr)]">
+          <aside className="xl:sticky xl:top-[96px] xl:self-start">
             <PropertiesFiltersSidebar
               initialQ={q}
               initialMaxPrice={maxPrice}
@@ -360,7 +424,7 @@ export default async function PropertiesPage({
             />
           </aside>
 
-          <div className="independent-scroll-column space-y-8 pr-2">
+          <div className="space-y-8">
             <section className="rounded-[32px] border border-white/10 bg-white/[0.03] p-5">
               <PropertiesMapSection
                 properties={propertiesWithCoordinatesForMap.map((property) => ({
@@ -386,10 +450,7 @@ export default async function PropertiesPage({
               <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-2">
                   <p className="text-sm text-white/45">
-                    {polygonFilteredProperties.length}{' '}
-                    {polygonFilteredProperties.length === 1
-                      ? 'immobile trovato'
-                      : 'immobili trovati'}
+                    {totalResults} {totalResults === 1 ? 'immobile trovato' : 'immobili trovati'}
                   </p>
 
                   {hasActivePolygon && (
@@ -399,16 +460,30 @@ export default async function PropertiesPage({
                   )}
                 </div>
 
-                {hasActivePolygon && (
-                  <div className="flex gap-3">
-                    <Link
-                      href="/immobili/mappa-area"
-                      className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white transition hover:bg-white/10"
-                    >
-                      Modifica area
-                    </Link>
-                  </div>
-                )}
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-sm text-white/50">Mostra:</span>
+
+                  {[5, 10, 20].map((size) => {
+                    const active = limit === size
+
+                    return (
+                      <Link
+                        key={size}
+                        href={buildUrl(baseParams, {
+                          limit: String(size),
+                          page: '1',
+                        })}
+                        className={`rounded-full px-4 py-2 text-sm transition ${
+                          active
+                            ? 'bg-white text-black'
+                            : 'border border-white/10 bg-white/5 text-white/75 hover:bg-white/10'
+                        }`}
+                      >
+                        {size}
+                      </Link>
+                    )
+                  })}
+                </div>
               </div>
 
               {error && (
@@ -417,7 +492,7 @@ export default async function PropertiesPage({
                 </div>
               )}
 
-              {!error && polygonFilteredProperties.length === 0 && (
+              {!error && totalResults === 0 && (
                 <div className="rounded-3xl border border-dashed border-white/15 bg-white/5 p-10 text-white/60">
                   {hasActivePolygon
                     ? 'Nessun immobile trovato dentro l’area selezionata con i filtri attuali. Prova a modificare la zona oppure ad alleggerire i filtri.'
@@ -426,7 +501,7 @@ export default async function PropertiesPage({
               )}
 
               <div className="flex flex-col gap-4">
-                {polygonFilteredProperties.map((property) => {
+                {visibleResults.map((property) => {
                   const images = (property.property_media || [])
                     .filter((item) => item.media_type === 'image')
                     .sort((a, b) => {
@@ -440,110 +515,135 @@ export default async function PropertiesPage({
                   const cover =
                     images.find((item) => item.is_cover) || images[0] || null
 
-                  const features = [
+                  const labels = [
+                    property.contract_type || null,
+                    property.property_type || null,
+                    property.is_auction ? 'Asta' : null,
                     property.has_garage ? 'Garage' : null,
                     property.has_parking ? 'Posto auto' : null,
                     property.has_garden ? 'Giardino' : null,
                     property.has_elevator ? 'Ascensore' : null,
-                    property.is_auction ? 'Asta' : null,
                   ].filter(Boolean) as string[]
 
                   return (
                     <Link
                       key={property.id}
                       href={`/immobili/${property.slug}`}
-                      className="group flex flex-col overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.03] transition hover:border-white/20 hover:bg-white/[0.05] md:grid md:grid-cols-[180px_minmax(0,1fr)]"
+                      className="group block overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.03] transition hover:border-white/20 hover:bg-white/[0.05]"
                     >
-                      <div
-                        className="h-40 w-full bg-cover bg-center md:h-[180px] md:w-[180px]"
-                        style={
-                          cover
-                            ? { backgroundImage: `url('${cover.file_url}')` }
-                            : undefined
-                        }
-                      >
-                        {!cover && (
-                          <div className="flex h-full items-center justify-center text-sm text-white/40">
-                            Nessuna immagine
-                          </div>
-                        )}
-                      </div>
+                      <div className="flex flex-col md:grid md:min-h-[186px] md:grid-cols-[220px_minmax(0,1fr)_170px]">
+                        <div
+                          className="h-44 w-full bg-cover bg-center md:h-full md:min-h-[186px] md:w-[220px]"
+                          style={
+                            cover
+                              ? { backgroundImage: `url('${cover.file_url}')` }
+                              : undefined
+                          }
+                        >
+                          {!cover && (
+                            <div className="flex h-full items-center justify-center text-sm text-white/40">
+                              Nessuna immagine
+                            </div>
+                          )}
+                        </div>
 
-                      <div className="flex min-h-[180px] flex-col justify-between p-4">
-                        <div className="space-y-2.5">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-white/65">
-                              {property.contract_type || 'contratto'}
-                            </span>
-
-                            <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-white/65">
-                              {property.property_type || 'tipologia'}
-                            </span>
-
-                            {property.is_auction && (
-                              <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-white/65">
-                                Asta
-                              </span>
-                            )}
-
-                            {features.slice(0, 2).map((feature) => (
-                              <span
-                                key={feature}
-                                className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/72"
-                              >
-                                {feature}
-                              </span>
-                            ))}
-                          </div>
+                        <div className="flex min-w-0 flex-col justify-center px-5 py-4 md:px-6">
+                          {labels.length > 0 && (
+                            <div className="mb-3 flex flex-wrap gap-2">
+                              {labels.slice(0, 5).map((label) => (
+                                <span
+                                  key={label}
+                                  className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-white/65"
+                                >
+                                  {label}
+                                </span>
+                              ))}
+                            </div>
+                          )}
 
                           <p className="text-sm text-white/45">
                             {property.comune || '—'} ({property.province || '—'})
                             {property.frazione ? ` • ${property.frazione}` : ''}
                           </p>
 
-                          <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
-                            <div className="min-w-0">
-                              <h3 className="truncate text-[1.05rem] font-semibold md:text-[1.15rem]">
-                                {property.title}
-                              </h3>
-                              <p className="mt-1 text-sm text-white/60">
-                                {property.surface || '—'} mq · {property.rooms || '—'} locali ·{' '}
-                                {property.bathrooms || '—'} bagni
-                              </p>
-                            </div>
+                          <h3 className="mt-2 line-clamp-2 text-[1.2rem] font-semibold leading-tight text-white md:text-[1.45rem]">
+                            {property.title}
+                          </h3>
 
-                            <div className="shrink-0 md:pl-4">
-                              {property.price ? (
-                                <p className="text-2xl font-semibold text-white">
-                                  € {property.price.toLocaleString()}
-                                </p>
-                              ) : (
-                                <p className="text-lg text-white/70">
-                                  Trattativa riservata
-                                </p>
-                              )}
-                            </div>
-                          </div>
+                          <p className="mt-3 text-sm text-white/60">
+                            {property.surface || '—'} mq · {property.rooms || '—'} locali ·{' '}
+                            {property.bathrooms || '—'} bagni
+                          </p>
 
-                          <p className="line-clamp-2 text-sm leading-6 text-white/55">
+                          <p className="mt-3 line-clamp-1 text-sm leading-6 text-white/55">
                             {property.description || 'Descrizione in aggiornamento.'}
                           </p>
                         </div>
 
-                        <div className="mt-2 flex items-center justify-between">
-                          <span className="text-sm text-white/40 group-hover:text-white">
-                            Scopri di più →
-                          </span>
+                        <div className="flex items-center justify-end px-5 pb-5 md:px-6 md:pb-0">
+                          {property.price ? (
+                            <p className="text-3xl font-semibold text-white md:text-[2.2rem] whitespace-nowrap">
+                              € {property.price.toLocaleString()}
+                            </p>
+                          ) : (
+                            <p className="text-xl text-white/70">
+                              Trattativa riservata
+                            </p>
+                          )}
                         </div>
                       </div>
                     </Link>
                   )
                 })}
               </div>
+
+              {totalResults > 0 && (
+                <div className="mt-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <p className="text-sm text-white/50">
+                    Stai vedendo {startIndex + 1}-{Math.min(endIndex, totalResults)} di {totalResults} risultati
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Link
+                      href={buildUrl(baseParams, {
+                        page: safePage > 1 ? String(safePage - 1) : '1',
+                      })}
+                      className={`rounded-2xl px-4 py-2 text-sm transition ${
+                        safePage <= 1
+                          ? 'pointer-events-none border border-white/10 bg-white/5 text-white/30'
+                          : 'border border-white/10 bg-white/5 text-white hover:bg-white/10'
+                      }`}
+                    >
+                      ← Precedente
+                    </Link>
+
+                    <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80">
+                      Pagina {safePage} / {totalPages}
+                    </div>
+
+                    <Link
+                      href={buildUrl(baseParams, {
+                        page: safePage < totalPages ? String(safePage + 1) : String(totalPages),
+                      })}
+                      className={`rounded-2xl px-4 py-2 text-sm transition ${
+                        safePage >= totalPages
+                          ? 'pointer-events-none border border-white/10 bg-white/5 text-white/30'
+                          : 'border border-white/10 bg-white/5 text-white hover:bg-white/10'
+                      }`}
+                    >
+                      Successiva →
+                    </Link>
+                  </div>
+                </div>
+              )}
             </section>
           </div>
         </div>
       </section>
+
+      <FooterReveal>
+        <Footer />
+      </FooterReveal>
     </main>
   )
 }

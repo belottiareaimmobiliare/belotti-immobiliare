@@ -38,9 +38,9 @@ export default function HomeHero() {
   }, [])
 
   const textStyle = useMemo(() => {
-    const progress = Math.min(scrollY / 420, 1)
+    const progress = Math.min(scrollY / 500, 1)
     const translateY = progress * -90
-    const opacity = 1 - progress * 1.15
+    const opacity = 1 - progress * 1.05
 
     return {
       transform: `translate3d(0, ${translateY}px, 0)`,
@@ -48,8 +48,18 @@ export default function HomeHero() {
     }
   }, [scrollY])
 
+  const visualStyle = useMemo(() => {
+    const progress = Math.min(scrollY / 700, 1)
+    const translateY = progress * 60
+    const scale = 1 - progress * 0.08
+
+    return {
+      transform: `translate3d(0, ${translateY}px, 0) scale(${scale})`,
+    }
+  }, [scrollY])
+
   return (
-    <section className="home-hero-sticky relative h-screen overflow-hidden border-b border-white/10">
+    <section className="relative min-h-[92vh] overflow-hidden border-b border-white/10 bg-[#09101b]">
       <div className="absolute inset-0">
         <div className="absolute inset-0 overflow-hidden">
           {previous !== null && (
@@ -71,102 +81,136 @@ export default function HomeHero() {
           />
         </div>
 
-        <div className="absolute inset-0 bg-white/58" />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.42)_40%,rgba(255,255,255,0.58)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),transparent_42%)]" />
+        <div className="absolute inset-0 bg-[#06101d]/55" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.16),transparent_24%),linear-gradient(90deg,rgba(5,10,22,0.86)_0%,rgba(5,10,22,0.52)_38%,rgba(5,10,22,0.76)_100%)]" />
       </div>
 
-      <div className="relative mx-auto flex h-full max-w-7xl items-center px-6">
+      <div className="relative grid min-h-[92vh] w-full items-center gap-12 px-6 py-12 xl:grid-cols-[1.15fr_0.85fr] xl:px-10 2xl:px-14">
         <div
           style={textStyle}
-          className="max-w-5xl transition-[opacity,transform] duration-150"
+          className="max-w-[920px] transition-[opacity,transform] duration-150"
         >
-          <p className="text-sm font-medium uppercase tracking-[0.32em] text-black/55">
-            Bergamo dal 1980
+          <p className="text-sm font-medium uppercase tracking-[0.34em] text-white/55">
+            Area Immobiliare dal 1980
           </p>
 
-          <h1 className="mt-5 text-4xl font-semibold leading-[1.06] text-black md:text-6xl">
-            Da oltre 40 anni, immobili in vendita e in affitto con serietà e competenza
+          <h1 className="mt-6 max-w-[900px] text-5xl font-semibold leading-[0.98] text-white md:text-7xl xl:text-[5.5rem]">
+            Bergamo, case e scelte immobiliari lette con esperienza vera.
           </h1>
 
-          <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-            <p className="max-w-3xl text-base leading-8 text-black/72 md:text-lg">
-              Esplora la mappa e filtra per trovare la casa più adatta alle tue esigenze.
-            </p>
-
-            {/* 🔥 BOTTONE MAPPA FIXATO */}
-            <Link
-              href="/immobili/mappa-area"
-              className="group relative hidden min-w-[230px] shrink-0 overflow-hidden rounded-[22px] border border-black/10 shadow-[0_12px_28px_rgba(0,0,0,0.12)] transition hover:scale-[1.02] md:inline-flex"
-            >
-              {/* IMMAGINE */}
-              <div className="absolute inset-0 bg-[url('/images/map-card-bg.jpg')] bg-cover bg-center opacity-100" />
-
-              {/* 🔥 RIDOTTO BIANCO (prima era 68%) */}
-              <div className="absolute inset-0 bg-white/35 backdrop-blur-[1.5px]" />
-
-              {/* LEGGERO GRADIENT */}
-              <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.25)_0%,rgba(255,255,255,0.05)_100%)]" />
-
-              <div className="relative flex w-full items-center justify-between gap-4 px-5 py-4">
-                <div>
-                  <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-black/50">
-                    Ricerca su mappa
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-black">
-                    Vai alla mappa
-                  </p>
-                </div>
-
-                <div className="rounded-full border border-black/10 bg-black px-3 py-2 text-xs font-semibold text-white transition group-hover:translate-x-0.5">
-                  Apri
-                </div>
-              </div>
-            </Link>
-          </div>
+          <p className="mt-7 max-w-[760px] text-base leading-8 text-white/72 md:text-lg xl:text-[1.15rem]">
+            Un approccio più chiaro, più solido e più umano alla compravendita e
+            alla locazione. Analisi, verifica e conoscenza del territorio per
+            trovare la soluzione giusta senza rumore inutile.
+          </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/immobili"
-              className="rounded-2xl bg-black px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+              className="rounded-2xl bg-white px-6 py-3.5 text-sm font-semibold text-black transition hover:opacity-90"
             >
-              Cerca un immobile
+              Esplora gli immobili
+            </Link>
+
+            <Link
+              href="/immobili/mappa-area"
+              className="rounded-2xl border border-white/12 bg-white/6 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/10"
+            >
+              Disegna la tua area
             </Link>
 
             <Link
               href="/chi-siamo"
-              className="rounded-2xl border border-black/10 bg-white/55 px-5 py-3 text-sm font-semibold text-black backdrop-blur-md transition hover:bg-white/65"
+              className="rounded-2xl border border-white/12 bg-transparent px-6 py-3.5 text-sm font-semibold text-white/86 transition hover:bg-white/6 hover:text-white"
             >
               Scopri Area Immobiliare
             </Link>
           </div>
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-black/10 bg-white/50 px-5 py-4 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.10)]">
-              <p className="text-xs font-medium uppercase tracking-[0.22em] text-black/45">
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
+            <div className="rounded-[24px] border border-white/10 bg-white/[0.04] px-5 py-5 backdrop-blur-md">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">
                 Storia
               </p>
-              <p className="mt-2 text-[1.15rem] font-semibold text-black">
-                Dal 1980
-              </p>
+              <p className="mt-2 text-2xl font-semibold text-white">Dal 1980</p>
             </div>
 
-            <div className="rounded-2xl border border-black/10 bg-white/50 px-5 py-4 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.10)]">
-              <p className="text-xs font-medium uppercase tracking-[0.22em] text-black/45">
+            <div className="rounded-[24px] border border-white/10 bg-white/[0.04] px-5 py-5 backdrop-blur-md">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">
                 Territorio
               </p>
-              <p className="mt-2 text-[1.15rem] font-semibold text-black">
+              <p className="mt-2 text-2xl font-semibold text-white">
                 Bergamo e provincia
               </p>
             </div>
 
-            <div className="rounded-2xl border border-black/10 bg-white/50 px-5 py-4 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.10)]">
-              <p className="text-xs font-medium uppercase tracking-[0.22em] text-black/45">
+            <div className="rounded-[24px] border border-white/10 bg-white/[0.04] px-5 py-5 backdrop-blur-md">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">
                 Metodo
               </p>
-              <p className="mt-2 text-[1.15rem] font-semibold text-black">
-                Valutazione e verifica
+              <p className="mt-2 text-2xl font-semibold text-white">
+                Analisi e verifica
               </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={visualStyle}
+          className="hidden xl:flex xl:justify-end xl:self-end"
+        >
+          <div className="relative w-full max-w-[540px]">
+            <div className="absolute -left-8 top-10 h-32 w-32 rounded-full bg-sky-400/18 blur-3xl" />
+            <div className="absolute -right-6 bottom-4 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
+
+            <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[#09111d]/62 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.34)] backdrop-blur-2xl">
+              <div className="grid gap-4">
+                <div className="overflow-hidden rounded-[26px] border border-white/10">
+                  <div
+                    className="h-[240px] w-full bg-cover bg-center"
+                    style={{ backgroundImage: "url('/images/bergamo-2.jpg')" }}
+                  />
+                </div>
+
+                <div className="grid grid-cols-[1.1fr_0.9fr] gap-4">
+                  <div className="rounded-[24px] border border-white/10 bg-white/[0.04] p-4">
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">
+                      Ricerca su mappa
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold text-white">
+                      Zone precise
+                    </p>
+                    <p className="mt-3 text-sm leading-7 text-white/62">
+                      Disegna l’area che ti interessa e concentrati solo sugli
+                      immobili coerenti con la tua ricerca.
+                    </p>
+                  </div>
+
+                  <Link
+                    href="/immobili/mappa-area"
+                    className="group relative overflow-hidden rounded-[24px] border border-white/10"
+                  >
+                    <div className="absolute inset-0 bg-[url('/images/map-card-bg.jpg')] bg-cover bg-center opacity-100" />
+                    <div className="absolute inset-0 bg-white/28 backdrop-blur-[1.5px]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.24)_0%,rgba(255,255,255,0.04)_100%)]" />
+
+                    <div className="relative flex h-full flex-col justify-between p-4">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.22em] text-black/50">
+                          Mappa interattiva
+                        </p>
+                        <p className="mt-2 text-xl font-semibold text-black">
+                          Vai alla mappa
+                        </p>
+                      </div>
+
+                      <div className="mt-6 inline-flex w-fit rounded-full border border-black/10 bg-black px-3 py-2 text-xs font-semibold text-white transition group-hover:translate-x-0.5">
+                        Apri
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>
