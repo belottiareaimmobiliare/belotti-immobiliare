@@ -583,7 +583,7 @@ export default async function PropertiesPage({
                         <div className="flex items-center justify-end px-5 pb-5 md:px-6 md:pb-0">
                           {property.price ? (
                             <p className="text-3xl font-semibold text-white md:text-[2.2rem] whitespace-nowrap">
-                              € {property.price.toLocaleString()}
+                              € {property.price.toLocaleString('it-IT')}
                             </p>
                           ) : (
                             <p className="text-xl text-white/70">

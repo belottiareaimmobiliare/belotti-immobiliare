@@ -188,7 +188,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               </p>
               {currentProperty.price ? (
                 <p className="mt-2 text-3xl font-semibold md:text-5xl">
-                  € {currentProperty.price.toLocaleString()}
+                  € {currentProperty.price.toLocaleString('it-IT')}
                 </p>
               ) : (
                 <p className="mt-2 text-2xl font-semibold md:text-4xl">
