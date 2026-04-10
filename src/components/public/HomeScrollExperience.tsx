@@ -50,8 +50,24 @@ function SearchBoxFallback() {
 export default function HomeScrollExperience() {
   const sectionRef = useRef<HTMLElement | null>(null)
   const [progress, setProgress] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
+    const updateDevice = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    updateDevice()
+    window.addEventListener('resize', updateDevice)
+
+    return () => {
+      window.removeEventListener('resize', updateDevice)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (isMobile) return
+
     const updateProgress = () => {
       if (!sectionRef.current) return
 
@@ -76,7 +92,7 @@ export default function HomeScrollExperience() {
       window.removeEventListener('scroll', updateProgress)
       window.removeEventListener('resize', updateProgress)
     }
-  }, [])
+  }, [isMobile])
 
   const searchHold = segment(progress, 0.0, 0.34)
   const searchFade = segment(progress, 0.34, 0.46)
@@ -117,13 +133,50 @@ export default function HomeScrollExperience() {
     })
   }, [panelCompact, panelRise, panelReadableHold, panelFade])
 
+  if (isMobile) {
+    return (
+      <section className="bg-[linear-gradient(180deg,#071120_0%,#071524_35%,#06111d_65%,#010409_100%)] px-4 py-5">
+        <div className="rounded-[30px] border border-white/10 bg-[rgba(58,70,94,0.72)] shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl">
+          <Suspense fallback={<SearchBoxFallback />}>
+            <HomeSearchBoxMobile />
+          </Suspense>
+        </div>
+
+        <div className="mt-6 space-y-5">
+          {panels.map((panel) => (
+            <article
+              key={panel.title}
+              className="rounded-[24px] border border-white/10 bg-[linear-gradient(135deg,rgba(7,18,35,0.98)_0%,rgba(3,11,24,0.98)_100%)] px-5 py-6 shadow-[0_18px_40px_rgba(0,0,0,0.2)]"
+            >
+              <p className="text-[11px] uppercase tracking-[0.28em] text-white/35">
+                {panel.eyebrow}
+              </p>
+
+              <h3 className="mt-4 text-[2rem] font-semibold leading-tight text-white">
+                {panel.title}
+              </h3>
+
+              <p className="mt-4 text-sm leading-7 text-white/62">
+                {panel.text}
+              </p>
+            </article>
+          ))}
+        </div>
+
+        <div className="mt-8">
+          <Footer />
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section
       ref={sectionRef}
-      className="relative h-[470vh] md:h-[430vh] bg-[linear-gradient(180deg,#071120_0%,#071524_26%,#06111d_54%,#03070e_82%,#010409_100%)]"
+      className="relative h-[430vh] bg-[linear-gradient(180deg,#071120_0%,#071524_26%,#06111d_54%,#03070e_82%,#010409_100%)]"
     >
       <div className="sticky top-[78px] h-[calc(100vh-78px)] overflow-hidden">
-        <div className="absolute inset-0 px-4 py-4 md:px-6 md:py-6 xl:px-10 2xl:px-14">
+        <div className="absolute inset-0 px-6 py-6 xl:px-10 2xl:px-14">
           <div
             style={{
               opacity: searchOpacity,
@@ -131,14 +184,10 @@ export default function HomeScrollExperience() {
             }}
             className="transition-[opacity,transform] duration-200"
           >
-            <div className="overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(58,70,94,0.72)] shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl md:rounded-[36px]">
+            <div className="overflow-hidden rounded-[36px] border border-white/10 bg-[rgba(58,70,94,0.72)] shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl">
               <Suspense fallback={<SearchBoxFallback />}>
                 <div className="hidden md:block">
                   <HomeSearchBoxDesktop />
-                </div>
-
-                <div className="md:hidden">
-                  <HomeSearchBoxMobile />
                 </div>
               </Suspense>
             </div>
@@ -149,7 +198,7 @@ export default function HomeScrollExperience() {
               opacity: panelsOpacity,
               transform: `translate3d(0, ${panelsTranslateY}px, 0)`,
             }}
-            className="mt-6 transition-[opacity,transform] duration-200 md:mt-8"
+            className="mt-8 transition-[opacity,transform] duration-200"
           >
             <div
               className="grid grid-cols-1 xl:grid-cols-12"
@@ -159,17 +208,17 @@ export default function HomeScrollExperience() {
                 <article
                   key={panel.title}
                   style={panelStyles[index]}
-                  className={`${panel.className} rounded-[24px] border border-white/10 bg-[linear-gradient(135deg,rgba(7,18,35,0.98)_0%,rgba(3,11,24,0.98)_100%)] px-6 py-7 shadow-[0_20px_50px_rgba(0,0,0,0.2)] transition-[transform] duration-200 md:rounded-[28px] md:px-8 md:py-9`}
+                  className={`${panel.className} rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(7,18,35,0.98)_0%,rgba(3,11,24,0.98)_100%)] px-7 py-8 shadow-[0_20px_50px_rgba(0,0,0,0.2)] transition-[transform] duration-200 md:px-8 md:py-9`}
                 >
                   <p className="text-[11px] uppercase tracking-[0.28em] text-white/35">
                     {panel.eyebrow}
                   </p>
 
-                  <h3 className="mt-4 text-[1.7rem] font-semibold leading-tight text-white md:mt-5 md:max-w-[980px] md:text-[2rem] xl:text-[2.45rem]">
+                  <h3 className="mt-5 max-w-[980px] text-[2rem] font-semibold leading-tight text-white xl:text-[2.45rem]">
                     {panel.title}
                   </h3>
 
-                  <p className="mt-4 text-sm leading-7 text-white/62 md:mt-5 md:max-w-[980px] md:text-base md:leading-8">
+                  <p className="mt-5 max-w-[980px] text-base leading-8 text-white/62">
                     {panel.text}
                   </p>
                 </article>
