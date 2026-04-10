@@ -25,6 +25,22 @@ export default function CookieBanner() {
     setVisible(false)
   }, [])
 
+  useEffect(() => {
+    const handleOpenBanner = () => {
+      const existing = readCookiePreferences()
+      setAnalytics(existing?.analytics ?? false)
+      setMarketing(existing?.marketing ?? false)
+      setVisible(true)
+      setShowSettings(true)
+    }
+
+    window.addEventListener('open-cookie-banner', handleOpenBanner)
+
+    return () => {
+      window.removeEventListener('open-cookie-banner', handleOpenBanner)
+    }
+  }, [])
+
   const draftPreferences = useMemo<CookiePreferences>(
     () => ({
       necessary: true,
@@ -46,18 +62,21 @@ export default function CookieBanner() {
     })
     setVisible(false)
     setShowSettings(false)
+    window.dispatchEvent(new Event('cookie-preferences-updated'))
   }
 
   const rejectOptional = () => {
     saveCookiePreferences(getDefaultCookiePreferences())
     setVisible(false)
     setShowSettings(false)
+    window.dispatchEvent(new Event('cookie-preferences-updated'))
   }
 
   const saveCustom = () => {
     saveCookiePreferences(draftPreferences)
     setVisible(false)
     setShowSettings(false)
+    window.dispatchEvent(new Event('cookie-preferences-updated'))
   }
 
   if (!visible) return null

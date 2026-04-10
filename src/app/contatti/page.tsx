@@ -4,10 +4,7 @@ import { useEffect, useState } from 'react'
 import SiteHeader from '@/components/public/SiteHeader'
 import Footer from '@/components/public/Footer'
 import FooterReveal from '@/components/public/FooterReveal'
-import {
-  readCookiePreferences,
-  saveCookiePreferences,
-} from '@/lib/cookie-consent'
+import { readCookiePreferences } from '@/lib/cookie-consent'
 
 const googleMapsQuery = encodeURIComponent('Via A. Locatelli 62, 24121 Bergamo')
 const googleMapsHref = `https://www.google.com/maps/search/?api=1&query=${googleMapsQuery}`
@@ -16,28 +13,30 @@ export default function ContattiPage() {
   const [canLoadExternalMap, setCanLoadExternalMap] = useState(false)
 
   useEffect(() => {
-    const preferences = readCookiePreferences()
+    const syncPreferences = () => {
+      const preferences = readCookiePreferences()
 
-    if (!preferences) {
-      setCanLoadExternalMap(false)
-      return
+      if (!preferences) {
+        setCanLoadExternalMap(false)
+        return
+      }
+
+      setCanLoadExternalMap(
+        preferences.analytics === true || preferences.marketing === true
+      )
     }
 
-    setCanLoadExternalMap(
-      preferences.analytics === true || preferences.marketing === true
-    )
+    syncPreferences()
+
+    window.addEventListener('cookie-preferences-updated', syncPreferences)
+
+    return () => {
+      window.removeEventListener('cookie-preferences-updated', syncPreferences)
+    }
   }, [])
 
-  const handleAcceptAndShowMap = () => {
-    saveCookiePreferences({
-      necessary: true,
-      analytics: true,
-      marketing: false,
-      updatedAt: new Date().toISOString(),
-      status: 'custom',
-    })
-
-    setCanLoadExternalMap(true)
+  const handleOpenCookieBanner = () => {
+    window.dispatchEvent(new Event('open-cookie-banner'))
   }
 
   return (
@@ -143,18 +142,17 @@ export default function ContattiPage() {
                   </h3>
                   <p className="mt-4 max-w-xl text-sm leading-7 text-white/65">
                     Per visualizzare la mappa incorporata di Google è necessario
-                    abilitare almeno i cookie facoltativi collegati a contenuti
-                    esterni. In alternativa puoi aprire direttamente la posizione
-                    su Google Maps con il pulsante dedicato.
+                    abilitare i cookie facoltativi per questo contenuto. In alternativa
+                    puoi aprire direttamente la posizione su Google Maps con il pulsante dedicato.
                   </p>
 
                   <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                     <button
                       type="button"
-                      onClick={handleAcceptAndShowMap}
+                      onClick={handleOpenCookieBanner}
                       className="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
                     >
-                      Accetta e visualizza la mappa
+                      Gestisci cookie per visualizzare la mappa
                     </button>
 
                     <a
