@@ -81,8 +81,11 @@ export default function HomeHero() {
           />
         </div>
 
-        <div className="absolute inset-0 bg-black/28" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(255,255,255,0.12),transparent_30%),radial-gradient(circle_at_82%_18%,rgba(255,255,255,0.08),transparent_22%),linear-gradient(90deg,rgba(4,10,18,0.42)_0%,rgba(4,10,18,0.18)_38%,rgba(4,10,18,0.34)_100%)]" />
+        <div className="absolute inset-0 bg-black/18" />
+        <div className="absolute inset-0 bg-white/[0.07] backdrop-blur-[3px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.10)_0%,rgba(255,255,255,0.04)_38%,rgba(255,255,255,0.08)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(255,255,255,0.10),transparent_30%),radial-gradient(circle_at_82%_18%,rgba(255,255,255,0.06),transparent_22%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,10,18,0.18)_0%,rgba(4,10,18,0.10)_35%,rgba(4,10,18,0.22)_100%)]" />
       </div>
 
       <div className="relative grid min-h-[92vh] w-full items-center gap-12 px-6 py-12 xl:grid-cols-[1.15fr_0.85fr] xl:px-10 2xl:px-14">
@@ -90,7 +93,7 @@ export default function HomeHero() {
           style={textStyle}
           className="max-w-[920px] transition-[opacity,transform] duration-150"
         >
-          <p className="text-sm font-medium uppercase tracking-[0.34em] text-white/72">
+          <p className="text-sm font-medium uppercase tracking-[0.34em] text-white/78">
             Area Immobiliare dal 1980
           </p>
 
@@ -98,7 +101,7 @@ export default function HomeHero() {
             Bergamo, case e scelte immobiliari lette con esperienza vera.
           </h1>
 
-          <p className="mt-7 max-w-[760px] text-base leading-8 text-white/82 md:text-lg xl:text-[1.15rem]">
+          <p className="mt-7 max-w-[760px] text-base leading-8 text-white/84 md:text-lg xl:text-[1.15rem]">
             Un approccio più chiaro, più solido e più umano alla compravendita e
             alla locazione. Analisi, verifica e conoscenza del territorio per
             trovare la soluzione giusta senza rumore inutile.
