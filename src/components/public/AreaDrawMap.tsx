@@ -28,6 +28,11 @@ type MapProperty = {
   location_mode?: string | null
 }
 
+type ValidMapProperty = MapProperty & {
+  latitude: number
+  longitude: number
+}
+
 type Props = {
   properties: MapProperty[]
 }
@@ -100,6 +105,10 @@ function isValidCoordinate(value: number | null): value is number {
   return typeof value === 'number' && !Number.isNaN(value)
 }
 
+function isValidMapProperty(property: MapProperty): property is ValidMapProperty {
+  return isValidCoordinate(property.latitude) && isValidCoordinate(property.longitude)
+}
+
 function pointInPolygon(point: Point, polygon: Point[]) {
   let inside = false
 
@@ -127,10 +136,7 @@ function FitMapToProperties({ properties }: { properties: MapProperty[] }) {
   const map = useMap()
 
   useMemo(() => {
-    const valid = properties.filter(
-      (property) =>
-        isValidCoordinate(property.latitude) && isValidCoordinate(property.longitude)
-    )
+    const valid = properties.filter(isValidMapProperty)
 
     if (valid.length === 0) return
 
@@ -183,7 +189,7 @@ export default function AreaDrawMap({ properties }: Props) {
     if (!polygonClosed) return []
 
     return properties.filter((property) => {
-      if (!isValidCoordinate(property.latitude) || !isValidCoordinate(property.longitude)) {
+      if (!isValidMapProperty(property)) {
         return false
       }
 
@@ -342,7 +348,7 @@ export default function AreaDrawMap({ properties }: Props) {
         />
 
         {properties.map((property) => {
-          if (!isValidCoordinate(property.latitude) || !isValidCoordinate(property.longitude)) {
+          if (!isValidMapProperty(property)) {
             return null
           }
 

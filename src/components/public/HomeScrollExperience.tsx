@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import HomeSearchBoxDesktop from '@/components/public/HomeSearchBoxDesktop'
 import HomeSearchBoxMobile from '@/components/public/HomeSearchBoxMobile'
@@ -60,6 +60,14 @@ function clamp(value: number, min: number, max: number) {
 
 function segment(progress: number, start: number, end: number) {
   return clamp((progress - start) / (end - start), 0, 1)
+}
+
+function SearchBoxFallback() {
+  return (
+    <div className="p-6 text-white/55">
+      Caricamento ricerca...
+    </div>
+  )
 }
 
 export default function HomeScrollExperience() {
@@ -152,13 +160,15 @@ export default function HomeScrollExperience() {
             className="transition-[opacity,transform] duration-200"
           >
             <div className="overflow-hidden rounded-[36px] border border-white/10 bg-[rgba(58,70,94,0.72)] shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl">
-              <div className="hidden md:block">
-                <HomeSearchBoxDesktop />
-              </div>
+              <Suspense fallback={<SearchBoxFallback />}>
+                <div className="hidden md:block">
+                  <HomeSearchBoxDesktop />
+                </div>
 
-              <div className="md:hidden">
-                <HomeSearchBoxMobile />
-              </div>
+                <div className="md:hidden">
+                  <HomeSearchBoxMobile />
+                </div>
+              </Suspense>
             </div>
           </div>
 
@@ -247,7 +257,7 @@ export default function HomeScrollExperience() {
                     <img
                       src="/images/brand/areaimmobiliare.png"
                       alt="Area Immobiliare"
-                      className="max-h-[120px] w-auto object-contain brightness-0 invert opacity-95"
+                      className="max-h-[78px] w-auto object-contain brightness-0 invert opacity-95"
                     />
                   </div>
                   <p className="mt-5 max-w-[420px] text-base leading-8 text-white/58">
