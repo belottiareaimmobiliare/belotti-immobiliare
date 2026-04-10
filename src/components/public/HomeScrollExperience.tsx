@@ -120,10 +120,10 @@ export default function HomeScrollExperience() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-[430vh] bg-[linear-gradient(180deg,#071120_0%,#071524_26%,#06111d_54%,#03070e_82%,#010409_100%)]"
+      className="relative h-[470vh] md:h-[430vh] bg-[linear-gradient(180deg,#071120_0%,#071524_26%,#06111d_54%,#03070e_82%,#010409_100%)]"
     >
       <div className="sticky top-[78px] h-[calc(100vh-78px)] overflow-hidden">
-        <div className="absolute inset-0 px-6 py-6 xl:px-10 2xl:px-14">
+        <div className="absolute inset-0 px-4 py-4 md:px-6 md:py-6 xl:px-10 2xl:px-14">
           <div
             style={{
               opacity: searchOpacity,
@@ -131,7 +131,7 @@ export default function HomeScrollExperience() {
             }}
             className="transition-[opacity,transform] duration-200"
           >
-            <div className="overflow-hidden rounded-[36px] border border-white/10 bg-[rgba(58,70,94,0.72)] shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl">
+            <div className="overflow-hidden rounded-[30px] md:rounded-[36px] border border-white/10 bg-[rgba(58,70,94,0.72)] shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl">
               <Suspense fallback={<SearchBoxFallback />}>
                 <div className="hidden md:block">
                   <HomeSearchBoxDesktop />
@@ -149,7 +149,7 @@ export default function HomeScrollExperience() {
               opacity: panelsOpacity,
               transform: `translate3d(0, ${panelsTranslateY}px, 0)`,
             }}
-            className="mt-8 transition-[opacity,transform] duration-200"
+            className="mt-6 md:mt-8 transition-[opacity,transform] duration-200"
           >
             <div
               className="grid grid-cols-1 xl:grid-cols-12"
@@ -159,17 +159,17 @@ export default function HomeScrollExperience() {
                 <article
                   key={panel.title}
                   style={panelStyles[index]}
-                  className={`${panel.className} rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(7,18,35,0.98)_0%,rgba(3,11,24,0.98)_100%)] px-7 py-8 shadow-[0_20px_50px_rgba(0,0,0,0.2)] transition-[transform] duration-200 md:px-8 md:py-9`}
+                  className={`${panel.className} rounded-[24px] md:rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(7,18,35,0.98)_0%,rgba(3,11,24,0.98)_100%)] px-6 py-7 shadow-[0_20px_50px_rgba(0,0,0,0.2)] transition-[transform] duration-200 md:px-8 md:py-9`}
                 >
                   <p className="text-[11px] uppercase tracking-[0.28em] text-white/35">
                     {panel.eyebrow}
                   </p>
 
-                  <h3 className="mt-5 max-w-[980px] text-[2rem] font-semibold leading-tight text-white xl:text-[2.45rem]">
+                  <h3 className="mt-4 text-[1.7rem] font-semibold leading-tight text-white md:mt-5 md:max-w-[980px] md:text-[2rem] xl:text-[2.45rem]">
                     {panel.title}
                   </h3>
 
-                  <p className="mt-5 max-w-[980px] text-base leading-8 text-white/62">
+                  <p className="mt-4 text-sm leading-7 text-white/62 md:mt-5 md:max-w-[980px] md:text-base md:leading-8">
                     {panel.text}
                   </p>
                 </article>
@@ -182,16 +182,21 @@ export default function HomeScrollExperience() {
               opacity: footerShellOpacity,
               transform: `translate3d(0, ${footerShellTranslateY}px, 0)`,
             }}
-            className="absolute inset-x-0 bottom-0 transition-[opacity,transform] duration-200"
+            className="absolute inset-x-0 bottom-0 top-0 md:top-auto transition-[opacity,transform] duration-200"
           >
             <div
               style={{
                 opacity: footerIn,
                 transform: `translate3d(0, ${28 - footerIn * 28}px, 0)`,
               }}
-              className="transition-[opacity,transform] duration-200"
+              className="h-full transition-[opacity,transform] duration-200"
             >
-              <Footer />
+              <div className="h-full overflow-y-auto overscroll-contain md:h-auto md:overflow-visible">
+                <div className="pt-6 md:pt-0">
+                  <Footer />
+                </div>
+                <div className="h-16 md:hidden" />
+              </div>
             </div>
           </div>
         </div>
