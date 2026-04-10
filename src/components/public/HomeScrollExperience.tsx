@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
-import Link from 'next/link'
+import Footer from '@/components/public/Footer'
 import HomeSearchBoxDesktop from '@/components/public/HomeSearchBoxDesktop'
 import HomeSearchBoxMobile from '@/components/public/HomeSearchBoxMobile'
 
@@ -35,25 +35,6 @@ const panels = [
   },
 ]
 
-const partnerLogos = [
-  {
-    label: 'Immobiliare.it',
-    src: '/images/partners/transparent-logo-immobiliareit.png',
-  },
-  {
-    label: 'Casa.it',
-    src: '/images/partners/transparent-logo-casait.png',
-  },
-  {
-    label: 'Idealista',
-    src: '/images/partners/transparent-logo-idealista.png',
-  },
-  {
-    label: 'BergamoNews',
-    src: '/images/partners/transparent-logo-bergamonews.png',
-  },
-]
-
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
 }
@@ -63,11 +44,7 @@ function segment(progress: number, start: number, end: number) {
 }
 
 function SearchBoxFallback() {
-  return (
-    <div className="p-6 text-white/55">
-      Caricamento ricerca...
-    </div>
-  )
+  return <div className="p-6 text-white/55">Caricamento ricerca...</div>
 }
 
 export default function HomeScrollExperience() {
@@ -110,12 +87,7 @@ export default function HomeScrollExperience() {
   const panelFade = segment(progress, 0.74, 0.82)
 
   const footerShellRise = segment(progress, 0.82, 0.9)
-
-  const partnersIn = segment(progress, 0.88, 0.92)
-  const brandIn = segment(progress, 0.91, 0.945)
-  const navIn = segment(progress, 0.935, 0.965)
-  const servicesIn = segment(progress, 0.955, 0.982)
-  const contactsIn = segment(progress, 0.972, 0.995)
+  const footerIn = segment(progress, 0.88, 0.995)
 
   const searchOpacity = 1 - searchFade
   const searchTranslateY = -(searchHold * 4 + searchFade * 72)
@@ -212,140 +184,15 @@ export default function HomeScrollExperience() {
             }}
             className="absolute inset-x-0 bottom-0 transition-[opacity,transform] duration-200"
           >
-            <section className="w-full bg-[#010409] px-6 py-16 xl:px-10 2xl:px-14">
-              <div
-                style={{
-                  opacity: partnersIn,
-                  transform: `translate3d(0, ${34 - partnersIn * 34}px, 0)`,
-                }}
-                className="transition-[opacity,transform] duration-200"
-              >
-                <p className="text-xs uppercase tracking-[0.3em] text-white/30">
-                  Partners
-                </p>
-
-                <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-                  {partnerLogos.map((partner) => (
-                    <div
-                      key={partner.label}
-                      className="flex min-h-[96px] items-center justify-center border-b border-white/10 pb-4 md:border-b-0 md:pb-0"
-                    >
-                      <img
-                        src={partner.src}
-                        alt={partner.label}
-                        className="max-h-[50px] w-auto max-w-[200px] object-contain opacity-95"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-12 h-px w-full bg-white/10" />
-
-              <div className="mt-12 grid gap-12 xl:grid-cols-4">
-                <div
-                  style={{
-                    opacity: brandIn,
-                    transform: `translate3d(0, ${34 - brandIn * 34}px, 0)`,
-                  }}
-                  className="transition-[opacity,transform] duration-200"
-                >
-                  <p className="text-[11px] uppercase tracking-[0.26em] text-white/30">
-                    Brand
-                  </p>
-                  <div className="mt-4">
-                    <img
-                      src="/images/brand/areaimmobiliare.png"
-                      alt="Area Immobiliare"
-                      className="max-h-[78px] w-auto object-contain brightness-0 invert opacity-95"
-                    />
-                  </div>
-                  <p className="mt-5 max-w-[420px] text-base leading-8 text-white/58">
-                    Un modo più chiaro, solido e leggibile di cercare, valutare e
-                    scegliere casa a Bergamo e provincia.
-                  </p>
-                </div>
-
-                <div
-                  style={{
-                    opacity: navIn,
-                    transform: `translate3d(0, ${34 - navIn * 34}px, 0)`,
-                  }}
-                  className="transition-[opacity,transform] duration-200"
-                >
-                  <p className="text-[11px] uppercase tracking-[0.26em] text-white/30">
-                    Navigazione
-                  </p>
-                  <div className="mt-4 flex flex-col gap-4 text-base text-white/72">
-                    <Link href="/" className="transition hover:text-white">
-                      Home
-                    </Link>
-                    <Link href="/immobili" className="transition hover:text-white">
-                      Immobili
-                    </Link>
-                    <Link href="/chi-siamo" className="transition hover:text-white">
-                      Chi siamo
-                    </Link>
-                    <Link href="/contatti" className="transition hover:text-white">
-                      Contatti
-                    </Link>
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    opacity: servicesIn,
-                    transform: `translate3d(0, ${34 - servicesIn * 34}px, 0)`,
-                  }}
-                  className="transition-[opacity,transform] duration-200"
-                >
-                  <p className="text-[11px] uppercase tracking-[0.26em] text-white/30">
-                    Servizi
-                  </p>
-                  <div className="mt-4 flex flex-col gap-4 text-base text-white/72">
-                    <Link
-                      href="/immobili?contractType=vendita"
-                      className="transition hover:text-white"
-                    >
-                      Vendita
-                    </Link>
-                    <Link
-                      href="/immobili?contractType=affitto"
-                      className="transition hover:text-white"
-                    >
-                      Affitto
-                    </Link>
-                    <Link
-                      href="/immobili/mappa-area"
-                      className="transition hover:text-white"
-                    >
-                      Ricerca su mappa
-                    </Link>
-                    <Link href="/immobili" className="transition hover:text-white">
-                      Ricerca avanzata
-                    </Link>
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    opacity: contactsIn,
-                    transform: `translate3d(0, ${34 - contactsIn * 34}px, 0)`,
-                  }}
-                  className="transition-[opacity,transform] duration-200"
-                >
-                  <p className="text-[11px] uppercase tracking-[0.26em] text-white/30">
-                    Contatti
-                  </p>
-                  <div className="mt-4 space-y-4 text-base leading-8 text-white/72">
-                    <p>info@areaimmobiliare.com</p>
-                    <p>035 221206</p>
-                    <p>Bergamo e provincia</p>
-                    <p>Ricevimento su appuntamento</p>
-                  </div>
-                </div>
-              </div>
-            </section>
+            <div
+              style={{
+                opacity: footerIn,
+                transform: `translate3d(0, ${28 - footerIn * 28}px, 0)`,
+              }}
+              className="transition-[opacity,transform] duration-200"
+            >
+              <Footer />
+            </div>
           </div>
         </div>
       </div>
