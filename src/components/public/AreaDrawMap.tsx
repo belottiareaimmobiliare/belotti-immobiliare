@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   MapContainer,
@@ -94,6 +94,7 @@ const closeVertexIcon = L.divIcon({
 
 function formatPrice(price: number | null) {
   if (!price) return 'Prezzo riservato'
+
   return new Intl.NumberFormat('it-IT', {
     style: 'currency',
     currency: 'EUR',
@@ -135,7 +136,7 @@ function serializePolygon(points: Point[]) {
 function FitMapToProperties({ properties }: { properties: MapProperty[] }) {
   const map = useMap()
 
-  useMemo(() => {
+  useEffect(() => {
     const valid = properties.filter(isValidMapProperty)
 
     if (valid.length === 0) return
@@ -232,6 +233,7 @@ export default function AreaDrawMap({ properties }: Props) {
 
     const polygonParam = serializePolygon(polygonPoints)
     const params = new URLSearchParams(searchParams.toString())
+
     params.delete('page')
     params.delete('province')
     params.delete('comune')
@@ -252,85 +254,87 @@ export default function AreaDrawMap({ properties }: Props) {
 
   return (
     <div className="relative h-full w-full">
-      <div className="draw-map-overlay draw-map-box draw-map-box--safe-controls absolute w-[min(420px,calc(100%-3rem))] rounded-[30px] p-6">
-        <div>
-          <p className="text-xs uppercase tracking-[0.26em] theme-text-faint">
-            Ricerca avanzata
+      <div className="absolute left-6 top-24 z-[30] w-[min(420px,calc(100%-3rem))]">
+        <div className="theme-panel overflow-hidden rounded-[30px] border p-6 backdrop-blur-xl">
+          <div>
+            <p className="text-xs uppercase tracking-[0.26em] text-[var(--site-text-faint)]">
+              Ricerca avanzata
+            </p>
+            <h2 className="mt-2 text-3xl font-semibold text-[var(--site-text)]">
+              Disegna la tua area sulla mappa
+            </h2>
+          </div>
+
+          <p className="mt-5 text-base leading-8 text-[var(--site-text-soft)]">
+            Clicca sulla mappa per aggiungere i punti dell’area. Quando vuoi
+            chiudere il poligono, clicca sul primo punto evidenziato.
           </p>
-          <h2 className="mt-2 text-3xl font-semibold theme-text">
-            Disegna la tua area sulla mappa
-          </h2>
-        </div>
 
-        <p className="mt-5 text-base leading-8 theme-text-soft">
-          Clicca sulla mappa per aggiungere i punti dell’area. Quando vuoi
-          chiudere il poligono, clicca sul primo punto evidenziato.
-        </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={handleStartDrawing}
+              className="theme-button-primary rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95"
+            >
+              Disegna la tua area
+            </button>
 
-        <div className="mt-5 flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={handleStartDrawing}
-            className="theme-button-primary rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95"
-          >
-            Disegna la tua area
-          </button>
+            <button
+              type="button"
+              onClick={handleUndoLastPoint}
+              disabled={polygonPoints.length === 0 || isClosed}
+              className="theme-button-secondary rounded-2xl px-5 py-3 text-sm transition disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Annulla ultimo punto
+            </button>
 
-          <button
-            type="button"
-            onClick={handleUndoLastPoint}
-            disabled={polygonPoints.length === 0 || isClosed}
-            className="theme-button-secondary rounded-2xl px-5 py-3 text-sm transition disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Annulla ultimo punto
-          </button>
+            <button
+              type="button"
+              onClick={handleResetArea}
+              disabled={polygonPoints.length === 0 && !isClosed}
+              className="theme-button-secondary rounded-2xl px-5 py-3 text-sm transition disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Reset area
+            </button>
+          </div>
 
-          <button
-            type="button"
-            onClick={handleResetArea}
-            disabled={polygonPoints.length === 0 && !isClosed}
-            className="theme-button-secondary rounded-2xl px-5 py-3 text-sm transition disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Reset area
-          </button>
-        </div>
+          <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
+            <div className="theme-card rounded-[24px] border p-4">
+              <div className="text-[var(--site-text-faint)]">Punti area</div>
+              <div className="mt-3 text-4xl font-semibold text-[var(--site-text)]">
+                {polygonPoints.length}
+              </div>
+            </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-          <div className="draw-map-stat rounded-[24px] p-4">
-            <div className="theme-text-faint">Punti area</div>
-            <div className="mt-3 text-4xl font-semibold theme-text">
-              {polygonPoints.length}
+            <div className="theme-card rounded-[24px] border p-4">
+              <div className="text-[var(--site-text-faint)]">Immobili trovati</div>
+              <div className="mt-3 text-4xl font-semibold text-[var(--site-text)]">
+                {polygonClosed ? matchingProperties.length : '—'}
+              </div>
             </div>
           </div>
 
-          <div className="draw-map-stat rounded-[24px] p-4">
-            <div className="theme-text-faint">Immobili trovati</div>
-            <div className="mt-3 text-4xl font-semibold theme-text">
-              {polygonClosed ? matchingProperties.length : '—'}
+          {drawingEnabled && (
+            <div className="mt-5 rounded-2xl border border-emerald-500/25 bg-emerald-500/12 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-100">
+              Modalità disegno attiva: clicca sulla mappa per aggiungere i vertici.
             </div>
-          </div>
+          )}
+
+          {polygonClosed && (
+            <div className="mt-5 rounded-2xl border border-sky-500/25 bg-sky-500/12 px-4 py-3 text-sm text-sky-700 dark:text-sky-100">
+              Area chiusa correttamente. Ora puoi vedere gli immobili contenuti nella zona selezionata.
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleShowResults}
+            disabled={!polygonClosed}
+            className="mt-5 w-full rounded-2xl bg-sky-400 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Vedi {matchingProperties.length} immobili
+          </button>
         </div>
-
-        {drawingEnabled && (
-          <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-            Modalità disegno attiva: clicca sulla mappa per aggiungere i vertici.
-          </div>
-        )}
-
-        {polygonClosed && (
-          <div className="mt-5 rounded-2xl border border-sky-400/20 bg-sky-500/10 px-4 py-3 text-sm text-sky-100">
-            Area chiusa correttamente. Ora puoi vedere gli immobili contenuti nella zona selezionata.
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={handleShowResults}
-          disabled={!polygonClosed}
-          className="mt-5 w-full rounded-2xl bg-sky-400 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          Vedi {matchingProperties.length} immobili
-        </button>
       </div>
 
       <MapContainer
