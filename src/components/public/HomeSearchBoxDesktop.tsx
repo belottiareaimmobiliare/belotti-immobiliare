@@ -31,6 +31,8 @@ export default function HomeSearchBoxDesktop() {
     []
   )
 
+  const isLight = typeof document !== 'undefined' && document.documentElement.dataset.theme === 'light'
+
   const goToSearch = () => {
     const params = new URLSearchParams()
 
@@ -60,14 +62,16 @@ export default function HomeSearchBoxDesktop() {
   }
 
   return (
-    <section className="rounded-[34px] border border-white/10 bg-white/[0.06] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+    <section className="rounded-[34px] border border-[var(--site-border)] bg-transparent p-6">
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.28em] text-white/40">
+          <p className="text-xs uppercase tracking-[0.28em] text-[var(--site-text-faint)]">
             Cerca immobile
           </p>
-          <h2 className="mt-2 text-3xl font-semibold">Trova il tuo spazio</h2>
-          <p className="mt-2 text-sm text-white/60">
+          <h2 className="mt-2 text-3xl font-semibold text-[var(--site-text)]">
+            Trova il tuo spazio
+          </h2>
+          <p className="mt-2 text-sm text-[var(--site-text-muted)]">
             Ricerca rapida, filtri reali e risultati già allineati al gestionale.
           </p>
         </div>
@@ -75,7 +79,7 @@ export default function HomeSearchBoxDesktop() {
         <button
           type="button"
           onClick={goToAdvancedSearch}
-          className="rounded-full border border-white/12 bg-white/5 px-5 py-3 text-sm text-white/70 transition hover:bg-white/10"
+          className="rounded-full border border-[var(--site-border)] bg-[var(--site-surface-2)] px-5 py-3 text-sm text-[var(--site-text-soft)] transition hover:bg-[var(--site-surface-3)]"
         >
           Vai alla ricerca avanzata
         </button>
@@ -87,8 +91,8 @@ export default function HomeSearchBoxDesktop() {
           onClick={() => setContractType('sale')}
           className={`rounded-[18px] px-6 py-3 text-base font-medium transition ${
             contractType === 'sale'
-              ? 'bg-white text-black'
-              : 'border border-white/10 bg-black/20 text-white/75'
+              ? 'bg-[var(--site-text)] text-[var(--site-bg)]'
+              : 'border border-[var(--site-border)] bg-[var(--site-surface-strong)] text-[var(--site-text-soft)] hover:bg-[var(--site-surface-3)]'
           }`}
         >
           Cerca in Vendita
@@ -99,8 +103,8 @@ export default function HomeSearchBoxDesktop() {
           onClick={() => setContractType('rent')}
           className={`rounded-[18px] px-6 py-3 text-base font-medium transition ${
             contractType === 'rent'
-              ? 'bg-white text-black'
-              : 'border border-white/10 bg-black/20 text-white/75'
+              ? 'bg-[var(--site-text)] text-[var(--site-bg)]'
+              : 'border border-[var(--site-border)] bg-[var(--site-surface-strong)] text-[var(--site-text-soft)] hover:bg-[var(--site-surface-3)]'
           }`}
         >
           Cerca in Affitto
@@ -109,7 +113,7 @@ export default function HomeSearchBoxDesktop() {
         <button
           type="button"
           onClick={() => router.push('/immobili?mapMode=zones')}
-          className="rounded-[18px] border border-white/10 bg-white/5 px-6 py-3 text-base font-medium text-white/75 transition hover:bg-white/10"
+          className="rounded-[18px] border border-[var(--site-border)] bg-[var(--site-surface-2)] px-6 py-3 text-base font-medium text-[var(--site-text-soft)] transition hover:bg-[var(--site-surface-3)]"
         >
           Seleziona zone
         </button>
@@ -117,15 +121,15 @@ export default function HomeSearchBoxDesktop() {
         <button
           type="button"
           onClick={() => router.push('/immobili/mappa-area')}
-          className="group relative hidden min-w-[220px] shrink-0 overflow-hidden rounded-[18px] border border-white/10 shadow-[0_12px_28px_rgba(0,0,0,0.18)] transition hover:scale-[1.02] md:inline-flex"
+          className="group relative hidden min-w-[220px] shrink-0 overflow-hidden rounded-[18px] border border-[var(--site-border)] shadow-[0_12px_28px_rgba(0,0,0,0.10)] transition hover:scale-[1.02] md:inline-flex"
         >
           <div className="absolute inset-0 bg-[url('/images/map-card-bg.jpg')] bg-cover bg-center opacity-100" />
-          <div className="absolute inset-0 bg-white/35 backdrop-blur-[1.5px]" />
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.25)_0%,rgba(255,255,255,0.05)_100%)]" />
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.45)_0%,rgba(255,255,255,0.18)_100%)]" />
 
           <div className="relative flex w-full items-center justify-between gap-4 px-5 py-3">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-black/50">
+              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-black/55">
                 Ricerca su mappa
               </p>
               <p className="mt-1 text-sm font-semibold text-black">
@@ -142,25 +146,25 @@ export default function HomeSearchBoxDesktop() {
 
       <div className="grid gap-4 xl:grid-cols-[1.3fr_1fr_1fr_0.9fr_0.9fr_auto]">
         <div>
-          <label className="mb-2 block text-xs uppercase tracking-[0.26em] text-white/40">
+          <label className="mb-2 block text-xs uppercase tracking-[0.26em] text-[var(--site-text-faint)]">
             Cerca
           </label>
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Titolo, zona, keyword..."
-            className="w-full rounded-[18px] border border-white/10 bg-black/20 px-5 py-3.5 text-base text-white placeholder:text-white/28"
+            className="w-full rounded-[18px] border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-5 py-3.5 text-base text-[var(--site-text)] placeholder:text-[var(--site-text-faint)]"
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-xs uppercase tracking-[0.26em] text-white/40">
+          <label className="mb-2 block text-xs uppercase tracking-[0.26em] text-[var(--site-text-faint)]">
             Tipologia
           </label>
           <select
             value={propertyType}
             onChange={(e) => setPropertyType(e.target.value)}
-            className="w-full rounded-[18px] border border-white/10 bg-black/20 px-5 py-3.5 text-base text-white outline-none"
+            className="w-full rounded-[18px] border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-5 py-3.5 text-base text-[var(--site-text)] outline-none"
           >
             <option value="">Qualsiasi</option>
             <option value="appartamento">Appartamento</option>
@@ -174,13 +178,13 @@ export default function HomeSearchBoxDesktop() {
         </div>
 
         <div>
-          <label className="mb-2 block text-xs uppercase tracking-[0.26em] text-white/40">
+          <label className="mb-2 block text-xs uppercase tracking-[0.26em] text-[var(--site-text-faint)]">
             Provincia
           </label>
           <select
             value={province}
             onChange={(e) => setProvince(e.target.value)}
-            className="w-full rounded-[18px] border border-white/10 bg-black/20 px-5 py-3.5 text-base text-white outline-none"
+            className="w-full rounded-[18px] border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-5 py-3.5 text-base text-[var(--site-text)] outline-none"
           >
             <option value="">Qualsiasi provincia</option>
             {provinceOptions.map((item) => (
@@ -192,26 +196,26 @@ export default function HomeSearchBoxDesktop() {
         </div>
 
         <div>
-          <label className="mb-2 block text-xs uppercase tracking-[0.26em] text-white/40">
+          <label className="mb-2 block text-xs uppercase tracking-[0.26em] text-[var(--site-text-faint)]">
             Prezzo max
           </label>
           <input
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
             placeholder="Es. 300000"
-            className="w-full rounded-[18px] border border-white/10 bg-black/20 px-5 py-3.5 text-base text-white placeholder:text-white/28"
+            className="w-full rounded-[18px] border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-5 py-3.5 text-base text-[var(--site-text)] placeholder:text-[var(--site-text-faint)]"
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-xs uppercase tracking-[0.26em] text-white/40">
+          <label className="mb-2 block text-xs uppercase tracking-[0.26em] text-[var(--site-text-faint)]">
             Locali min
           </label>
           <input
             value={minRooms}
             onChange={(e) => setMinRooms(e.target.value)}
             placeholder="Es. 3"
-            className="w-full rounded-[18px] border border-white/10 bg-black/20 px-5 py-3.5 text-base text-white placeholder:text-white/28"
+            className="w-full rounded-[18px] border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-5 py-3.5 text-base text-[var(--site-text)] placeholder:text-[var(--site-text-faint)]"
           />
         </div>
 
@@ -219,7 +223,11 @@ export default function HomeSearchBoxDesktop() {
           <button
             type="button"
             onClick={goToSearch}
-            className="w-full rounded-[18px] bg-white px-6 py-3.5 text-base font-semibold text-black transition hover:opacity-90"
+            className={`w-full rounded-[18px] px-6 py-3.5 text-base font-semibold transition ${
+              isLight
+                ? 'border border-[#d9bd7a] bg-white text-[#2a2116] shadow-[0_0_0_1px_rgba(217,189,122,0.10)] hover:bg-[#fffaf0]'
+                : 'bg-white text-black hover:opacity-90'
+            }`}
           >
             Cerca
           </button>
