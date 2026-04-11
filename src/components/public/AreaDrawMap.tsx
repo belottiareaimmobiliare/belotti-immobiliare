@@ -94,7 +94,6 @@ const closeVertexIcon = L.divIcon({
 
 function formatPrice(price: number | null) {
   if (!price) return 'Prezzo riservato'
-
   return new Intl.NumberFormat('it-IT', {
     style: 'currency',
     currency: 'EUR',
@@ -233,7 +232,6 @@ export default function AreaDrawMap({ properties }: Props) {
 
     const polygonParam = serializePolygon(polygonPoints)
     const params = new URLSearchParams(searchParams.toString())
-
     params.delete('page')
     params.delete('province')
     params.delete('comune')
@@ -255,12 +253,12 @@ export default function AreaDrawMap({ properties }: Props) {
   return (
     <div className="relative h-full w-full">
       <div className="absolute left-6 top-24 z-[30] w-[min(420px,calc(100%-3rem))]">
-        <div className="theme-panel overflow-hidden rounded-[30px] border p-6 backdrop-blur-xl">
+        <div className="theme-map-floating overflow-hidden rounded-[30px] p-6">
           <div>
             <p className="text-xs uppercase tracking-[0.26em] text-[var(--site-text-faint)]">
               Ricerca avanzata
             </p>
-            <h2 className="mt-2 text-3xl font-semibold text-[var(--site-text)]">
+            <h2 className="mt-2 text-3xl font-semibold leading-tight text-[var(--site-text)]">
               Disegna la tua area sulla mappa
             </h2>
           </div>
@@ -299,14 +297,14 @@ export default function AreaDrawMap({ properties }: Props) {
           </div>
 
           <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-            <div className="theme-card rounded-[24px] border p-4">
+            <div className="theme-card rounded-[24px] p-4">
               <div className="text-[var(--site-text-faint)]">Punti area</div>
               <div className="mt-3 text-4xl font-semibold text-[var(--site-text)]">
                 {polygonPoints.length}
               </div>
             </div>
 
-            <div className="theme-card rounded-[24px] border p-4">
+            <div className="theme-card rounded-[24px] p-4">
               <div className="text-[var(--site-text-faint)]">Immobili trovati</div>
               <div className="mt-3 text-4xl font-semibold text-[var(--site-text)]">
                 {polygonClosed ? matchingProperties.length : '—'}
@@ -315,13 +313,13 @@ export default function AreaDrawMap({ properties }: Props) {
           </div>
 
           {drawingEnabled && (
-            <div className="mt-5 rounded-2xl border border-emerald-500/25 bg-emerald-500/12 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-100">
+            <div className="theme-info-emerald mt-5 rounded-2xl px-4 py-3 text-sm font-medium">
               Modalità disegno attiva: clicca sulla mappa per aggiungere i vertici.
             </div>
           )}
 
           {polygonClosed && (
-            <div className="mt-5 rounded-2xl border border-sky-500/25 bg-sky-500/12 px-4 py-3 text-sm text-sky-700 dark:text-sky-100">
+            <div className="theme-info-sky mt-5 rounded-2xl px-4 py-3 text-sm font-medium">
               Area chiusa correttamente. Ora puoi vedere gli immobili contenuti nella zona selezionata.
             </div>
           )}
@@ -366,19 +364,19 @@ export default function AreaDrawMap({ properties }: Props) {
             >
               <Popup>
                 <div className="min-w-[220px]">
-                  <div className="text-sm font-semibold text-slate-900">
+                  <div className="text-sm font-semibold">
                     {property.title || 'Immobile'}
                   </div>
-                  <div className="mt-1 text-sm text-slate-600">
+                  <div className="mt-1 text-sm opacity-80">
                     {[property.comune, property.province].filter(Boolean).join(' • ')}
                   </div>
-                  <div className="mt-2 text-sm font-medium text-slate-900">
+                  <div className="mt-2 text-sm font-medium">
                     {formatPrice(property.price)}
                   </div>
                   {property.slug && (
                     <a
                       href={`/immobili/${property.slug}`}
-                      className="mt-3 inline-block text-sm font-medium text-sky-700 underline"
+                      className="mt-3 inline-block text-sm font-medium underline"
                     >
                       Vai al dettaglio
                     </a>

@@ -48,7 +48,7 @@ type Property = {
 
 function formatPrice(price: number | null) {
   if (!price) return 'Trattativa riservata'
-  return `€ ${price.toLocaleString()}`
+  return `€ ${price.toLocaleString('it-IT')}`
 }
 
 function formatCoordinate(value: number | null) {
@@ -86,7 +86,7 @@ function getLocationBadge(property: Property) {
 
   return {
     label: 'Posizione disponibile',
-    className: 'border-white/15 bg-white/5 text-white/75',
+    className: 'theme-admin-chip',
   }
 }
 
@@ -138,16 +138,16 @@ export default async function AdminPropertiesPage({
   })
 
   return (
-    <section className="mx-auto w-full max-w-7xl px-4">
+    <section className="mx-auto w-full max-w-7xl px-4 text-[var(--site-text)]">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.2em] text-white/40">
+          <p className="theme-admin-faint text-sm uppercase tracking-[0.2em]">
             Admin immobili
           </p>
-          <h1 className="mt-2 text-3xl font-semibold text-white">
+          <h1 className="mt-2 text-3xl font-semibold">
             Gestione immobili
           </h1>
-          <p className="mt-3 text-white/60">
+          <p className="theme-admin-muted mt-3">
             Ricerca, controlla e modifica rapidamente gli immobili caricati.
           </p>
         </div>
@@ -155,28 +155,28 @@ export default async function AdminPropertiesPage({
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
             href="/admin"
-            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+            className="theme-admin-button-secondary inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-medium transition hover:opacity-95"
           >
             Vai alla dashboard
           </Link>
 
           <Link
             href="/admin/immobili/nuovo"
-            className="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-medium text-black transition hover:opacity-90"
+            className="theme-admin-button-primary inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-medium transition hover:opacity-95"
           >
             Nuovo immobile
           </Link>
         </div>
       </div>
 
-      <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-5 md:p-6">
-        <div className="mb-5 grid max-w-md grid-cols-3 gap-2 rounded-2xl border border-white/10 bg-black/20 p-1">
+      <div className="theme-admin-card mt-8 rounded-3xl p-5 md:p-6">
+        <div className="mb-5 grid max-w-md grid-cols-3 gap-2 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-1">
           <Link
             href={`/admin/immobili${status ? `?status=${status}` : ''}`}
             className={`rounded-xl px-4 py-3 text-center text-sm font-medium transition ${
               contractType === ''
-                ? 'bg-white text-black'
-                : 'text-white/75 hover:bg-white/10'
+                ? 'theme-admin-chip-active'
+                : 'theme-admin-chip'
             }`}
           >
             Tutti
@@ -186,8 +186,8 @@ export default async function AdminPropertiesPage({
             href={`/admin/immobili?contractType=vendita${status ? `&status=${status}` : ''}`}
             className={`rounded-xl px-4 py-3 text-center text-sm font-medium transition ${
               contractType === 'vendita'
-                ? 'bg-white text-black'
-                : 'text-white/75 hover:bg-white/10'
+                ? 'theme-admin-chip-active'
+                : 'theme-admin-chip'
             }`}
           >
             Vendita
@@ -197,8 +197,8 @@ export default async function AdminPropertiesPage({
             href={`/admin/immobili?contractType=affitto${status ? `&status=${status}` : ''}`}
             className={`rounded-xl px-4 py-3 text-center text-sm font-medium transition ${
               contractType === 'affitto'
-                ? 'bg-white text-black'
-                : 'text-white/75 hover:bg-white/10'
+                ? 'theme-admin-chip-active'
+                : 'theme-admin-chip'
             }`}
           >
             Affitto
@@ -214,13 +214,13 @@ export default async function AdminPropertiesPage({
               name="q"
               defaultValue={params.q || ''}
               placeholder="Cerca per titolo, comune, provincia..."
-              className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
+              className="theme-admin-input rounded-2xl px-4 py-3"
             />
 
             <select
               name="status"
               defaultValue={status}
-              className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white"
+              className="theme-admin-select rounded-2xl px-4 py-3"
             >
               <option value="">Tutti gli stati</option>
               <option value="draft">Solo bozze</option>
@@ -230,14 +230,14 @@ export default async function AdminPropertiesPage({
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="flex-1 rounded-2xl bg-white px-5 py-3 font-medium text-black transition hover:opacity-90"
+                className="theme-admin-button-primary flex-1 rounded-2xl px-5 py-3 font-medium transition hover:opacity-95"
               >
                 Filtra
               </button>
 
               <Link
                 href="/admin/immobili"
-                className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-center font-medium text-white transition hover:bg-white/10"
+                className="theme-admin-button-secondary flex-1 rounded-2xl px-5 py-3 text-center font-medium transition hover:opacity-95"
               >
                 Reset
               </Link>
@@ -253,7 +253,7 @@ export default async function AdminPropertiesPage({
       )}
 
       {!error && properties.length === 0 && (
-        <div className="mt-8 rounded-3xl border border-dashed border-white/15 bg-white/5 p-10 text-white/60">
+        <div className="theme-admin-card mt-8 rounded-3xl border-dashed p-10 text-[var(--site-text-muted)]">
           Nessun immobile trovato.
         </div>
       )}
@@ -284,7 +284,7 @@ export default async function AdminPropertiesPage({
           return (
             <article
               key={property.id}
-              className="overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.03]"
+              className="theme-admin-card overflow-hidden rounded-[30px]"
             >
               <div
                 className="h-56 bg-cover bg-center"
@@ -293,7 +293,7 @@ export default async function AdminPropertiesPage({
                 }
               >
                 {!cover && (
-                  <div className="flex h-full items-center justify-center text-sm text-white/40">
+                  <div className="flex h-full items-center justify-center text-sm text-[var(--site-text-faint)]">
                     Nessuna immagine
                   </div>
                 )}
@@ -306,11 +306,11 @@ export default async function AdminPropertiesPage({
                     currentStatus={property.status || 'draft'}
                   />
 
-                  <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs uppercase tracking-[0.18em] text-white/65">
+                  <span className="theme-admin-chip rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
                     {property.contract_type || 'contratto da definire'}
                   </span>
 
-                  <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs uppercase tracking-[0.18em] text-white/65">
+                  <span className="theme-admin-chip rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
                     {property.property_type || 'tipologia da definire'}
                   </span>
 
@@ -321,39 +321,39 @@ export default async function AdminPropertiesPage({
                   </span>
                 </div>
 
-                <p className="mt-4 text-sm text-white/45">
+                <p className="theme-admin-faint mt-4 text-sm">
                   {property.comune || '—'} ({property.province || '—'})
                   {property.frazione ? ` • ${property.frazione}` : ''}
                 </p>
 
                 {property.address && (
-                  <p className="mt-1 text-sm text-white/50">{property.address}</p>
+                  <p className="theme-admin-muted mt-1 text-sm">{property.address}</p>
                 )}
 
-                <h2 className="mt-2 text-2xl font-semibold text-white">
+                <h2 className="mt-2 text-2xl font-semibold">
                   {property.title || 'Immobile senza titolo'}
                 </h2>
 
-                <p className="mt-4 text-2xl font-semibold text-white">
+                <p className="mt-4 text-2xl font-semibold">
                   {formatPrice(property.price)}
                 </p>
 
-                <p className="mt-2 text-sm text-white/60">
+                <p className="theme-admin-muted mt-2 text-sm">
                   {property.surface || '—'} mq · {property.rooms || '—'} locali ·{' '}
                   {property.bathrooms || '—'} bagni
                 </p>
 
-                <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-xs text-white/55">
+                <div className="theme-admin-card mt-4 rounded-2xl px-4 py-3 text-xs text-[var(--site-text-muted)]">
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                     <span>
-                      Lat: <span className="text-white/75">{formatCoordinate(property.latitude)}</span>
+                      Lat: <span className="text-[var(--site-text-soft)]">{formatCoordinate(property.latitude)}</span>
                     </span>
                     <span>
-                      Lng: <span className="text-white/75">{formatCoordinate(property.longitude)}</span>
+                      Lng: <span className="text-[var(--site-text-soft)]">{formatCoordinate(property.longitude)}</span>
                     </span>
                     <span>
                       Mode:{' '}
-                      <span className="text-white/75">
+                      <span className="text-[var(--site-text-soft)]">
                         {property.location_mode || '—'}
                       </span>
                     </span>
@@ -365,7 +365,7 @@ export default async function AdminPropertiesPage({
                     {features.map((feature) => (
                       <span
                         key={feature}
-                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/75"
+                        className="theme-admin-chip rounded-full px-3 py-1 text-xs"
                       >
                         {feature}
                       </span>
@@ -376,7 +376,7 @@ export default async function AdminPropertiesPage({
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                   <Link
                     href={`/admin/immobili/${property.id}`}
-                    className="inline-flex flex-1 items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-medium text-black transition hover:opacity-90"
+                    className="theme-admin-button-primary inline-flex flex-1 items-center justify-center rounded-2xl px-5 py-3 text-sm font-medium transition hover:opacity-95"
                   >
                     Modifica
                   </Link>
@@ -385,12 +385,12 @@ export default async function AdminPropertiesPage({
                     <Link
                       href={`/immobili/${property.slug}`}
                       target="_blank"
-                      className="inline-flex flex-1 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+                      className="theme-admin-button-secondary inline-flex flex-1 items-center justify-center rounded-2xl px-5 py-3 text-sm font-medium transition hover:opacity-95"
                     >
                       Apri scheda
                     </Link>
                   ) : (
-                    <div className="inline-flex flex-1 items-center justify-center rounded-2xl border border-white/10 bg-black/20 px-5 py-3 text-sm text-white/40">
+                    <div className="theme-admin-chip inline-flex flex-1 items-center justify-center rounded-2xl px-5 py-3 text-sm">
                       Scheda pubblica non disponibile
                     </div>
                   )}

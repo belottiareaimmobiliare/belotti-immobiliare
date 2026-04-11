@@ -19,7 +19,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+    <div className="theme-admin-page min-h-screen">
       <div className="flex min-h-screen">
         <Sidebar />
 
