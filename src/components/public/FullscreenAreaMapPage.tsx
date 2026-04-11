@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
+import ThemeToggle from '@/components/public/ThemeToggle'
 
 type MapProperty = {
   id: string
@@ -20,7 +21,7 @@ type MapProperty = {
 const AreaDrawMap = dynamic(() => import('@/components/public/AreaDrawMap'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full w-full items-center justify-center bg-[#0a0f1a] text-white/55">
+    <div className="flex h-full w-full items-center justify-center bg-[var(--site-bg)] text-[var(--site-text-muted)]">
       Caricamento mappa...
     </div>
   ),
@@ -29,7 +30,7 @@ const AreaDrawMap = dynamic(() => import('@/components/public/AreaDrawMap'), {
 const PropertiesMap = dynamic(() => import('@/components/public/PropertiesMap'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full w-full items-center justify-center bg-[#0a0f1a] text-white/55">
+    <div className="flex h-full w-full items-center justify-center bg-[var(--site-bg)] text-[var(--site-text-muted)]">
       Caricamento mappa...
     </div>
   ),
@@ -54,22 +55,24 @@ export default function FullscreenAreaMapPage({
   }, [])
 
   return (
-    <main className="fixed inset-0 z-[90] h-screen w-screen overflow-hidden bg-[#0a0f1a] text-white">
+    <main className="fixed inset-0 z-[90] h-screen w-screen overflow-hidden bg-[var(--site-bg)] text-[var(--site-text)] transition-colors duration-300">
       <div className="flex h-full flex-col">
-        <div className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-b border-white/10 bg-[#08111f] px-4 py-4 md:px-5">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-b border-[var(--site-border)] bg-[var(--site-surface-2)] px-4 py-4 md:px-5">
           <div className="flex flex-col gap-2">
-            <p className="text-xs uppercase tracking-[0.26em] text-white/40">
+            <p className="text-xs uppercase tracking-[0.26em] text-[var(--site-text-faint)]">
               Mappa risultati
             </p>
-            <h1 className="text-xl font-semibold md:text-2xl">
+            <h1 className="text-xl font-semibold md:text-2xl text-[var(--site-text)]">
               {isMobile ? 'Vista mappa immobili' : 'Esplora la zona sulla mappa'}
             </h1>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            <ThemeToggle />
+
             <Link
               href="/immobili"
-              className="rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+              className="theme-button-primary rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95"
             >
               Torna agli immobili
             </Link>
@@ -77,7 +80,7 @@ export default function FullscreenAreaMapPage({
         </div>
 
         {!isMobile && (
-          <div className="shrink-0 border-b border-sky-400/20 bg-sky-500/10 px-5 py-3 text-sm text-sky-100">
+          <div className="shrink-0 border-b border-[var(--site-border)] bg-[var(--site-surface)] px-5 py-3 text-sm text-[var(--site-text-muted)]">
             Muoviti sulla mappa con trascinamento e zoom. Poi attiva il disegno e crea la tua area cliccando sulla mappa.
           </div>
         )}

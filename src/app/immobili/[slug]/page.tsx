@@ -182,14 +182,14 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     : null
 
   return (
-    <main className="min-h-screen bg-[#0a0f1a] text-white">
+    <main className="min-h-screen bg-[var(--site-bg)] text-[var(--site-text)] transition-colors duration-300">
       <SiteHeader />
 
-      <section className="border-b border-white/10 bg-[#0d1321]">
+      <section className="border-b border-[var(--site-border)] bg-[var(--site-bg-soft)] transition-colors duration-300">
         <div className="mx-auto max-w-7xl px-6 py-8">
           <Link
             href="/immobili"
-            className="text-sm text-white/45 transition hover:text-white"
+            className="text-sm text-[var(--site-text-faint)] transition hover:text-[var(--site-text)]"
           >
             ← Torna agli immobili
           </Link>
@@ -198,50 +198,50 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             <div>
               <div className="flex flex-wrap gap-2">
                 {currentProperty.contract_type && (
-                  <span className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/55">
+                  <span className="theme-badge inline-flex rounded-full border px-3 py-1 text-xs uppercase tracking-[0.2em]">
                     {currentProperty.contract_type}
                   </span>
                 )}
 
                 {currentProperty.property_type && (
-                  <span className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/55">
+                  <span className="theme-badge inline-flex rounded-full border px-3 py-1 text-xs uppercase tracking-[0.2em]">
                     {currentProperty.property_type}
                   </span>
                 )}
 
                 {currentProperty.is_auction && (
-                  <span className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/55">
+                  <span className="theme-badge inline-flex rounded-full border px-3 py-1 text-xs uppercase tracking-[0.2em]">
                     Asta
                   </span>
                 )}
               </div>
 
-              <h1 className="mt-4 text-3xl font-semibold leading-tight md:text-5xl">
+              <h1 className="mt-4 text-3xl font-semibold leading-tight md:text-5xl text-[var(--site-text)]">
                 {currentProperty.title || 'Immobile'}
               </h1>
 
-              <p className="mt-3 text-base text-white/60 md:text-lg">
+              <p className="mt-3 text-base text-[var(--site-text-muted)] md:text-lg">
                 {currentProperty.comune || '—'} ({currentProperty.province || '—'})
                 {currentProperty.frazione ? ` • ${currentProperty.frazione}` : ''}
               </p>
 
               {currentProperty.address && (
-                <p className="mt-2 text-sm text-white/50 md:text-base">
+                <p className="mt-2 text-sm text-[var(--site-text-faint)] md:text-base">
                   {currentProperty.address}
                 </p>
               )}
             </div>
 
             <div className="md:text-right">
-              <p className="text-sm uppercase tracking-[0.25em] text-white/40">
+              <p className="text-sm uppercase tracking-[0.25em] text-[var(--site-text-faint)]">
                 Prezzo
               </p>
               {currentProperty.price ? (
-                <p className="mt-2 text-3xl font-semibold md:text-5xl">
+                <p className="mt-2 text-3xl font-semibold md:text-5xl text-[var(--site-text)]">
                   € {currentProperty.price.toLocaleString('it-IT')}
                 </p>
               ) : (
-                <p className="mt-2 text-2xl font-semibold md:text-4xl">
+                <p className="mt-2 text-2xl font-semibold md:text-4xl text-[var(--site-text)]">
                   Trattativa riservata
                 </p>
               )}
@@ -264,54 +264,62 @@ export default async function PropertyDetailPage({ params }: PageProps) {
       <section className="mx-auto max-w-7xl px-6 pb-20">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-8">
-            <div className="rounded-[30px] border border-white/10 bg-white/[0.03] p-7">
-              <h2 className="text-2xl font-semibold">Dettagli principali</h2>
+            <div className="theme-panel rounded-[30px] border p-7">
+              <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+                Dettagli principali
+              </h2>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                 {detailFeatures.length > 0 ? (
                   detailFeatures.map((feature) => (
                     <div
                       key={feature}
-                      className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-sm text-white/80"
+                      className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4 text-sm text-[var(--site-text-soft)]"
                     >
                       {feature}
                     </div>
                   ))
                 ) : (
-                  <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-sm text-white/50">
+                  <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4 text-sm text-[var(--site-text-faint)]">
                     Dettagli in aggiornamento
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="rounded-[30px] border border-white/10 bg-white/[0.03] p-7">
-              <h2 className="text-2xl font-semibold">Informazioni aggiuntive</h2>
+            <div className="theme-panel rounded-[30px] border p-7">
+              <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+                Informazioni aggiuntive
+              </h2>
 
               <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {infoCards.map((card) => (
                   <div
                     key={card.label}
-                    className={`rounded-2xl border border-white/10 bg-black/20 px-4 py-4 ${card.spanClass}`}
+                    className={`rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4 ${card.spanClass}`}
                   >
-                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">
+                    <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
                       {card.label}
                     </p>
-                    <p className="mt-2 text-sm text-white/80">{card.value}</p>
+                    <p className="mt-2 text-sm text-[var(--site-text-soft)]">
+                      {card.value}
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
 
             {extraFeatures.length > 0 && (
-              <div className="rounded-[30px] border border-white/10 bg-white/[0.03] p-7">
-                <h2 className="text-2xl font-semibold">Caratteristiche</h2>
+              <div className="theme-panel rounded-[30px] border p-7">
+                <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+                  Caratteristiche
+                </h2>
 
                 <div className="mt-6 flex flex-wrap gap-3">
                   {extraFeatures.map((feature) => (
                     <span
                       key={feature}
-                      className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80"
+                      className="theme-badge rounded-full border px-4 py-2 text-sm"
                     >
                       {feature}
                     </span>
@@ -320,10 +328,12 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               </div>
             )}
 
-            <div className="rounded-[30px] border border-white/10 bg-white/[0.03] p-7">
-              <h2 className="text-2xl font-semibold">Descrizione</h2>
+            <div className="theme-panel rounded-[30px] border p-7">
+              <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+                Descrizione
+              </h2>
 
-              <div className="mt-5 space-y-4 text-sm leading-8 text-white/65 md:text-base">
+              <div className="mt-5 space-y-4 text-sm leading-8 text-[var(--site-text-muted)] md:text-base">
                 {currentProperty.description ? (
                   currentProperty.description
                     .split('\n')
@@ -336,8 +346,10 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             </div>
 
             <div className="grid gap-8 xl:grid-cols-2">
-              <div className="rounded-[30px] border border-white/10 bg-white/[0.03] p-7">
-                <h2 className="text-2xl font-semibold">Planimetrie</h2>
+              <div className="theme-panel rounded-[30px] border p-7">
+                <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+                  Planimetrie
+                </h2>
 
                 {plans.length > 0 ? (
                   <div className="mt-5 space-y-4">
@@ -347,22 +359,24 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                         href={plan.file_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex min-h-[88px] items-center justify-between rounded-[24px] border border-white/10 bg-black/20 px-5 py-4 text-sm text-white/80 transition hover:border-white/20 hover:bg-black/30"
+                        className="flex min-h-[88px] items-center justify-between rounded-[24px] border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-5 py-4 text-sm text-[var(--site-text-soft)] transition hover:bg-[var(--site-surface-2)]"
                       >
                         <span>{plan.label || 'Apri planimetria'}</span>
-                        <span className="text-white/45">Apri</span>
+                        <span className="text-[var(--site-text-faint)]">Apri</span>
                       </a>
                     ))}
                   </div>
                 ) : (
-                  <div className="mt-5 flex min-h-[280px] items-center justify-center rounded-[24px] border border-dashed border-white/15 bg-black/20 text-sm text-white/40">
+                  <div className="mt-5 flex min-h-[280px] items-center justify-center rounded-[24px] border border-dashed border-[var(--site-border)] bg-[var(--site-surface-strong)] text-sm text-[var(--site-text-faint)]">
                     Nessuna planimetria disponibile
                   </div>
                 )}
               </div>
 
-              <div className="rounded-[30px] border border-white/10 bg-white/[0.03] p-7">
-                <h2 className="text-2xl font-semibold">Posizione</h2>
+              <div className="theme-panel rounded-[30px] border p-7">
+                <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+                  Posizione
+                </h2>
 
                 <div className="mt-5">
                   <SinglePropertyMapSection
@@ -376,7 +390,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                   />
                 </div>
 
-                <p className="mt-4 text-sm text-white/50">
+                <p className="mt-4 text-sm text-[var(--site-text-faint)]">
                   {currentProperty.location_mode === 'comune_center'
                     ? 'La posizione mostrata è indicativa e centrata sul comune.'
                     : currentProperty.latitude && currentProperty.longitude
@@ -389,10 +403,10 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                     href={googleMapsHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+                    className="theme-button-secondary mt-4 inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm transition"
                   >
                     <span>Apri indirizzo su Google Maps</span>
-                    <span className="text-white/45">↗</span>
+                    <span className="opacity-60">↗</span>
                   </a>
                 )}
               </div>
@@ -401,10 +415,12 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
           <aside
             id="contatto"
-            className="h-fit rounded-[30px] border border-white/10 bg-white/[0.03] p-7 lg:sticky lg:top-24"
+            className="theme-panel h-fit rounded-[30px] border p-7 lg:sticky lg:top-24"
           >
-            <h2 className="text-2xl font-semibold">Richiedi informazioni</h2>
-            <p className="mt-3 text-sm leading-7 text-white/60">
+            <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+              Richiedi informazioni
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-[var(--site-text-muted)]">
               Invia una richiesta rapida all’agenzia per questo immobile.
             </p>
 
