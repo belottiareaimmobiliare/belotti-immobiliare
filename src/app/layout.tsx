@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import CookieBanner from '@/components/public/CookieBanner'
 import WhatsAppChatButton from '@/components/public/WhatsAppChatButton'
+import ThemeInitializer from '@/components/public/ThemeInitializer'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -28,9 +29,11 @@ export default function RootLayout({
   return (
     <html
       lang="it"
+      data-theme="dark"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#050b16] text-white">
+      <body className="min-h-full bg-[var(--site-bg)] text-[var(--site-text)] transition-colors duration-300">
+        <ThemeInitializer />
         {children}
         <WhatsAppChatButton />
         <CookieBanner />

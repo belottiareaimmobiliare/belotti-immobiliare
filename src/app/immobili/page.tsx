@@ -353,33 +353,33 @@ export default async function PropertiesPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#0a0f1a] text-white">
+    <main className="min-h-screen bg-[var(--site-bg)] text-[var(--site-text)] transition-colors duration-300">
       <SiteHeader />
 
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="mb-10">
-          <p className="text-sm uppercase tracking-[0.3em] text-white/45">
+          <p className="text-sm uppercase tracking-[0.3em] text-[var(--site-text-faint)]">
             Immobili
           </p>
-          <h1 className="mt-3 text-4xl font-semibold">
+          <h1 className="mt-3 text-4xl font-semibold text-[var(--site-text)]">
             Tutti gli immobili disponibili
           </h1>
-          <p className="mt-4 max-w-3xl text-white/60">
+          <p className="mt-4 max-w-3xl text-[var(--site-text-muted)]">
             Una ricerca chiara, con strumenti di filtro, vista mappa e selezione
             dell’area per individuare le soluzioni più adatte.
           </p>
         </div>
 
         {hasActivePolygon && (
-          <div className="mb-8 flex flex-col gap-4 rounded-[28px] border border-sky-400/20 bg-sky-500/10 p-5 md:flex-row md:items-center md:justify-between">
+          <div className="theme-panel mb-8 flex flex-col gap-4 rounded-[28px] border p-5 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-sky-100/70">
+              <p className="text-xs uppercase tracking-[0.22em] text-[var(--site-text-faint)]">
                 Ricerca geografica attiva
               </p>
-              <h2 className="mt-2 text-xl font-semibold text-white">
+              <h2 className="mt-2 text-xl font-semibold text-[var(--site-text)]">
                 Stai visualizzando gli immobili contenuti nell’area disegnata
               </h2>
-              <p className="mt-2 text-sm text-sky-100/90">
+              <p className="mt-2 text-sm text-[var(--site-text-muted)]">
                 Puoi continuare ad affinare i risultati con i filtri disponibili, oppure modificare la zona direttamente sulla mappa.
               </p>
             </div>
@@ -387,14 +387,14 @@ export default async function PropertiesPage({
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/immobili/mappa-area"
-                className="rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+                className="theme-button-primary rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95"
               >
                 Modifica area
               </Link>
 
               <Link
                 href="/immobili"
-                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm text-white transition hover:bg-white/10"
+                className="theme-button-secondary rounded-2xl px-5 py-3 text-sm transition"
               >
                 Rimuovi area
               </Link>
@@ -425,7 +425,7 @@ export default async function PropertiesPage({
           </aside>
 
           <div className="space-y-8">
-            <section className="rounded-[32px] border border-white/10 bg-white/[0.03] p-5">
+            <section className="theme-panel rounded-[32px] border p-5">
               <PropertiesMapSection
                 properties={propertiesWithCoordinatesForMap.map((property) => ({
                   id: property.id,
@@ -449,19 +449,19 @@ export default async function PropertiesPage({
             <section>
               <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-2">
-                  <p className="text-sm text-white/45">
+                  <p className="text-sm text-[var(--site-text-faint)]">
                     {totalResults} {totalResults === 1 ? 'immobile trovato' : 'immobili trovati'}
                   </p>
 
                   {hasActivePolygon && (
-                    <div className="inline-flex rounded-full border border-sky-400/20 bg-sky-500/10 px-3 py-1 text-xs text-sky-100">
+                    <div className="theme-badge inline-flex rounded-full border px-3 py-1 text-xs">
                       Risultati filtrati per area disegnata
                     </div>
                   )}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-sm text-white/50">Mostra:</span>
+                  <span className="text-sm text-[var(--site-text-faint)]">Mostra:</span>
 
                   {[5, 10, 20].map((size) => {
                     const active = limit === size
@@ -475,8 +475,8 @@ export default async function PropertiesPage({
                         })}
                         className={`rounded-full px-4 py-2 text-sm transition ${
                           active
-                            ? 'bg-white text-black'
-                            : 'border border-white/10 bg-white/5 text-white/75 hover:bg-white/10'
+                            ? 'theme-pill-active border'
+                            : 'theme-pill border'
                         }`}
                       >
                         {size}
@@ -493,7 +493,7 @@ export default async function PropertiesPage({
               )}
 
               {!error && totalResults === 0 && (
-                <div className="rounded-3xl border border-dashed border-white/15 bg-white/5 p-10 text-white/60">
+                <div className="theme-panel rounded-3xl border border-dashed p-10 text-[var(--site-text-muted)]">
                   {hasActivePolygon
                     ? 'Nessun immobile trovato dentro l’area selezionata con i filtri attuali. Prova a modificare la zona oppure ad alleggerire i filtri.'
                     : 'Nessun immobile trovato con i filtri selezionati.'}
@@ -529,7 +529,7 @@ export default async function PropertiesPage({
                     <Link
                       key={property.id}
                       href={`/immobili/${property.slug}`}
-                      className="group block overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.03] transition hover:border-white/20 hover:bg-white/[0.05]"
+                      className="theme-card group block overflow-hidden rounded-[30px] border transition"
                     >
                       <div className="flex flex-col md:grid md:min-h-[186px] md:grid-cols-[220px_minmax(0,1fr)_170px]">
                         <div
@@ -541,7 +541,7 @@ export default async function PropertiesPage({
                           }
                         >
                           {!cover && (
-                            <div className="flex h-full items-center justify-center text-sm text-white/40">
+                            <div className="flex h-full items-center justify-center text-sm text-[var(--site-text-faint)]">
                               Nessuna immagine
                             </div>
                           )}
@@ -553,7 +553,7 @@ export default async function PropertiesPage({
                               {labels.slice(0, 5).map((label) => (
                                 <span
                                   key={label}
-                                  className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-white/65"
+                                  className="theme-badge rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.16em]"
                                 >
                                   {label}
                                 </span>
@@ -561,32 +561,32 @@ export default async function PropertiesPage({
                             </div>
                           )}
 
-                          <p className="text-sm text-white/45">
+                          <p className="text-sm text-[var(--site-text-faint)]">
                             {property.comune || '—'} ({property.province || '—'})
                             {property.frazione ? ` • ${property.frazione}` : ''}
                           </p>
 
-                          <h3 className="mt-2 line-clamp-2 text-[1.2rem] font-semibold leading-tight text-white md:text-[1.45rem]">
+                          <h3 className="mt-2 line-clamp-2 text-[1.2rem] font-semibold leading-tight text-[var(--site-text)] md:text-[1.45rem]">
                             {property.title}
                           </h3>
 
-                          <p className="mt-3 text-sm text-white/60">
+                          <p className="mt-3 text-sm text-[var(--site-text-muted)]">
                             {property.surface || '—'} mq · {property.rooms || '—'} locali ·{' '}
                             {property.bathrooms || '—'} bagni
                           </p>
 
-                          <p className="mt-3 line-clamp-1 text-sm leading-6 text-white/55">
+                          <p className="mt-3 line-clamp-1 text-sm leading-6 text-[var(--site-text-muted)]">
                             {property.description || 'Descrizione in aggiornamento.'}
                           </p>
                         </div>
 
                         <div className="flex items-center justify-end px-5 pb-5 md:px-6 md:pb-0">
                           {property.price ? (
-                            <p className="text-3xl font-semibold text-white md:text-[2.2rem] whitespace-nowrap">
+                            <p className="whitespace-nowrap text-3xl font-semibold text-[var(--site-text)] md:text-[2.2rem]">
                               € {property.price.toLocaleString('it-IT')}
                             </p>
                           ) : (
-                            <p className="text-xl text-white/70">
+                            <p className="text-xl text-[var(--site-text-muted)]">
                               Trattativa riservata
                             </p>
                           )}
@@ -599,7 +599,7 @@ export default async function PropertiesPage({
 
               {totalResults > 0 && (
                 <div className="mt-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                  <p className="text-sm text-white/50">
+                  <p className="text-sm text-[var(--site-text-faint)]">
                     Stai vedendo {startIndex + 1}-{Math.min(endIndex, totalResults)} di {totalResults} risultati
                   </p>
 
@@ -610,14 +610,14 @@ export default async function PropertiesPage({
                       })}
                       className={`rounded-2xl px-4 py-2 text-sm transition ${
                         safePage <= 1
-                          ? 'pointer-events-none border border-white/10 bg-white/5 text-white/30'
-                          : 'border border-white/10 bg-white/5 text-white hover:bg-white/10'
+                          ? 'pointer-events-none border border-[var(--site-border)] bg-[var(--site-surface-2)] text-[var(--site-text-faint)]'
+                          : 'theme-button-secondary'
                       }`}
                     >
                       ← Precedente
                     </Link>
 
-                    <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80">
+                    <div className="theme-pill rounded-2xl border px-4 py-2 text-sm">
                       Pagina {safePage} / {totalPages}
                     </div>
 
@@ -627,8 +627,8 @@ export default async function PropertiesPage({
                       })}
                       className={`rounded-2xl px-4 py-2 text-sm transition ${
                         safePage >= totalPages
-                          ? 'pointer-events-none border border-white/10 bg-white/5 text-white/30'
-                          : 'border border-white/10 bg-white/5 text-white hover:bg-white/10'
+                          ? 'pointer-events-none border border-[var(--site-border)] bg-[var(--site-surface-2)] text-[var(--site-text-faint)]'
+                          : 'theme-button-secondary'
                       }`}
                     >
                       Successiva →

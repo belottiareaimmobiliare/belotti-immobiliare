@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import ThemeToggle from '@/components/public/ThemeToggle'
 
 const links = [
   { href: '/', label: 'Home' },
@@ -15,6 +16,8 @@ const links = [
 export default function SiteHeader() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const isHome = pathname === '/'
 
   useEffect(() => {
     setMobileMenuOpen(false)
@@ -33,7 +36,13 @@ export default function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050b16]/78 backdrop-blur-xl">
+      <header
+        className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-colors duration-300 ${
+          isHome
+            ? 'border-white/10 bg-[#050b16]/78'
+            : 'border-[var(--site-border)] bg-[var(--site-surface-2)]'
+        }`}
+      >
         <div className="flex w-full items-center justify-between px-4 py-4 md:px-6 xl:px-10 2xl:px-14">
           <Link href="/" className="flex items-center">
             <Image
@@ -42,7 +51,9 @@ export default function SiteHeader() {
               width={190}
               height={60}
               priority
-              className="h-[50px] w-auto object-contain brightness-0 invert opacity-95 md:h-[54px]"
+              className={`h-[50px] w-auto object-contain md:h-[54px] ${
+                isHome ? 'brightness-0 invert opacity-95' : 'opacity-95'
+              }`}
             />
           </Link>
 
@@ -58,7 +69,13 @@ export default function SiteHeader() {
                   key={item.href}
                   href={item.href}
                   className={`transition ${
-                    active ? 'text-white' : 'text-white/68 hover:text-white'
+                    isHome
+                      ? active
+                        ? 'text-white'
+                        : 'text-white/68 hover:text-white'
+                      : active
+                        ? 'text-[var(--site-text)]'
+                        : 'text-[var(--site-text-muted)] hover:text-[var(--site-text)]'
                   }`}
                 >
                   {item.label}
@@ -68,45 +85,63 @@ export default function SiteHeader() {
           </nav>
 
           <div className="hidden items-center gap-4 md:flex">
+            <ThemeToggle forceDark={isHome} />
+
             <a
               href="mailto:info@areaimmobiliare.com"
-              className="text-sm text-white/65 transition hover:text-white"
+              className={`text-sm transition ${
+                isHome
+                  ? 'text-white/65 hover:text-white'
+                  : 'text-[var(--site-text-muted)] hover:text-[var(--site-text)]'
+              }`}
             >
               info@areaimmobiliare.com
             </a>
 
             <a
               href="tel:035221206"
-              className="rounded-full border border-white/15 px-4 py-2 text-sm text-white transition hover:border-white/30 hover:bg-white/5"
+              className={`rounded-full px-4 py-2 text-sm transition ${
+                isHome
+                  ? 'border border-white/15 text-white hover:border-white/30 hover:bg-white/5'
+                  : 'border border-[var(--site-border-strong)] bg-[var(--site-surface-2)] text-[var(--site-text)] shadow-[var(--site-button-shadow)] hover:bg-[var(--site-surface-3)]'
+              }`}
             >
               035 221206
             </a>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen((prev) => !prev)}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition hover:bg-white/10 md:hidden"
-            aria-label={mobileMenuOpen ? 'Chiudi menu' : 'Apri menu'}
-          >
-            <div className="relative h-4 w-5">
-              <span
-                className={`absolute left-0 top-0 h-[2px] w-5 bg-white transition ${
-                  mobileMenuOpen ? 'translate-y-[7px] rotate-45' : ''
-                }`}
-              />
-              <span
-                className={`absolute left-0 top-[7px] h-[2px] w-5 bg-white transition ${
-                  mobileMenuOpen ? 'opacity-0' : 'opacity-100'
-                }`}
-              />
-              <span
-                className={`absolute left-0 top-[14px] h-[2px] w-5 bg-white transition ${
-                  mobileMenuOpen ? '-translate-y-[7px] -rotate-45' : ''
-                }`}
-              />
-            </div>
-          </button>
+          <div className="flex items-center gap-2 md:hidden">
+            <ThemeToggle forceDark={isHome} />
+
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              className={`flex h-11 w-11 items-center justify-center rounded-full border transition ${
+                isHome
+                  ? 'border-white/10 bg-white/5 text-white hover:bg-white/10'
+                  : 'border-[var(--site-border)] bg-[var(--site-surface-2)] text-[var(--site-text)] shadow-[var(--site-button-shadow)] hover:bg-[var(--site-surface-3)]'
+              }`}
+              aria-label={mobileMenuOpen ? 'Chiudi menu' : 'Apri menu'}
+            >
+              <div className="relative h-4 w-5">
+                <span
+                  className={`absolute left-0 top-0 h-[2px] w-5 transition ${
+                    isHome ? 'bg-white' : 'bg-[var(--site-text)]'
+                  } ${mobileMenuOpen ? 'translate-y-[7px] rotate-45' : ''}`}
+                />
+                <span
+                  className={`absolute left-0 top-[7px] h-[2px] w-5 transition ${
+                    isHome ? 'bg-white' : 'bg-[var(--site-text)]'
+                  } ${mobileMenuOpen ? 'opacity-0' : 'opacity-100'}`}
+                />
+                <span
+                  className={`absolute left-0 top-[14px] h-[2px] w-5 transition ${
+                    isHome ? 'bg-white' : 'bg-[var(--site-text)]'
+                  } ${mobileMenuOpen ? '-translate-y-[7px] -rotate-45' : ''}`}
+                />
+              </div>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -115,24 +150,36 @@ export default function SiteHeader() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(false)}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/45 backdrop-blur-sm"
             aria-label="Chiudi menu mobile"
           />
 
-          <div className="absolute right-0 top-0 h-full w-[86%] max-w-[360px] border-l border-white/10 bg-[#07111d] p-6 shadow-2xl">
+          <div
+            className={`absolute right-0 top-0 h-full w-[86%] max-w-[360px] border-l p-6 shadow-2xl transition-colors ${
+              isHome
+                ? 'border-white/10 bg-[#07111d]'
+                : 'border-[var(--site-border)] bg-[var(--site-bg-soft)]'
+            }`}
+          >
             <div className="flex items-center justify-between">
               <Image
                 src="/images/brand/areaimmobiliare.png"
                 alt="Area Immobiliare"
                 width={150}
                 height={48}
-                className="h-[42px] w-auto object-contain brightness-0 invert opacity-95"
+                className={`h-[42px] w-auto object-contain ${
+                  isHome ? 'brightness-0 invert opacity-95' : 'opacity-95'
+                }`}
               />
 
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xl text-white"
+                className={`flex h-10 w-10 items-center justify-center rounded-full border text-xl ${
+                  isHome
+                    ? 'border-white/10 bg-white/5 text-white'
+                    : 'border-[var(--site-border)] bg-[var(--site-surface-2)] text-[var(--site-text)]'
+                }`}
                 aria-label="Chiudi menu"
               >
                 ×
@@ -151,9 +198,13 @@ export default function SiteHeader() {
                     key={item.href}
                     href={item.href}
                     className={`rounded-2xl px-4 py-3 text-base transition ${
-                      active
-                        ? 'bg-white text-black'
-                        : 'border border-white/10 bg-white/5 text-white hover:bg-white/10'
+                      isHome
+                        ? active
+                          ? 'bg-white text-black'
+                          : 'border border-white/10 bg-white/5 text-white hover:bg-white/10'
+                        : active
+                          ? 'theme-pill-active border'
+                          : 'theme-pill border'
                     }`}
                   >
                     {item.label}
@@ -162,33 +213,57 @@ export default function SiteHeader() {
               })}
             </div>
 
-            <div className="mt-8 h-px w-full bg-white/10" />
+            <div
+              className={`mt-8 h-px w-full ${
+                isHome ? 'bg-white/10' : 'bg-[var(--site-border)]'
+              }`}
+            />
 
-            <div className="mt-8 space-y-3 text-sm text-white/72">
+            <div
+              className={`mt-8 space-y-3 text-sm ${
+                isHome ? 'text-white/72' : 'text-[var(--site-text-soft)]'
+              }`}
+            >
               <a
                 href="mailto:info@areaimmobiliare.com"
-                className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition hover:bg-white/10"
+                className={`block rounded-2xl px-4 py-3 transition ${
+                  isHome
+                    ? 'border border-white/10 bg-white/5 hover:bg-white/10'
+                    : 'theme-pill border'
+                }`}
               >
                 info@areaimmobiliare.com
               </a>
 
               <a
                 href="tel:035221206"
-                className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition hover:bg-white/10"
+                className={`block rounded-2xl px-4 py-3 transition ${
+                  isHome
+                    ? 'border border-white/10 bg-white/5 hover:bg-white/10'
+                    : 'theme-pill border'
+                }`}
               >
                 035 221206
               </a>
 
               <Link
                 href="/privacy"
-                className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition hover:bg-white/10"
+                className={`block rounded-2xl px-4 py-3 transition ${
+                  isHome
+                    ? 'border border-white/10 bg-white/5 hover:bg-white/10'
+                    : 'theme-pill border'
+                }`}
               >
                 Privacy Policy
               </Link>
 
               <Link
                 href="/cookie"
-                className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition hover:bg-white/10"
+                className={`block rounded-2xl px-4 py-3 transition ${
+                  isHome
+                    ? 'border border-white/10 bg-white/5 hover:bg-white/10'
+                    : 'theme-pill border'
+                }`}
               >
                 Cookie Policy
               </Link>
