@@ -110,7 +110,7 @@ export default function HomeHero() {
               Bergamo, case e scelte immobiliari lette con esperienza vera.
             </h1>
 
-            <p className="mt-7 max-w-[760px] text-base leading-8 text-white/84 md:text-lg xl:text-[1.15rem] [text-shadow:0_1px_2px_rgba(0,0,0,0.45)]">
+            <p className="mt-7 max-w-[760px] text-base leading-8 text-white/88 [text-shadow:0_2px_4px_rgba(0,0,0,0.6)] md:text-lg xl:text-[1.15rem]">
               Un approccio più chiaro, più solido e più umano alla compravendita e
               alla locazione. Analisi, verifica e conoscenza del territorio per
               trovare la soluzione giusta senza rumore inutile.
