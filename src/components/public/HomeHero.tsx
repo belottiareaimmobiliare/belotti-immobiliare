@@ -39,7 +39,7 @@ export default function HomeHero() {
 
   const textStyle = useMemo(() => {
     const progress = Math.min(scrollY / 760, 1)
-    const translateY = progress * -74
+    const translateY = progress * -82
     const opacity = 1 - progress * 0.92
 
     return {
@@ -50,7 +50,7 @@ export default function HomeHero() {
 
   const statsStyle = useMemo(() => {
     const progress = Math.min(scrollY / 1450, 1)
-    const translateY = progress * -54
+    const translateY = progress * -62
     const fade = Math.max((progress - 0.88) / 0.12, 0)
     const opacity = 1 - fade
 
@@ -62,8 +62,8 @@ export default function HomeHero() {
 
   const visualStyle = useMemo(() => {
     const progress = Math.min(scrollY / 1500, 1)
-    const translateY = progress * 64
-    const scale = 1 - progress * 0.085
+    const translateY = progress * -68
+    const scale = 1 - progress * 0.035
     const fade = Math.max((progress - 0.86) / 0.14, 0)
     const opacity = 1 - fade
 
