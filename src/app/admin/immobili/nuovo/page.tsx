@@ -24,6 +24,53 @@ function generateSlug(title: string) {
     .replace(/\s+/g, '-')
 }
 
+function normalizeOptionalField(value: string) {
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  if (trimmed === '-') return '-'
+  return trimmed
+}
+
+type FeatureToggleProps = {
+  label: string
+  checked: boolean
+  onClick: () => void
+  fullWidth?: boolean
+}
+
+function FeatureToggle({
+  label,
+  checked,
+  onClick,
+  fullWidth = false,
+}: FeatureToggleProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex items-center justify-between gap-4 rounded-2xl border px-4 py-3 text-left text-sm transition ${
+        checked
+          ? 'border-emerald-400/30 bg-emerald-500/18 text-white'
+          : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
+      } ${fullWidth ? 'md:col-span-2' : ''}`}
+    >
+      <span>{label}</span>
+
+      <span
+        className={`relative inline-flex h-7 w-12 shrink-0 rounded-full transition ${
+          checked ? 'bg-emerald-400' : 'bg-white/18'
+        }`}
+      >
+        <span
+          className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition ${
+            checked ? 'left-6' : 'left-1'
+          }`}
+        />
+      </span>
+    </button>
+  )
+}
+
 export default function NewPropertyPage() {
   const supabase = createClient()
   const router = useRouter()
@@ -78,18 +125,7 @@ export default function NewPropertyPage() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, type } = e.target
-
-    if (type === 'checkbox') {
-      const target = e.target as HTMLInputElement
-      setForm((prev) => ({
-        ...prev,
-        [name]: target.checked,
-      }))
-      return
-    }
-
-    const value = e.target.value
+    const { name, value } = e.target
 
     if (name === 'province') {
       setForm((prev) => ({
@@ -104,6 +140,15 @@ export default function NewPropertyPage() {
     setForm((prev) => ({
       ...prev,
       [name]: value,
+    }))
+  }
+
+  const toggleBooleanField = (
+    name: 'has_garage' | 'has_parking' | 'has_garden' | 'has_elevator' | 'is_auction'
+  ) => {
+    setForm((prev) => ({
+      ...prev,
+      [name]: !prev[name],
     }))
   }
 
@@ -177,9 +222,9 @@ export default function NewPropertyPage() {
         condo_fees: form.condo_fees || null,
         heating_type: form.heating_type || null,
         furnished_status: form.furnished_status || null,
-        deposit_amount: form.deposit_amount || null,
-        advance_amount: form.advance_amount || null,
-        advance_deposit_amount: form.advance_deposit_amount || null,
+        deposit_amount: normalizeOptionalField(form.deposit_amount),
+        advance_amount: normalizeOptionalField(form.advance_amount),
+        advance_deposit_amount: normalizeOptionalField(form.advance_deposit_amount),
       })
       .select('id')
       .single()
@@ -204,9 +249,7 @@ export default function NewPropertyPage() {
         Nuovo immobile
       </p>
 
-      <h2 className="mt-2 text-3xl font-semibold text-white">
-        Crea immobile
-      </h2>
+      <h2 className="mt-2 text-3xl font-semibold text-white">Crea immobile</h2>
 
       <p className="mt-3 text-white/60">
         Inserisci i dati principali dell’immobile.
@@ -507,6 +550,16 @@ export default function NewPropertyPage() {
             </div>
           </div>
 
+          <div className="rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-4 text-sm text-amber-100">
+            Per <strong>cauzione</strong>, <strong>anticipo</strong> e <strong>anticipo + cauzione</strong> puoi inserire:
+            <div className="mt-2 space-y-1 text-amber-100/90">
+              <div>• <strong>da definire</strong></div>
+              <div>• una cifra in euro</div>
+              <div>• un testo come “2 mensilità”</div>
+              <div>• <strong>-</strong> se non vuoi mostrarlo nella scheda immobile</div>
+            </div>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-3">
             <div>
               <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/40">
@@ -514,7 +567,7 @@ export default function NewPropertyPage() {
               </label>
               <input
                 name="deposit_amount"
-                placeholder="Es. 2 mensilità"
+                placeholder="Es. 2 mensilità / da definire / -"
                 value={form.deposit_amount}
                 onChange={handleChange}
                 className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
@@ -527,7 +580,7 @@ export default function NewPropertyPage() {
               </label>
               <input
                 name="advance_amount"
-                placeholder="Es. 1 mensilità"
+                placeholder="Es. 1 mensilità / da definire / -"
                 value={form.advance_amount}
                 onChange={handleChange}
                 className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
@@ -540,7 +593,7 @@ export default function NewPropertyPage() {
               </label>
               <input
                 name="advance_deposit_amount"
-                placeholder="Es. 3 mensilità"
+                placeholder="Es. 3 mensilità / da definire / -"
                 value={form.advance_deposit_amount}
                 onChange={handleChange}
                 className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
@@ -563,60 +616,32 @@ export default function NewPropertyPage() {
             </p>
 
             <div className="grid gap-3 md:grid-cols-2">
-              <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80">
-                <input
-                  type="checkbox"
-                  name="has_garage"
-                  checked={form.has_garage}
-                  onChange={handleChange}
-                  className="h-4 w-4 accent-white"
-                />
-                Box / Garage
-              </label>
-
-              <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80">
-                <input
-                  type="checkbox"
-                  name="has_parking"
-                  checked={form.has_parking}
-                  onChange={handleChange}
-                  className="h-4 w-4 accent-white"
-                />
-                Posto auto
-              </label>
-
-              <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80">
-                <input
-                  type="checkbox"
-                  name="has_garden"
-                  checked={form.has_garden}
-                  onChange={handleChange}
-                  className="h-4 w-4 accent-white"
-                />
-                Giardino
-              </label>
-
-              <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80">
-                <input
-                  type="checkbox"
-                  name="has_elevator"
-                  checked={form.has_elevator}
-                  onChange={handleChange}
-                  className="h-4 w-4 accent-white"
-                />
-                Ascensore
-              </label>
-
-              <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 md:col-span-2">
-                <input
-                  type="checkbox"
-                  name="is_auction"
-                  checked={form.is_auction}
-                  onChange={handleChange}
-                  className="h-4 w-4 accent-white"
-                />
-                Immobile all’asta
-              </label>
+              <FeatureToggle
+                label="Box / Garage"
+                checked={form.has_garage}
+                onClick={() => toggleBooleanField('has_garage')}
+              />
+              <FeatureToggle
+                label="Posto auto"
+                checked={form.has_parking}
+                onClick={() => toggleBooleanField('has_parking')}
+              />
+              <FeatureToggle
+                label="Giardino"
+                checked={form.has_garden}
+                onClick={() => toggleBooleanField('has_garden')}
+              />
+              <FeatureToggle
+                label="Ascensore"
+                checked={form.has_elevator}
+                onClick={() => toggleBooleanField('has_elevator')}
+              />
+              <FeatureToggle
+                label="Immobile all’asta"
+                checked={form.is_auction}
+                onClick={() => toggleBooleanField('is_auction')}
+                fullWidth
+              />
             </div>
           </div>
         </div>

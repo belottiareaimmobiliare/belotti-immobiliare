@@ -38,9 +38,20 @@ export default function HomeHero() {
   }, [])
 
   const textStyle = useMemo(() => {
-    const progress = Math.min(scrollY / 500, 1)
-    const translateY = progress * -90
-    const opacity = 1 - progress * 1.05
+    const progress = Math.min(scrollY / 700, 1)
+    const translateY = progress * -70
+    const opacity = 1 - progress * 0.9
+
+    return {
+      transform: `translate3d(0, ${translateY}px, 0)`,
+      opacity: Math.max(opacity, 0),
+    }
+  }, [scrollY])
+
+  const statsStyle = useMemo(() => {
+    const progress = Math.min(scrollY / 1050, 1)
+    const translateY = progress * -38
+    const opacity = 1 - progress * 0.32
 
     return {
       transform: `translate3d(0, ${translateY}px, 0)`,
@@ -89,56 +100,61 @@ export default function HomeHero() {
       </div>
 
       <div className="relative grid min-h-[92vh] w-full items-center gap-12 px-6 py-12 xl:grid-cols-[1.15fr_0.85fr] xl:px-10 2xl:px-14">
-        <div
-          style={textStyle}
-          className="max-w-[920px] transition-[opacity,transform] duration-150"
-        >
-          <p className="text-sm font-semibold uppercase tracking-[0.34em] text-white/90 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
-            Area Immobiliare dal 1980
-          </p>
+        <div className="max-w-[920px]">
+          <div
+            style={textStyle}
+            className="transition-[opacity,transform] duration-150"
+          >
+            <p className="text-sm font-semibold uppercase tracking-[0.34em] text-white/90 [text-shadow:0_1px_2px_rgba(0,0,0,0.72)]">
+              Area Immobiliare dal 1980
+            </p>
 
-          <h1 className="mt-6 max-w-[900px] text-5xl font-semibold leading-[0.98] text-white md:text-7xl xl:text-[5.5rem]">
-            Bergamo, case e scelte immobiliari lette con esperienza vera.
-          </h1>
+            <h1 className="mt-6 max-w-[900px] text-5xl font-semibold leading-[0.98] text-white md:text-7xl xl:text-[5.5rem]">
+              Bergamo, case e scelte immobiliari lette con esperienza vera.
+            </h1>
 
-          <p className="mt-7 max-w-[760px] text-base leading-8 text-white/84 md:text-lg xl:text-[1.15rem]">
-            Un approccio più chiaro, più solido e più umano alla compravendita e
-            alla locazione. Analisi, verifica e conoscenza del territorio per
-            trovare la soluzione giusta senza rumore inutile.
-          </p>
+            <p className="mt-7 max-w-[760px] text-base leading-8 text-white/84 md:text-lg xl:text-[1.15rem]">
+              Un approccio più chiaro, più solido e più umano alla compravendita e
+              alla locazione. Analisi, verifica e conoscenza del territorio per
+              trovare la soluzione giusta senza rumore inutile.
+            </p>
 
-          <div className="mt-8 hidden flex-wrap gap-3 md:flex">
-            <Link
-              href="/immobili"
-              className="rounded-2xl bg-white px-6 py-3.5 text-sm font-semibold text-black transition hover:opacity-90"
-            >
-              Esplora gli immobili
-            </Link>
+            <div className="mt-8 hidden flex-wrap gap-3 md:flex">
+              <Link
+                href="/immobili"
+                className="rounded-2xl bg-white px-6 py-3.5 text-sm font-semibold text-black transition hover:opacity-90"
+              >
+                Esplora gli immobili
+              </Link>
 
-            <Link
-              href="/immobili/mappa-area"
-              className="rounded-2xl border border-white/20 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/16"
-            >
-              Disegna la tua area
-            </Link>
+              <Link
+                href="/immobili/mappa-area"
+                className="rounded-2xl border border-white/20 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/16"
+              >
+                Disegna la tua area
+              </Link>
 
-            <Link
-              href="/chi-siamo"
-              className="rounded-2xl border border-white/18 bg-transparent px-6 py-3.5 text-sm font-semibold text-white/90 transition hover:bg-white/8 hover:text-white"
-            >
-              Scopri Area Immobiliare
-            </Link>
+              <Link
+                href="/chi-siamo"
+                className="rounded-2xl border border-white/18 bg-transparent px-6 py-3.5 text-sm font-semibold text-white/90 transition hover:bg-white/8 hover:text-white"
+              >
+                Scopri Area Immobiliare
+              </Link>
+            </div>
           </div>
 
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            <div className="rounded-[24px] border border-white/18 bg-white/[0.10] px-5 py-5 backdrop-blur-md">
+          <div
+            style={statsStyle}
+            className="mt-10 grid gap-4 md:grid-cols-3 transition-[opacity,transform] duration-150"
+          >
+            <div className="rounded-[24px] border border-white/18 bg-white/[0.10] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.14)] backdrop-blur-md">
               <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/82 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
                 Storia
               </p>
               <p className="mt-2 text-2xl font-semibold text-white">Dal 1980</p>
             </div>
 
-            <div className="rounded-[24px] border border-white/18 bg-white/[0.10] px-5 py-5 backdrop-blur-md">
+            <div className="rounded-[24px] border border-white/18 bg-white/[0.10] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.14)] backdrop-blur-md">
               <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/82 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
                 Territorio
               </p>
@@ -147,7 +163,7 @@ export default function HomeHero() {
               </p>
             </div>
 
-            <div className="rounded-[24px] border border-white/18 bg-white/[0.10] px-5 py-5 backdrop-blur-md">
+            <div className="rounded-[24px] border border-white/18 bg-white/[0.10] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.14)] backdrop-blur-md">
               <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/82 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
                 Metodo
               </p>
