@@ -38,9 +38,9 @@ export default function HomeHero() {
   }, [])
 
   const textStyle = useMemo(() => {
-    const progress = Math.min(scrollY / 700, 1)
-    const translateY = progress * -70
-    const opacity = 1 - progress * 0.9
+    const progress = Math.min(scrollY / 760, 1)
+    const translateY = progress * -74
+    const opacity = 1 - progress * 0.92
 
     return {
       transform: `translate3d(0, ${translateY}px, 0)`,
@@ -49,22 +49,27 @@ export default function HomeHero() {
   }, [scrollY])
 
   const statsStyle = useMemo(() => {
-    const progress = Math.min(scrollY / 1200, 1)
-    const translateY = progress * -42
+    const progress = Math.min(scrollY / 1450, 1)
+    const translateY = progress * -54
+    const fade = Math.max((progress - 0.88) / 0.12, 0)
+    const opacity = 1 - fade
 
     return {
       transform: `translate3d(0, ${translateY}px, 0)`,
-      opacity: 1,
+      opacity: Math.max(opacity, 0),
     }
   }, [scrollY])
 
   const visualStyle = useMemo(() => {
-    const progress = Math.min(scrollY / 700, 1)
-    const translateY = progress * 60
-    const scale = 1 - progress * 0.08
+    const progress = Math.min(scrollY / 1500, 1)
+    const translateY = progress * 64
+    const scale = 1 - progress * 0.085
+    const fade = Math.max((progress - 0.86) / 0.14, 0)
+    const opacity = 1 - fade
 
     return {
       transform: `translate3d(0, ${translateY}px, 0) scale(${scale})`,
+      opacity: Math.max(opacity, 0),
     }
   }, [scrollY])
 
@@ -83,7 +88,9 @@ export default function HomeHero() {
 
           <div
             className={`absolute inset-0 bg-cover bg-center ${
-              isAnimating ? 'animate-hero-slide-in-right' : 'translate-x-0 opacity-100'
+              isAnimating
+                ? 'animate-hero-slide-in-right'
+                : 'translate-x-0 opacity-100'
             }`}
             style={{ backgroundImage: `url('${slides[current]}')` }}
           />
@@ -142,7 +149,7 @@ export default function HomeHero() {
 
           <div
             style={statsStyle}
-            className="mt-10 grid gap-4 md:grid-cols-3 transition-transform duration-150"
+            className="mt-10 grid gap-4 md:grid-cols-3 transition-[opacity,transform] duration-150"
           >
             <div className="rounded-[24px] border border-white/20 bg-white/[0.13] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.16)] backdrop-blur-md">
               <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/86 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
@@ -173,7 +180,7 @@ export default function HomeHero() {
 
         <div
           style={visualStyle}
-          className="hidden xl:flex xl:justify-end xl:self-end"
+          className="hidden xl:flex xl:justify-end xl:self-end transition-[opacity,transform] duration-150"
         >
           <div className="relative w-full max-w-[540px]">
             <div className="absolute -left-8 top-10 h-32 w-32 rounded-full bg-white/18 blur-3xl" />
@@ -181,11 +188,12 @@ export default function HomeHero() {
 
             <div className="relative overflow-hidden rounded-[34px] border border-white/20 bg-white/[0.08] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.26)] backdrop-blur-md">
               <div className="absolute inset-0 bg-white/[0.06]" />
+
               <div className="relative grid gap-4">
                 <div className="overflow-hidden rounded-[26px] border border-white/18">
                   <div
                     className="h-[240px] w-full bg-cover bg-center"
-                    style={{ backgroundImage: "url('/images/bergamo-2.jpg')" }}
+                    style={{ backgroundImage: "url('/images/bergamo-map.jpg')" }}
                   />
                 </div>
 
@@ -207,8 +215,11 @@ export default function HomeHero() {
                     href="/immobili/mappa-area"
                     className="group relative overflow-hidden rounded-[24px] border border-white/18"
                   >
-                    <div className="absolute inset-0 bg-[url('/images/map-card-bg.jpg')] bg-cover bg-center opacity-100" />
-                    <div className="absolute inset-0 bg-white/68 backdrop-blur-[4px]" />
+                    <div
+                      className="absolute inset-0 bg-cover bg-center opacity-100"
+                      style={{ backgroundImage: "url('/images/bergamo-map.jpg')" }}
+                    />
+                    <div className="absolute inset-0 bg-white/72 backdrop-blur-[4px]" />
                     <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.34)_0%,rgba(255,255,255,0.14)_100%)]" />
 
                     <div className="relative flex h-full flex-col justify-between p-4">
