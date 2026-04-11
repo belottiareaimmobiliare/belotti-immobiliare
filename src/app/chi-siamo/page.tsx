@@ -1,105 +1,215 @@
-'use client'
-
+import Footer from '@/components/public/Footer'
+import FooterReveal from '@/components/public/FooterReveal'
+import Image from 'next/image'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
-import { useEffect, useState } from 'react'
+import SiteHeader from '@/components/public/SiteHeader'
 
-type MapProperty = {
-  id: string
-  slug: string | null
-  title: string | null
-  comune: string | null
-  province: string | null
-  price: number | null
-  latitude: number | null
-  longitude: number | null
-  location_mode?: string | null
-  coverImage?: string | null
-}
-
-const AreaDrawMap = dynamic(() => import('@/components/public/AreaDrawMap'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full items-center justify-center bg-[#0a0f1a] text-white/55">
-      Caricamento mappa...
-    </div>
-  ),
-})
-
-const PropertiesMap = dynamic(() => import('@/components/public/PropertiesMap'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full items-center justify-center bg-[#0a0f1a] text-white/55">
-      Caricamento mappa...
-    </div>
-  ),
-})
-
-type Props = {
-  properties: MapProperty[]
-  hasError?: boolean
-}
-
-export default function FullscreenAreaMapPage({
-  properties,
-  hasError = false,
-}: Props) {
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
-    check()
-    window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
-  }, [])
-
+export default function ChiSiamoPage() {
   return (
-    <main className="fixed inset-0 z-[90] h-screen w-screen overflow-hidden bg-[#0a0f1a] text-white">
-      <div className="flex h-full flex-col">
-        <div className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-b border-white/10 bg-[#08111f] px-4 py-4 md:px-5">
-          <div className="flex flex-col gap-2">
-            <p className="text-xs uppercase tracking-[0.26em] text-white/40">
-              Mappa risultati
-            </p>
-            <h1 className="text-xl font-semibold md:text-2xl">
-              {isMobile ? 'Vista mappa immobili' : 'Esplora la zona sulla mappa'}
-            </h1>
+    <main className="min-h-screen bg-[var(--site-bg)] text-[var(--site-text)] transition-colors duration-300">
+      <SiteHeader />
+
+      <section className="border-b border-[var(--site-border)] bg-[var(--site-bg-soft)] transition-colors duration-300">
+        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-center">
+          <div className="flex items-center justify-center lg:justify-start">
+            <div className="relative h-[270px] w-[270px] overflow-hidden rounded-full border-2 border-[var(--site-border-strong)] bg-[var(--site-surface)] shadow-[var(--site-card-shadow)]">
+              <Image
+                src="/images/gianfederico-belotti.jpg"
+                alt="Gianfederico Belotti"
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              href="/immobili"
-              className="rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
-            >
-              Torna agli immobili
-            </Link>
+          <div>
+            <p className="text-sm uppercase tracking-[0.3em] text-[var(--site-text-faint)]">
+              Chi siamo
+            </p>
+
+            <h1 className="mt-4 text-4xl font-semibold leading-tight md:text-5xl text-[var(--site-text)]">
+              Gianfederico Belotti,
+              <br />
+              una storia immobiliare costruita su esperienza e trasparenza
+            </h1>
+
+            <p className="mt-6 max-w-3xl text-base leading-8 text-[var(--site-text-muted)] md:text-lg">
+              Area Immobiliare affianca da decenni chi desidera acquistare,
+              vendere o locare un immobile con un metodo fondato su conoscenza
+              del territorio, valutazione corretta e attenzione concreta alla
+              qualità dell’operazione.
+            </p>
           </div>
         </div>
+      </section>
 
-        {!isMobile && (
-          <div className="shrink-0 border-b border-sky-400/20 bg-sky-500/10 px-5 py-3 text-sm text-sky-100">
-            Muoviti sulla mappa con trascinamento e zoom. Poi attiva il disegno e crea la tua area cliccando sulla mappa.
-          </div>
-        )}
+      <section className="mx-auto max-w-7xl px-6 py-16">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="space-y-8">
+            <div className="theme-panel rounded-[30px] border p-8">
+              <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+                Una presenza storica a Bergamo
+              </h2>
 
-        {hasError ? (
-          <div className="flex flex-1 items-center justify-center px-6 text-center text-red-300">
-            Errore nel caricamento della mappa.
+              <div className="mt-5 space-y-5 text-[var(--site-text-muted)]">
+                <p className="leading-8">
+                  Il mercato immobiliare è un ambito complesso, fatto di
+                  opportunità ma anche di aspetti tecnici, economici e
+                  documentali che richiedono esperienza. Area Immobiliare nasce
+                  con l’idea di accompagnare il cliente con sobrietà, metodo e
+                  visione concreta.
+                </p>
+
+                <p className="leading-8">
+                  Dal 1980, l’agenzia opera a Bergamo aiutando famiglie, privati
+                  e investitori nella scelta di abitazioni, uffici, negozi e
+                  altre soluzioni immobiliari, con attenzione alla reale
+                  commerciabilità dell’immobile e alla sostenibilità
+                  dell’operazione.
+                </p>
+
+                <p className="leading-8">
+                  Gianfederico Belotti ha costruito negli anni una realtà
+                  riconosciuta per la conoscenza del territorio, per la
+                  sensibilità nel leggere il mercato e per l’attenzione al
+                  valore corretto degli immobili.
+                </p>
+              </div>
+            </div>
+
+            <div className="theme-panel rounded-[30px] border p-8">
+              <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+                Un metodo fondato su valutazione, verifica e tutela
+              </h2>
+
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5">
+                  <h3 className="text-lg font-medium text-[var(--site-text)]">
+                    Valutazione corretta
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-[var(--site-text-muted)]">
+                    Ogni immobile viene letto con attenzione per comprenderne il
+                    valore reale e il suo posizionamento di mercato.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5">
+                  <h3 className="text-lg font-medium text-[var(--site-text)]">
+                    Controlli documentali
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-[var(--site-text-muted)]">
+                    Provenienze, conformità, libertà da criticità e aspetti
+                    essenziali vengono verificati con metodo.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5">
+                  <h3 className="text-lg font-medium text-[var(--site-text)]">
+                    Conoscenza del territorio
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-[var(--site-text-muted)]">
+                    Bergamo, Città Alta, Città Bassa, Colli e hinterland vengono
+                    interpretati con esperienza maturata sul campo.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5">
+                  <h3 className="text-lg font-medium text-[var(--site-text)]">
+                    Rete di professionisti
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-[var(--site-text-muted)]">
+                    Quando serve, il cliente può contare anche su notai, tecnici,
+                    istituti di credito e partner selezionati.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="theme-panel rounded-[30px] border p-8">
+              <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+                La cultura del prezzo giusto
+              </h2>
+
+              <div className="mt-5 space-y-5 text-[var(--site-text-muted)]">
+                <p className="leading-8">
+                  Uno degli aspetti distintivi dell’approccio di Gianfederico
+                  Belotti è l’attenzione alla trasparenza del mercato. La
+                  valutazione dell’immobile non è solo una cifra: è un lavoro di
+                  equilibrio tra desiderio, realtà e prospettiva futura.
+                </p>
+
+                <p className="leading-8">
+                  Questo approccio ha contribuito a costruire un profilo
+                  professionale autorevole, orientato a tutelare chi compra, chi
+                  vende e chi cerca una soluzione in affitto con maggiore
+                  consapevolezza.
+                </p>
+              </div>
+            </div>
+
+            <div className="theme-panel rounded-[30px] border p-8">
+              <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+                Uno stile di lavoro sobrio e concreto
+              </h2>
+
+              <p className="mt-5 leading-8 text-[var(--site-text-muted)]">
+                Area Immobiliare si rivolge a chi cerca non soltanto un immobile,
+                ma un interlocutore affidabile. L’obiettivo è accompagnare il
+                cliente in un percorso serio, ordinato e ben seguito, senza
+                eccessi comunicativi ma con attenzione reale alla qualità della
+                scelta.
+              </p>
+            </div>
           </div>
-        ) : (
-          <div className="min-h-0 flex-1">
-            {isMobile ? (
-              <PropertiesMap
-                properties={properties}
-                enableDrawing={false}
-                heightClassName="h-full"
-              />
-            ) : (
-              <AreaDrawMap properties={properties} />
-            )}
-          </div>
-        )}
-      </div>
+
+          <aside className="space-y-6 lg:sticky lg:top-24 lg:h-fit">
+            <div className="theme-panel rounded-[30px] border p-7">
+              <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
+                Riferimenti
+              </p>
+
+              <div className="mt-5 space-y-4 text-sm text-[var(--site-text-soft)]">
+                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                    Sede
+                  </p>
+                  <p className="mt-2 leading-6">
+                    Via A. Locatelli 62
+                    <br />
+                    24121 Bergamo
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                    Telefono
+                  </p>
+                  <p className="mt-2">035 221206</p>
+                </div>
+
+                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                    Email
+                  </p>
+                  <p className="mt-2 break-all">info@areaimmobiliare.com</p>
+                </div>
+              </div>
+
+              <Link
+                href="/contatti"
+                className="theme-button-primary mt-6 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95"
+              >
+                Contattaci
+              </Link>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <FooterReveal>
+        <Footer />
+      </FooterReveal>
     </main>
   )
 }
