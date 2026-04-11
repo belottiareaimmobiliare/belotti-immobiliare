@@ -44,7 +44,7 @@ function segment(progress: number, start: number, end: number) {
 }
 
 function SearchBoxFallback() {
-  return <div className="p-6 text-white/55">Caricamento ricerca...</div>
+  return <div className="p-6 text-[var(--site-text-muted)]">Caricamento ricerca...</div>
 }
 
 export default function HomeScrollExperience() {
@@ -135,8 +135,21 @@ export default function HomeScrollExperience() {
 
   if (isMobile) {
     return (
-      <section className="bg-[linear-gradient(180deg,#f4efe5_0%,#efe8da_45%,#e7dece_72%,#010409_100%)] px-4 py-5">
-        <div className="rounded-[30px] border border-white/30 bg-white/[0.20] shadow-[0_28px_90px_rgba(0,0,0,0.14)] backdrop-blur-xl">
+      <section
+        className="px-4 py-5"
+        style={{
+          background:
+            'linear-gradient(180deg, var(--site-bg) 0%, var(--site-bg-soft) 35%, var(--site-bg) 100%)',
+        }}
+      >
+        <div
+          className="rounded-[30px] border backdrop-blur-xl"
+          style={{
+            background: 'var(--site-surface-2)',
+            borderColor: 'var(--site-border)',
+            boxShadow: 'var(--site-card-shadow)',
+          }}
+        >
           <Suspense fallback={<SearchBoxFallback />}>
             <HomeSearchBoxMobile />
           </Suspense>
@@ -146,17 +159,22 @@ export default function HomeScrollExperience() {
           {panels.map((panel) => (
             <article
               key={panel.title}
-              className="rounded-[24px] border border-white/30 bg-white/[0.20] px-5 py-6 shadow-[0_18px_40px_rgba(0,0,0,0.10)] backdrop-blur-xl"
+              className="rounded-[24px] border px-5 py-6 backdrop-blur-xl"
+              style={{
+                background: 'var(--site-surface-2)',
+                borderColor: 'var(--site-border)',
+                boxShadow: 'var(--site-card-shadow)',
+              }}
             >
-              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-black/55">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-[var(--site-text-faint)]">
                 {panel.eyebrow}
               </p>
 
-              <h3 className="mt-4 text-[2rem] font-semibold leading-tight text-[#1f1a16]">
+              <h3 className="mt-4 text-[2rem] font-semibold leading-tight text-[var(--site-text)]">
                 {panel.title}
               </h3>
 
-              <p className="mt-4 text-sm leading-7 text-black/65">
+              <p className="mt-4 text-sm leading-7 text-[var(--site-text-muted)]">
                 {panel.text}
               </p>
             </article>
@@ -173,7 +191,11 @@ export default function HomeScrollExperience() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-[430vh] bg-[linear-gradient(180deg,#f4efe5_0%,#efe8da_30%,#e8e0d0_58%,#010409_100%)]"
+      className="relative h-[430vh]"
+      style={{
+        background:
+          'linear-gradient(180deg, var(--site-bg) 0%, var(--site-bg-soft) 26%, var(--site-bg) 58%, #010409 100%)',
+      }}
     >
       <div className="sticky top-[78px] h-[calc(100vh-78px)] overflow-hidden">
         <div className="absolute inset-0 px-6 py-6 xl:px-10 2xl:px-14">
@@ -185,7 +207,14 @@ export default function HomeScrollExperience() {
             }}
             className="relative z-30 transition-[opacity,transform] duration-200"
           >
-            <div className="overflow-hidden rounded-[36px] border border-white/30 bg-white/[0.16] shadow-[0_28px_90px_rgba(0,0,0,0.18)] backdrop-blur-xl">
+            <div
+              className="overflow-hidden rounded-[36px] border backdrop-blur-xl"
+              style={{
+                background: 'var(--site-surface-2)',
+                borderColor: 'var(--site-border)',
+                boxShadow: 'var(--site-card-shadow)',
+              }}
+            >
               <Suspense fallback={<SearchBoxFallback />}>
                 <div className="hidden md:block">
                   <HomeSearchBoxDesktop />
@@ -209,18 +238,23 @@ export default function HomeScrollExperience() {
               {panels.map((panel, index) => (
                 <article
                   key={panel.title}
-                  style={panelStyles[index]}
-                  className={`${panel.className} rounded-[28px] border border-white/30 bg-white/[0.20] px-7 py-8 shadow-[0_20px_50px_rgba(0,0,0,0.10)] backdrop-blur-xl transition-[transform] duration-200 md:px-8 md:py-9`}
+                  style={{
+                    ...panelStyles[index],
+                    background: 'var(--site-surface-2)',
+                    borderColor: 'var(--site-border)',
+                    boxShadow: 'var(--site-card-shadow)',
+                  }}
+                  className={`${panel.className} rounded-[28px] border px-7 py-8 backdrop-blur-xl transition-[transform] duration-200 md:px-8 md:py-9`}
                 >
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-black/55">
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-[var(--site-text-faint)]">
                     {panel.eyebrow}
                   </p>
 
-                  <h3 className="mt-5 max-w-[980px] text-[2rem] font-semibold leading-tight text-[#1f1a16] xl:text-[2.45rem]">
+                  <h3 className="mt-5 max-w-[980px] text-[2rem] font-semibold leading-tight text-[var(--site-text)] xl:text-[2.45rem]">
                     {panel.title}
                   </h3>
 
-                  <p className="mt-5 max-w-[980px] text-base leading-8 text-black/65">
+                  <p className="mt-5 max-w-[980px] text-base leading-8 text-[var(--site-text-muted)]">
                     {panel.text}
                   </p>
                 </article>

@@ -31,8 +31,6 @@ export default function HomeSearchBoxDesktop() {
     []
   )
 
-  const isLight = typeof document !== 'undefined' && document.documentElement.dataset.theme === 'light'
-
   const goToSearch = () => {
     const params = new URLSearchParams()
 
@@ -62,7 +60,14 @@ export default function HomeSearchBoxDesktop() {
   }
 
   return (
-    <section className="rounded-[34px] border border-[var(--site-border)] bg-transparent p-6">
+    <section
+      className="rounded-[34px] border p-6 backdrop-blur-xl"
+      style={{
+        background: 'var(--site-surface-2)',
+        borderColor: 'var(--site-border)',
+        boxShadow: 'var(--site-card-shadow)',
+      }}
+    >
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.28em] text-[var(--site-text-faint)]">
@@ -79,7 +84,7 @@ export default function HomeSearchBoxDesktop() {
         <button
           type="button"
           onClick={goToAdvancedSearch}
-          className="rounded-full border border-[var(--site-border)] bg-[var(--site-surface-2)] px-5 py-3 text-sm text-[var(--site-text-soft)] transition hover:bg-[var(--site-surface-3)]"
+          className="theme-button-secondary rounded-full px-5 py-3 text-sm transition"
         >
           Vai alla ricerca avanzata
         </button>
@@ -90,9 +95,7 @@ export default function HomeSearchBoxDesktop() {
           type="button"
           onClick={() => setContractType('sale')}
           className={`rounded-[18px] px-6 py-3 text-base font-medium transition ${
-            contractType === 'sale'
-              ? 'bg-[var(--site-text)] text-[var(--site-bg)]'
-              : 'border border-[var(--site-border)] bg-[var(--site-surface-strong)] text-[var(--site-text-soft)] hover:bg-[var(--site-surface-3)]'
+            contractType === 'sale' ? 'theme-pill-active' : 'theme-pill'
           }`}
         >
           Cerca in Vendita
@@ -102,9 +105,7 @@ export default function HomeSearchBoxDesktop() {
           type="button"
           onClick={() => setContractType('rent')}
           className={`rounded-[18px] px-6 py-3 text-base font-medium transition ${
-            contractType === 'rent'
-              ? 'bg-[var(--site-text)] text-[var(--site-bg)]'
-              : 'border border-[var(--site-border)] bg-[var(--site-surface-strong)] text-[var(--site-text-soft)] hover:bg-[var(--site-surface-3)]'
+            contractType === 'rent' ? 'theme-pill-active' : 'theme-pill'
           }`}
         >
           Cerca in Affitto
@@ -113,7 +114,7 @@ export default function HomeSearchBoxDesktop() {
         <button
           type="button"
           onClick={() => router.push('/immobili?mapMode=zones')}
-          className="rounded-[18px] border border-[var(--site-border)] bg-[var(--site-surface-2)] px-6 py-3 text-base font-medium text-[var(--site-text-soft)] transition hover:bg-[var(--site-surface-3)]"
+          className="theme-button-secondary rounded-[18px] px-6 py-3 text-base font-medium transition"
         >
           Seleziona zone
         </button>
@@ -121,11 +122,12 @@ export default function HomeSearchBoxDesktop() {
         <button
           type="button"
           onClick={() => router.push('/immobili/mappa-area')}
-          className="group relative hidden min-w-[220px] shrink-0 overflow-hidden rounded-[18px] border border-[var(--site-border)] shadow-[0_12px_28px_rgba(0,0,0,0.10)] transition hover:scale-[1.02] md:inline-flex"
+          className="group relative hidden min-w-[220px] shrink-0 overflow-hidden rounded-[18px] border shadow-[0_12px_28px_rgba(0,0,0,0.12)] transition hover:scale-[1.02] md:inline-flex"
+          style={{ borderColor: 'var(--site-border)' }}
         >
           <div className="absolute inset-0 bg-[url('/images/map-card-bg.jpg')] bg-cover bg-center opacity-100" />
-          <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.45)_0%,rgba(255,255,255,0.18)_100%)]" />
+          <div className="absolute inset-0 bg-white/45 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.34)_0%,rgba(255,255,255,0.16)_100%)]" />
 
           <div className="relative flex w-full items-center justify-between gap-4 px-5 py-3">
             <div>
@@ -153,7 +155,7 @@ export default function HomeSearchBoxDesktop() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Titolo, zona, keyword..."
-            className="w-full rounded-[18px] border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-5 py-3.5 text-base text-[var(--site-text)] placeholder:text-[var(--site-text-faint)]"
+            className="theme-input w-full rounded-[18px] px-5 py-3.5 text-base outline-none"
           />
         </div>
 
@@ -164,7 +166,7 @@ export default function HomeSearchBoxDesktop() {
           <select
             value={propertyType}
             onChange={(e) => setPropertyType(e.target.value)}
-            className="w-full rounded-[18px] border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-5 py-3.5 text-base text-[var(--site-text)] outline-none"
+            className="theme-input w-full rounded-[18px] px-5 py-3.5 text-base outline-none"
           >
             <option value="">Qualsiasi</option>
             <option value="appartamento">Appartamento</option>
@@ -184,7 +186,7 @@ export default function HomeSearchBoxDesktop() {
           <select
             value={province}
             onChange={(e) => setProvince(e.target.value)}
-            className="w-full rounded-[18px] border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-5 py-3.5 text-base text-[var(--site-text)] outline-none"
+            className="theme-input w-full rounded-[18px] px-5 py-3.5 text-base outline-none"
           >
             <option value="">Qualsiasi provincia</option>
             {provinceOptions.map((item) => (
@@ -203,7 +205,7 @@ export default function HomeSearchBoxDesktop() {
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
             placeholder="Es. 300000"
-            className="w-full rounded-[18px] border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-5 py-3.5 text-base text-[var(--site-text)] placeholder:text-[var(--site-text-faint)]"
+            className="theme-input w-full rounded-[18px] px-5 py-3.5 text-base outline-none"
           />
         </div>
 
@@ -215,7 +217,7 @@ export default function HomeSearchBoxDesktop() {
             value={minRooms}
             onChange={(e) => setMinRooms(e.target.value)}
             placeholder="Es. 3"
-            className="w-full rounded-[18px] border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-5 py-3.5 text-base text-[var(--site-text)] placeholder:text-[var(--site-text-faint)]"
+            className="theme-input w-full rounded-[18px] px-5 py-3.5 text-base outline-none"
           />
         </div>
 
@@ -223,11 +225,7 @@ export default function HomeSearchBoxDesktop() {
           <button
             type="button"
             onClick={goToSearch}
-            className={`w-full rounded-[18px] px-6 py-3.5 text-base font-semibold transition ${
-              isLight
-                ? 'border border-[#d9bd7a] bg-white text-[#2a2116] shadow-[0_0_0_1px_rgba(217,189,122,0.10)] hover:bg-[#fffaf0]'
-                : 'bg-white text-black hover:opacity-90'
-            }`}
+            className="theme-button-primary w-full rounded-[18px] px-6 py-3.5 text-base font-semibold transition hover:opacity-90"
           >
             Cerca
           </button>
