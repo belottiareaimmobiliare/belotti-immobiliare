@@ -37,7 +37,7 @@ export default function SiteHeader() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-colors duration-300 ${
+        className={`sticky top-0 z-[1000] border-b backdrop-blur-xl transition-colors duration-300 ${
           isHome
             ? 'border-white/10 bg-[#050b16]/78'
             : 'border-[var(--site-border)] bg-[var(--site-surface-2)]'
@@ -85,7 +85,7 @@ export default function SiteHeader() {
           </nav>
 
           <div className="hidden items-center gap-4 md:flex">
-            <ThemeToggle forceDark={isHome} />
+            <ThemeToggle />
 
             <a
               href="mailto:info@areaimmobiliare.com"
@@ -111,7 +111,7 @@ export default function SiteHeader() {
           </div>
 
           <div className="flex items-center gap-2 md:hidden">
-            <ThemeToggle forceDark={isHome} />
+            <ThemeToggle />
 
             <button
               type="button"
@@ -146,7 +146,7 @@ export default function SiteHeader() {
       </header>
 
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[60] md:hidden">
+        <div className="fixed inset-0 z-[1100] md:hidden">
           <button
             type="button"
             onClick={() => setMobileMenuOpen(false)}

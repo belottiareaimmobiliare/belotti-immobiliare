@@ -205,3 +205,18 @@ html[data-theme='light'] .theme-button-secondary:hover,
 html[data-theme='light'] .theme-pill:hover {
   background: rgba(250, 244, 232, 0.96);
 }
+
+.leaflet-container {
+  z-index: 1 !important;
+}
+
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom,
+.leaflet-control {
+  z-index: 1 !important;
+}
+
+.leaflet-popup {
+  z-index: 2 !important;
+}
