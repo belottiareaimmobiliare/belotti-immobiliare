@@ -49,13 +49,12 @@ export default function HomeHero() {
   }, [scrollY])
 
   const statsStyle = useMemo(() => {
-    const progress = Math.min(scrollY / 1050, 1)
-    const translateY = progress * -38
-    const opacity = 1 - progress * 0.32
+    const progress = Math.min(scrollY / 1200, 1)
+    const translateY = progress * -42
 
     return {
       transform: `translate3d(0, ${translateY}px, 0)`,
-      opacity: Math.max(opacity, 0),
+      opacity: 1,
     }
   }, [scrollY])
 
@@ -84,9 +83,7 @@ export default function HomeHero() {
 
           <div
             className={`absolute inset-0 bg-cover bg-center ${
-              isAnimating
-                ? 'animate-hero-slide-in-right'
-                : 'translate-x-0 opacity-100'
+              isAnimating ? 'animate-hero-slide-in-right' : 'translate-x-0 opacity-100'
             }`}
             style={{ backgroundImage: `url('${slides[current]}')` }}
           />
@@ -113,7 +110,7 @@ export default function HomeHero() {
               Bergamo, case e scelte immobiliari lette con esperienza vera.
             </h1>
 
-            <p className="mt-7 max-w-[760px] text-base leading-8 text-white/84 md:text-lg xl:text-[1.15rem]">
+            <p className="mt-7 max-w-[760px] text-base leading-8 text-white/84 md:text-lg xl:text-[1.15rem] [text-shadow:0_1px_2px_rgba(0,0,0,0.45)]">
               Un approccio più chiaro, più solido e più umano alla compravendita e
               alla locazione. Analisi, verifica e conoscenza del territorio per
               trovare la soluzione giusta senza rumore inutile.
@@ -145,17 +142,17 @@ export default function HomeHero() {
 
           <div
             style={statsStyle}
-            className="mt-10 grid gap-4 md:grid-cols-3 transition-[opacity,transform] duration-150"
+            className="mt-10 grid gap-4 md:grid-cols-3 transition-transform duration-150"
           >
-            <div className="rounded-[24px] border border-white/18 bg-white/[0.10] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.14)] backdrop-blur-md">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/82 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
+            <div className="rounded-[24px] border border-white/20 bg-white/[0.13] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.16)] backdrop-blur-md">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/86 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
                 Storia
               </p>
               <p className="mt-2 text-2xl font-semibold text-white">Dal 1980</p>
             </div>
 
-            <div className="rounded-[24px] border border-white/18 bg-white/[0.10] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.14)] backdrop-blur-md">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/82 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
+            <div className="rounded-[24px] border border-white/20 bg-white/[0.13] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.16)] backdrop-blur-md">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/86 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
                 Territorio
               </p>
               <p className="mt-2 text-2xl font-semibold text-white">
@@ -163,8 +160,8 @@ export default function HomeHero() {
               </p>
             </div>
 
-            <div className="rounded-[24px] border border-white/18 bg-white/[0.10] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.14)] backdrop-blur-md">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/82 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
+            <div className="rounded-[24px] border border-white/20 bg-white/[0.13] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.16)] backdrop-blur-md">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/86 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
                 Metodo
               </p>
               <p className="mt-2 text-2xl font-semibold text-white">
