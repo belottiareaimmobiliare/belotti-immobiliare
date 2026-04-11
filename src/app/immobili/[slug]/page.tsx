@@ -63,6 +63,11 @@ function formatLabel(value: string | null | undefined, fallback = '—') {
   return clean || fallback
 }
 
+function shouldRenderOptionalField(value: string | null | undefined) {
+  const clean = String(value || '').trim()
+  return clean !== '' && clean !== '-'
+}
+
 export default async function PropertyDetailPage({ params }: PageProps) {
   const { slug } = await params
   const supabase = await createClient()
@@ -117,6 +122,51 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     currentProperty.has_elevator ? 'Ascensore' : null,
     currentProperty.is_auction ? 'Immobile all’asta' : null,
   ].filter(Boolean) as string[]
+
+  const infoCards = [
+    {
+      label: 'Classe energetica',
+      value: formatLabel(currentProperty.energy_class, '-'),
+      visible: true,
+      spanClass: '',
+    },
+    {
+      label: 'Spese condominiali',
+      value: formatLabel(currentProperty.condo_fees, 'Da definire'),
+      visible: true,
+      spanClass: '',
+    },
+    {
+      label: 'Riscaldamento',
+      value: formatLabel(currentProperty.heating_type, 'Da definire'),
+      visible: true,
+      spanClass: '',
+    },
+    {
+      label: 'Ammobiliato',
+      value: formatLabel(currentProperty.furnished_status, 'Da definire'),
+      visible: true,
+      spanClass: '',
+    },
+    {
+      label: 'Cauzione',
+      value: formatLabel(currentProperty.deposit_amount),
+      visible: shouldRenderOptionalField(currentProperty.deposit_amount),
+      spanClass: '',
+    },
+    {
+      label: 'Anticipo',
+      value: formatLabel(currentProperty.advance_amount),
+      visible: shouldRenderOptionalField(currentProperty.advance_amount),
+      spanClass: '',
+    },
+    {
+      label: 'Anticipo + cauzione',
+      value: formatLabel(currentProperty.advance_deposit_amount),
+      visible: shouldRenderOptionalField(currentProperty.advance_deposit_amount),
+      spanClass: 'md:col-span-2 xl:col-span-3',
+    },
+  ].filter((item) => item.visible)
 
   const fullAddressForMaps = [
     currentProperty.address,
@@ -239,71 +289,17 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               <h2 className="text-2xl font-semibold">Informazioni aggiuntive</h2>
 
               <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/35">
-                    Classe energetica
-                  </p>
-                  <p className="mt-2 text-sm text-white/80">
-                    {formatLabel(currentProperty.energy_class, '-')}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/35">
-                    Spese condominiali
-                  </p>
-                  <p className="mt-2 text-sm text-white/80">
-                    {formatLabel(currentProperty.condo_fees, 'Da definire')}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/35">
-                    Riscaldamento
-                  </p>
-                  <p className="mt-2 text-sm text-white/80">
-                    {formatLabel(currentProperty.heating_type, 'Da definire')}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/35">
-                    Ammobiliato
-                  </p>
-                  <p className="mt-2 text-sm text-white/80">
-                    {formatLabel(currentProperty.furnished_status, 'Da definire')}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/35">
-                    Cauzione
-                  </p>
-                  <p className="mt-2 text-sm text-white/80">
-                    {formatLabel(currentProperty.deposit_amount, 'Da definire')}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/35">
-                    Anticipo
-                  </p>
-                  <p className="mt-2 text-sm text-white/80">
-                    {formatLabel(currentProperty.advance_amount, 'Da definire')}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4 md:col-span-2 xl:col-span-3">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/35">
-                    Anticipo + cauzione
-                  </p>
-                  <p className="mt-2 text-sm text-white/80">
-                    {formatLabel(
-                      currentProperty.advance_deposit_amount,
-                      'Da definire'
-                    )}
-                  </p>
-                </div>
+                {infoCards.map((card) => (
+                  <div
+                    key={card.label}
+                    className={`rounded-2xl border border-white/10 bg-black/20 px-4 py-4 ${card.spanClass}`}
+                  >
+                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">
+                      {card.label}
+                    </p>
+                    <p className="mt-2 text-sm text-white/80">{card.value}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -332,9 +328,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                   currentProperty.description
                     .split('\n')
                     .filter((paragraph) => paragraph.trim().length > 0)
-                    .map((paragraph, index) => (
-                      <p key={index}>{paragraph}</p>
-                    ))
+                    .map((paragraph, index) => <p key={index}>{paragraph}</p>)
                 ) : (
                   <p>Descrizione in aggiornamento.</p>
                 )}
@@ -422,9 +416,10 @@ export default async function PropertyDetailPage({ params }: PageProps) {
           </aside>
         </div>
       </section>
+
       <FooterReveal>
-  <Footer />
-</FooterReveal>
+        <Footer />
+      </FooterReveal>
     </main>
   )
 }

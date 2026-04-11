@@ -2,7 +2,9 @@ import Link from 'next/link'
 
 const links = [
   { href: '/admin', label: 'Dashboard' },
-  { href: '/admin/immobili', label: 'Immobili' },
+  { href: '/admin/immobili', label: 'Tutti gli immobili' },
+  { href: '/admin/immobili?contractType=vendita', label: 'Immobili in vendita' },
+  { href: '/admin/immobili?contractType=affitto', label: 'Immobili in affitto' },
 ]
 
 export default function Sidebar() {

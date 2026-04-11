@@ -93,7 +93,7 @@ export default function HomeHero() {
           style={textStyle}
           className="max-w-[920px] transition-[opacity,transform] duration-150"
         >
-          <p className="text-sm font-medium uppercase tracking-[0.34em] text-white/78">
+          <p className="text-sm font-semibold uppercase tracking-[0.34em] text-white/90 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
             Area Immobiliare dal 1980
           </p>
 
@@ -132,14 +132,14 @@ export default function HomeHero() {
 
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             <div className="rounded-[24px] border border-white/18 bg-white/[0.10] px-5 py-5 backdrop-blur-md">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-white/60">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/82 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
                 Storia
               </p>
               <p className="mt-2 text-2xl font-semibold text-white">Dal 1980</p>
             </div>
 
             <div className="rounded-[24px] border border-white/18 bg-white/[0.10] px-5 py-5 backdrop-blur-md">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-white/60">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/82 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
                 Territorio
               </p>
               <p className="mt-2 text-2xl font-semibold text-white">
@@ -148,7 +148,7 @@ export default function HomeHero() {
             </div>
 
             <div className="rounded-[24px] border border-white/18 bg-white/[0.10] px-5 py-5 backdrop-blur-md">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-white/60">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/82 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
                 Metodo
               </p>
               <p className="mt-2 text-2xl font-semibold text-white">
@@ -178,7 +178,7 @@ export default function HomeHero() {
 
                 <div className="grid grid-cols-[1.1fr_0.9fr] gap-4">
                   <div className="rounded-[24px] border border-white/18 bg-white/[0.10] p-4 backdrop-blur-sm">
-                    <p className="text-[11px] uppercase tracking-[0.22em] text-white/62">
+                    <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-white/82 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
                       Ricerca su mappa
                     </p>
                     <p className="mt-2 text-2xl font-semibold text-white">
@@ -200,7 +200,7 @@ export default function HomeHero() {
 
                     <div className="relative flex h-full flex-col justify-between p-4">
                       <div>
-                        <p className="text-[11px] uppercase tracking-[0.22em] text-black/55">
+                        <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-black/65">
                           Mappa interattiva
                         </p>
                         <p className="mt-2 text-xl font-semibold text-black">

@@ -94,38 +94,38 @@ export default function HomeScrollExperience() {
     }
   }, [isMobile])
 
-  const searchHold = segment(progress, 0.0, 0.34)
-  const searchFade = segment(progress, 0.34, 0.46)
+  const searchHold = segment(progress, 0.0, 0.58)
+  const searchFade = segment(progress, 0.58, 0.78)
 
-  const panelCompact = segment(progress, 0.42, 0.52)
-  const panelRise = segment(progress, 0.46, 0.62)
-  const panelReadableHold = segment(progress, 0.62, 0.74)
-  const panelFade = segment(progress, 0.74, 0.82)
+  const panelCompact = segment(progress, 0.60, 0.72)
+  const panelRise = segment(progress, 0.68, 0.82)
+  const panelReadableHold = segment(progress, 0.82, 0.9)
+  const panelFade = segment(progress, 0.9, 0.96)
 
-  const footerShellRise = segment(progress, 0.82, 0.9)
-  const footerIn = segment(progress, 0.88, 0.995)
+  const footerShellRise = segment(progress, 0.94, 0.985)
+  const footerIn = segment(progress, 0.965, 1)
 
   const searchOpacity = 1 - searchFade
-  const searchTranslateY = -(searchHold * 4 + searchFade * 72)
+  const searchTranslateY = -(searchFade * 72)
 
   const panelsOpacity = 1 - panelFade
-  const panelsTranslateY = -(panelRise * 180 + panelReadableHold * 210)
+  const panelsTranslateY = -(panelRise * 160 + panelReadableHold * 130)
 
   const brickGap = 34 - panelCompact * 14
 
   const footerShellOpacity = footerShellRise
-  const footerShellTranslateY = 130 - footerShellRise * 130
+  const footerShellTranslateY = 100 - footerShellRise * 100
 
   const panelStyles = useMemo(() => {
     return panels.map((panel) => {
       const x = panel.initialX * (1 - panelCompact)
       const y =
         panel.initialY * (1 - panelCompact) -
-        panelRise * 120 -
-        panelReadableHold * 26 -
-        panelFade * 44
+        panelRise * 100 -
+        panelReadableHold * 16 -
+        panelFade * 24
 
-      const scale = 0.965 + panelCompact * 0.035
+      const scale = 0.97 + panelCompact * 0.03
 
       return {
         transform: `translate3d(${x}px, ${y}px, 0) scale(${scale})`,
@@ -148,7 +148,7 @@ export default function HomeScrollExperience() {
               key={panel.title}
               className="rounded-[24px] border border-white/10 bg-[linear-gradient(135deg,rgba(7,18,35,0.98)_0%,rgba(3,11,24,0.98)_100%)] px-5 py-6 shadow-[0_18px_40px_rgba(0,0,0,0.2)]"
             >
-              <p className="text-[11px] uppercase tracking-[0.28em] text-white/35">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/72">
                 {panel.eyebrow}
               </p>
 
@@ -163,7 +163,7 @@ export default function HomeScrollExperience() {
           ))}
         </div>
 
-        <div className="mt-8">
+        <div className="mt-8 -mx-4 bg-[#010409]">
           <Footer />
         </div>
       </section>
@@ -181,10 +181,11 @@ export default function HomeScrollExperience() {
             style={{
               opacity: searchOpacity,
               transform: `translate3d(0, ${searchTranslateY}px, 0)`,
+              pointerEvents: searchOpacity > 0.08 ? 'auto' : 'none',
             }}
-            className="transition-[opacity,transform] duration-200"
+            className="relative z-30 transition-[opacity,transform] duration-200"
           >
-            <div className="overflow-hidden rounded-[36px] border border-white/10 bg-[rgba(58,70,94,0.72)] shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl">
+            <div className="overflow-hidden rounded-[36px] border border-white/10 bg-[rgba(255,255,255,0.10)] shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-xl">
               <Suspense fallback={<SearchBoxFallback />}>
                 <div className="hidden md:block">
                   <HomeSearchBoxDesktop />
@@ -197,8 +198,9 @@ export default function HomeScrollExperience() {
             style={{
               opacity: panelsOpacity,
               transform: `translate3d(0, ${panelsTranslateY}px, 0)`,
+              pointerEvents: panelsOpacity > 0.08 ? 'auto' : 'none',
             }}
-            className="mt-8 transition-[opacity,transform] duration-200"
+            className="relative z-20 mt-8 transition-[opacity,transform] duration-200"
           >
             <div
               className="grid grid-cols-1 xl:grid-cols-12"
@@ -210,7 +212,7 @@ export default function HomeScrollExperience() {
                   style={panelStyles[index]}
                   className={`${panel.className} rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(7,18,35,0.98)_0%,rgba(3,11,24,0.98)_100%)] px-7 py-8 shadow-[0_20px_50px_rgba(0,0,0,0.2)] transition-[transform] duration-200 md:px-8 md:py-9`}
                 >
-                  <p className="text-[11px] uppercase tracking-[0.28em] text-white/35">
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/72">
                     {panel.eyebrow}
                   </p>
 
@@ -230,8 +232,9 @@ export default function HomeScrollExperience() {
             style={{
               opacity: footerShellOpacity,
               transform: `translate3d(0, ${footerShellTranslateY}px, 0)`,
+              pointerEvents: footerShellOpacity > 0.08 ? 'auto' : 'none',
             }}
-            className="absolute inset-x-0 bottom-0 transition-[opacity,transform] duration-200"
+            className="absolute inset-x-0 bottom-0 z-10 transition-[opacity,transform] duration-200"
           >
             <div
               style={{
