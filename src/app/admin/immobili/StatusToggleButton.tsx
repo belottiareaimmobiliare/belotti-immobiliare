@@ -35,11 +35,11 @@ export default function StatusToggleButton({
       type="button"
       onClick={handleClick}
       disabled={isPending}
-      className={`rounded-full border px-3 py-1 text-xs uppercase tracking-[0.18em] transition ${
+      className={`rounded-full border px-3 py-1 text-xs uppercase tracking-[0.18em] transition disabled:opacity-60 ${
         isPublished
-          ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200'
-          : 'border-amber-500/20 bg-amber-500/10 text-amber-200'
-      } disabled:opacity-60`}
+          ? 'border-emerald-500/30 bg-emerald-500/12 text-emerald-300'
+          : 'border-amber-500/30 bg-amber-500/12 text-amber-300'
+      }`}
     >
       {isPending ? 'Aggiorno...' : isPublished ? 'Published' : 'Draft'}
     </button>

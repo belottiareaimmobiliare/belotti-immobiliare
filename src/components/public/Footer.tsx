@@ -27,7 +27,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="site-footer-force-dark w-full bg-[#010409] px-6 py-14 xl:px-10 2xl:px-14">
+    <footer className="site-footer-force-dark w-full px-6 py-14 xl:px-10 2xl:px-14">
       <p className="text-xs uppercase tracking-[0.3em] text-white/30">
         Partners
       </p>

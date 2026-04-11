@@ -458,3 +458,35 @@ html[data-theme='light'] .leaflet-tooltip {
   color: #191611;
   border: 1px solid rgba(181,138,58,0.20);
 }
+
+.site-header-solid {
+  background:
+    linear-gradient(180deg, rgba(4, 10, 18, 0.96) 0%, rgba(4, 10, 18, 0.94) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+html[data-theme='light'] .site-header-solid {
+  background:
+    linear-gradient(180deg, rgba(251, 248, 241, 0.96) 0%, rgba(246, 242, 232, 0.94) 100%);
+}
+
+.site-footer-force-dark {
+  background: #010409 !important;
+  color: #ffffff !important;
+}
+
+.theme-toggle-button {
+  border: 1px solid var(--site-border);
+  background: var(--site-surface-2);
+  color: var(--site-text);
+  box-shadow: var(--site-button-shadow);
+}
+
+html[data-theme='light'] .theme-toggle-button {
+  color: #b58a3a;
+}
+
+html[data-theme='dark'] .theme-toggle-button {
+  color: #ffffff;
+}

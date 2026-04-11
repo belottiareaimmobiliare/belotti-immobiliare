@@ -70,17 +70,15 @@ function FeatureToggle({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center justify-between gap-4 rounded-2xl border px-4 py-3 text-left text-sm transition ${
-        checked
-          ? 'border-emerald-400/30 bg-emerald-500/18 text-white'
-          : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
-      } ${fullWidth ? 'md:col-span-2' : ''}`}
+      className={`theme-admin-input flex items-center justify-between gap-4 rounded-2xl px-4 py-3 text-left text-sm transition hover:opacity-95 ${
+        fullWidth ? 'md:col-span-2' : ''
+      }`}
     >
-      <span>{label}</span>
+      <span className="text-[var(--site-text-soft)]">{label}</span>
 
       <span
         className={`relative inline-flex h-7 w-12 shrink-0 rounded-full transition ${
-          checked ? 'bg-emerald-400' : 'bg-white/18'
+          checked ? 'bg-emerald-500' : 'bg-white/20'
         }`}
       >
         <span
@@ -268,22 +266,22 @@ export default function EditForm({ property }: EditFormProps) {
   }
 
   return (
-    <section className="mx-auto w-full max-w-3xl px-4">
-      <p className="text-sm uppercase tracking-[0.2em] text-white/40">
+    <section className="mx-auto w-full max-w-3xl px-4 text-[var(--site-text)]">
+      <p className="theme-admin-faint text-sm uppercase tracking-[0.2em]">
         Modifica immobile
       </p>
 
-      <h2 className="mt-2 text-3xl font-semibold text-white">
+      <h2 className="mt-2 text-3xl font-semibold">
         Aggiorna immobile
       </h2>
 
-      <p className="mt-3 text-white/60">
+      <p className="theme-admin-muted mt-3">
         Modifica i dati principali dell’immobile selezionato.
       </p>
 
       <form
         onSubmit={handleSubmit}
-        className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-5 md:p-6"
+        className="theme-admin-card mt-8 rounded-3xl p-5 md:p-6"
       >
         <div className="grid gap-4">
           <input
@@ -291,7 +289,7 @@ export default function EditForm({ property }: EditFormProps) {
             placeholder="Titolo"
             value={form.title}
             onChange={handleChange}
-            className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
+            className="theme-admin-input rounded-xl px-4 py-3"
             required
           />
 
@@ -301,7 +299,7 @@ export default function EditForm({ property }: EditFormProps) {
             type="number"
             value={form.price}
             onChange={handleChange}
-            className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
+            className="theme-admin-input rounded-xl px-4 py-3"
           />
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -309,7 +307,7 @@ export default function EditForm({ property }: EditFormProps) {
               name="contract_type"
               value={form.contract_type}
               onChange={handleChange}
-              className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white"
+              className="theme-admin-select rounded-xl px-4 py-3"
             >
               <option value="vendita">Vendita</option>
               <option value="affitto">Affitto</option>
@@ -319,7 +317,7 @@ export default function EditForm({ property }: EditFormProps) {
               name="property_type"
               value={form.property_type}
               onChange={handleChange}
-              className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white"
+              className="theme-admin-select rounded-xl px-4 py-3"
             >
               <option value="appartamento">Appartamento</option>
               <option value="attico">Attico</option>
@@ -334,14 +332,14 @@ export default function EditForm({ property }: EditFormProps) {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/40">
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
                 Provincia
               </label>
               <select
                 name="province"
                 value={form.province}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white"
+                className="theme-admin-select w-full rounded-xl px-4 py-3"
               >
                 <option value="">Seleziona provincia</option>
                 {provinces.map((province) => (
@@ -356,7 +354,7 @@ export default function EditForm({ property }: EditFormProps) {
             </div>
 
             <div>
-              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/40">
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
                 Frazione
               </label>
               <input
@@ -364,23 +362,23 @@ export default function EditForm({ property }: EditFormProps) {
                 placeholder="Frazione (opzionale)"
                 value={form.frazione}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
+                className="theme-admin-input w-full rounded-xl px-4 py-3"
               />
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+          <div className="theme-admin-card rounded-2xl p-4">
             <div className="mb-3">
-              <p className="text-xs uppercase tracking-[0.22em] text-white/35">
+              <p className="theme-admin-faint text-xs uppercase tracking-[0.22em]">
                 Comune
               </p>
-              <p className="mt-2 text-sm text-white/55">
+              <p className="theme-admin-muted mt-2 text-sm">
                 Seleziona un comune della provincia scelta.
               </p>
             </div>
 
             {!activeProvince ? (
-              <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-4 py-4 text-sm text-white/45">
+              <div className="theme-admin-input rounded-2xl border-dashed px-4 py-4 text-sm text-[var(--site-text-muted)]">
                 Seleziona prima una provincia.
               </div>
             ) : (
@@ -390,7 +388,7 @@ export default function EditForm({ property }: EditFormProps) {
                   value={comuneSearch}
                   onChange={(e) => setComuneSearch(e.target.value)}
                   placeholder="Cerca comune..."
-                  className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/35"
+                  className="theme-admin-input w-full rounded-2xl px-4 py-3"
                 />
 
                 {form.comune ? (
@@ -403,19 +401,19 @@ export default function EditForm({ property }: EditFormProps) {
                           comune: '',
                         }))
                       }
-                      className="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs text-white/85 transition hover:bg-white/15"
+                      className="theme-admin-chip flex items-center gap-2 rounded-full px-3 py-1.5 text-xs transition hover:opacity-95"
                     >
                       <span>{form.comune}</span>
-                      <span className="text-white/60">×</span>
+                      <span className="opacity-60">×</span>
                     </button>
                   </div>
                 ) : (
-                  <p className="text-xs text-white/40">Nessun comune selezionato</p>
+                  <p className="theme-admin-faint text-xs">Nessun comune selezionato</p>
                 )}
 
-                <div className="max-h-60 space-y-2 overflow-y-auto rounded-2xl border border-white/10 bg-white/5 p-2">
+                <div className="theme-admin-card max-h-60 space-y-2 overflow-y-auto rounded-2xl p-2">
                   {filteredComuni.length === 0 ? (
-                    <div className="px-3 py-3 text-sm text-white/45">
+                    <div className="px-3 py-3 text-sm text-[var(--site-text-muted)]">
                       Nessun comune trovato.
                     </div>
                   ) : (
@@ -429,8 +427,8 @@ export default function EditForm({ property }: EditFormProps) {
                           onClick={() => handleComuneSelect(comune.name)}
                           className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition ${
                             selected
-                              ? 'bg-white text-black'
-                              : 'bg-transparent text-white/80 hover:bg-white/10'
+                              ? 'theme-admin-chip-active'
+                              : 'theme-admin-chip hover:opacity-95'
                           }`}
                         >
                           <span>{comune.name}</span>
@@ -447,7 +445,7 @@ export default function EditForm({ property }: EditFormProps) {
           </div>
 
           <div>
-            <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/40">
+            <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
               Indirizzo completo
             </label>
             <input
@@ -455,16 +453,16 @@ export default function EditForm({ property }: EditFormProps) {
               placeholder="Es. Via Roma 25"
               value={form.address}
               onChange={handleChange}
-              className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
+              className="theme-admin-input w-full rounded-xl px-4 py-3"
             />
-            <p className="mt-2 text-xs text-white/45">
+            <p className="theme-admin-faint mt-2 text-xs">
               Se manca l’indirizzo preciso, la mappa userà il centro del comune.
             </p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
             <div>
-              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/40">
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
                 Locali
               </label>
               <input
@@ -473,12 +471,12 @@ export default function EditForm({ property }: EditFormProps) {
                 type="number"
                 value={form.rooms}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
+                className="theme-admin-input w-full rounded-xl px-4 py-3"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/40">
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
                 Bagni
               </label>
               <input
@@ -487,12 +485,12 @@ export default function EditForm({ property }: EditFormProps) {
                 type="number"
                 value={form.bathrooms}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
+                className="theme-admin-input w-full rounded-xl px-4 py-3"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/40">
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
                 Mq
               </label>
               <input
@@ -501,14 +499,14 @@ export default function EditForm({ property }: EditFormProps) {
                 type="number"
                 value={form.surface}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
+                className="theme-admin-input w-full rounded-xl px-4 py-3"
               />
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/40">
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
                 Classe energetica
               </label>
               <input
@@ -516,12 +514,12 @@ export default function EditForm({ property }: EditFormProps) {
                 placeholder="Es. A4, B, C..."
                 value={form.energy_class}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
+                className="theme-admin-input w-full rounded-xl px-4 py-3"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/40">
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
                 Spese condominiali
               </label>
               <input
@@ -529,14 +527,14 @@ export default function EditForm({ property }: EditFormProps) {
                 placeholder="Es. 120€/mese, comprese, da definire"
                 value={form.condo_fees}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
+                className="theme-admin-input w-full rounded-xl px-4 py-3"
               />
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/40">
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
                 Riscaldamento
               </label>
               <input
@@ -544,19 +542,19 @@ export default function EditForm({ property }: EditFormProps) {
                 placeholder="Es. termoautonomo"
                 value={form.heating_type}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
+                className="theme-admin-input w-full rounded-xl px-4 py-3"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/40">
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
                 Ammobiliato
               </label>
               <select
                 name="furnished_status"
                 value={form.furnished_status}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white"
+                className="theme-admin-select w-full rounded-xl px-4 py-3"
               >
                 <option value="">Da definire</option>
                 <option value="si">Sì</option>
@@ -578,7 +576,7 @@ export default function EditForm({ property }: EditFormProps) {
 
           <div className="grid gap-4 md:grid-cols-3">
             <div>
-              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/40">
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
                 Cauzione
               </label>
               <input
@@ -586,12 +584,12 @@ export default function EditForm({ property }: EditFormProps) {
                 placeholder="Es. 2 mensilità / da definire / -"
                 value={form.deposit_amount}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
+                className="theme-admin-input w-full rounded-xl px-4 py-3"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/40">
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
                 Anticipo
               </label>
               <input
@@ -599,12 +597,12 @@ export default function EditForm({ property }: EditFormProps) {
                 placeholder="Es. 1 mensilità / da definire / -"
                 value={form.advance_amount}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
+                className="theme-admin-input w-full rounded-xl px-4 py-3"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/40">
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
                 Anticipo + cauzione
               </label>
               <input
@@ -612,7 +610,7 @@ export default function EditForm({ property }: EditFormProps) {
                 placeholder="Es. 3 mensilità / da definire / -"
                 value={form.advance_deposit_amount}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
+                className="theme-admin-input w-full rounded-xl px-4 py-3"
               />
             </div>
           </div>
@@ -623,11 +621,11 @@ export default function EditForm({ property }: EditFormProps) {
             value={form.description}
             onChange={handleChange}
             rows={6}
-            className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white placeholder:text-white/35"
+            className="theme-admin-input w-full rounded-xl px-4 py-3"
           />
 
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-            <p className="mb-4 text-xs uppercase tracking-[0.22em] text-white/35">
+          <div className="theme-admin-card rounded-2xl p-4">
+            <p className="theme-admin-faint mb-4 text-xs uppercase tracking-[0.22em]">
               Caratteristiche aggiuntive
             </p>
 
@@ -665,7 +663,7 @@ export default function EditForm({ property }: EditFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="mt-6 w-full rounded-2xl bg-white py-3 font-medium text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="theme-admin-button-primary mt-6 w-full rounded-2xl py-3 font-medium transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? 'Salvataggio...' : 'Aggiorna immobile'}
         </button>
