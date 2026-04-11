@@ -109,7 +109,7 @@ export default function PropertyContactForm({
 
   if (step === 'done') {
     return (
-      <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-4 text-sm text-emerald-100">
+      <div className="mt-6 rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-4 text-sm text-emerald-700 dark:text-emerald-100">
         {successMessage || 'Richiesta inviata correttamente.'}
       </div>
     )
@@ -118,13 +118,13 @@ export default function PropertyContactForm({
   if (step === 'verify') {
     return (
       <form onSubmit={handleVerifyCode} className="mt-6 space-y-4">
-        <div className="rounded-2xl border border-sky-400/20 bg-sky-500/10 px-4 py-4 text-sm text-sky-100">
+        <div className="rounded-2xl border border-sky-400/25 bg-sky-500/10 px-4 py-4 text-sm text-sky-700 dark:text-sky-100">
           Inserisci il codice di verifica che ti abbiamo inviato via mail.
         </div>
 
         <div>
-          <label className="mb-2 block text-sm text-white/80">
-            Codice di verifica <span className="text-red-400">*</span>
+          <label className="mb-2 block text-sm text-[var(--site-text-soft)]">
+            Codice di verifica <span className="text-red-500">*</span>
           </label>
 
           <input
@@ -137,22 +137,22 @@ export default function PropertyContactForm({
             maxLength={4}
             placeholder="0000"
             required
-            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-center text-3xl tracking-[0.5em] text-white placeholder:text-white/25"
+            className="w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4 text-center text-3xl tracking-[0.5em] text-[var(--site-text)] placeholder:text-[var(--site-text-faint)]"
           />
 
-          <p className="mt-2 text-xs text-white/45">
+          <p className="mt-2 text-xs text-[var(--site-text-faint)]">
             Inserisci le 4 cifre ricevute via email.
           </p>
         </div>
 
         {successMessage ? (
-          <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+          <div className="rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-100">
             {successMessage}
           </div>
         ) : null}
 
         {errorMessage ? (
-          <div className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+          <div className="rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-100">
             {errorMessage}
           </div>
         ) : null}
@@ -160,7 +160,7 @@ export default function PropertyContactForm({
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="theme-button-primary w-full rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? 'Verifica in corso...' : 'Conferma codice'}
         </button>
@@ -173,7 +173,7 @@ export default function PropertyContactForm({
             setErrorMessage('')
             setSuccessMessage('')
           }}
-          className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm text-white transition hover:bg-white/10"
+          className="theme-button-secondary w-full rounded-2xl px-5 py-3 text-sm transition"
         >
           Torna al form
         </button>
@@ -183,26 +183,26 @@ export default function PropertyContactForm({
 
   return (
     <form onSubmit={handleRequestCode} className="mt-6 space-y-4">
-      <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-xs text-white/60">
-        I campi contrassegnati con <span className="text-red-400">*</span> sono obbligatori.
+      <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-xs text-[var(--site-text-muted)]">
+        I campi contrassegnati con <span className="text-red-500">*</span> sono obbligatori.
       </div>
 
       <div>
-        <label className="mb-2 block text-sm text-white/80">
-          Nome e cognome <span className="text-red-400">*</span>
+        <label className="mb-2 block text-sm text-[var(--site-text-soft)]">
+          Nome e cognome <span className="text-red-500">*</span>
         </label>
         <input
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
           placeholder="Mario Rossi"
           required
-          className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/50"
+          className="w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-sm text-[var(--site-text)] placeholder:text-[var(--site-text-faint)]"
         />
       </div>
 
       <div>
-        <label className="mb-2 block text-sm text-white/80">
-          Email <span className="text-red-400">*</span>
+        <label className="mb-2 block text-sm text-[var(--site-text-soft)]">
+          Email <span className="text-red-500">*</span>
         </label>
         <input
           type="email"
@@ -210,28 +210,28 @@ export default function PropertyContactForm({
           onChange={(e) => setEmail(e.target.value)}
           placeholder="nome@email.it"
           required
-          className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/50"
+          className="w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-sm text-[var(--site-text)] placeholder:text-[var(--site-text-faint)]"
         />
-        <p className="mt-2 text-xs text-white/45">
+        <p className="mt-2 text-xs text-[var(--site-text-faint)]">
           Riceverai qui il codice di verifica a 4 cifre.
         </p>
       </div>
 
       <div>
-        <label className="mb-2 block text-sm text-white/80">
-          Cellulare <span className="text-red-400">*</span>
+        <label className="mb-2 block text-sm text-[var(--site-text-soft)]">
+          Cellulare <span className="text-red-500">*</span>
         </label>
         <input
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="333 1234567"
           required
-          className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/50"
+          className="w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-sm text-[var(--site-text)] placeholder:text-[var(--site-text-faint)]"
         />
       </div>
 
       <div>
-        <label className="mb-2 block text-sm text-white/80">
+        <label className="mb-2 block text-sm text-[var(--site-text-soft)]">
           Messaggio
         </label>
         <textarea
@@ -239,18 +239,18 @@ export default function PropertyContactForm({
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Scrivi qui la tua richiesta"
           rows={5}
-          className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/50"
+          className="w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-sm text-[var(--site-text)] placeholder:text-[var(--site-text-faint)]"
         />
       </div>
 
       {successMessage ? (
-        <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+        <div className="rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-100">
           {successMessage}
         </div>
       ) : null}
 
       {errorMessage ? (
-        <div className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+        <div className="rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-100">
           {errorMessage}
         </div>
       ) : null}
@@ -258,7 +258,7 @@ export default function PropertyContactForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="theme-button-primary w-full rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? 'Invio codice...' : 'Invia richiesta'}
       </button>

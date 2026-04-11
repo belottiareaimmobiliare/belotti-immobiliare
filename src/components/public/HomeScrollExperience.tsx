@@ -135,8 +135,8 @@ export default function HomeScrollExperience() {
 
   if (isMobile) {
     return (
-      <section className="bg-[linear-gradient(180deg,#071120_0%,#071524_35%,#06111d_65%,#010409_100%)] px-4 py-5">
-        <div className="rounded-[30px] border border-white/10 bg-[rgba(58,70,94,0.72)] shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl">
+      <section className="bg-[linear-gradient(180deg,#f4efe5_0%,#efe8da_45%,#e7dece_72%,#010409_100%)] px-4 py-5">
+        <div className="rounded-[30px] border border-white/30 bg-white/[0.20] shadow-[0_28px_90px_rgba(0,0,0,0.14)] backdrop-blur-xl">
           <Suspense fallback={<SearchBoxFallback />}>
             <HomeSearchBoxMobile />
           </Suspense>
@@ -146,17 +146,17 @@ export default function HomeScrollExperience() {
           {panels.map((panel) => (
             <article
               key={panel.title}
-              className="rounded-[24px] border border-white/10 bg-[linear-gradient(135deg,rgba(7,18,35,0.98)_0%,rgba(3,11,24,0.98)_100%)] px-5 py-6 shadow-[0_18px_40px_rgba(0,0,0,0.2)]"
+              className="rounded-[24px] border border-white/30 bg-white/[0.20] px-5 py-6 shadow-[0_18px_40px_rgba(0,0,0,0.10)] backdrop-blur-xl"
             >
-              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/72">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-black/55">
                 {panel.eyebrow}
               </p>
 
-              <h3 className="mt-4 text-[2rem] font-semibold leading-tight text-white">
+              <h3 className="mt-4 text-[2rem] font-semibold leading-tight text-[#1f1a16]">
                 {panel.title}
               </h3>
 
-              <p className="mt-4 text-sm leading-7 text-white/62">
+              <p className="mt-4 text-sm leading-7 text-black/65">
                 {panel.text}
               </p>
             </article>
@@ -173,7 +173,7 @@ export default function HomeScrollExperience() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-[430vh] bg-[linear-gradient(180deg,#071120_0%,#071524_26%,#06111d_54%,#03070e_82%,#010409_100%)]"
+      className="relative h-[430vh] bg-[linear-gradient(180deg,#f4efe5_0%,#efe8da_30%,#e8e0d0_58%,#010409_100%)]"
     >
       <div className="sticky top-[78px] h-[calc(100vh-78px)] overflow-hidden">
         <div className="absolute inset-0 px-6 py-6 xl:px-10 2xl:px-14">
@@ -185,7 +185,7 @@ export default function HomeScrollExperience() {
             }}
             className="relative z-30 transition-[opacity,transform] duration-200"
           >
-            <div className="overflow-hidden rounded-[36px] border border-white/10 bg-[rgba(255,255,255,0.10)] shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-xl">
+            <div className="overflow-hidden rounded-[36px] border border-white/30 bg-white/[0.16] shadow-[0_28px_90px_rgba(0,0,0,0.18)] backdrop-blur-xl">
               <Suspense fallback={<SearchBoxFallback />}>
                 <div className="hidden md:block">
                   <HomeSearchBoxDesktop />
@@ -210,17 +210,17 @@ export default function HomeScrollExperience() {
                 <article
                   key={panel.title}
                   style={panelStyles[index]}
-                  className={`${panel.className} rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(7,18,35,0.98)_0%,rgba(3,11,24,0.98)_100%)] px-7 py-8 shadow-[0_20px_50px_rgba(0,0,0,0.2)] transition-[transform] duration-200 md:px-8 md:py-9`}
+                  className={`${panel.className} rounded-[28px] border border-white/30 bg-white/[0.20] px-7 py-8 shadow-[0_20px_50px_rgba(0,0,0,0.10)] backdrop-blur-xl transition-[transform] duration-200 md:px-8 md:py-9`}
                 >
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/72">
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-black/55">
                     {panel.eyebrow}
                   </p>
 
-                  <h3 className="mt-5 max-w-[980px] text-[2rem] font-semibold leading-tight text-white xl:text-[2.45rem]">
+                  <h3 className="mt-5 max-w-[980px] text-[2rem] font-semibold leading-tight text-[#1f1a16] xl:text-[2.45rem]">
                     {panel.title}
                   </h3>
 
-                  <p className="mt-5 max-w-[980px] text-base leading-8 text-white/62">
+                  <p className="mt-5 max-w-[980px] text-base leading-8 text-black/65">
                     {panel.text}
                   </p>
                 </article>

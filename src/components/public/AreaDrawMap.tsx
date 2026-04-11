@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   MapContainer,
   Marker,
@@ -42,7 +42,7 @@ type Point = {
   lng: number
 }
 
-const DEFAULT_CENTER: [number, number] = [45.6983, 9.6773] // Bergamo
+const DEFAULT_CENTER: [number, number] = [45.6983, 9.6773]
 
 const propertyIcon = L.divIcon({
   className: '',
@@ -52,8 +52,8 @@ const propertyIcon = L.divIcon({
       height: 14px;
       border-radius: 9999px;
       background: white;
-      border: 3px solid #0ea5e9;
-      box-shadow: 0 0 0 4px rgba(14,165,233,0.18);
+      border: 3px solid #38bdf8;
+      box-shadow: 0 0 0 4px rgba(56,189,248,0.18);
     "></div>
   `,
   iconSize: [14, 14],
@@ -178,6 +178,7 @@ function DrawingEvents({
 
 export default function AreaDrawMap({ properties }: Props) {
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   const [drawingEnabled, setDrawingEnabled] = useState(false)
   const [polygonPoints, setPolygonPoints] = useState<Point[]>([])
@@ -189,15 +190,10 @@ export default function AreaDrawMap({ properties }: Props) {
     if (!polygonClosed) return []
 
     return properties.filter((property) => {
-      if (!isValidMapProperty(property)) {
-        return false
-      }
+      if (!isValidMapProperty(property)) return false
 
       return pointInPolygon(
-        {
-          lat: property.latitude,
-          lng: property.longitude,
-        },
+        { lat: property.latitude, lng: property.longitude },
         polygonPoints
       )
     })
@@ -235,7 +231,13 @@ export default function AreaDrawMap({ properties }: Props) {
     if (!polygonClosed) return
 
     const polygonParam = serializePolygon(polygonPoints)
-    router.push(`/immobili?polygon=${encodeURIComponent(polygonParam)}`)
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('page')
+    params.delete('province')
+    params.delete('comune')
+    params.set('polygon', polygonParam)
+
+    router.push(`/immobili?${params.toString()}`)
   }
 
   const polylinePositions: LatLngExpression[] = polygonPoints.map((point) => [
@@ -250,83 +252,87 @@ export default function AreaDrawMap({ properties }: Props) {
 
   return (
     <div className="relative h-full w-full">
-      <div className="absolute left-4 top-4 z-[1000] flex max-w-[420px] flex-col gap-3 rounded-[24px] border border-white/10 bg-[#08111f]/90 p-4 shadow-2xl backdrop-blur-md">
-        <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-white/40">
-            Ricerca avanzata
-          </p>
-          <h2 className="mt-1 text-lg font-semibold text-white">
-            Disegna la tua area sulla mappa
-          </h2>
-        </div>
-
-        <p className="text-sm leading-6 text-white/70">
-          Clicca sulla mappa per aggiungere i punti dell’area. Quando vuoi chiudere il poligono,
-          clicca sul primo punto evidenziato.
-        </p>
-
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={handleStartDrawing}
-            className="rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-black transition hover:opacity-90"
-          >
-            Disegna la tua area
-          </button>
-
-          <button
-            type="button"
-            onClick={handleUndoLastPoint}
-            disabled={polygonPoints.length === 0 || isClosed}
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Annulla ultimo punto
-          </button>
-
-          <button
-            type="button"
-            onClick={handleResetArea}
-            disabled={polygonPoints.length === 0 && !isClosed}
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Reset area
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-            <div className="text-white/45">Punti area</div>
-            <div className="mt-1 text-xl font-semibold text-white">{polygonPoints.length}</div>
+      <div className="absolute left-6 top-24 z-[30] w-[min(420px,calc(100%-3rem))]">
+        <div className="overflow-hidden rounded-[30px] border border-white/12 bg-[#0d1b2a]/88 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.38)] backdrop-blur-xl">
+          <div>
+            <p className="text-xs uppercase tracking-[0.26em] text-white/55">
+              Ricerca avanzata
+            </p>
+            <h2 className="mt-2 text-3xl font-semibold text-white">
+              Disegna la tua area sulla mappa
+            </h2>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-            <div className="text-white/45">Immobili trovati</div>
-            <div className="mt-1 text-xl font-semibold text-white">
-              {polygonClosed ? matchingProperties.length : '—'}
+          <p className="mt-5 text-base leading-8 text-white/78">
+            Clicca sulla mappa per aggiungere i punti dell’area. Quando vuoi
+            chiudere il poligono, clicca sul primo punto evidenziato.
+          </p>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={handleStartDrawing}
+              className="rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-95"
+            >
+              Disegna la tua area
+            </button>
+
+            <button
+              type="button"
+              onClick={handleUndoLastPoint}
+              disabled={polygonPoints.length === 0 || isClosed}
+              className="rounded-2xl border border-white/14 bg-white/6 px-5 py-3 text-sm text-white/82 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Annulla ultimo punto
+            </button>
+
+            <button
+              type="button"
+              onClick={handleResetArea}
+              disabled={polygonPoints.length === 0 && !isClosed}
+              className="rounded-2xl border border-white/14 bg-white/6 px-5 py-3 text-sm text-white/82 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Reset area
+            </button>
+          </div>
+
+          <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
+            <div className="rounded-[24px] border border-white/12 bg-white/[0.06] p-4">
+              <div className="text-white/55">Punti area</div>
+              <div className="mt-3 text-4xl font-semibold text-white">
+                {polygonPoints.length}
+              </div>
+            </div>
+
+            <div className="rounded-[24px] border border-white/12 bg-white/[0.06] p-4">
+              <div className="text-white/55">Immobili trovati</div>
+              <div className="mt-3 text-4xl font-semibold text-white">
+                {polygonClosed ? matchingProperties.length : '—'}
+              </div>
             </div>
           </div>
+
+          {drawingEnabled && (
+            <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+              Modalità disegno attiva: clicca sulla mappa per aggiungere i vertici.
+            </div>
+          )}
+
+          {polygonClosed && (
+            <div className="mt-5 rounded-2xl border border-sky-400/20 bg-sky-500/10 px-4 py-3 text-sm text-sky-100">
+              Area chiusa correttamente. Ora puoi vedere gli immobili contenuti nella zona selezionata.
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleShowResults}
+            disabled={!polygonClosed}
+            className="mt-5 w-full rounded-2xl bg-sky-400 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Vedi {matchingProperties.length} immobili
+          </button>
         </div>
-
-        {drawingEnabled && (
-          <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-            Modalità disegno attiva: clicca sulla mappa per aggiungere i vertici.
-          </div>
-        )}
-
-        {polygonClosed && (
-          <div className="rounded-2xl border border-sky-400/20 bg-sky-500/10 px-4 py-3 text-sm text-sky-100">
-            Area chiusa correttamente. Ora puoi vedere gli immobili contenuti nella zona selezionata.
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={handleShowResults}
-          disabled={!polygonClosed}
-          className="rounded-2xl bg-sky-400 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          Vedi {matchingProperties.length} immobili
-        </button>
       </div>
 
       <MapContainer
@@ -348,9 +354,7 @@ export default function AreaDrawMap({ properties }: Props) {
         />
 
         {properties.map((property) => {
-          if (!isValidMapProperty(property)) {
-            return null
-          }
+          if (!isValidMapProperty(property)) return null
 
           return (
             <Marker

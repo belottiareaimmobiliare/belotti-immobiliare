@@ -220,3 +220,16 @@ html[data-theme='light'] .theme-pill:hover {
 .leaflet-popup {
   z-index: 2 !important;
 }
+
+.leaflet-control-container .leaflet-top,
+.leaflet-control-container .leaflet-bottom {
+  z-index: 20 !important;
+}
+
+.leaflet-left .leaflet-control {
+  margin-left: 14px !important;
+}
+
+.leaflet-top .leaflet-control {
+  margin-top: 14px !important;
+}
