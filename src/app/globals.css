@@ -173,10 +173,36 @@ body {
 }
 
 .theme-pill-active {
-  background: var(--site-surface-3);
-  border: 1px solid var(--site-border-strong);
-  color: var(--site-text);
-  box-shadow: var(--site-button-shadow);
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #111111;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+}
+
+html[data-theme='light'] .theme-pill-active {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 252, 245, 0.98) 0%,
+    rgba(243, 231, 205, 0.98) 100%
+  );
+  color: #17130d;
+  border-color: rgba(181, 138, 58, 0.24);
+  box-shadow:
+    0 0 0 1px rgba(181, 138, 58, 0.08),
+    0 14px 34px rgba(181, 138, 58, 0.12);
+}
+
+html[data-theme='dark'] .theme-pill[aria-pressed='true'],
+html[data-theme='dark'] .theme-pill-active {
+  color: #111111;
+}
+
+html[data-theme='light'] .theme-pill {
+  color: rgba(25, 22, 17, 0.78);
+}
+
+html[data-theme='dark'] .theme-pill {
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .theme-input {
@@ -381,6 +407,11 @@ html[data-theme='light'] .theme-admin-button-primary {
   color: white;
 }
 
+.site-footer-force-dark {
+  background: #010409 !important;
+  color: #ffffff !important;
+}
+
 /* ---------- LEAFLET ---------- */
 
 .leaflet-container {
@@ -459,6 +490,8 @@ html[data-theme='light'] .leaflet-tooltip {
   border: 1px solid rgba(181,138,58,0.20);
 }
 
+/* ---------- HEADER / TOGGLE ---------- */
+
 .site-header-solid {
   background:
     linear-gradient(180deg, rgba(4, 10, 18, 0.96) 0%, rgba(4, 10, 18, 0.94) 100%);
@@ -469,11 +502,6 @@ html[data-theme='light'] .leaflet-tooltip {
 html[data-theme='light'] .site-header-solid {
   background:
     linear-gradient(180deg, rgba(251, 248, 241, 0.96) 0%, rgba(246, 242, 232, 0.94) 100%);
-}
-
-.site-footer-force-dark {
-  background: #010409 !important;
-  color: #ffffff !important;
 }
 
 .theme-toggle-button {
@@ -491,58 +519,7 @@ html[data-theme='dark'] .theme-toggle-button {
   color: #ffffff;
 }
 
-.theme-toggle-button {
-  border: 1px solid var(--site-border);
-  background: var(--site-surface-2);
-  color: var(--site-text);
-  box-shadow: var(--site-button-shadow);
-}
-
-.theme-panel {
-  background: var(--site-surface);
-  border: 1px solid var(--site-border);
-}
-
-.theme-pill {
-  background: var(--site-surface-2);
-  border: 1px solid var(--site-border);
-  color: var(--site-text-soft);
-}
-
-.theme-pill-active {
-  background: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: #111111;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
-}
-
-html[data-theme='light'] .theme-pill-active {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 252, 245, 0.98) 0%,
-    rgba(243, 231, 205, 0.98) 100%
-  );
-  color: #17130d;
-  border-color: rgba(181, 138, 58, 0.24);
-  box-shadow:
-    0 0 0 1px rgba(181, 138, 58, 0.08),
-    0 14px 34px rgba(181, 138, 58, 0.12);
-}
-
-/* switch leggibile meglio anche in dark */
-html[data-theme='dark'] .theme-pill[aria-pressed='true'],
-html[data-theme='dark'] .theme-pill-active {
-  color: #111111;
-}
-
-/* opzionale: rende più chiari i testi dei label nei filtri */
-html[data-theme='light'] .theme-pill {
-  color: rgba(25, 22, 17, 0.78);
-}
-
-html[data-theme='dark'] .theme-pill {
-  color: rgba(255, 255, 255, 0.82);
-}
+/* ---------- LIQUID BUTTON ---------- */
 
 .liquid-button {
   position: relative;
@@ -559,22 +536,20 @@ html[data-theme='dark'] .theme-pill {
 .liquid-button::before {
   content: '';
   position: absolute;
-  left: -12%;
-  bottom: -140%;
-  width: 124%;
-  height: 220%;
+  left: -10%;
+  bottom: -165%;
+  width: 120%;
+  height: 240%;
   z-index: 0;
   pointer-events: none;
-
   background: currentColor;
-  opacity: 0.14;
-
-  border-radius: 42% 58% 48% 52% / 58% 42% 58% 42%;
+  opacity: 0;
+  border-radius: 46% 54% 52% 48% / 58% 42% 58% 42%;
   transform: translateY(0) scale(1);
   transition:
-    transform 900ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-radius 900ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 260ms ease;
+    transform 1000ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 1000ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 220ms ease;
 }
 
 .liquid-button::after {
@@ -584,7 +559,6 @@ html[data-theme='dark'] .theme-pill {
   z-index: 0;
   pointer-events: none;
   background: transparent;
-  transition: background-color 180ms ease;
 }
 
 .liquid-button > * {
@@ -593,79 +567,29 @@ html[data-theme='dark'] .theme-pill {
 }
 
 .liquid-button:hover::before {
-  transform: translateY(-34%);
-  border-radius: 58% 42% 60% 40% / 42% 58% 38% 62%;
-  opacity: 0.22;
+  opacity: 0.18;
+  transform: translateY(-32%);
+  border-radius: 58% 42% 62% 38% / 40% 60% 42% 58%;
 }
 
-.liquid-button:active::before,
-.liquid-button.is-active::before {
-  transform: translateY(-78%);
-  border-radius: 26px;
+.liquid-button:active::before {
   opacity: 0.28;
-}
-
-.liquid-button:active {
-  transform: translateY(1px);
-}
-
-.liquid-button {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  transition:
-    color 220ms ease,
-    border-color 220ms ease,
-    background-color 220ms ease,
-    box-shadow 220ms ease,
-    transform 160ms ease;
-}
-
-.liquid-button::before {
-  content: '';
-  position: absolute;
-  left: -12%;
-  bottom: -140%;
-  width: 124%;
-  height: 220%;
-  z-index: 0;
-  pointer-events: none;
-  background: currentColor;
-  opacity: 0.14;
-  border-radius: 42% 58% 48% 52% / 58% 42% 58% 42%;
-  transform: translateY(0) scale(1);
-  transition:
-    transform 900ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-radius 900ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 260ms ease;
-}
-
-.liquid-button::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: transparent;
-  transition: background-color 180ms ease;
-}
-
-.liquid-button > * {
-  position: relative;
-  z-index: 1;
-}
-
-.liquid-button:hover::before {
-  transform: translateY(-34%);
-  border-radius: 58% 42% 60% 40% / 42% 58% 38% 62%;
-  opacity: 0.22;
-}
-
-.liquid-button:active::before,
-.liquid-button.is-active::before {
   transform: translateY(-78%);
-  border-radius: 26px;
-  opacity: 0.28;
+  border-radius: 24px;
+  transition:
+    transform 220ms ease,
+    border-radius 220ms ease,
+    opacity 160ms ease;
+}
+
+.liquid-button.is-active::before {
+  opacity: 0.24;
+  transform: translateY(-78%);
+  border-radius: 24px;
+  transition:
+    transform 260ms ease,
+    border-radius 260ms ease,
+    opacity 180ms ease;
 }
 
 .liquid-button:active {
