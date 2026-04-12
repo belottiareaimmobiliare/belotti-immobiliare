@@ -17,8 +17,8 @@ export default function HomeSearchBoxDesktop() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const [contractType, setContractType] = useState<'sale' | 'rent'>(
-    searchParams.get('contractType') === 'rent' ? 'rent' : 'sale'
+  const [contractType, setContractType] = useState<'vendita' | 'affitto'>(
+    searchParams.get('contractType') === 'affitto' ? 'affitto' : 'vendita'
   )
   const [q, setQ] = useState(searchParams.get('q') || '')
   const [propertyType, setPropertyType] = useState(searchParams.get('propertyType') || '')
@@ -31,7 +31,7 @@ export default function HomeSearchBoxDesktop() {
     []
   )
 
-  const goToSearch = () => {
+  const buildSearchParams = () => {
     const params = new URLSearchParams()
 
     params.set('contractType', contractType)
@@ -42,32 +42,19 @@ export default function HomeSearchBoxDesktop() {
     if (maxPrice.trim()) params.set('maxPrice', maxPrice.trim())
     if (minRooms.trim()) params.set('minRooms', minRooms.trim())
 
-    router.push(`/immobili?${params.toString()}`)
+    return params.toString()
+  }
+
+  const goToSearch = () => {
+    router.push(`/immobili?${buildSearchParams()}`)
   }
 
   const goToAdvancedSearch = () => {
-    const params = new URLSearchParams()
-
-    params.set('contractType', contractType)
-
-    if (q.trim()) params.set('q', q.trim())
-    if (propertyType) params.set('propertyType', propertyType)
-    if (province) params.set('province', province)
-    if (maxPrice.trim()) params.set('maxPrice', maxPrice.trim())
-    if (minRooms.trim()) params.set('minRooms', minRooms.trim())
-
-    router.push(`/immobili?${params.toString()}`)
+    router.push(`/immobili?${buildSearchParams()}`)
   }
 
   return (
-    <section
-      className="rounded-[34px] border p-6 backdrop-blur-xl"
-      style={{
-        background: 'var(--site-surface-2)',
-        borderColor: 'var(--site-border)',
-        boxShadow: 'var(--site-card-shadow)',
-      }}
-    >
+    <section className="rounded-[34px] p-6">
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.28em] text-[var(--site-text-faint)]">
@@ -93,9 +80,11 @@ export default function HomeSearchBoxDesktop() {
       <div className="mb-5 flex flex-wrap gap-3">
         <button
           type="button"
-          onClick={() => setContractType('sale')}
+          onClick={() => setContractType('vendita')}
           className={`rounded-[18px] px-6 py-3 text-base font-medium transition ${
-            contractType === 'sale' ? 'theme-pill-active' : 'theme-pill'
+            contractType === 'vendita'
+              ? 'theme-pill-active border'
+              : 'theme-pill border'
           }`}
         >
           Cerca in Vendita
@@ -103,9 +92,11 @@ export default function HomeSearchBoxDesktop() {
 
         <button
           type="button"
-          onClick={() => setContractType('rent')}
+          onClick={() => setContractType('affitto')}
           className={`rounded-[18px] px-6 py-3 text-base font-medium transition ${
-            contractType === 'rent' ? 'theme-pill-active' : 'theme-pill'
+            contractType === 'affitto'
+              ? 'theme-pill-active border'
+              : 'theme-pill border'
           }`}
         >
           Cerca in Affitto
@@ -114,7 +105,7 @@ export default function HomeSearchBoxDesktop() {
         <button
           type="button"
           onClick={() => router.push('/immobili?mapMode=zones')}
-          className="theme-button-secondary rounded-[18px] px-6 py-3 text-base font-medium transition"
+          className="theme-pill rounded-[18px] border px-6 py-3 text-base font-medium transition"
         >
           Seleziona zone
         </button>
@@ -122,24 +113,23 @@ export default function HomeSearchBoxDesktop() {
         <button
           type="button"
           onClick={() => router.push('/immobili/mappa-area')}
-          className="group relative hidden min-w-[220px] shrink-0 overflow-hidden rounded-[18px] border shadow-[0_12px_28px_rgba(0,0,0,0.12)] transition hover:scale-[1.02] md:inline-flex"
-          style={{ borderColor: 'var(--site-border)' }}
+          className="group relative hidden min-w-[220px] shrink-0 overflow-hidden rounded-[18px] border border-[var(--site-border)] shadow-[var(--site-card-shadow)] transition hover:scale-[1.02] md:inline-flex"
         >
           <div className="absolute inset-0 bg-[url('/images/map-card-bg.jpg')] bg-cover bg-center opacity-100" />
-          <div className="absolute inset-0 bg-white/45 backdrop-blur-[2px]" />
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.34)_0%,rgba(255,255,255,0.16)_100%)]" />
+          <div className="absolute inset-0 bg-white/55 backdrop-blur-[2px] dark:bg-white/20" />
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.28)_0%,rgba(255,255,255,0.08)_100%)]" />
 
           <div className="relative flex w-full items-center justify-between gap-4 px-5 py-3">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-black/55">
+              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-black/55 dark:text-white/70">
                 Ricerca su mappa
               </p>
-              <p className="mt-1 text-sm font-semibold text-black">
+              <p className="mt-1 text-sm font-semibold text-black dark:text-white">
                 Vai alla mappa
               </p>
             </div>
 
-            <div className="rounded-full border border-black/10 bg-black px-3 py-2 text-xs font-semibold text-white transition group-hover:translate-x-0.5">
+            <div className="rounded-full bg-black px-3 py-2 text-xs font-semibold text-white transition group-hover:translate-x-0.5 dark:border dark:border-white/10">
               Apri
             </div>
           </div>
@@ -155,7 +145,7 @@ export default function HomeSearchBoxDesktop() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Titolo, zona, keyword..."
-            className="theme-input w-full rounded-[18px] px-5 py-3.5 text-base outline-none"
+            className="theme-input w-full rounded-[18px] border px-5 py-3.5 text-base placeholder:text-[var(--site-text-faint)]"
           />
         </div>
 
@@ -166,7 +156,7 @@ export default function HomeSearchBoxDesktop() {
           <select
             value={propertyType}
             onChange={(e) => setPropertyType(e.target.value)}
-            className="theme-input w-full rounded-[18px] px-5 py-3.5 text-base outline-none"
+            className="theme-input w-full rounded-[18px] border px-5 py-3.5 text-base outline-none"
           >
             <option value="">Qualsiasi</option>
             <option value="appartamento">Appartamento</option>
@@ -186,7 +176,7 @@ export default function HomeSearchBoxDesktop() {
           <select
             value={province}
             onChange={(e) => setProvince(e.target.value)}
-            className="theme-input w-full rounded-[18px] px-5 py-3.5 text-base outline-none"
+            className="theme-input w-full rounded-[18px] border px-5 py-3.5 text-base outline-none"
           >
             <option value="">Qualsiasi provincia</option>
             {provinceOptions.map((item) => (
@@ -205,7 +195,7 @@ export default function HomeSearchBoxDesktop() {
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
             placeholder="Es. 300000"
-            className="theme-input w-full rounded-[18px] px-5 py-3.5 text-base outline-none"
+            className="theme-input w-full rounded-[18px] border px-5 py-3.5 text-base placeholder:text-[var(--site-text-faint)]"
           />
         </div>
 
@@ -217,7 +207,7 @@ export default function HomeSearchBoxDesktop() {
             value={minRooms}
             onChange={(e) => setMinRooms(e.target.value)}
             placeholder="Es. 3"
-            className="theme-input w-full rounded-[18px] px-5 py-3.5 text-base outline-none"
+            className="theme-input w-full rounded-[18px] border px-5 py-3.5 text-base placeholder:text-[var(--site-text-faint)]"
           />
         </div>
 
@@ -225,7 +215,7 @@ export default function HomeSearchBoxDesktop() {
           <button
             type="button"
             onClick={goToSearch}
-            className="theme-button-primary w-full rounded-[18px] px-6 py-3.5 text-base font-semibold transition hover:opacity-90"
+            className="theme-button-primary w-full rounded-[18px] px-6 py-3.5 text-base font-semibold transition hover:opacity-95"
           >
             Cerca
           </button>

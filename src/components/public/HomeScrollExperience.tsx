@@ -94,16 +94,16 @@ export default function HomeScrollExperience() {
     }
   }, [isMobile])
 
-  const searchHold = segment(progress, 0.0, 0.58)
-  const searchFade = segment(progress, 0.58, 0.78)
+  const searchHold = segment(progress, 0.0, 0.54)
+  const searchFade = segment(progress, 0.54, 0.76)
 
-  const panelCompact = segment(progress, 0.60, 0.72)
-  const panelRise = segment(progress, 0.68, 0.82)
-  const panelReadableHold = segment(progress, 0.82, 0.9)
-  const panelFade = segment(progress, 0.9, 0.96)
+  const panelCompact = segment(progress, 0.53, 0.69)
+  const panelRise = segment(progress, 0.60, 0.81)
+  const panelReadableHold = segment(progress, 0.81, 0.90)
+  const panelFade = segment(progress, 0.90, 0.965)
 
-  const footerShellRise = segment(progress, 0.94, 0.985)
-  const footerIn = segment(progress, 0.965, 1)
+  const footerShellRise = segment(progress, 0.945, 0.985)
+  const footerIn = segment(progress, 0.97, 1)
 
   const searchOpacity = 1 - searchFade
   const searchTranslateY = -(searchFade * 72)
@@ -136,20 +136,13 @@ export default function HomeScrollExperience() {
   if (isMobile) {
     return (
       <section
-        className="px-4 py-5"
+        className="px-4 py-5 transition-colors duration-300"
         style={{
           background:
-            'linear-gradient(180deg, var(--site-bg) 0%, var(--site-bg-soft) 35%, var(--site-bg) 100%)',
+            'linear-gradient(180deg,var(--site-bg-soft) 0%, var(--site-bg) 38%, var(--site-bg) 72%, #010409 100%)',
         }}
       >
-        <div
-          className="rounded-[30px] border backdrop-blur-xl"
-          style={{
-            background: 'var(--site-surface-2)',
-            borderColor: 'var(--site-border)',
-            boxShadow: 'var(--site-card-shadow)',
-          }}
-        >
+        <div className="theme-panel rounded-[30px] border shadow-[var(--site-card-shadow)] backdrop-blur-2xl">
           <Suspense fallback={<SearchBoxFallback />}>
             <HomeSearchBoxMobile />
           </Suspense>
@@ -159,12 +152,7 @@ export default function HomeScrollExperience() {
           {panels.map((panel) => (
             <article
               key={panel.title}
-              className="rounded-[24px] border px-5 py-6 backdrop-blur-xl"
-              style={{
-                background: 'var(--site-surface-2)',
-                borderColor: 'var(--site-border)',
-                boxShadow: 'var(--site-card-shadow)',
-              }}
+              className="theme-panel rounded-[24px] border px-5 py-6 shadow-[var(--site-card-shadow)]"
             >
               <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-[var(--site-text-faint)]">
                 {panel.eyebrow}
@@ -191,10 +179,10 @@ export default function HomeScrollExperience() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-[430vh]"
+      className="relative h-[430vh] transition-colors duration-300"
       style={{
         background:
-          'linear-gradient(180deg, var(--site-bg) 0%, var(--site-bg-soft) 26%, var(--site-bg) 58%, #010409 100%)',
+          'linear-gradient(180deg,var(--site-bg-soft) 0%, var(--site-bg) 26%, var(--site-bg) 58%, color-mix(in srgb, var(--site-bg) 78%, #010409 22%) 82%, #010409 100%)',
       }}
     >
       <div className="sticky top-[78px] h-[calc(100vh-78px)] overflow-hidden">
@@ -207,14 +195,7 @@ export default function HomeScrollExperience() {
             }}
             className="relative z-30 transition-[opacity,transform] duration-200"
           >
-            <div
-              className="overflow-hidden rounded-[36px] border backdrop-blur-xl"
-              style={{
-                background: 'var(--site-surface-2)',
-                borderColor: 'var(--site-border)',
-                boxShadow: 'var(--site-card-shadow)',
-              }}
-            >
+            <div className="theme-panel overflow-hidden rounded-[36px] border shadow-[var(--site-card-shadow)] backdrop-blur-xl">
               <Suspense fallback={<SearchBoxFallback />}>
                 <div className="hidden md:block">
                   <HomeSearchBoxDesktop />
@@ -238,13 +219,8 @@ export default function HomeScrollExperience() {
               {panels.map((panel, index) => (
                 <article
                   key={panel.title}
-                  style={{
-                    ...panelStyles[index],
-                    background: 'var(--site-surface-2)',
-                    borderColor: 'var(--site-border)',
-                    boxShadow: 'var(--site-card-shadow)',
-                  }}
-                  className={`${panel.className} rounded-[28px] border px-7 py-8 backdrop-blur-xl transition-[transform] duration-200 md:px-8 md:py-9`}
+                  style={panelStyles[index]}
+                  className={`${panel.className} theme-panel rounded-[28px] border px-7 py-8 shadow-[var(--site-card-shadow)] transition-[transform] duration-200 md:px-8 md:py-9`}
                 >
                   <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-[var(--site-text-faint)]">
                     {panel.eyebrow}
