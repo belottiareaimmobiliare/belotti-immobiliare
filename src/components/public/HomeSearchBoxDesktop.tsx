@@ -111,29 +111,29 @@ export default function HomeSearchBoxDesktop() {
         </button>
 
         <button
-          type="button"
-          onClick={() => router.push('/immobili/mappa-area')}
-          className="group relative hidden min-w-[220px] shrink-0 overflow-hidden rounded-[18px] border border-[var(--site-border)] shadow-[var(--site-card-shadow)] transition hover:scale-[1.02] md:inline-flex"
-        >
-          <div className="absolute inset-0 bg-[url('/images/map-card-bg.jpg')] bg-cover bg-center opacity-100" />
-          <div className="absolute inset-0 bg-white/55 backdrop-blur-[2px] dark:bg-white/20" />
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.28)_0%,rgba(255,255,255,0.08)_100%)]" />
+  type="button"
+  onClick={() => router.push('/immobili/mappa-area')}
+  className="group relative hidden min-w-[220px] shrink-0 overflow-hidden rounded-[18px] border border-white/10 shadow-[0_12px_28px_rgba(0,0,0,0.18)] transition hover:scale-[1.02] md:inline-flex"
+>
+  <div className="absolute inset-0 bg-[url('/images/map-card-bg.jpg')] bg-cover bg-center opacity-100" />
+  <div className="absolute inset-0 bg-white/35 backdrop-blur-[1.5px]" />
+  <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.25)_0%,rgba(255,255,255,0.05)_100%)]" />
 
-          <div className="relative flex w-full items-center justify-between gap-4 px-5 py-3">
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-black/55 dark:text-white/70">
-                Ricerca su mappa
-              </p>
-              <p className="mt-1 text-sm font-semibold text-black dark:text-white">
-                Vai alla mappa
-              </p>
-            </div>
+  <div className="relative flex w-full items-center justify-between gap-4 px-5 py-3">
+    <div>
+      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-black/60">
+        Ricerca su mappa
+      </p>
+      <p className="mt-1 text-sm font-semibold text-black">
+        Vai alla mappa
+      </p>
+    </div>
 
-            <div className="rounded-full bg-black px-3 py-2 text-xs font-semibold text-white transition group-hover:translate-x-0.5 dark:border dark:border-white/10">
-              Apri
-            </div>
-          </div>
-        </button>
+    <div className="rounded-full border border-black/10 bg-black px-3 py-2 text-xs font-semibold text-white transition group-hover:translate-x-0.5">
+      Apri
+    </div>
+  </div>
+</button>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.3fr_1fr_1fr_0.9fr_0.9fr_auto]">
