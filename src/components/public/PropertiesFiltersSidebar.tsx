@@ -237,34 +237,40 @@ export default function PropertiesFiltersSidebar({
           <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-1">
             <div className="grid grid-cols-2 gap-2">
               <button
-                type="button"
-                onClick={() => setContractType('vendita')}
-                className={`theme-pill liquid-button liquid-button-vertical rounded-xl border px-4 py-3 text-sm transition ${
-                  contractType === 'vendita' ? 'liquid-button-selected' : ''
-                }`}
-              >
-                <span>Vendita</span>
-              </button>
+  type="button"
+  onClick={() => setContractType('vendita')}
+  data-active={contractType === 'vendita' ? 'true' : 'false'}
+  className={`rounded-xl px-4 py-3 text-sm transition liquid-button ${
+    contractType === 'vendita'
+      ? 'theme-pill-active border'
+      : 'theme-pill border'
+  }`}
+>
+  Vendita
+</button>
 
-              <button
-                type="button"
-                onClick={() => setContractType('affitto')}
-                className={`theme-pill liquid-button liquid-button-vertical rounded-xl border px-4 py-3 text-sm transition ${
-                  contractType === 'affitto' ? 'liquid-button-selected' : ''
-                }`}
-              >
-                <span>Affitto</span>
-              </button>
+<button
+  type="button"
+  onClick={() => setContractType('affitto')}
+  data-active={contractType === 'affitto' ? 'true' : 'false'}
+  className={`rounded-xl px-4 py-3 text-sm transition liquid-button ${
+    contractType === 'affitto'
+      ? 'theme-pill-active border'
+      : 'theme-pill border'
+  }`}
+>
+  Affitto
+</button>
             </div>
           </div>
 
           <button
-            type="button"
-            onClick={() => setContractType('')}
-            className="theme-pill liquid-button liquid-button-vertical w-full rounded-2xl border px-4 py-3 text-sm transition"
-          >
-            <span>Qualsiasi contratto</span>
-          </button>
+  type="button"
+  onClick={() => setContractType('')}
+  className="theme-pill liquid-button w-full rounded-2xl border px-4 py-3 text-sm transition"
+>
+  Qualsiasi contratto
+</button>
         </div>
 
         <div>
@@ -472,19 +478,19 @@ export default function PropertiesFiltersSidebar({
 
         <div className="flex flex-col gap-3">
           <button
-            type="submit"
-            className="theme-button-primary liquid-button liquid-button-vertical w-full rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95"
-          >
-            <span>Applica filtri</span>
-          </button>
+  type="submit"
+  className="theme-button-primary liquid-button w-full rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95"
+>
+  Applica filtri
+</button>
 
-          <button
-            type="button"
-            onClick={handleResetFilters}
-            className="theme-button-secondary liquid-button liquid-button-vertical w-full rounded-2xl px-5 py-3 text-sm transition"
-          >
-            <span>Reset filtri</span>
-          </button>
+<button
+  type="button"
+  onClick={handleResetFilters}
+  className="theme-button-secondary liquid-button w-full rounded-2xl px-5 py-3 text-sm transition"
+>
+  Reset filtri
+</button>
 
           {hideLocationFilters && (
             <button
