@@ -4,6 +4,7 @@ import { FormEvent, useMemo, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import italyLocations from '@/data/italyLocations.json'
 import FilterSwitch from '@/components/public/FilterSwitch'
+import LiquidButton from '@/components/shared/LiquidButton'
 
 type ProvinceItem = {
   name: string
@@ -203,7 +204,9 @@ export default function PropertiesFiltersSidebar({
       {hideLocationFilters && (
         <div className="mt-4 space-y-3">
           <div className="rounded-[24px] border border-[var(--site-border)] bg-[var(--site-surface-2)] px-4 py-3 text-sm text-[var(--site-text-soft)]">
-            <div className="font-medium text-[var(--site-text)]">Ricerca per area attiva</div>
+            <div className="font-medium text-[var(--site-text)]">
+              Ricerca per area attiva
+            </div>
             <div className="mt-1 text-[var(--site-text-muted)]">
               Stai visualizzando gli immobili contenuti nella zona che hai disegnato sulla mappa.
               I filtri di provincia e comuni sono nascosti per evitare conflitti con l’area selezionata.
@@ -234,41 +237,40 @@ export default function PropertiesFiltersSidebar({
         </div>
 
         <div className="grid gap-3">
-          <div className="theme-panel rounded-2xl border p-1">
+          <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-1">
             <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
+              <LiquidButton
+                active={contractType === 'vendita'}
                 onClick={() => setContractType('vendita')}
-                className={`rounded-xl px-4 py-3 text-sm transition ${
+                className={
                   contractType === 'vendita'
-                    ? 'theme-pill-active border'
-                    : 'theme-pill border'
-                }`}
+                    ? 'theme-pill-active w-full border text-sm'
+                    : 'theme-pill w-full border text-sm'
+                }
               >
                 Vendita
-              </button>
+              </LiquidButton>
 
-              <button
-                type="button"
+              <LiquidButton
+                active={contractType === 'affitto'}
                 onClick={() => setContractType('affitto')}
-                className={`rounded-xl px-4 py-3 text-sm transition ${
+                className={
                   contractType === 'affitto'
-                    ? 'theme-pill-active border'
-                    : 'theme-pill border'
-                }`}
+                    ? 'theme-pill-active w-full border text-sm'
+                    : 'theme-pill w-full border text-sm'
+                }
               >
                 Affitto
-              </button>
+              </LiquidButton>
             </div>
           </div>
 
-          <button
-            type="button"
+          <LiquidButton
             onClick={() => setContractType('')}
-            className="theme-pill w-full rounded-2xl border px-4 py-3 text-sm transition"
+            className="theme-pill w-full rounded-2xl border text-sm"
           >
             Qualsiasi contratto
-          </button>
+          </LiquidButton>
         </div>
 
         <div>
