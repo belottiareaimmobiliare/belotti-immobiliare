@@ -490,3 +490,56 @@ html[data-theme='light'] .theme-toggle-button {
 html[data-theme='dark'] .theme-toggle-button {
   color: #ffffff;
 }
+
+.theme-toggle-button {
+  border: 1px solid var(--site-border);
+  background: var(--site-surface-2);
+  color: var(--site-text);
+  box-shadow: var(--site-button-shadow);
+}
+
+.theme-panel {
+  background: var(--site-surface);
+  border: 1px solid var(--site-border);
+}
+
+.theme-pill {
+  background: var(--site-surface-2);
+  border: 1px solid var(--site-border);
+  color: var(--site-text-soft);
+}
+
+.theme-pill-active {
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #111111;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+}
+
+html[data-theme='light'] .theme-pill-active {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 252, 245, 0.98) 0%,
+    rgba(243, 231, 205, 0.98) 100%
+  );
+  color: #17130d;
+  border-color: rgba(181, 138, 58, 0.24);
+  box-shadow:
+    0 0 0 1px rgba(181, 138, 58, 0.08),
+    0 14px 34px rgba(181, 138, 58, 0.12);
+}
+
+/* switch leggibile meglio anche in dark */
+html[data-theme='dark'] .theme-pill[aria-pressed='true'],
+html[data-theme='dark'] .theme-pill-active {
+  color: #111111;
+}
+
+/* opzionale: rende più chiari i testi dei label nei filtri */
+html[data-theme='light'] .theme-pill {
+  color: rgba(25, 22, 17, 0.78);
+}
+
+html[data-theme='dark'] .theme-pill {
+  color: rgba(255, 255, 255, 0.82);
+}

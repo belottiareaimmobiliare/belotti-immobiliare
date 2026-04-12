@@ -234,7 +234,7 @@ export default function PropertiesFiltersSidebar({
         </div>
 
         <div className="grid gap-3">
-          <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-1">
+          <div className="theme-panel rounded-2xl border p-1">
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"

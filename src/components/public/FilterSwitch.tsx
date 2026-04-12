@@ -11,25 +11,23 @@ export default function FilterSwitch({ checked, onChange, label }: Props) {
     <button
       type="button"
       onClick={() => onChange(!checked)}
-      className="flex w-full items-center justify-between rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] px-4 py-3 text-left transition hover:bg-[var(--site-surface-3)]"
       aria-pressed={checked}
+      className="theme-pill flex w-full items-center justify-between gap-4 rounded-2xl border px-4 py-3 text-left text-sm transition"
     >
-      <span className="text-sm font-medium text-[var(--site-text)]">
-        {label}
-      </span>
+      <span className="text-[var(--site-text-soft)]">{label}</span>
 
       <span
-        className={`relative h-7 w-12 rounded-full border transition ${
+        className={`relative inline-flex h-7 w-12 shrink-0 rounded-full border transition-all duration-200 ${
           checked
-            ? 'border-[var(--site-accent)] bg-[var(--site-accent)]/20'
-            : 'border-[var(--site-border)] bg-[var(--site-surface)]'
+            ? 'border-[var(--site-gold)] bg-[var(--site-gold)]'
+            : 'border-[var(--site-border-strong)] bg-[var(--site-surface-2)]'
         }`}
       >
         <span
-          className={`absolute top-1 h-5 w-5 rounded-full transition ${
+          className={`absolute top-1 h-5 w-5 rounded-full shadow transition-all duration-200 ${
             checked
-              ? 'left-6 bg-[var(--site-accent)] shadow-[0_0_0_1px_rgba(0,0,0,0.04)]'
-              : 'left-1 bg-[var(--site-text)]/88'
+              ? 'left-6 bg-[#0b0f17]'
+              : 'left-1 bg-white'
           }`}
         />
       </span>
