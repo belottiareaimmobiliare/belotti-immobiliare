@@ -4,7 +4,6 @@ import { FormEvent, useMemo, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import italyLocations from '@/data/italyLocations.json'
 import FilterSwitch from '@/components/public/FilterSwitch'
-import LiquidButton from '@/components/shared/LiquidButton'
 
 type ProvinceItem = {
   name: string
@@ -204,9 +203,7 @@ export default function PropertiesFiltersSidebar({
       {hideLocationFilters && (
         <div className="mt-4 space-y-3">
           <div className="rounded-[24px] border border-[var(--site-border)] bg-[var(--site-surface-2)] px-4 py-3 text-sm text-[var(--site-text-soft)]">
-            <div className="font-medium text-[var(--site-text)]">
-              Ricerca per area attiva
-            </div>
+            <div className="font-medium text-[var(--site-text)]">Ricerca per area attiva</div>
             <div className="mt-1 text-[var(--site-text-muted)]">
               Stai visualizzando gli immobili contenuti nella zona che hai disegnato sulla mappa.
               I filtri di provincia e comuni sono nascosti per evitare conflitti con l’area selezionata.
@@ -216,9 +213,9 @@ export default function PropertiesFiltersSidebar({
           <button
             type="button"
             onClick={handleResetMap}
-            className="theme-button-secondary w-full rounded-2xl px-5 py-3 text-sm font-medium transition"
+            className="theme-button-secondary liquid-button liquid-button-vertical w-full rounded-2xl px-5 py-3 text-sm font-medium transition"
           >
-            Rimuovi area disegnata
+            <span>Rimuovi area disegnata</span>
           </button>
         </div>
       )}
@@ -239,38 +236,35 @@ export default function PropertiesFiltersSidebar({
         <div className="grid gap-3">
           <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-1">
             <div className="grid grid-cols-2 gap-2">
-              <LiquidButton
-                active={contractType === 'vendita'}
+              <button
+                type="button"
                 onClick={() => setContractType('vendita')}
-                className={
-                  contractType === 'vendita'
-                    ? 'theme-pill-active w-full border text-sm'
-                    : 'theme-pill w-full border text-sm'
-                }
+                className={`theme-pill liquid-button liquid-button-vertical rounded-xl border px-4 py-3 text-sm transition ${
+                  contractType === 'vendita' ? 'liquid-button-selected' : ''
+                }`}
               >
-                Vendita
-              </LiquidButton>
+                <span>Vendita</span>
+              </button>
 
-              <LiquidButton
-                active={contractType === 'affitto'}
+              <button
+                type="button"
                 onClick={() => setContractType('affitto')}
-                className={
-                  contractType === 'affitto'
-                    ? 'theme-pill-active w-full border text-sm'
-                    : 'theme-pill w-full border text-sm'
-                }
+                className={`theme-pill liquid-button liquid-button-vertical rounded-xl border px-4 py-3 text-sm transition ${
+                  contractType === 'affitto' ? 'liquid-button-selected' : ''
+                }`}
               >
-                Affitto
-              </LiquidButton>
+                <span>Affitto</span>
+              </button>
             </div>
           </div>
 
-          <LiquidButton
+          <button
+            type="button"
             onClick={() => setContractType('')}
-            className="theme-pill w-full rounded-2xl border text-sm"
+            className="theme-pill liquid-button liquid-button-vertical w-full rounded-2xl border px-4 py-3 text-sm transition"
           >
-            Qualsiasi contratto
-          </LiquidButton>
+            <span>Qualsiasi contratto</span>
+          </button>
         </div>
 
         <div>
@@ -348,9 +342,11 @@ export default function PropertiesFiltersSidebar({
                             key={comune}
                             type="button"
                             onClick={() => toggleComune(comune)}
-                            className="theme-pill rounded-full border px-3 py-2 text-sm transition"
+                            className="theme-pill liquid-button liquid-button-vertical rounded-full border px-3 py-2 text-sm transition"
                           >
-                            {comune} <span className="opacity-60">×</span>
+                            <span>
+                              {comune} <span className="opacity-60">×</span>
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -376,10 +372,8 @@ export default function PropertiesFiltersSidebar({
                               key={comune.code}
                               type="button"
                               onClick={() => toggleComune(comune.name)}
-                              className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm transition ${
-                                selected
-                                  ? 'theme-pill-active border'
-                                  : 'theme-pill border'
+                              className={`theme-pill liquid-button liquid-button-vertical flex w-full items-center justify-between rounded-xl border px-3 py-3 text-left text-sm transition ${
+                                selected ? 'liquid-button-selected' : ''
                               }`}
                             >
                               <span>{comune.name}</span>
@@ -479,26 +473,26 @@ export default function PropertiesFiltersSidebar({
         <div className="flex flex-col gap-3">
           <button
             type="submit"
-            className="theme-button-primary w-full rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95"
+            className="theme-button-primary liquid-button liquid-button-vertical w-full rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95"
           >
-            Applica filtri
+            <span>Applica filtri</span>
           </button>
 
           <button
             type="button"
             onClick={handleResetFilters}
-            className="theme-button-secondary w-full rounded-2xl px-5 py-3 text-sm transition"
+            className="theme-button-secondary liquid-button liquid-button-vertical w-full rounded-2xl px-5 py-3 text-sm transition"
           >
-            Reset filtri
+            <span>Reset filtri</span>
           </button>
 
           {hideLocationFilters && (
             <button
               type="button"
               onClick={handleResetMap}
-              className="theme-button-secondary w-full rounded-2xl px-5 py-3 text-sm transition"
+              className="theme-button-secondary liquid-button liquid-button-vertical w-full rounded-2xl px-5 py-3 text-sm transition"
             >
-              Reset mappa
+              <span>Reset mappa</span>
             </button>
           )}
         </div>

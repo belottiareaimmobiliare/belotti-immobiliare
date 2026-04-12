@@ -519,7 +519,7 @@ html[data-theme='dark'] .theme-toggle-button {
   color: #ffffff;
 }
 
-/* ---------- LIQUID BUTTON ---------- */
+/* ---------- LIQUID BUTTONS ---------- */
 
 .liquid-button {
   position: relative;
@@ -533,65 +533,109 @@ html[data-theme='dark'] .theme-toggle-button {
     transform 160ms ease;
 }
 
+.liquid-button > * {
+  position: relative;
+  z-index: 2;
+}
+
 .liquid-button::before {
   content: '';
   position: absolute;
-  left: -10%;
-  bottom: -165%;
-  width: 120%;
-  height: 240%;
-  z-index: 0;
-  pointer-events: none;
-  background: currentColor;
-  opacity: 0;
-  border-radius: 46% 54% 52% 48% / 58% 42% 58% 42%;
-  transform: translateY(0) scale(1);
-  transition:
-    transform 1000ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-radius 1000ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 220ms ease;
-}
-
-.liquid-button::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: transparent;
-}
-
-.liquid-button > * {
-  position: relative;
   z-index: 1;
-}
-
-.liquid-button:hover::before {
-  opacity: 0.18;
-  transform: translateY(-32%);
-  border-radius: 58% 42% 62% 38% / 40% 60% 42% 58%;
-}
-
-.liquid-button:active::before {
-  opacity: 0.28;
-  transform: translateY(-78%);
-  border-radius: 24px;
+  pointer-events: none;
   transition:
-    transform 220ms ease,
-    border-radius 220ms ease,
-    opacity 160ms ease;
+    transform 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 220ms ease,
+    border-radius 500ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.liquid-button.is-active::before {
-  opacity: 0.24;
-  transform: translateY(-78%);
+/* verticale: basso -> alto con gobba centrale */
+.liquid-button-vertical::before {
+  left: -8%;
+  bottom: -145%;
+  width: 116%;
+  height: 230%;
+  background: rgba(170, 245, 214, 0.92);
+  opacity: 0;
+  border-radius: 48% 52% 42% 58% / 62% 34% 66% 38%;
+  transform: translateY(0);
+}
+
+.liquid-button-vertical:hover::before {
+  opacity: 1;
+  transform: translateY(-28%);
+  border-radius: 44% 56% 38% 62% / 58% 36% 64% 42%;
+}
+
+.liquid-button-vertical:active::before,
+.liquid-button-vertical.is-active::before {
+  opacity: 1;
+  transform: translateY(-76%);
   border-radius: 24px;
-  transition:
-    transform 260ms ease,
-    border-radius 260ms ease,
-    opacity 180ms ease;
 }
 
-.liquid-button:active {
-  transform: translateY(1px);
+/* orizzontale: sinistra -> destra */
+.liquid-button-horizontal::before {
+  left: -135%;
+  top: -8%;
+  width: 230%;
+  height: 116%;
+  background: rgba(170, 245, 214, 0.96);
+  opacity: 0;
+  border-radius: 60% 40% 58% 42% / 44% 56% 40% 60%;
+  transform: translateX(0);
+}
+
+.liquid-button-horizontal:hover::before {
+  opacity: 1;
+  transform: translateX(36%);
+  border-radius: 56% 44% 52% 48% / 42% 58% 46% 54%;
+}
+
+.liquid-button-horizontal:active::before,
+.liquid-button-horizontal.is-active::before {
+  opacity: 1;
+  transform: translateX(88%);
+  border-radius: 24px;
+}
+
+/* testo nero quando parte l'effetto */
+.liquid-button:hover,
+.liquid-button:active,
+.liquid-button.is-active {
+  color: #111111 !important;
+}
+
+/* stato selezionato forte */
+.liquid-button-selected {
+  color: #111111 !important;
+  border-color: rgba(126, 211, 173, 0.55) !important;
+  box-shadow:
+    0 0 0 1px rgba(126, 211, 173, 0.18),
+    0 12px 28px rgba(126, 211, 173, 0.16);
+}
+
+.liquid-button-selected::before {
+  opacity: 1 !important;
+}
+
+.liquid-button-selected.liquid-button-vertical::before {
+  transform: translateY(-76%) !important;
+  border-radius: 24px !important;
+}
+
+.liquid-button-selected.liquid-button-horizontal::before {
+  transform: translateX(88%) !important;
+  border-radius: 24px !important;
+}
+
+/* evita effetto brutto sui disabled */
+.liquid-button:disabled::before,
+.liquid-button[aria-disabled='true']::before {
+  opacity: 0 !important;
+}
+
+.liquid-button:disabled,
+.liquid-button[aria-disabled='true'] {
+  transform: none !important;
 }
