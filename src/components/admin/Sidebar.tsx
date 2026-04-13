@@ -12,21 +12,11 @@ export default function Sidebar() {
     <aside className="hidden w-72 shrink-0 border-r border-[var(--site-border)] bg-[var(--site-bg-soft)] lg:block">
       <div className="flex h-full flex-col px-6 py-8">
         <div className="mb-10">
-          <div className="block dark:hidden">
-            <img
-              src="/images/brand/areaimmobiliare.png"
-              alt="Area Immobiliare"
-              className="h-auto max-w-[170px] object-contain"
-            />
-          </div>
-
-          <div className="hidden dark:block">
-            <img
-              src="/images/brand/areaimmobiliare.png"
-              alt="Area Immobiliare"
-              className="h-auto max-w-[170px] object-contain brightness-0 invert"
-            />
-          </div>
+          <img
+            src="/images/brand/areaimmobiliare.png"
+            alt="Area Immobiliare"
+            className="h-auto max-w-[170px] object-contain dark:brightness-0 dark:invert"
+          />
         </div>
 
         <nav className="space-y-2">
@@ -42,7 +32,9 @@ export default function Sidebar() {
         </nav>
 
         <div className="theme-admin-card mt-auto rounded-2xl p-4">
-          <p className="text-sm text-[var(--site-text)]">Gestionale premium in costruzione</p>
+          <p className="text-sm text-[var(--site-text)]">
+            Gestionale premium in costruzione
+          </p>
           <p className="mt-1 text-xs text-[var(--site-text-muted)]">
             Base admin pronta per immobili e pubblicazione.
           </p>
