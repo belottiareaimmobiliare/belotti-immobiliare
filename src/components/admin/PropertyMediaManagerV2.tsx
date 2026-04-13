@@ -262,16 +262,16 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
   }
 
   return (
-    <div className="mt-8 space-y-8">
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-5 md:p-6">
+    <div className="mt-8 space-y-8 text-[var(--site-text)]">
+      <div className="theme-admin-card rounded-3xl p-5 md:p-6">
         <div className="mb-4">
-          <p className="text-sm uppercase tracking-[0.2em] text-white/40">
+          <p className="theme-admin-faint text-sm uppercase tracking-[0.2em]">
             Immagini immobile
           </p>
-          <h3 className="mt-2 text-xl font-semibold text-white">
+          <h3 className="mt-2 text-xl font-semibold text-[var(--site-text)]">
             Foto e copertina
           </h3>
-          <p className="mt-2 text-sm text-white/60">
+          <p className="theme-admin-muted mt-2 text-sm">
             Trascina qui una o più immagini oppure clicca per caricarle. Per ogni file puoi scrivere a mano l’etichetta che vuoi.
           </p>
         </div>
@@ -298,16 +298,16 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
           onDrop={onImagesDrop}
           className={`relative cursor-pointer rounded-3xl border border-dashed p-4 transition ${
             imagesDragActive
-              ? 'border-white/40 bg-white/10'
-              : 'border-white/15 bg-black/20'
+              ? 'border-[var(--site-border-strong)] bg-[var(--site-surface-2)]'
+              : 'border-[var(--site-border)] bg-[var(--site-surface-strong)]'
           }`}
         >
-          <div className="flex min-h-[140px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-black/20 px-6 text-center">
-            <p className="text-sm uppercase tracking-[0.18em] text-white/35">
+          <div className="theme-admin-card flex min-h-[140px] flex-col items-center justify-center rounded-2xl px-6 text-center">
+            <p className="theme-admin-faint text-sm uppercase tracking-[0.18em]">
               Spazio immagini
             </p>
 
-            <p className="mt-3 text-sm text-white/60">
+            <p className="theme-admin-muted mt-3 text-sm">
               {isUploadingImages
                 ? `Caricamento immagini ${uploadedCount}/${totalCount}...`
                 : 'Trascina qui le foto oppure clicca per selezionarle'}
@@ -315,7 +315,7 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
           </div>
 
           {isUploadingImages && (
-            <div className="absolute inset-4 flex flex-col items-center justify-center rounded-2xl bg-black/60 backdrop-blur-sm">
+            <div className="absolute inset-4 flex flex-col items-center justify-center rounded-2xl bg-black/55 backdrop-blur-sm">
               <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/20 border-t-white" />
               <p className="mt-4 text-sm font-medium text-white">
                 Elaborazione immagini...
@@ -349,15 +349,15 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
         )}
       </div>
 
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-5 md:p-6">
+      <div className="theme-admin-card rounded-3xl p-5 md:p-6">
         <div className="mb-4">
-          <p className="text-sm uppercase tracking-[0.2em] text-white/40">
+          <p className="theme-admin-faint text-sm uppercase tracking-[0.2em]">
             Planimetrie e documenti grafici
           </p>
-          <h3 className="mt-2 text-xl font-semibold text-white">
+          <h3 className="mt-2 text-xl font-semibold text-[var(--site-text)]">
             Plani multiple
           </h3>
-          <p className="mt-2 text-sm text-white/60">
+          <p className="theme-admin-muted mt-2 text-sm">
             Puoi caricare più PDF o immagini e scrivere etichette libere come “bagno”, “garage”, “cantina”, “cucina”, “piano box”.
           </p>
         </div>
@@ -384,16 +384,16 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
           onDrop={onPlansDrop}
           className={`relative cursor-pointer rounded-3xl border border-dashed p-4 transition ${
             plansDragActive
-              ? 'border-white/40 bg-white/10'
-              : 'border-white/15 bg-black/20'
+              ? 'border-[var(--site-border-strong)] bg-[var(--site-surface-2)]'
+              : 'border-[var(--site-border)] bg-[var(--site-surface-strong)]'
           }`}
         >
-          <div className="flex min-h-[140px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-black/20 px-6 text-center">
-            <p className="text-sm uppercase tracking-[0.18em] text-white/35">
+          <div className="theme-admin-card flex min-h-[140px] flex-col items-center justify-center rounded-2xl px-6 text-center">
+            <p className="theme-admin-faint text-sm uppercase tracking-[0.18em]">
               Spazio planimetrie
             </p>
 
-            <p className="mt-3 text-sm text-white/60">
+            <p className="theme-admin-muted mt-3 text-sm">
               {isUploadingPlans
                 ? `Caricamento planimetrie ${uploadedCount}/${totalCount}...`
                 : 'Trascina qui PDF o immagini oppure clicca per selezionarli'}
@@ -401,7 +401,7 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
           </div>
 
           {isUploadingPlans && (
-            <div className="absolute inset-4 flex flex-col items-center justify-center rounded-2xl bg-black/60 backdrop-blur-sm">
+            <div className="absolute inset-4 flex flex-col items-center justify-center rounded-2xl bg-black/55 backdrop-blur-sm">
               <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/20 border-t-white" />
               <p className="mt-4 text-sm font-medium text-white">
                 Elaborazione planimetrie...
@@ -464,26 +464,26 @@ function MediaCard({
   const isPdf = item.file_url.toLowerCase().includes('.pdf')
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/20">
+    <div className="theme-admin-card overflow-hidden rounded-2xl">
       {isPlan && isPdf ? (
-        <div className="flex h-48 items-center justify-center border-b border-white/10 bg-black/30 text-sm text-white/60">
+        <div className="flex h-48 items-center justify-center border-b border-[var(--site-border)] bg-[var(--site-surface-strong)] text-sm text-[var(--site-text-muted)]">
           PDF planimetria
         </div>
       ) : (
         <div
-          className="h-48 border-b border-white/10 bg-cover bg-center"
+          className="h-48 border-b border-[var(--site-border)] bg-cover bg-center"
           style={{ backgroundImage: `url('${item.file_url}')` }}
         />
       )}
 
       <div className="space-y-3 p-4">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-xs uppercase tracking-[0.18em] text-white/40">
+          <p className="theme-admin-faint text-xs uppercase tracking-[0.18em]">
             {isPlan ? `Plan ${index + 1}` : `Foto ${index + 1}`}
           </p>
 
           {item.is_cover && !isPlan && (
-            <span className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-white/75">
+            <span className="theme-admin-chip rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.18em]">
               Copertina
             </span>
           )}
@@ -498,7 +498,7 @@ function MediaCard({
               ? 'Scrivi etichetta libera (es. garage)'
               : 'Scrivi etichetta libera (es. cucina)'
           }
-          className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/35"
+          className="theme-admin-input w-full rounded-xl px-3 py-2 text-sm"
         />
 
         <div className="grid gap-2">
@@ -506,7 +506,7 @@ function MediaCard({
             type="button"
             onClick={() => onSaveLabel(item.id, label)}
             disabled={isSavingLabel}
-            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white transition hover:bg-white/10"
+            className="theme-admin-button-secondary rounded-xl px-3 py-2 text-sm transition hover:opacity-95"
           >
             {isSavingLabel ? 'Salvataggio etichetta...' : 'Salva etichetta'}
           </button>
@@ -516,13 +516,13 @@ function MediaCard({
               type="button"
               onClick={() => onSetCover(item.id)}
               disabled={isSettingCover || Boolean(item.is_cover)}
-              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white transition hover:bg-white/10 disabled:opacity-50"
+              className="theme-admin-button-secondary rounded-xl px-3 py-2 text-sm transition hover:opacity-95 disabled:opacity-50"
             >
               {item.is_cover
                 ? 'Copertina attiva'
                 : isSettingCover
-                ? 'Impostazione copertina...'
-                : 'Imposta come copertina'}
+                  ? 'Impostazione copertina...'
+                  : 'Imposta come copertina'}
             </button>
           )}
 
@@ -530,7 +530,7 @@ function MediaCard({
             href={item.file_url}
             target="_blank"
             rel="noreferrer"
-            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-center text-sm text-white transition hover:bg-white/10"
+            className="theme-admin-button-secondary rounded-xl px-3 py-2 text-center text-sm transition hover:opacity-95"
           >
             Apri file
           </a>
@@ -539,7 +539,7 @@ function MediaCard({
             type="button"
             onClick={() => onDelete(item.id, item.media_type)}
             disabled={isDeleting}
-            className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 transition hover:bg-red-500/15 disabled:opacity-50"
+            className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-700 transition hover:bg-red-500/15 disabled:opacity-50 dark:text-red-300"
           >
             {isDeleting ? 'Eliminazione...' : 'Elimina'}
           </button>

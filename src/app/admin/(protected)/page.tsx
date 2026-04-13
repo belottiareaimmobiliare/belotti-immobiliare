@@ -22,7 +22,7 @@ export default async function AdminPage() {
         Dashboard
       </p>
 
-      <h2 className="mt-2 text-3xl font-semibold">
+      <h2 className="mt-2 text-3xl font-semibold text-[var(--site-text)]">
         Benvenuto nel gestionale
       </h2>
 
@@ -51,17 +51,17 @@ export default async function AdminPage() {
       <div className="mt-8 grid gap-4 md:grid-cols-3">
         <div className="theme-admin-card rounded-3xl p-6">
           <p className="theme-admin-muted text-sm">Totale immobili</p>
-          <p className="mt-3 text-3xl font-semibold">{total}</p>
+          <p className="mt-3 text-3xl font-semibold text-[var(--site-text)]">{total}</p>
         </div>
 
         <div className="theme-admin-card rounded-3xl p-6">
           <p className="theme-admin-muted text-sm">Pubblicati</p>
-          <p className="mt-3 text-3xl font-semibold">{published}</p>
+          <p className="mt-3 text-3xl font-semibold text-[var(--site-text)]">{published}</p>
         </div>
 
         <div className="theme-admin-card rounded-3xl p-6">
           <p className="theme-admin-muted text-sm">Bozze</p>
-          <p className="mt-3 text-3xl font-semibold">{draft}</p>
+          <p className="mt-3 text-3xl font-semibold text-[var(--site-text)]">{draft}</p>
         </div>
       </div>
     </section>
