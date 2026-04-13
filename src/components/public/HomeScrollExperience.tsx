@@ -98,8 +98,8 @@ export default function HomeScrollExperience() {
   const searchFade = segment(progress, 0.54, 0.76)
 
   const panelCompact = segment(progress, 0.53, 0.69)
-  const panelRise = segment(progress, 0.60, 0.81)
-  const panelReadableHold = segment(progress, 0.81, 0.90)
+  const panelRise = segment(progress, 0.56, 0.81)
+  const panelReadableHold = segment(progress, 0.79, 0.90)
   const panelFade = segment(progress, 0.90, 0.965)
 
   const footerShellRise = segment(progress, 0.945, 0.985)
