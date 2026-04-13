@@ -68,9 +68,7 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
         upsert: false,
       })
 
-    if (uploadError) {
-      throw uploadError
-    }
+    if (uploadError) throw uploadError
 
     const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath)
     return data.publicUrl
@@ -93,9 +91,7 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
       },
     ])
 
-    if (error) {
-      throw error
-    }
+    if (error) throw error
 
     if (mediaType === 'image' && isCover) {
       const { error: propertyError } = await supabase
@@ -103,9 +99,7 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
         .update({ main_image: fileUrl })
         .eq('id', propertyId)
 
-      if (propertyError) {
-        throw propertyError
-      }
+      if (propertyError) throw propertyError
     }
   }
 
@@ -262,7 +256,7 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
   }
 
   return (
-    <div className="mt-8 space-y-8 text-[var(--site-text)]">
+    <div className="mt-8 space-y-8">
       <div className="theme-admin-card rounded-3xl p-5 md:p-6">
         <div className="mb-4">
           <p className="theme-admin-faint text-sm uppercase tracking-[0.2em]">
@@ -272,7 +266,7 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
             Foto e copertina
           </h3>
           <p className="theme-admin-muted mt-2 text-sm">
-            Trascina qui una o più immagini oppure clicca per caricarle. Per ogni file puoi scrivere a mano l’etichetta che vuoi.
+            Trascina qui una o più immagini oppure clicca per caricarle. Per ogni file puoi scrivere l’etichetta che vuoi.
           </p>
         </div>
 
@@ -315,17 +309,14 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
           </div>
 
           {isUploadingImages && (
-            <div className="absolute inset-4 flex flex-col items-center justify-center rounded-2xl bg-black/55 backdrop-blur-sm">
+            <div className="absolute inset-4 flex flex-col items-center justify-center rounded-2xl bg-black/45 backdrop-blur-sm">
               <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/20 border-t-white" />
               <p className="mt-4 text-sm font-medium text-white">
                 Elaborazione immagini...
               </p>
-              <p className="mt-2 text-sm text-white/70">
+              <p className="mt-2 text-sm text-white/80">
                 {uploadedCount} / {totalCount} file caricati
               </p>
-              <div className="mt-4 h-1.5 w-56 overflow-hidden rounded-full bg-white/10">
-                <div className="h-full animate-pulse rounded-full bg-white" />
-              </div>
             </div>
           )}
         </div>
@@ -355,7 +346,7 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
             Planimetrie e documenti grafici
           </p>
           <h3 className="mt-2 text-xl font-semibold text-[var(--site-text)]">
-            Plani multiple
+            Planimetrie multiple
           </h3>
           <p className="theme-admin-muted mt-2 text-sm">
             Puoi caricare più PDF o immagini e scrivere etichette libere come “bagno”, “garage”, “cantina”, “cucina”, “piano box”.
@@ -401,17 +392,14 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
           </div>
 
           {isUploadingPlans && (
-            <div className="absolute inset-4 flex flex-col items-center justify-center rounded-2xl bg-black/55 backdrop-blur-sm">
+            <div className="absolute inset-4 flex flex-col items-center justify-center rounded-2xl bg-black/45 backdrop-blur-sm">
               <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/20 border-t-white" />
               <p className="mt-4 text-sm font-medium text-white">
                 Elaborazione planimetrie...
               </p>
-              <p className="mt-2 text-sm text-white/70">
+              <p className="mt-2 text-sm text-white/80">
                 {uploadedCount} / {totalCount} file caricati
               </p>
-              <div className="mt-4 h-1.5 w-56 overflow-hidden rounded-full bg-white/10">
-                <div className="h-full animate-pulse rounded-full bg-white" />
-              </div>
             </div>
           )}
         </div>
@@ -466,7 +454,7 @@ function MediaCard({
   return (
     <div className="theme-admin-card overflow-hidden rounded-2xl">
       {isPlan && isPdf ? (
-        <div className="flex h-48 items-center justify-center border-b border-[var(--site-border)] bg-[var(--site-surface-strong)] text-sm text-[var(--site-text-muted)]">
+        <div className="theme-admin-input flex h-48 items-center justify-center border-b border-[var(--site-border)] text-sm text-[var(--site-text-muted)]">
           PDF planimetria
         </div>
       ) : (
@@ -539,7 +527,7 @@ function MediaCard({
             type="button"
             onClick={() => onDelete(item.id, item.media_type)}
             disabled={isDeleting}
-            className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-700 transition hover:bg-red-500/15 disabled:opacity-50 dark:text-red-300"
+            className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-600 transition hover:bg-red-500/15 disabled:opacity-50 dark:text-red-300"
           >
             {isDeleting ? 'Eliminazione...' : 'Elimina'}
           </button>
