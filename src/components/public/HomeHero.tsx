@@ -211,32 +211,35 @@ export default function HomeHero() {
                     </p>
                   </div>
 
-                  <Link
-                    href="/immobili/mappa-area"
-                    className="group relative overflow-hidden rounded-[24px] border border-white/18"
-                  >
-                    <div
-                      className="absolute inset-0 bg-cover bg-center opacity-100"
-                      style={{ backgroundImage: "url('/images/bergamo-map.jpg')" }}
-                    />
-                    <div className="absolute inset-0 bg-white/72 backdrop-blur-[4px]" />
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.34)_0%,rgba(255,255,255,0.14)_100%)]" />
+<Link
+  href="/immobili/mappa-area"
+  className="group relative overflow-hidden rounded-[26px] border border-white/18 bg-white/[0.10] shadow-[0_10px_28px_rgba(0,0,0,0.16)] backdrop-blur-sm transition hover:border-white/24"
+>
+  <div
+    className="absolute inset-0 bg-cover bg-center opacity-100"
+    style={{ backgroundImage: "url('/images/bergamo-map.jpg')" }}
+  />
+  <div className="absolute inset-0 bg-white/68 backdrop-blur-[4px]" />
+  <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.42)_0%,rgba(255,255,255,0.18)_100%)]" />
 
-                    <div className="relative flex h-full flex-col justify-between p-4">
-                      <div>
-                        <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-black/65">
-                          Mappa interattiva
-                        </p>
-                        <p className="mt-2 text-xl font-semibold text-black">
-                          Vai alla mappa
-                        </p>
-                      </div>
+  <div className="relative flex h-full min-h-[220px] flex-col justify-between p-5">
+    <div>
+      <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-black/60">
+        Mappa interattiva
+      </p>
+      <p className="mt-3 text-[2rem] font-semibold leading-tight text-black">
+        Vai alla mappa
+      </p>
+      <p className="mt-3 max-w-[220px] text-sm leading-7 text-black/68">
+        Apri la vista mappa completa e disegna la zona che vuoi analizzare.
+      </p>
+    </div>
 
-                      <div className="mt-6 inline-flex w-fit rounded-full border border-black/10 bg-black px-3 py-2 text-xs font-semibold text-white transition group-hover:translate-x-0.5">
-                        Apri
-                      </div>
-                    </div>
-                  </Link>
+    <div className="mt-6 inline-flex w-fit items-center rounded-full border border-black/10 bg-black px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(0,0,0,0.18)] transition group-hover:translate-x-0.5">
+      Apri
+    </div>
+  </div>
+</Link>
                 </div>
               </div>
             </div>

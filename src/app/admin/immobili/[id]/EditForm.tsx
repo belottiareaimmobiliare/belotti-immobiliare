@@ -276,14 +276,16 @@ export default function EditForm({ property }: EditFormProps) {
   return (
     <section className="mx-auto w-full max-w-3xl px-4 text-[var(--site-text)]">
       <p className="theme-admin-faint text-sm uppercase tracking-[0.2em]">
-        Modifica immobile
-      </p>
+  Modifica immobile
+</p>
 
-      <h2 className="mt-2 text-3xl font-semibold">Aggiorna immobile</h2>
+<h2 className="mt-2 text-3xl font-semibold text-[var(--site-text)]">
+  Aggiorna immobile
+</h2>
 
-      <p className="theme-admin-muted mt-3">
-        Modifica i dati principali dell’immobile selezionato.
-      </p>
+<p className="theme-admin-muted mt-3">
+  Modifica i dati principali dell’immobile selezionato.
+</p>
 
       <form
         onSubmit={handleSubmit}
@@ -570,17 +572,13 @@ export default function EditForm({ property }: EditFormProps) {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-amber-400/25 bg-amber-500/12 px-4 py-4 text-sm text-amber-900 dark:text-amber-100">
-  <p>
-    Per le voci <strong>cauzione</strong>, <strong>anticipo</strong> e{' '}
-    <strong>anticipo + cauzione</strong> puoi inserire:
-  </p>
-
-  <div className="mt-3 space-y-1 text-amber-800 dark:text-amber-100/90">
+          <div className="rounded-2xl border border-violet-300/40 bg-violet-500/10 px-4 py-4 text-sm text-violet-800 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-100">
+  Per le voci <strong>cauzione</strong>, <strong>anticipo</strong> e <strong>anticipo + cauzione</strong> puoi inserire:
+  <div className="mt-2 space-y-1">
     <div>• <strong>da definire</strong></div>
     <div>• una cifra in euro</div>
     <div>• un testo come “2 mensilità”</div>
-    <div>• nulla, se non vuoi mostrarle nella scheda immobile</div>
+    <div>• nulla, se non vuoi mostrarlo nella scheda immobile</div>
   </div>
 </div>
 
