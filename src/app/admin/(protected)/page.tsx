@@ -17,50 +17,50 @@ export default async function AdminPage() {
     properties?.filter((p) => p.contract_type === 'affitto').length || 0
 
   return (
-    <section>
-      <p className="text-sm uppercase tracking-[0.2em] text-white/40">
+    <section className="text-[var(--site-text)]">
+      <p className="theme-admin-faint text-sm uppercase tracking-[0.2em]">
         Dashboard
       </p>
 
-      <h2 className="mt-2 text-3xl font-semibold text-white">
+      <h2 className="mt-2 text-3xl font-semibold">
         Benvenuto nel gestionale
       </h2>
 
-      <p className="mt-3 max-w-2xl text-white/60">
+      <p className="theme-admin-muted mt-3 max-w-2xl">
         Da qui gestirai immobili, pubblicazione, immagini e planimetrie.
       </p>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         <Link
           href="/admin/immobili?contractType=vendita"
-          className="rounded-2xl border border-white/10 bg-white px-5 py-4 text-center text-sm font-medium text-black transition hover:opacity-90"
+          className="theme-admin-button-primary inline-flex flex-col items-center justify-center rounded-2xl px-5 py-4 text-center text-sm font-medium transition hover:opacity-95"
         >
-          Immobili in vendita
-          <div className="mt-1 text-xs text-black/60">{saleCount} elementi</div>
+          <span>Immobili in vendita</span>
+          <span className="mt-1 text-xs opacity-70">{saleCount} elementi</span>
         </Link>
 
         <Link
           href="/admin/immobili?contractType=affitto"
-          className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-center text-sm font-medium text-white transition hover:bg-white/10"
+          className="theme-admin-button-secondary inline-flex flex-col items-center justify-center rounded-2xl px-5 py-4 text-center text-sm font-medium transition hover:opacity-95"
         >
-          Immobili in affitto
-          <div className="mt-1 text-xs text-white/45">{rentCount} elementi</div>
+          <span>Immobili in affitto</span>
+          <span className="mt-1 text-xs opacity-70">{rentCount} elementi</span>
         </Link>
       </div>
 
       <div className="mt-8 grid gap-4 md:grid-cols-3">
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-          <p className="text-sm text-white/50">Totale immobili</p>
+        <div className="theme-admin-card rounded-3xl p-6">
+          <p className="theme-admin-muted text-sm">Totale immobili</p>
           <p className="mt-3 text-3xl font-semibold">{total}</p>
         </div>
 
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-          <p className="text-sm text-white/50">Pubblicati</p>
+        <div className="theme-admin-card rounded-3xl p-6">
+          <p className="theme-admin-muted text-sm">Pubblicati</p>
           <p className="mt-3 text-3xl font-semibold">{published}</p>
         </div>
 
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-          <p className="text-sm text-white/50">Bozze</p>
+        <div className="theme-admin-card rounded-3xl p-6">
+          <p className="theme-admin-muted text-sm">Bozze</p>
           <p className="mt-3 text-3xl font-semibold">{draft}</p>
         </div>
       </div>
