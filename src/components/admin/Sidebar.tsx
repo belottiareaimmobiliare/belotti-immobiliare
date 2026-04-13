@@ -23,8 +23,8 @@ export default function Sidebar() {
               src="/images/brand/areaimmobiliare.png"
               alt="Area Immobiliare"
               fill
-              className="object-contain object-left"
               priority
+              className="object-contain object-left dark:brightness-0 dark:invert"
             />
           </div>
         </div>
@@ -33,7 +33,9 @@ export default function Sidebar() {
           {links.map((link) => {
             const isActive =
               pathname === link.href ||
-              (link.href !== '/admin' && pathname.startsWith('/admin/immobili') && link.href.includes('/admin/immobili'))
+              (link.href !== '/admin' &&
+                pathname.startsWith('/admin/immobili') &&
+                link.href.includes('/admin/immobili'))
 
             return (
               <Link
