@@ -1,70 +1,210 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import SiteHeader from '@/components/public/SiteHeader'
+import Footer from '@/components/public/Footer'
+import FooterReveal from '@/components/public/FooterReveal'
 
-type Property = {
-  id: string
-  title: string | null
-  price: number | null
-  status: string | null
-  contract_type: string | null
-  comune: string | null
-  province: string | null
-  created_at: string | null
-  updated_at: string | null
+type Tone = 'positive' | 'negative' | 'neutral'
+
+type PulseCard = {
+  label: string
+  value: string
+  change: string
+  tone: Tone
+  updatedAt: string
 }
 
-function startOfMonth(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), 1)
+type NewsItem = {
+  title: string
+  source: string
+  publishedAt: string
+  category: string
+  impact: 'alto' | 'medio' | 'basso'
 }
 
-function monthKey(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+type StructuralMetric = {
+  label: string
+  value: string
+  updatedAt: string
+  note: string
 }
 
-function monthLabel(date: Date) {
-  return date.toLocaleDateString('it-IT', { month: 'short' })
-}
+function getMockData() {
+  const pulseCards: PulseCard[] = [
+    {
+      label: 'FTSE MIB',
+      value: '+0,84%',
+      change: 'Sessione positiva, clima risk-on moderato',
+      tone: 'positive',
+      updatedAt: 'Agg. 5 min',
+    },
+    {
+      label: 'Spread BTP-Bund',
+      value: '128 bp',
+      change: '-4 bp rispetto al rilevamento precedente',
+      tone: 'positive',
+      updatedAt: 'Agg. 5 min',
+    },
+    {
+      label: 'Rendimento BTP 10Y',
+      value: '3,61%',
+      change: 'Lieve compressione dei rendimenti',
+      tone: 'positive',
+      updatedAt: 'Agg. 5 min',
+    },
+    {
+      label: 'Costo del credito casa',
+      value: 'Ancora selettivo',
+      change: 'Il finanziamento continua a influenzare la domanda',
+      tone: 'neutral',
+      updatedAt: 'Ultimo dato ufficiale',
+    },
+  ]
 
-function MiniLineChart({ values }: { values: number[] }) {
-  const width = 100
-  const height = 44
-  const padding = 4
+  const structuralMetrics: StructuralMetric[] = [
+    {
+      label: 'Prezzi abitazioni',
+      value: 'Tenuta moderata',
+      updatedAt: 'Ultimo aggiornamento ufficiale',
+      note: 'Pressione ancora sana sugli immobili ben posizionati.',
+    },
+    {
+      label: 'Compravendite',
+      value: 'Mercato selettivo',
+      updatedAt: 'Ultimo aggiornamento ufficiale',
+      note: 'La rotazione favorisce prodotto corretto e ben presentato.',
+    },
+    {
+      label: 'Quotazioni residenziali',
+      value: 'Stabili / differenziate',
+      updatedAt: 'Ultimo aggiornamento ufficiale',
+      note: 'La distanza tra zone e qualità immobiliari pesa più della media generale.',
+    },
+  ]
 
-  if (values.length === 0) {
-    return <div className="h-12" />
+  const news: NewsItem[] = [
+    {
+      title:
+        'Tassi e credito: il mercato residenziale continua a premiare immobili con pricing coerente',
+      source: 'Desk mercato',
+      publishedAt: 'Oggi',
+      category: 'Credito',
+      impact: 'alto',
+    },
+    {
+      title:
+        'Locazioni ancora forti nelle fasce più richieste: domanda viva e stock contenuto',
+      source: 'Desk locazioni',
+      publishedAt: 'Oggi',
+      category: 'Affitti',
+      impact: 'medio',
+    },
+    {
+      title:
+        'Il differenziale tra immobili ben presentati e stock generico incide sempre di più sui tempi',
+      source: 'Desk operatività',
+      publishedAt: 'Oggi',
+      category: 'Vendita',
+      impact: 'alto',
+    },
+    {
+      title:
+        'Mercato più selettivo: cresce il peso della valutazione iniziale e della documentazione pulita',
+      source: 'Desk immobiliare',
+      publishedAt: 'Oggi',
+      category: 'Scenario',
+      impact: 'medio',
+    },
+  ]
+
+  const intradayBrief =
+    'Il quadro intraday resta favorevole a una lettura costruttiva ma non euforica: il contesto di mercato appare più disteso rispetto alle fasi di maggiore tensione, mentre il credito continua a rimanere un filtro reale per la domanda immobiliare finanziata. In pratica, il sentiment aiuta, ma nel mattone continuano a performare soprattutto gli immobili con prezzo corretto, buona liquidità e presentazione pulita.'
+
+  const structuralBrief =
+    'Sul piano strutturale il mercato non premia più la sola presenza online dell’immobile. La differenza la fanno coerenza del prezzo, qualità del posizionamento e leggibilità della scheda. Dove il prodotto è corretto, la tenuta resta buona; dove il pricing parte troppo alto, il tempo lavora contro il venditore e indebolisce la trattativa.'
+
+  const marketSeries = {
+    ftseMib: [100, 101.4, 100.8, 101.9, 102.6, 102.3, 103.1, 103.8],
+    spread: [142, 140, 139, 137, 134, 132, 130, 128],
+    housingMood: [100, 100.2, 100.4, 100.7, 100.9, 101, 101.2, 101.3],
   }
+
+  return {
+    pulseCards,
+    structuralMetrics,
+    news,
+    intradayBrief,
+    structuralBrief,
+    marketSeries,
+  }
+}
+
+function toneClasses(tone: Tone) {
+  if (tone === 'positive') {
+    return 'text-emerald-300 border-emerald-400/20 bg-emerald-500/10'
+  }
+
+  if (tone === 'negative') {
+    return 'text-red-300 border-red-400/20 bg-red-500/10'
+  }
+
+  return 'text-white/70 border-white/10 bg-white/[0.05]'
+}
+
+function impactClasses(impact: NewsItem['impact']) {
+  if (impact === 'alto') {
+    return 'border-red-400/20 bg-red-500/10 text-red-200'
+  }
+
+  if (impact === 'medio') {
+    return 'border-amber-400/20 bg-amber-500/10 text-amber-200'
+  }
+
+  return 'border-white/10 bg-white/[0.04] text-white/70'
+}
+
+function MiniLineChart({
+  values,
+  lineClassName = 'stroke-white',
+  areaClassName = 'fill-white/10',
+}: {
+  values: number[]
+  lineClassName?: string
+  areaClassName?: string
+}) {
+  const width = 100
+  const height = 48
+  const padding = 6
 
   const min = Math.min(...values)
   const max = Math.max(...values)
   const range = max - min || 1
 
-  const points = values
-    .map((value, index) => {
-      const x =
-        padding + (index * (width - padding * 2)) / Math.max(values.length - 1, 1)
-      const y =
-        height -
-        padding -
-        ((value - min) / range) * (height - padding * 2)
+  const points = values.map((value, index) => {
+    const x = padding + (index * (width - padding * 2)) / Math.max(values.length - 1, 1)
+    const y =
+      height - padding - ((value - min) / range) * (height - padding * 2)
+    return { x, y }
+  })
 
-      return `${x},${y}`
-    })
+  const linePath = points
+    .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
     .join(' ')
 
+  const areaPath = `
+    ${linePath}
+    L ${points[points.length - 1].x} ${height - padding}
+    L ${points[0].x} ${height - padding}
+    Z
+  `
+
   return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      className="h-12 w-full overflow-visible"
-      aria-hidden="true"
-    >
-      <line x1="0" y1="36" x2={width} y2="36" className="stroke-white/10" />
-      <line x1="0" y1="22" x2={width} y2="22" className="stroke-white/10" />
-      <line x1="0" y1="8" x2={width} y2="8" className="stroke-white/10" />
-      <polyline
+    <svg viewBox={`0 0 ${width} ${height}`} className="h-16 w-full">
+      <path d={areaPath} className={areaClassName} />
+      <path
+        d={linePath}
+        className={lineClassName}
         fill="none"
-        points={points}
-        className="stroke-white"
-        strokeWidth="2.4"
+        strokeWidth="2.2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -72,380 +212,342 @@ function MiniLineChart({ values }: { values: number[] }) {
   )
 }
 
-function MetricBox({
-  label,
-  value,
-  hint,
-}: {
-  label: string
-  value: string
-  hint: string
-}) {
+function PulseCardItem({ item }: { item: PulseCard }) {
   return (
-    <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.24)]">
-      <p className="text-[11px] uppercase tracking-[0.22em] text-white/35">
-        {label}
-      </p>
-      <p className="mt-3 text-3xl font-semibold text-white">{value}</p>
-      <p className="mt-2 text-sm text-white/58">{hint}</p>
+    <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.26)]">
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-[11px] uppercase tracking-[0.24em] text-white/35">
+          {item.label}
+        </p>
+        <span className={`rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] ${toneClasses(item.tone)}`}>
+          {item.updatedAt}
+        </span>
+      </div>
+
+      <p className="mt-4 text-3xl font-semibold text-white">{item.value}</p>
+      <p className="mt-3 text-sm leading-7 text-white/68">{item.change}</p>
     </div>
   )
 }
 
-function Panel({
+function ChartPanel({
+  eyebrow,
   title,
-  subtitle,
-  children,
+  text,
+  values,
+  lineClassName,
+  areaClassName,
 }: {
+  eyebrow: string
   title: string
-  subtitle?: string
-  children: React.ReactNode
+  text: string
+  values: number[]
+  lineClassName?: string
+  areaClassName?: string
 }) {
   return (
-    <section className="rounded-[30px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.24)]">
-      <h2 className="text-2xl font-semibold text-white">{title}</h2>
-      {subtitle ? (
-        <p className="mt-2 text-sm leading-7 text-white/60">{subtitle}</p>
-      ) : null}
-      <div className="mt-6">{children}</div>
-    </section>
+    <div className="rounded-[30px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.26)]">
+      <p className="text-[11px] uppercase tracking-[0.24em] text-white/35">
+        {eyebrow}
+      </p>
+
+      <h3 className="mt-3 text-2xl font-semibold text-white">{title}</h3>
+      <p className="mt-3 text-sm leading-7 text-white/62">{text}</p>
+
+      <div className="mt-6 rounded-[24px] border border-white/8 bg-black/35 px-4 py-5">
+        <MiniLineChart
+          values={values}
+          lineClassName={lineClassName}
+          areaClassName={areaClassName}
+        />
+      </div>
+    </div>
   )
 }
 
-export default async function AdminMercatoDelMattonePage() {
-  const supabase = await createClient()
-
-  const { data } = await supabase
-    .from('properties')
-    .select(
-      'id, title, price, status, contract_type, comune, province, created_at, updated_at'
-    )
-    .order('created_at', { ascending: false })
-
-  const properties = (data || []) as Property[]
-  const now = new Date()
-  const days14 = 14 * 24 * 60 * 60 * 1000
-  const days60 = 60 * 24 * 60 * 60 * 1000
-
-  const total = properties.length
-  const published = properties.filter((item) => item.status === 'published').length
-  const draft = properties.filter((item) => item.status === 'draft').length
-  const sale = properties.filter((item) => item.contract_type === 'vendita').length
-  const rent = properties.filter((item) => item.contract_type === 'affitto').length
-
-  const pricedPublished = properties.filter(
-    (item) => item.status === 'published' && typeof item.price === 'number'
-  )
-  const avgPublishedPrice =
-    pricedPublished.length > 0
-      ? Math.round(
-          pricedPublished.reduce((sum, item) => sum + Number(item.price || 0), 0) /
-            pricedPublished.length
-        )
-      : 0
-
-  const recentAdded = properties.filter((item) => {
-    if (!item.created_at) return false
-    return now.getTime() - new Date(item.created_at).getTime() <= days14
-  }).length
-
-  const stalePublished = properties.filter((item) => {
-    if (item.status !== 'published' || !item.updated_at) return false
-    return now.getTime() - new Date(item.updated_at).getTime() > days60
-  }).length
-
-  const comuniMap = new Map<string, number>()
-  properties.forEach((item) => {
-    const key = item.comune?.trim()
-    if (!key) return
-    comuniMap.set(key, (comuniMap.get(key) || 0) + 1)
-  })
-
-  const topComuni = [...comuniMap.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 6)
-
-  const months = Array.from({ length: 6 }, (_, index) => {
-    const date = startOfMonth(new Date(now.getFullYear(), now.getMonth() - (5 - index), 1))
-    return date
-  })
-
-  const monthlyCounts = months.map((monthDate) => {
-    const key = monthKey(monthDate)
-    return properties.filter((item) => {
-      if (!item.created_at) return false
-      return monthKey(new Date(item.created_at)) === key
-    }).length
-  })
-
-  const publishedMonthlyCounts = months.map((monthDate) => {
-    const key = monthKey(monthDate)
-    return properties.filter((item) => {
-      if (!item.created_at || item.status !== 'published') return false
-      return monthKey(new Date(item.created_at)) === key
-    }).length
-  })
-
-  const brokerSummary =
-    stalePublished > Math.max(3, Math.round(published * 0.18))
-      ? 'Lo stock pubblicato sta iniziando a sedimentare: conviene controllare pricing, ordine delle foto e qualità dei titoli sugli immobili meno freschi.'
-      : recentAdded > Math.max(2, Math.round(total * 0.12))
-        ? 'Il caricamento recente è vivace: è un buon momento per monitorare velocemente coerenza dei prezzi e completezza delle schede prima che si disperda attenzione.'
-        : rent > sale * 0.55
-          ? 'La quota affitti è rilevante rispetto alla vendita: può valere la pena leggere separatamente il posizionamento locazioni per evitare segnali misti.'
-          : 'Il portafoglio è abbastanza ordinato: il focus ora va tenuto su rotazione, qualità delle schede e verifica degli immobili pubblicati da più tempo.'
+export default function MercatoDelMattonePage() {
+  const {
+    pulseCards,
+    structuralMetrics,
+    news,
+    intradayBrief,
+    structuralBrief,
+    marketSeries,
+  } = getMockData()
 
   return (
-    <main className="min-h-screen bg-[#010409] px-4 py-8 text-white md:px-6">
-      <section className="mx-auto max-w-7xl">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-sm uppercase tracking-[0.24em] text-white/35">
-              Admin · mercato del mattone
-            </p>
-            <h1 className="mt-2 text-4xl font-semibold text-white">
-              Osservatorio operativo
-            </h1>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/62">
-              Cruscotto interno per leggere rapidamente stock, ritmo di
-              pubblicazione, peso vendita/affitto e concentrazione territoriale.
-            </p>
-          </div>
+    <main className="min-h-screen bg-[#010409] text-white">
+      <div className="bg-[#010409]">
+        <SiteHeader />
+      </div>
 
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/admin/immobili"
-              className="rounded-2xl border border-white/14 bg-white/[0.04] px-5 py-3 text-sm font-medium text-white transition hover:bg-white/[0.08]"
-            >
-              Vai agli immobili
-            </Link>
-            <Link
-              href="/mercato-del-mattone"
-              target="_blank"
-              className="rounded-2xl bg-white px-5 py-3 text-sm font-medium text-black transition hover:opacity-90"
-            >
-              Apri pagina pubblica
-            </Link>
-          </div>
-        </div>
+      <section className="border-b border-white/10 bg-[#03060c]">
+        <div className="mx-auto max-w-7xl px-6 py-16 xl:px-10 2xl:px-14">
+          <p className="text-sm uppercase tracking-[0.32em] text-white/35">
+            Mercato del mattone
+          </p>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-          <MetricBox
-            label="Totale stock"
-            value={String(total)}
-            hint="Immobili presenti in archivio"
-          />
-          <MetricBox
-            label="Pubblicati"
-            value={String(published)}
-            hint="Schede attualmente online"
-          />
-          <MetricBox
-            label="Bozze"
-            value={String(draft)}
-            hint="Da completare o rivedere"
-          />
-          <MetricBox
-            label="Vendita"
-            value={String(sale)}
-            hint="Portafoglio vendita"
-          />
-          <MetricBox
-            label="Affitto"
-            value={String(rent)}
-            hint="Portafoglio locazioni"
-          />
-          <MetricBox
-            label="Prezzo medio"
-            value={avgPublishedPrice ? `€ ${avgPublishedPrice.toLocaleString('it-IT')}` : '—'}
-            hint="Media immobili pubblicati con prezzo"
-          />
-        </div>
+          <div className="mt-6 grid gap-8 xl:grid-cols-[1.15fr_0.85fr]">
+            <div>
+              <h1 className="max-w-5xl text-4xl font-semibold leading-tight md:text-6xl">
+                Mercati, credito, mattone e segnali utili
+                <br />
+                letti in modo serio.
+              </h1>
 
-        <div className="mt-8 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <Panel
-            title="Lettura automatica interna"
-            subtitle="Sintesi operativa generata sui numeri attualmente presenti nel gestionale."
-          >
-            <div className="rounded-[24px] border border-white/10 bg-black/30 p-5">
-              <p className="text-sm leading-8 text-white/74">{brokerSummary}</p>
-            </div>
-
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-white/35">
-                  Inserimenti ultimi 14 giorni
-                </p>
-                <p className="mt-2 text-2xl font-semibold text-white">{recentAdded}</p>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-white/35">
-                  Pubblicati fermi oltre 60 giorni
-                </p>
-                <p className="mt-2 text-2xl font-semibold text-white">{stalePublished}</p>
-              </div>
-            </div>
-          </Panel>
-
-          <Panel
-            title="Alert rapidi"
-            subtitle="Cose da guardare prima di aprire il gestionale completo."
-          >
-            <div className="grid gap-3">
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4">
-                <p className="text-sm font-semibold text-white">Stock invecchiato</p>
-                <p className="mt-2 text-sm leading-7 text-white/62">
-                  {stalePublished > 0
-                    ? `${stalePublished} immobili pubblicati risultano poco mossi o non aggiornati da oltre 60 giorni.`
-                    : 'Nessun segnale forte di stock fermo oltre soglia.'}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4">
-                <p className="text-sm font-semibold text-white">Mix portafoglio</p>
-                <p className="mt-2 text-sm leading-7 text-white/62">
-                  Vendita: {sale} · Affitto: {rent}. Tenere separata la lettura dei
-                  due segmenti aiuta a non mescolare segnali diversi.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4">
-                <p className="text-sm font-semibold text-white">Concentrazione territorio</p>
-                <p className="mt-2 text-sm leading-7 text-white/62">
-                  Le zone più presenti vanno presidiate meglio in termini di pricing,
-                  ordine vetrina e qualità descrittiva.
-                </p>
-              </div>
-            </div>
-          </Panel>
-        </div>
-
-        <div className="mt-8 grid gap-6 xl:grid-cols-3">
-          <Panel
-            title="Nuovi inserimenti"
-            subtitle="Andamento ultimi 6 mesi."
-          >
-            <div className="rounded-[24px] border border-white/10 bg-black/30 px-4 py-5">
-              <MiniLineChart values={monthlyCounts} />
-            </div>
-
-            <div className="mt-4 grid grid-cols-6 gap-2 text-center text-xs uppercase tracking-[0.14em] text-white/38">
-              {months.map((month) => (
-                <div key={month.toISOString()}>{monthLabel(month)}</div>
-              ))}
-            </div>
-          </Panel>
-
-          <Panel
-            title="Pubblicazioni"
-            subtitle="Immobili creati e già online."
-          >
-            <div className="rounded-[24px] border border-white/10 bg-black/30 px-4 py-5">
-              <MiniLineChart values={publishedMonthlyCounts} />
-            </div>
-
-            <div className="mt-4 grid grid-cols-6 gap-2 text-center text-xs uppercase tracking-[0.14em] text-white/38">
-              {months.map((month) => (
-                <div key={month.toISOString()}>{monthLabel(month)}</div>
-              ))}
-            </div>
-          </Panel>
-
-          <Panel
-            title="Distribuzione portafoglio"
-            subtitle="Lettura immediata del peso relativo."
-          >
-            <div className="space-y-4">
-              <div>
-                <div className="mb-2 flex items-center justify-between text-sm text-white/65">
-                  <span>Vendita</span>
-                  <span>{sale}</span>
-                </div>
-                <div className="h-3 overflow-hidden rounded-full bg-white/8">
-                  <div
-                    className="h-full rounded-full bg-white"
-                    style={{
-                      width: `${total > 0 ? (sale / total) * 100 : 0}%`,
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="mb-2 flex items-center justify-between text-sm text-white/65">
-                  <span>Affitto</span>
-                  <span>{rent}</span>
-                </div>
-                <div className="h-3 overflow-hidden rounded-full bg-white/8">
-                  <div
-                    className="h-full rounded-full bg-white/70"
-                    style={{
-                      width: `${total > 0 ? (rent / total) * 100 : 0}%`,
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="mb-2 flex items-center justify-between text-sm text-white/65">
-                  <span>Bozze</span>
-                  <span>{draft}</span>
-                </div>
-                <div className="h-3 overflow-hidden rounded-full bg-white/8">
-                  <div
-                    className="h-full rounded-full bg-white/40"
-                    style={{
-                      width: `${total > 0 ? (draft / total) * 100 : 0}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </Panel>
-        </div>
-
-        <div className="mt-8 grid gap-6 xl:grid-cols-[1fr_0.9fr]">
-          <Panel
-            title="Comuni più presenti"
-            subtitle="Dove il portafoglio è più concentrato."
-          >
-            <div className="space-y-3">
-              {topComuni.length > 0 ? (
-                topComuni.map(([comune, count]) => (
-                  <div
-                    key={comune}
-                    className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"
-                  >
-                    <span className="text-sm text-white">{comune}</span>
-                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs uppercase tracking-[0.16em] text-white/72">
-                      {count} immobili
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-white/58">
-                  Nessun dato territoriale disponibile.
-                </div>
-              )}
-            </div>
-          </Panel>
-
-          <Panel
-            title="Nota pratica"
-            subtitle="Questa pagina non usa ancora fonti esterne automatiche."
-          >
-            <div className="rounded-[24px] border border-white/10 bg-black/30 p-5">
-              <p className="text-sm leading-8 text-white/68">
-                Questo osservatorio admin sta già leggendo i dati interni del
-                gestionale. Nel passo successivo si possono collegare fonti
-                esterne ufficiali per tassi, prezzi e volumi di mercato e
-                affiancarle ai dati interni per una lettura più completa.
+              <p className="mt-6 max-w-3xl text-base leading-8 text-white/68 md:text-lg">
+                Una pagina pensata per osservare il contesto finanziario che può
+                influenzare il real estate, i segnali strutturali del mercato
+                immobiliare e una lettura automatica utile a chi ragiona da
+                professionista, non da spettatore.
               </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href="/immobili"
+                  className="rounded-2xl bg-white px-6 py-3.5 text-sm font-semibold text-black transition hover:opacity-90"
+                >
+                  Esplora immobili
+                </Link>
+
+                <Link
+                  href="/contatti"
+                  className="rounded-2xl border border-white/16 bg-white/[0.04] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-white/[0.08]"
+                >
+                  Contatta l’agenzia
+                </Link>
+              </div>
             </div>
-          </Panel>
+
+            <div className="rounded-[34px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[11px] uppercase tracking-[0.26em] text-white/35">
+                  Brief IA intraday
+                </p>
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-white/60">
+                  Refresh orario
+                </span>
+              </div>
+
+              <h2 className="mt-4 text-2xl font-semibold text-white">
+                Lettura sintetica di contesto
+              </h2>
+
+              <p className="mt-4 text-sm leading-8 text-white/72">
+                {intradayBrief}
+              </p>
+
+              <div className="mt-6 grid gap-3">
+                <div className="rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
+                  <p className="text-xs uppercase tracking-[0.18em] text-white/35">
+                    Focus del momento
+                  </p>
+                  <p className="mt-2 text-sm text-white/72">
+                    Il mercato continua a distinguere sempre di più tra prodotto
+                    corretto e prodotto semplicemente esposto.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
+                  <p className="text-xs uppercase tracking-[0.18em] text-white/35">
+                    Impatto potenziale
+                  </p>
+                  <p className="mt-2 text-sm text-white/72">
+                    Clima macro più disteso, ma il credito resta una variabile
+                    che seleziona ancora la domanda reale.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {pulseCards.map((item) => (
+              <PulseCardItem key={item.label} item={item} />
+            ))}
+          </div>
         </div>
       </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-16 xl:px-10 2xl:px-14">
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm uppercase tracking-[0.28em] text-white/35">
+              Grafici di contesto
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold text-white md:text-4xl">
+              Segnali finanziari che possono toccare il mattone
+            </h2>
+          </div>
+
+          <span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-white/60 md:inline-flex">
+            Update mercati: 5 min
+          </span>
+        </div>
+
+        <div className="grid gap-6 xl:grid-cols-3">
+          <ChartPanel
+            eyebrow="Azionario"
+            title="Mood borsa"
+            text="L’azionario non sposta da solo il mercato immobiliare, ma aiuta a leggere il clima generale di rischio e fiducia."
+            values={marketSeries.ftseMib}
+            lineClassName="stroke-emerald-300"
+            areaClassName="fill-emerald-400/10"
+          />
+
+          <ChartPanel
+            eyebrow="Obbligazionario"
+            title="Stress spread"
+            text="Spread e rendimenti influenzano il contesto del credito, la percezione del rischio e il costo del denaro."
+            values={marketSeries.spread}
+            lineClassName="stroke-white"
+            areaClassName="fill-white/10"
+          />
+
+          <ChartPanel
+            eyebrow="Scenario immobiliare"
+            title="Tenuta mercato casa"
+            text="Indicatore sintetico di scenario: non è quotazione diretta, ma una lettura visiva del tono complessivo del comparto."
+            values={marketSeries.housingMood}
+            lineClassName="stroke-sky-300"
+            areaClassName="fill-sky-400/10"
+          />
+        </div>
+      </section>
+
+      <section className="border-y border-white/10 bg-[#03060c]">
+        <div className="mx-auto max-w-7xl px-6 py-16 xl:px-10 2xl:px-14">
+          <div className="grid gap-8 xl:grid-cols-[1fr_0.95fr]">
+            <div>
+              <p className="text-sm uppercase tracking-[0.28em] text-white/35">
+                Mercato immobiliare ufficiale
+              </p>
+
+              <h2 className="mt-4 text-3xl font-semibold text-white md:text-4xl">
+                Lettura strutturale del comparto
+              </h2>
+
+              <div className="mt-8 grid gap-4 md:grid-cols-3">
+                {structuralMetrics.map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5"
+                  >
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-white/35">
+                      {item.label}
+                    </p>
+                    <p className="mt-3 text-2xl font-semibold text-white">
+                      {item.value}
+                    </p>
+                    <p className="mt-3 text-sm leading-7 text-white/62">
+                      {item.note}
+                    </p>
+                    <p className="mt-4 text-[11px] uppercase tracking-[0.18em] text-white/35">
+                      {item.updatedAt}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[34px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.24)]">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[11px] uppercase tracking-[0.26em] text-white/35">
+                  Brief IA strutturale
+                </p>
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-white/60">
+                  Al cambio dati ufficiali
+                </span>
+              </div>
+
+              <h3 className="mt-4 text-2xl font-semibold text-white">
+                Quadro di mercato non rumoroso
+              </h3>
+
+              <p className="mt-4 text-sm leading-8 text-white/72">
+                {structuralBrief}
+              </p>
+
+              <div className="mt-6 rounded-2xl border border-white/10 bg-black/35 px-4 py-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-white/35">
+                  Lettura operativa
+                </p>
+                <p className="mt-2 text-sm leading-7 text-white/72">
+                  In uno scenario selettivo, il valore iniziale attribuito
+                  all’immobile conta più della sola esposizione online.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-16 xl:px-10 2xl:px-14">
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm uppercase tracking-[0.28em] text-white/35">
+              News rilevanti
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold text-white md:text-4xl">
+              Notizie che possono toccare il mercato del mattone
+            </h2>
+          </div>
+
+          <span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-white/60 md:inline-flex">
+            Refresh giornaliero / orario
+          </span>
+        </div>
+
+        <div className="grid gap-4">
+          {news.map((item) => (
+            <article
+              key={item.title}
+              className="rounded-[26px] border border-white/10 bg-white/[0.04] p-5 shadow-[0_16px_44px_rgba(0,0,0,0.2)]"
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-white/65">
+                  {item.category}
+                </span>
+
+                <span className={`rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] ${impactClasses(item.impact)}`}>
+                  Impatto {item.impact}
+                </span>
+
+                <span className="rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-white/45">
+                  {item.source}
+                </span>
+
+                <span className="rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-white/45">
+                  {item.publishedAt}
+                </span>
+              </div>
+
+              <h3 className="mt-4 text-xl font-semibold text-white">
+                {item.title}
+              </h3>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 pb-16 xl:px-10 2xl:px-14">
+        <div className="rounded-[34px] border border-white/10 bg-white/[0.04] p-8 shadow-[0_24px_80px_rgba(0,0,0,0.24)]">
+          <p className="text-sm uppercase tracking-[0.28em] text-white/35">
+            Nota di metodo
+          </p>
+          <p className="mt-5 max-w-4xl text-sm leading-8 text-white/66 md:text-base">
+            Questa pagina è pensata per unire contesto finanziario, lettura
+            immobiliare e sintesi automatica. I blocchi intraday e quelli
+            strutturali possono avere frequenze di aggiornamento diverse, per
+            evitare di confondere il rumore di giornata con i segnali reali del
+            mercato.
+          </p>
+        </div>
+      </section>
+
+      <FooterReveal>
+        <Footer />
+      </FooterReveal>
     </main>
   )
 }
