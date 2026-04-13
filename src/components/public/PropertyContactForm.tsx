@@ -160,9 +160,9 @@ export default function PropertyContactForm({
         <button
           type="submit"
           disabled={loading}
-          className="theme-button-primary w-full rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+          className="theme-button-primary liquid-button w-full rounded-2xl px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? 'Verifica in corso...' : 'Conferma codice'}
+          <span>{loading ? 'Verifica in corso...' : 'Conferma codice'}</span>
         </button>
 
         <button
@@ -173,9 +173,9 @@ export default function PropertyContactForm({
             setErrorMessage('')
             setSuccessMessage('')
           }}
-          className="theme-button-secondary w-full rounded-2xl px-5 py-3 text-sm transition"
+          className="theme-button-secondary liquid-button w-full rounded-2xl px-5 py-3 text-sm transition"
         >
-          Torna al form
+          <span>Torna al form</span>
         </button>
       </form>
     )
@@ -258,9 +258,9 @@ export default function PropertyContactForm({
       <button
         type="submit"
         disabled={loading}
-        className="theme-button-primary w-full rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+        className="theme-button-primary liquid-button w-full rounded-2xl px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {loading ? 'Invio codice...' : 'Invia richiesta'}
+        <span>{loading ? 'Invio codice...' : 'Invia richiesta'}</span>
       </button>
     </form>
   )

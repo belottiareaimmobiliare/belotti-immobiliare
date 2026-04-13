@@ -28,7 +28,7 @@ export default function ChiSiamoPage() {
               Chi siamo
             </p>
 
-            <h1 className="mt-4 text-4xl font-semibold leading-tight md:text-5xl text-[var(--site-text)]">
+            <h1 className="mt-4 text-4xl font-semibold leading-tight text-[var(--site-text)] md:text-5xl">
               Gianfederico Belotti,
               <br />
               una storia immobiliare costruita su esperienza e trasparenza
@@ -198,9 +198,9 @@ export default function ChiSiamoPage() {
 
               <Link
                 href="/contatti"
-                className="theme-button-primary mt-6 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95"
+                className="theme-button-primary liquid-button mt-6 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition"
               >
-                Contattaci
+                <span>Contattaci</span>
               </Link>
             </div>
           </aside>

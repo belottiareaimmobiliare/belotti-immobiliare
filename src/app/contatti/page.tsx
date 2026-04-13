@@ -9,8 +9,27 @@ import { readCookiePreferences } from '@/lib/cookie-consent'
 const googleMapsQuery = encodeURIComponent('Via A. Locatelli 62, 24121 Bergamo')
 const googleMapsHref = `https://www.google.com/maps/search/?api=1&query=${googleMapsQuery}`
 
+function CopyIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="9" y="9" width="10" height="10" rx="2" />
+      <path d="M5 15V7a2 2 0 0 1 2-2h8" />
+    </svg>
+  )
+}
+
 export default function ContattiPage() {
   const [canLoadExternalMap, setCanLoadExternalMap] = useState(false)
+  const [copiedField, setCopiedField] = useState<'phone' | 'email' | null>(null)
 
   useEffect(() => {
     const syncPreferences = () => {
@@ -39,6 +58,16 @@ export default function ContattiPage() {
     window.dispatchEvent(new Event('open-cookie-banner'))
   }
 
+  const handleCopy = async (value: string, field: 'phone' | 'email') => {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopiedField(field)
+      window.setTimeout(() => setCopiedField(null), 1800)
+    } catch {
+      setCopiedField(null)
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[var(--site-bg)] text-[var(--site-text)] transition-colors duration-300">
       <SiteHeader />
@@ -48,7 +77,7 @@ export default function ContattiPage() {
           <p className="text-sm uppercase tracking-[0.3em] text-[var(--site-text-faint)]">
             Contatti
           </p>
-          <h1 className="mt-4 text-4xl font-semibold md:text-5xl text-[var(--site-text)]">
+          <h1 className="mt-4 text-4xl font-semibold text-[var(--site-text)] md:text-5xl">
             Siamo a disposizione per informazioni e appuntamenti
           </h1>
           <p className="mt-6 max-w-3xl text-base leading-8 text-[var(--site-text-muted)] md:text-lg">
@@ -67,27 +96,69 @@ export default function ContattiPage() {
               </p>
 
               <div className="mt-5 space-y-4">
-                <a
-                  href="tel:035221206"
-                  className="block rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4 transition hover:bg-[var(--site-surface-2)]"
-                >
-                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-                    Telefono
-                  </p>
-                  <p className="mt-2 text-sm text-[var(--site-text-soft)]">035 221206</p>
-                </a>
+                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <a
+                      href="tel:035221206"
+                      className="min-w-0 flex-1 transition hover:opacity-90"
+                    >
+                      <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                        Telefono
+                      </p>
+                      <p className="mt-2 text-sm text-[var(--site-text-soft)]">
+                        035 221206
+                      </p>
+                    </a>
 
-                <a
-                  href="mailto:info@areaimmobiliare.com"
-                  className="block rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4 transition hover:bg-[var(--site-surface-2)]"
-                >
-                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-                    Email
-                  </p>
-                  <p className="mt-2 break-all text-sm text-[var(--site-text-soft)]">
-                    info@areaimmobiliare.com
-                  </p>
-                </a>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy('035 221206', 'phone')}
+                      className="theme-button-secondary liquid-button inline-flex h-10 w-10 items-center justify-center rounded-xl transition"
+                      aria-label="Copia numero di telefono"
+                      title="Copia numero"
+                    >
+                      <CopyIcon />
+                    </button>
+                  </div>
+
+                  {copiedField === 'phone' && (
+                    <p className="mt-3 text-xs text-emerald-600 dark:text-emerald-300">
+                      Numero copiato
+                    </p>
+                  )}
+                </div>
+
+                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <a
+                      href="mailto:info@areaimmobiliare.com"
+                      className="min-w-0 flex-1 transition hover:opacity-90"
+                    >
+                      <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                        Email
+                      </p>
+                      <p className="mt-2 break-all text-sm text-[var(--site-text-soft)]">
+                        info@areaimmobiliare.com
+                      </p>
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={() => handleCopy('info@areaimmobiliare.com', 'email')}
+                      className="theme-button-secondary liquid-button inline-flex h-10 w-10 items-center justify-center rounded-xl transition"
+                      aria-label="Copia email"
+                      title="Copia email"
+                    >
+                      <CopyIcon />
+                    </button>
+                  </div>
+
+                  {copiedField === 'email' && (
+                    <p className="mt-3 text-xs text-emerald-600 dark:text-emerald-300">
+                      Email copiata
+                    </p>
+                  )}
+                </div>
 
                 <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
                   <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
@@ -105,9 +176,9 @@ export default function ContattiPage() {
                 href={googleMapsHref}
                 target="_blank"
                 rel="noreferrer"
-                className="theme-button-primary mt-6 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95"
+                className="theme-button-primary liquid-button mt-6 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition"
               >
-                Apri su Google Maps
+                <span>Apri su Google Maps</span>
               </a>
             </div>
 
@@ -150,18 +221,18 @@ export default function ContattiPage() {
                     <button
                       type="button"
                       onClick={handleOpenCookieBanner}
-                      className="theme-button-primary inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95"
+                      className="theme-button-primary liquid-button inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition"
                     >
-                      Gestisci cookie per visualizzare la mappa
+                      <span>Gestisci cookie per visualizzare la mappa</span>
                     </button>
 
                     <a
                       href={googleMapsHref}
                       target="_blank"
                       rel="noreferrer"
-                      className="theme-button-secondary inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm transition"
+                      className="theme-button-secondary liquid-button inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm transition"
                     >
-                      Apri su Google Maps
+                      <span>Apri su Google Maps</span>
                     </a>
                   </div>
                 </div>

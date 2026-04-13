@@ -58,25 +58,27 @@ export default function HomeSearchBoxMobile() {
         <button
           type="button"
           onClick={() => setContractType('vendita')}
-          className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
+          data-active={contractType === 'vendita' ? 'true' : 'false'}
+          className={`liquid-button rounded-2xl px-4 py-3 text-sm font-medium transition ${
             contractType === 'vendita'
               ? 'theme-pill-active border'
               : 'theme-pill border'
           }`}
         >
-          Vendita
+          <span>Vendita</span>
         </button>
 
         <button
           type="button"
           onClick={() => setContractType('affitto')}
-          className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
+          data-active={contractType === 'affitto' ? 'true' : 'false'}
+          className={`liquid-button rounded-2xl px-4 py-3 text-sm font-medium transition ${
             contractType === 'affitto'
               ? 'theme-pill-active border'
               : 'theme-pill border'
           }`}
         >
-          Affitto
+          <span>Affitto</span>
         </button>
       </div>
 
@@ -120,17 +122,17 @@ export default function HomeSearchBoxMobile() {
           <button
             type="button"
             onClick={goToSearch}
-            className="theme-button-primary w-full rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95"
+            className="theme-button-primary liquid-button w-full rounded-2xl px-5 py-3 text-sm font-semibold transition"
           >
-            Cerca
+            <span>Cerca</span>
           </button>
 
           <button
             type="button"
             onClick={() => router.push('/immobili/mappa-area')}
-            className="theme-button-secondary w-full rounded-2xl px-5 py-3 text-sm transition"
+            className="theme-button-secondary liquid-button w-full rounded-2xl px-5 py-3 text-sm transition"
           >
-            Vai alla mappa
+            <span>Vai alla mappa</span>
           </button>
         </div>
       </div>

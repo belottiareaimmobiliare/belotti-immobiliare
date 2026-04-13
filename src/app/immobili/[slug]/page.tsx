@@ -216,7 +216,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 )}
               </div>
 
-              <h1 className="mt-4 text-3xl font-semibold leading-tight md:text-5xl text-[var(--site-text)]">
+              <h1 className="mt-4 text-3xl font-semibold leading-tight text-[var(--site-text)] md:text-5xl">
                 {currentProperty.title || 'Immobile'}
               </h1>
 
@@ -237,11 +237,11 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 Prezzo
               </p>
               {currentProperty.price ? (
-                <p className="mt-2 text-3xl font-semibold md:text-5xl text-[var(--site-text)]">
+                <p className="mt-2 text-3xl font-semibold text-[var(--site-text)] md:text-5xl">
                   € {currentProperty.price.toLocaleString('it-IT')}
                 </p>
               ) : (
-                <p className="mt-2 text-2xl font-semibold md:text-4xl text-[var(--site-text)]">
+                <p className="mt-2 text-2xl font-semibold text-[var(--site-text)] md:text-4xl">
                   Trattativa riservata
                 </p>
               )}
@@ -403,7 +403,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                     href={googleMapsHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="theme-button-secondary mt-4 inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm transition"
+                    className="theme-button-secondary liquid-button mt-4 inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm transition"
                   >
                     <span>Apri indirizzo su Google Maps</span>
                     <span className="opacity-60">↗</span>

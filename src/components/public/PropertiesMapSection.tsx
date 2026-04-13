@@ -177,15 +177,17 @@ export default function PropertiesMapSection({
           <button
             type="button"
             onClick={() => setShowZonePicker((prev) => !prev)}
-            className="theme-button-secondary rounded-2xl px-4 py-2 text-sm transition"
+            data-open={showZonePicker ? 'true' : 'false'}
+            aria-expanded={showZonePicker}
+            className="theme-button-secondary liquid-dropdown rounded-2xl px-4 py-2 text-sm transition"
           >
-            Seleziona comuni
+            <span>Seleziona comuni</span>
           </button>
 
           <button
             type="button"
             onClick={goToMapView}
-            className="theme-button-secondary rounded-2xl px-4 py-2 text-sm transition"
+            className="theme-button-secondary liquid-button rounded-2xl px-4 py-2 text-sm transition"
           >
             <span className="hidden md:inline">
               {hasActivePolygon ? 'Ridisegna area su mappa' : 'Disegna area su mappa'}
@@ -251,7 +253,8 @@ export default function PropertiesMapSection({
                           key={`${item.provinceCode}-${item.name}`}
                           type="button"
                           onClick={() => toggleComune(item.name)}
-                          className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm transition ${
+                          data-active={selected ? 'true' : 'false'}
+                          className={`liquid-button flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm transition ${
                             selected
                               ? 'theme-pill-active border'
                               : 'theme-pill border'
@@ -291,9 +294,11 @@ export default function PropertiesMapSection({
                         key={comune}
                         type="button"
                         onClick={() => toggleComune(comune)}
-                        className="theme-pill rounded-full border px-3 py-2 text-sm transition"
+                        className="theme-pill liquid-button rounded-full border px-3 py-2 text-sm transition"
                       >
-                        {comune} <span className="opacity-60">×</span>
+                        <span>
+                          {comune} <span className="opacity-60">×</span>
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -308,17 +313,17 @@ export default function PropertiesMapSection({
                 <button
                   type="button"
                   onClick={applyZones}
-                  className="theme-button-primary flex-1 rounded-2xl px-4 py-3 text-sm font-medium transition hover:opacity-95"
+                  className="theme-button-primary liquid-button flex-1 rounded-2xl px-4 py-3 text-sm font-medium transition"
                 >
-                  Applica
+                  <span>Applica</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={clearZones}
-                  className="theme-button-secondary flex-1 rounded-2xl px-4 py-3 text-sm transition"
+                  className="theme-button-secondary liquid-button flex-1 rounded-2xl px-4 py-3 text-sm transition"
                 >
-                  Reset
+                  <span>Reset</span>
                 </button>
               </div>
             </div>
