@@ -676,3 +676,49 @@ html[data-theme='dark'] .theme-admin-note {
   background: rgba(245, 158, 11, 0.10);
   color: #fef3c7;
 }
+
+/* ---------- NATIVE SELECT DROPDOWN FIX (WINDOWS) ---------- */
+
+select,
+option,
+optgroup {
+  font-family: inherit;
+}
+
+.theme-input,
+.theme-select,
+.theme-admin-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* dark */
+html[data-theme='dark'] select,
+html[data-theme='dark'] .theme-input,
+html[data-theme='dark'] .theme-select,
+html[data-theme='dark'] .theme-admin-select {
+  background-color: #1a2233;
+  color: #ffffff;
+}
+
+html[data-theme='dark'] select option,
+html[data-theme='dark'] select optgroup {
+  background-color: #111827;
+  color: #ffffff;
+}
+
+/* light */
+html[data-theme='light'] select,
+html[data-theme='light'] .theme-input,
+html[data-theme='light'] .theme-select,
+html[data-theme='light'] .theme-admin-select {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #191611;
+}
+
+html[data-theme='light'] select option,
+html[data-theme='light'] select optgroup {
+  background-color: #fffaf2;
+  color: #191611;
+}
