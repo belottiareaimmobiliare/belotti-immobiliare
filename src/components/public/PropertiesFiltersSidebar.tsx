@@ -203,10 +203,13 @@ export default function PropertiesFiltersSidebar({
       {hideLocationFilters && (
         <div className="mt-4 space-y-3">
           <div className="rounded-[24px] border border-[var(--site-border)] bg-[var(--site-surface-2)] px-4 py-3 text-sm text-[var(--site-text-soft)]">
-            <div className="font-medium text-[var(--site-text)]">Ricerca per area attiva</div>
+            <div className="font-medium text-[var(--site-text)]">
+              Ricerca per area attiva
+            </div>
             <div className="mt-1 text-[var(--site-text-muted)]">
-              Stai visualizzando gli immobili contenuti nella zona che hai disegnato sulla mappa.
-              I filtri di provincia e comuni sono nascosti per evitare conflitti con l’area selezionata.
+              Stai visualizzando gli immobili contenuti nella zona che hai
+              disegnato sulla mappa. I filtri di provincia e comuni sono nascosti
+              per evitare conflitti con l’area selezionata.
             </div>
           </div>
 
@@ -237,40 +240,40 @@ export default function PropertiesFiltersSidebar({
           <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-1">
             <div className="grid grid-cols-2 gap-2">
               <button
-  type="button"
-  onClick={() => setContractType('vendita')}
-  data-active={contractType === 'vendita' ? 'true' : 'false'}
-  className={`rounded-xl px-4 py-3 text-sm transition liquid-button ${
-    contractType === 'vendita'
-      ? 'theme-pill-active border'
-      : 'theme-pill border'
-  }`}
->
-  Vendita
-</button>
+                type="button"
+                onClick={() => setContractType('vendita')}
+                data-active={contractType === 'vendita' ? 'true' : 'false'}
+                className={`liquid-button liquid-button-vertical rounded-xl px-4 py-3 text-sm transition ${
+                  contractType === 'vendita'
+                    ? 'theme-pill-active border'
+                    : 'theme-pill border'
+                }`}
+              >
+                <span>Vendita</span>
+              </button>
 
-<button
-  type="button"
-  onClick={() => setContractType('affitto')}
-  data-active={contractType === 'affitto' ? 'true' : 'false'}
-  className={`rounded-xl px-4 py-3 text-sm transition liquid-button ${
-    contractType === 'affitto'
-      ? 'theme-pill-active border'
-      : 'theme-pill border'
-  }`}
->
-  Affitto
-</button>
+              <button
+                type="button"
+                onClick={() => setContractType('affitto')}
+                data-active={contractType === 'affitto' ? 'true' : 'false'}
+                className={`liquid-button liquid-button-vertical rounded-xl px-4 py-3 text-sm transition ${
+                  contractType === 'affitto'
+                    ? 'theme-pill-active border'
+                    : 'theme-pill border'
+                }`}
+              >
+                <span>Affitto</span>
+              </button>
             </div>
           </div>
 
           <button
-  type="button"
-  onClick={() => setContractType('')}
-  className="theme-pill liquid-button w-full rounded-2xl border px-4 py-3 text-sm transition"
->
-  Qualsiasi contratto
-</button>
+            type="button"
+            onClick={() => setContractType('')}
+            className="theme-pill liquid-button liquid-button-vertical w-full rounded-2xl border px-4 py-3 text-sm transition"
+          >
+            <span>Qualsiasi contratto</span>
+          </button>
         </div>
 
         <div>
@@ -378,8 +381,11 @@ export default function PropertiesFiltersSidebar({
                               key={comune.code}
                               type="button"
                               onClick={() => toggleComune(comune.name)}
-                              className={`theme-pill liquid-button liquid-button-vertical flex w-full items-center justify-between rounded-xl border px-3 py-3 text-left text-sm transition ${
-                                selected ? 'liquid-button-selected' : ''
+                              data-active={selected ? 'true' : 'false'}
+                              className={`liquid-button liquid-button-vertical flex w-full items-center justify-between rounded-xl border px-3 py-3 text-left text-sm transition ${
+                                selected
+                                  ? 'theme-pill-active'
+                                  : 'theme-pill'
                               }`}
                             >
                               <span>{comune.name}</span>
@@ -468,29 +474,49 @@ export default function PropertiesFiltersSidebar({
           </p>
 
           <div className="grid gap-4">
-            <FilterSwitch checked={hasGarage} onChange={setHasGarage} label="Box / Garage" />
-            <FilterSwitch checked={hasParking} onChange={setHasParking} label="Posto auto" />
-            <FilterSwitch checked={hasGarden} onChange={setHasGarden} label="Giardino" />
-            <FilterSwitch checked={hasElevator} onChange={setHasElevator} label="Ascensore" />
-            <FilterSwitch checked={isAuction} onChange={setIsAuction} label="Aste" />
+            <FilterSwitch
+              checked={hasGarage}
+              onChange={setHasGarage}
+              label="Box / Garage"
+            />
+            <FilterSwitch
+              checked={hasParking}
+              onChange={setHasParking}
+              label="Posto auto"
+            />
+            <FilterSwitch
+              checked={hasGarden}
+              onChange={setHasGarden}
+              label="Giardino"
+            />
+            <FilterSwitch
+              checked={hasElevator}
+              onChange={setHasElevator}
+              label="Ascensore"
+            />
+            <FilterSwitch
+              checked={isAuction}
+              onChange={setIsAuction}
+              label="Aste"
+            />
           </div>
         </div>
 
         <div className="flex flex-col gap-3">
           <button
-  type="submit"
-  className="theme-button-primary liquid-button w-full rounded-2xl px-5 py-3 text-sm font-semibold transition hover:opacity-95"
->
-  Applica filtri
-</button>
+            type="submit"
+            className="theme-button-primary liquid-button liquid-button-vertical w-full rounded-2xl px-5 py-3 text-sm font-semibold transition"
+          >
+            <span>Applica filtri</span>
+          </button>
 
-<button
-  type="button"
-  onClick={handleResetFilters}
-  className="theme-button-secondary liquid-button w-full rounded-2xl px-5 py-3 text-sm transition"
->
-  Reset filtri
-</button>
+          <button
+            type="button"
+            onClick={handleResetFilters}
+            className="theme-button-secondary liquid-button liquid-button-vertical w-full rounded-2xl px-5 py-3 text-sm transition"
+          >
+            <span>Reset filtri</span>
+          </button>
 
           {hideLocationFilters && (
             <button
