@@ -377,18 +377,19 @@ export default async function AdminPropertiesPage({
                   </Link>
 
                   {property.slug && property.status === 'published' ? (
-                    <Link
-                      href={`/immobili/${property.slug}`}
-                      target="_blank"
-                      className="theme-admin-button-secondary inline-flex flex-1 items-center justify-center rounded-2xl px-5 py-3 text-sm font-medium transition hover:opacity-95"
-                    >
-                      Apri scheda
-                    </Link>
-                  ) : (
-                    <div className="theme-admin-chip inline-flex flex-1 items-center justify-center rounded-2xl px-5 py-3 text-sm">
-                      Scheda pubblica non disponibile
-                    </div>
-                  )}
+  <a
+    href={`/immobili/${property.slug}`}
+    target="_blank"
+    rel="noreferrer"
+    className="theme-admin-button-secondary inline-flex flex-1 items-center justify-center rounded-2xl px-5 py-3 text-sm font-medium transition hover:opacity-95"
+  >
+    Apri scheda
+  </a>
+) : (
+  <div className="theme-admin-chip inline-flex flex-1 items-center justify-center rounded-2xl px-5 py-3 text-sm">
+    Scheda pubblica non disponibile
+  </div>
+)}
                 </div>
               </div>
             </article>

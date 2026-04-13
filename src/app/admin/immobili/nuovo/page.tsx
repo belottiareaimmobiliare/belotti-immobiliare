@@ -550,15 +550,19 @@ export default function NewPropertyPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 px-4 py-4 text-sm text-amber-700 dark:text-amber-100">
-            Per <strong>cauzione</strong>, <strong>anticipo</strong> e <strong>anticipo + cauzione</strong> puoi inserire:
-            <div className="mt-2 space-y-1">
-              <div>• <strong>da definire</strong></div>
-              <div>• una cifra in euro</div>
-              <div>• un testo come “2 mensilità”</div>
-              <div>• <strong>-</strong> se non vuoi mostrarlo nella scheda immobile</div>
-            </div>
-          </div>
+          <div className="rounded-2xl border border-amber-400/25 bg-amber-500/12 px-4 py-4 text-sm text-amber-900 dark:text-amber-100">
+  <p>
+    Per le voci <strong>cauzione</strong>, <strong>anticipo</strong> e{' '}
+    <strong>anticipo + cauzione</strong> puoi inserire:
+  </p>
+  
+  <div className="mt-3 space-y-1 text-amber-800 dark:text-amber-100/90">
+    <div>• <strong>da definire</strong></div>
+    <div>• una cifra in euro</div>
+    <div>• un testo come “2 mensilità”</div>
+    <div>• nulla, se non vuoi mostrarle nella scheda immobile</div>
+  </div>
+</div>
 
           <div className="grid gap-4 md:grid-cols-3">
             <div>
