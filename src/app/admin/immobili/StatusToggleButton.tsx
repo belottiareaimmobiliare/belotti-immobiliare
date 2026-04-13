@@ -37,8 +37,8 @@ export default function StatusToggleButton({
       disabled={isPending}
       className={`rounded-full border px-3 py-1 text-xs uppercase tracking-[0.18em] transition disabled:opacity-60 ${
         isPublished
-          ? 'border-emerald-500/30 bg-emerald-500/12 text-emerald-300'
-          : 'border-amber-500/30 bg-amber-500/12 text-amber-300'
+          ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+          : 'border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300'
       }`}
     >
       {isPending ? 'Aggiorno...' : isPublished ? 'Published' : 'Draft'}

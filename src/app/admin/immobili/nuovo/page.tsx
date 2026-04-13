@@ -55,13 +55,15 @@ function FeatureToggle({
       <span className="text-[var(--site-text-soft)]">{label}</span>
 
       <span
-        className={`relative inline-flex h-7 w-12 shrink-0 rounded-full transition ${
-          checked ? 'bg-emerald-500' : 'bg-white/20'
+        className={`relative inline-flex h-7 w-12 shrink-0 rounded-full border transition ${
+          checked
+            ? 'border-[var(--site-gold)] bg-[var(--site-gold)]'
+            : 'border-[var(--site-border-strong)] bg-[var(--site-surface-2)]'
         }`}
       >
         <span
-          className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition ${
-            checked ? 'left-6' : 'left-1'
+          className={`absolute top-1 h-5 w-5 rounded-full shadow transition ${
+            checked ? 'left-6 bg-[#0b0f17]' : 'left-1 bg-white'
           }`}
         />
       </span>
@@ -548,9 +550,9 @@ export default function NewPropertyPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-4 text-sm text-amber-100">
+          <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 px-4 py-4 text-sm text-amber-700 dark:text-amber-100">
             Per <strong>cauzione</strong>, <strong>anticipo</strong> e <strong>anticipo + cauzione</strong> puoi inserire:
-            <div className="mt-2 space-y-1 text-amber-100/90">
+            <div className="mt-2 space-y-1">
               <div>• <strong>da definire</strong></div>
               <div>• una cifra in euro</div>
               <div>• un testo come “2 mensilità”</div>

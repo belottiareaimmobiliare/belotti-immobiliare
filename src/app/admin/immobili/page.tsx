@@ -66,21 +66,22 @@ function getLocationBadge(property: Property) {
   if (!hasCoordinates) {
     return {
       label: 'Nessuna posizione',
-      className: 'border-red-500/20 bg-red-500/10 text-red-200',
+      className: 'border-red-500/25 bg-red-500/10 text-red-700 dark:text-red-300',
     }
   }
 
   if (property.location_mode === 'precise') {
     return {
       label: 'Posizione precisa',
-      className: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200',
+      className:
+        'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
     }
   }
 
   if (property.location_mode === 'comune_center') {
     return {
       label: 'Posizione comune',
-      className: 'border-sky-500/20 bg-sky-500/10 text-sky-200',
+      className: 'border-sky-500/25 bg-sky-500/10 text-sky-700 dark:text-sky-300',
     }
   }
 
@@ -144,9 +145,7 @@ export default async function AdminPropertiesPage({
           <p className="theme-admin-faint text-sm uppercase tracking-[0.2em]">
             Admin immobili
           </p>
-          <h1 className="mt-2 text-3xl font-semibold">
-            Gestione immobili
-          </h1>
+          <h1 className="mt-2 text-3xl font-semibold">Gestione immobili</h1>
           <p className="theme-admin-muted mt-3">
             Ricerca, controlla e modifica rapidamente gli immobili caricati.
           </p>
@@ -174,9 +173,7 @@ export default async function AdminPropertiesPage({
           <Link
             href={`/admin/immobili${status ? `?status=${status}` : ''}`}
             className={`rounded-xl px-4 py-3 text-center text-sm font-medium transition ${
-              contractType === ''
-                ? 'theme-admin-chip-active'
-                : 'theme-admin-chip'
+              contractType === '' ? 'theme-admin-chip-active' : 'theme-admin-chip'
             }`}
           >
             Tutti
@@ -185,9 +182,7 @@ export default async function AdminPropertiesPage({
           <Link
             href={`/admin/immobili?contractType=vendita${status ? `&status=${status}` : ''}`}
             className={`rounded-xl px-4 py-3 text-center text-sm font-medium transition ${
-              contractType === 'vendita'
-                ? 'theme-admin-chip-active'
-                : 'theme-admin-chip'
+              contractType === 'vendita' ? 'theme-admin-chip-active' : 'theme-admin-chip'
             }`}
           >
             Vendita
@@ -196,9 +191,7 @@ export default async function AdminPropertiesPage({
           <Link
             href={`/admin/immobili?contractType=affitto${status ? `&status=${status}` : ''}`}
             className={`rounded-xl px-4 py-3 text-center text-sm font-medium transition ${
-              contractType === 'affitto'
-                ? 'theme-admin-chip-active'
-                : 'theme-admin-chip'
+              contractType === 'affitto' ? 'theme-admin-chip-active' : 'theme-admin-chip'
             }`}
           >
             Affitto
@@ -247,7 +240,7 @@ export default async function AdminPropertiesPage({
       </div>
 
       {error && (
-        <div className="mt-8 rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-300">
+        <div className="mt-8 rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-700 dark:text-red-300">
           Errore nel caricamento degli immobili.
         </div>
       )}
@@ -288,9 +281,7 @@ export default async function AdminPropertiesPage({
             >
               <div
                 className="h-56 bg-cover bg-center"
-                style={
-                  cover ? { backgroundImage: `url('${cover.file_url}')` } : undefined
-                }
+                style={cover ? { backgroundImage: `url('${cover.file_url}')` } : undefined}
               >
                 {!cover && (
                   <div className="flex h-full items-center justify-center text-sm text-[var(--site-text-faint)]">
@@ -334,22 +325,26 @@ export default async function AdminPropertiesPage({
                   {property.title || 'Immobile senza titolo'}
                 </h2>
 
-                <p className="mt-4 text-2xl font-semibold">
-                  {formatPrice(property.price)}
-                </p>
+                <p className="mt-4 text-2xl font-semibold">{formatPrice(property.price)}</p>
 
                 <p className="theme-admin-muted mt-2 text-sm">
                   {property.surface || '—'} mq · {property.rooms || '—'} locali ·{' '}
                   {property.bathrooms || '—'} bagni
                 </p>
 
-                <div className="theme-admin-card mt-4 rounded-2xl px-4 py-3 text-xs text-[var(--site-text-muted)]">
+                <div className="mt-4 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-xs text-[var(--site-text-muted)]">
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                     <span>
-                      Lat: <span className="text-[var(--site-text-soft)]">{formatCoordinate(property.latitude)}</span>
+                      Lat:{' '}
+                      <span className="text-[var(--site-text-soft)]">
+                        {formatCoordinate(property.latitude)}
+                      </span>
                     </span>
                     <span>
-                      Lng: <span className="text-[var(--site-text-soft)]">{formatCoordinate(property.longitude)}</span>
+                      Lng:{' '}
+                      <span className="text-[var(--site-text-soft)]">
+                        {formatCoordinate(property.longitude)}
+                      </span>
                     </span>
                     <span>
                       Mode:{' '}
