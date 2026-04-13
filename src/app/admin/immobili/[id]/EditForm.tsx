@@ -77,10 +77,8 @@ function FeatureToggle({
       <span className="text-[var(--site-text-soft)]">{label}</span>
 
       <span
-        className={`relative inline-flex h-7 w-12 shrink-0 rounded-full border transition ${
-          checked
-            ? 'border-[var(--site-gold)] bg-[var(--site-gold)]'
-            : 'border-[var(--site-border-strong)] bg-[var(--site-surface-2)]'
+        className={`relative inline-flex h-7 w-12 shrink-0 rounded-full transition ${
+          checked ? 'bg-[var(--site-gold)]' : 'bg-white/20'
         }`}
       >
         <span
@@ -276,16 +274,16 @@ export default function EditForm({ property }: EditFormProps) {
   return (
     <section className="mx-auto w-full max-w-3xl px-4 text-[var(--site-text)]">
       <p className="theme-admin-faint text-sm uppercase tracking-[0.2em]">
-  Modifica immobile
-</p>
+        Modifica immobile
+      </p>
 
-<h2 className="mt-2 text-3xl font-semibold text-[var(--site-text)]">
-  Aggiorna immobile
-</h2>
+      <h2 className="mt-2 text-3xl font-semibold text-[var(--site-text)]">
+        Aggiorna immobile
+      </h2>
 
-<p className="theme-admin-muted mt-3">
-  Modifica i dati principali dell’immobile selezionato.
-</p>
+      <p className="theme-admin-muted mt-3">
+        Modifica i dati principali dell’immobile selezionato.
+      </p>
 
       <form
         onSubmit={handleSubmit}
@@ -573,14 +571,15 @@ export default function EditForm({ property }: EditFormProps) {
           </div>
 
           <div className="rounded-2xl border border-violet-300/40 bg-violet-500/10 px-4 py-4 text-sm text-violet-800 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-100">
-  Per le voci <strong>cauzione</strong>, <strong>anticipo</strong> e <strong>anticipo + cauzione</strong> puoi inserire:
-  <div className="mt-2 space-y-1">
-    <div>• <strong>da definire</strong></div>
-    <div>• una cifra in euro</div>
-    <div>• un testo come “2 mensilità”</div>
-    <div>• nulla, se non vuoi mostrarlo nella scheda immobile</div>
-  </div>
-</div>
+            Per le voci <strong>cauzione</strong>, <strong>anticipo</strong> e{' '}
+            <strong>anticipo + cauzione</strong> puoi inserire:
+            <div className="mt-2 space-y-1">
+              <div>• <strong>da definire</strong></div>
+              <div>• una cifra in euro</div>
+              <div>• un testo come “2 mensilità”</div>
+              <div>• lasciare vuoto, se non vuoi mostrarlo nella scheda immobile</div>
+            </div>
+          </div>
 
           <div className="grid gap-4 md:grid-cols-3">
             <div>
@@ -589,7 +588,7 @@ export default function EditForm({ property }: EditFormProps) {
               </label>
               <input
                 name="deposit_amount"
-                placeholder="Es. 2 mensilità / da definire / -"
+                placeholder="Es. 2 mensilità / da definire"
                 value={form.deposit_amount}
                 onChange={handleChange}
                 className="theme-admin-input w-full rounded-xl px-4 py-3"
@@ -602,7 +601,7 @@ export default function EditForm({ property }: EditFormProps) {
               </label>
               <input
                 name="advance_amount"
-                placeholder="Es. 1 mensilità / da definire / -"
+                placeholder="Es. 1 mensilità / da definire"
                 value={form.advance_amount}
                 onChange={handleChange}
                 className="theme-admin-input w-full rounded-xl px-4 py-3"
@@ -615,7 +614,7 @@ export default function EditForm({ property }: EditFormProps) {
               </label>
               <input
                 name="advance_deposit_amount"
-                placeholder="Es. 3 mensilità / da definire / -"
+                placeholder="Es. 3 mensilità / da definire"
                 value={form.advance_deposit_amount}
                 onChange={handleChange}
                 className="theme-admin-input w-full rounded-xl px-4 py-3"
