@@ -12,12 +12,12 @@ export default function Sidebar() {
     <aside className="hidden w-72 shrink-0 border-r border-[var(--site-border)] bg-[var(--site-bg-soft)] lg:block">
       <div className="flex h-full flex-col px-6 py-8">
         <div className="mb-10">
-          <img
-            src="/images/brand/areaimmobiliare.png"
-            alt="Area Immobiliare"
-            className="h-auto max-w-[170px] object-contain dark:brightness-0 dark:invert"
-          />
-        </div>
+  <img
+    src="/images/brand/areaimmobiliare.png"
+    alt="Area Immobiliare"
+    className="admin-brand-logo h-auto max-w-[170px] object-contain"
+  />
+</div>
 
         <nav className="space-y-2">
           {links.map((link) => (

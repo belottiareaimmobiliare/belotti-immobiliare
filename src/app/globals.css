@@ -654,3 +654,25 @@ html[data-theme='dark'] .theme-toggle-button {
   background: inherit !important;
   border-color: inherit !important;
 }
+
+/* ---------- ADMIN THEME-SAFE OVERRIDES ---------- */
+
+.admin-brand-logo {
+  filter: none;
+}
+
+html[data-theme='dark'] .admin-brand-logo {
+  filter: brightness(0) invert(1);
+}
+
+.theme-admin-note {
+  border: 1px solid rgba(196, 181, 253, 0.5);
+  background: rgba(139, 92, 246, 0.10);
+  color: #5b21b6;
+}
+
+html[data-theme='dark'] .theme-admin-note {
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  background: rgba(245, 158, 11, 0.10);
+  color: #fef3c7;
+}

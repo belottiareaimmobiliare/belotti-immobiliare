@@ -570,7 +570,7 @@ export default function EditForm({ property }: EditFormProps) {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-violet-300/40 bg-violet-500/10 px-4 py-4 text-sm text-violet-800 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-100">
+          <div className="theme-admin-note rounded-2xl px-4 py-4 text-sm">
             Per le voci <strong>cauzione</strong>, <strong>anticipo</strong> e{' '}
             <strong>anticipo + cauzione</strong> puoi inserire:
             <div className="mt-2 space-y-1">
