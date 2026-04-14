@@ -75,7 +75,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-10">
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
           <div className="theme-panel overflow-hidden rounded-[30px] border">
             {coverSrc ? (
               <img
@@ -91,47 +91,10 @@ export default async function NewsDetailPage({ params }: PageProps) {
             )}
           </div>
 
-          <div className="theme-panel rounded-[30px] border p-8">
-            <p className="text-xs uppercase tracking-[0.22em] text-[var(--site-text-faint)]">
-              Brief
-            </p>
-
-            <div className="mt-5 text-lg italic leading-9 text-[var(--site-text-soft)]">
-              {item.brief || 'Nessun brief disponibile.'}
+          <div className="flex min-h-[340px] items-center">
+            <div className="w-full text-xl italic leading-10 text-[var(--site-text-soft)]">
+              {item.brief || 'Nessun testo introduttivo disponibile.'}
             </div>
-
-            {(item.source_name || item.source_url || item.external_url) && (
-              <div className="mt-8 space-y-3 text-sm text-[var(--site-text-muted)]">
-                {item.source_name && (
-                  <div>
-                    <span className="text-[var(--site-text-faint)]">Fonte:</span>{' '}
-                    {item.source_name}
-                  </div>
-                )}
-
-                {item.source_url && (
-                  <a
-                    href={item.source_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="theme-button-secondary inline-flex rounded-2xl px-4 py-3 text-sm transition"
-                  >
-                    Apri fonte
-                  </a>
-                )}
-
-                {item.external_url && (
-                  <a
-                    href={item.external_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="theme-button-primary inline-flex rounded-2xl px-4 py-3 text-sm font-medium transition hover:opacity-95"
-                  >
-                    Apri approfondimento
-                  </a>
-                )}
-              </div>
-            )}
           </div>
         </div>
 
@@ -150,15 +113,21 @@ export default async function NewsDetailPage({ params }: PageProps) {
               <span className="text-[var(--site-text-faint)]">Data:</span>{' '}
               {formatDate(item.published_at || item.created_at)}
             </span>
+
+            {item.source_name && (
+              <>
+                <span className="opacity-50">•</span>
+                <span>
+                  <span className="text-[var(--site-text-faint)]">Fonte:</span>{' '}
+                  {item.source_name}
+                </span>
+              </>
+            )}
           </div>
         </div>
 
         <article className="theme-panel mt-8 rounded-[30px] border p-8">
-          <p className="text-xs uppercase tracking-[0.22em] text-[var(--site-text-faint)]">
-            Notizia
-          </p>
-
-          <div className="mt-6 space-y-5 text-base leading-8 text-[var(--site-text-muted)]">
+          <div className="space-y-5 text-base leading-8 text-[var(--site-text-muted)]">
             {(item.content || '')
               .split('\n')
               .filter((paragraph: string) => paragraph.trim().length > 0)
@@ -166,15 +135,37 @@ export default async function NewsDetailPage({ params }: PageProps) {
                 <p key={index}>{paragraph}</p>
               ))}
           </div>
+
+          {(item.source_url || item.external_url) && (
+            <div className="mt-8 flex flex-wrap gap-3">
+              {item.source_url && (
+                <a
+                  href={item.source_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="theme-button-secondary inline-flex rounded-2xl px-4 py-3 text-sm transition"
+                >
+                  Apri fonte
+                </a>
+              )}
+
+              {item.external_url && (
+                <a
+                  href={item.external_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="theme-button-primary inline-flex rounded-2xl px-4 py-3 text-sm font-medium transition hover:opacity-95"
+                >
+                  Apri approfondimento
+                </a>
+              )}
+            </div>
+          )}
         </article>
 
         {media.length > 1 && (
           <section className="theme-panel mt-8 rounded-[30px] border p-8">
-            <p className="text-xs uppercase tracking-[0.22em] text-[var(--site-text-faint)]">
-              Galleria
-            </p>
-
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {media.map((image) => (
                 <a
                   key={image.id}

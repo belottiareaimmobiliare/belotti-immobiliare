@@ -113,7 +113,7 @@ function NewsCard({
           </p>
 
           <h2
-            className={`mt-4 font-semibold leading-tight text-[var(--site-text)] transition duration-300 group-hover:text-white ${
+            className={`mt-4 font-semibold leading-tight text-[var(--site-text)] transition duration-300 group-hover:text-[var(--site-text)] ${
               featured ? 'text-[2rem]' : 'text-[1.9rem]'
             }`}
           >
