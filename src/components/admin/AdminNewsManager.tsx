@@ -4,6 +4,16 @@ import { ChangeEvent, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
+type NewsMediaItem = {
+  id: string
+  news_item_id: string
+  image_url: string
+  caption: string | null
+  sort_order: number
+  is_cover: boolean
+  created_at: string
+}
+
 type NewsItem = {
   id: string
   source_type: 'manual' | 'facebook'
@@ -25,6 +35,7 @@ type NewsItem = {
   published_at: string | null
   created_at: string
   updated_at: string
+  news_media?: NewsMediaItem[]
 }
 
 type Props = {
@@ -75,10 +86,7 @@ export default function AdminNewsManager({ items }: Props) {
     external_url: '',
     status: 'published',
     sort_order: '0',
-    image_url: '',
   })
-
-  const [isUploadingCreateImage, setIsUploadingCreateImage] = useState(false)
 
   const visibleCount = useMemo(
     () => items.filter((item) => item.is_visible).length,
@@ -89,47 +97,6 @@ export default function AdminNewsManager({ items }: Props) {
     () => items.filter((item) => item.is_pinned).length,
     [items]
   )
-
-  const uploadNewsImage = async (file: File) => {
-    const ext = file.name.split('.').pop() || 'jpg'
-    const fileName = `news-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-    const filePath = `news/${fileName}`
-
-    const { error: uploadError } = await supabase.storage
-      .from('property-media')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false,
-      })
-
-    if (uploadError) {
-      throw uploadError
-    }
-
-    const { data } = supabase.storage.from('property-media').getPublicUrl(filePath)
-    return data.publicUrl
-  }
-
-  const onCreateImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    if (!file.type.startsWith('image/')) {
-      alert('Carica un file immagine valido.')
-      return
-    }
-
-    try {
-      setIsUploadingCreateImage(true)
-      const imageUrl = await uploadNewsImage(file)
-      setCreateForm((prev) => ({ ...prev, image_url: imageUrl }))
-    } catch (error) {
-      console.error(error)
-      alert("Errore durante l'upload immagine.")
-    } finally {
-      setIsUploadingCreateImage(false)
-    }
-  }
 
   const handleCreate = () => {
     if (!createForm.title.trim()) {
@@ -150,7 +117,7 @@ export default function AdminNewsManager({ items }: Props) {
         source_name: createForm.source_name.trim() || null,
         source_url: createForm.source_url.trim() || null,
         external_url: createForm.external_url.trim() || null,
-        image_url: createForm.image_url.trim() || null,
+        image_url: null,
         is_visible: true,
         is_pinned: false,
         pin_order: null,
@@ -175,7 +142,6 @@ export default function AdminNewsManager({ items }: Props) {
         external_url: '',
         status: 'published',
         sort_order: '0',
-        image_url: '',
       })
 
       router.refresh()
@@ -233,7 +199,7 @@ export default function AdminNewsManager({ items }: Props) {
       </h2>
 
       <p className="theme-admin-muted mt-3 max-w-3xl">
-        Crea news manuali, gestisci ordine, autore, fonte, visibilità e apertura nel sito pubblico.
+        Crea news manuali, gestisci ordine, autore, fonte, visibilità, pin e fino a 10 immagini per news.
       </p>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
@@ -311,34 +277,6 @@ export default function AdminNewsManager({ items }: Props) {
               placeholder="Link esterno opzionale"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
             />
-
-            <div className="space-y-3 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
-              <p className="theme-admin-faint text-xs uppercase tracking-[0.18em]">
-                Immagine news
-              </p>
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={onCreateImageChange}
-                className="theme-admin-input w-full rounded-2xl px-4 py-3 file:mr-3 file:rounded-xl file:border-0 file:bg-[var(--site-surface-3)] file:px-3 file:py-2"
-              />
-
-              {isUploadingCreateImage && (
-                <p className="text-sm text-[var(--site-text-muted)]">
-                  Upload immagine in corso...
-                </p>
-              )}
-
-              {createForm.image_url && (
-                <div className="overflow-hidden rounded-2xl border border-[var(--site-border)]">
-                  <div
-                    className="h-44 w-full bg-cover bg-center"
-                    style={{ backgroundImage: `url('${createForm.image_url}')` }}
-                  />
-                </div>
-              )}
-            </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <select
@@ -430,6 +368,20 @@ function NewsRow({
   onUpdate: (item: NewsItem, updates: Partial<NewsItem>) => void
   onDelete: (id: string) => void
 }) {
+  const supabase = createClient()
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  const media = (item.news_media || []).slice().sort((a, b) => {
+    if ((a.is_cover ? 1 : 0) !== (b.is_cover ? 1 : 0)) {
+      return a.is_cover ? -1 : 1
+    }
+    return (a.sort_order ?? 0) - (b.sort_order ?? 0)
+  })
+
+  const cover = media.find((m) => m.is_cover) || media[0] || null
+  const totalImages = media.length
+
   const [form, setForm] = useState({
     title: item.title || '',
     brief: item.brief || '',
@@ -438,13 +390,153 @@ function NewsRow({
     source_name: item.source_name || '',
     source_url: item.source_url || '',
     external_url: item.external_url || '',
-    image_url: item.image_url || '',
     status: item.status,
     is_visible: item.is_visible,
     is_pinned: item.is_pinned,
     pin_order: item.pin_order ? String(item.pin_order) : '',
     sort_order: String(item.sort_order ?? 0),
   })
+
+  const [externalImageUrl, setExternalImageUrl] = useState('')
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+
+  const uploadNewsImage = async (file: File) => {
+    const ext = file.name.split('.').pop() || 'jpg'
+    const fileName = `news-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+    const filePath = `news/${item.id}/${fileName}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('property-media')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+
+    if (uploadError) {
+      throw uploadError
+    }
+
+    const { data } = supabase.storage.from('property-media').getPublicUrl(filePath)
+    return data.publicUrl
+  }
+
+  const addMediaRecord = async (imageUrl: string) => {
+    if (totalImages >= 10) {
+      alert('Puoi inserire al massimo 10 immagini per news.')
+      return
+    }
+
+    const { error } = await supabase.from('news_media').insert({
+      news_item_id: item.id,
+      image_url: imageUrl,
+      caption: null,
+      sort_order: totalImages + 1,
+      is_cover: totalImages === 0,
+    })
+
+    if (error) {
+      throw error
+    }
+  }
+
+  const handleUploadImage = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (totalImages >= 10) {
+      alert('Puoi inserire al massimo 10 immagini per news.')
+      return
+    }
+
+    if (!file.type.startsWith('image/')) {
+      alert('Carica un file immagine valido.')
+      return
+    }
+
+    try {
+      setIsUploadingImage(true)
+      const imageUrl = await uploadNewsImage(file)
+      await addMediaRecord(imageUrl)
+      router.refresh()
+    } catch (error) {
+      console.error(error)
+      alert("Errore durante l'upload immagine.")
+    } finally {
+      setIsUploadingImage(false)
+    }
+  }
+
+  const handleAddExternalImage = () => {
+    if (!externalImageUrl.trim()) {
+      alert('Inserisci un URL immagine.')
+      return
+    }
+
+    if (totalImages >= 10) {
+      alert('Puoi inserire al massimo 10 immagini per news.')
+      return
+    }
+
+    startTransition(async () => {
+      const { error } = await supabase.from('news_media').insert({
+        news_item_id: item.id,
+        image_url: externalImageUrl.trim(),
+        caption: null,
+        sort_order: totalImages + 1,
+        is_cover: totalImages === 0,
+      })
+
+      if (error) {
+        alert(error.message)
+        return
+      }
+
+      setExternalImageUrl('')
+      router.refresh()
+    })
+  }
+
+  const handleSetCover = (mediaId: string) => {
+    startTransition(async () => {
+      const { error: clearError } = await supabase
+        .from('news_media')
+        .update({ is_cover: false })
+        .eq('news_item_id', item.id)
+
+      if (clearError) {
+        alert(clearError.message)
+        return
+      }
+
+      const { error } = await supabase
+        .from('news_media')
+        .update({ is_cover: true })
+        .eq('id', mediaId)
+
+      if (error) {
+        alert(error.message)
+        return
+      }
+
+      router.refresh()
+    })
+  }
+
+  const handleDeleteMedia = (mediaId: string) => {
+    const ok = window.confirm('Vuoi eliminare questa immagine?')
+    if (!ok) return
+
+    startTransition(async () => {
+      const { error } = await supabase.from('news_media').delete().eq('id', mediaId)
+
+      if (error) {
+        alert(error.message)
+        return
+      }
+
+      router.refresh()
+    })
+  }
 
   return (
     <article className="theme-admin-card rounded-3xl p-6">
@@ -472,20 +564,65 @@ function NewsRow({
             Pinnata {item.pin_order ? `#${item.pin_order}` : ''}
           </span>
         )}
+
+        <span className="theme-admin-chip rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
+          {totalImages}/10 immagini
+        </span>
       </div>
 
-      <div className="mt-5 grid gap-6 xl:grid-cols-[180px_minmax(0,1fr)]">
-        <div className="overflow-hidden rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)]">
-          {form.image_url ? (
-            <div
-              className="h-44 w-full bg-cover bg-center"
-              style={{ backgroundImage: `url('${form.image_url}')` }}
-            />
-          ) : (
-            <div className="flex h-44 items-center justify-center text-sm text-[var(--site-text-faint)]">
-              Nessuna immagine
+      <div className="mt-5 grid gap-6 xl:grid-cols-[220px_minmax(0,1fr)]">
+        <div className="space-y-4">
+          <div className="overflow-hidden rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)]">
+            {cover ? (
+              <div
+                className="h-52 w-full bg-cover bg-center"
+                style={{ backgroundImage: `url('${cover.image_url}')` }}
+              />
+            ) : (
+              <div className="flex h-52 items-center justify-center text-sm text-[var(--site-text-faint)]">
+                Nessuna copertina
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
+            <p className="theme-admin-faint text-xs uppercase tracking-[0.18em]">
+              Aggiungi immagini
+            </p>
+
+            <div className="mt-3 space-y-3">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleUploadImage}
+                disabled={isUploadingImage || totalImages >= 10}
+                className="theme-admin-input w-full rounded-2xl px-4 py-3 file:mr-3 file:rounded-xl file:border-0 file:bg-[var(--site-surface-3)] file:px-3 file:py-2 disabled:opacity-60"
+              />
+
+              {isUploadingImage && (
+                <p className="text-sm text-[var(--site-text-muted)]">
+                  Upload immagine in corso...
+                </p>
+              )}
+
+              <input
+                value={externalImageUrl}
+                onChange={(e) => setExternalImageUrl(e.target.value)}
+                placeholder="Oppure URL immagine"
+                className="theme-admin-input w-full rounded-2xl px-4 py-3"
+                disabled={totalImages >= 10}
+              />
+
+              <button
+                type="button"
+                onClick={handleAddExternalImage}
+                disabled={isPending || totalImages >= 10}
+                className="theme-admin-button-secondary w-full rounded-2xl px-4 py-3 text-sm font-medium transition hover:opacity-95 disabled:opacity-60"
+              >
+                Aggiungi da URL
+              </button>
             </div>
-          )}
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -527,11 +664,11 @@ function NewsRow({
             </select>
 
             <input
-              value={form.image_url}
+              value={form.external_url}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, image_url: e.target.value }))
+                setForm((prev) => ({ ...prev, external_url: e.target.value }))
               }
-              placeholder="URL immagine"
+              placeholder="Link esterno"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
             />
           </div>
@@ -556,16 +693,17 @@ function NewsRow({
             />
 
             <input
-              value={form.external_url}
+              type="number"
+              value={form.sort_order}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, external_url: e.target.value }))
+                setForm((prev) => ({ ...prev, sort_order: e.target.value }))
               }
-              placeholder="Link esterno"
+              placeholder="Ordine"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
             />
           </div>
 
-          <div className="grid gap-4 md:grid-cols-5">
+          <div className="grid gap-4 md:grid-cols-4">
             <select
               value={form.status}
               onChange={(e) =>
@@ -613,16 +751,6 @@ function NewsRow({
               placeholder="Pin"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
             />
-
-            <input
-              type="number"
-              value={form.sort_order}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, sort_order: e.target.value }))
-              }
-              placeholder="Ordine"
-              className="theme-admin-input w-full rounded-2xl px-4 py-3"
-            />
           </div>
 
           <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--site-text-faint)]">
@@ -643,7 +771,7 @@ function NewsRow({
                   source_name: form.source_name || null,
                   source_url: form.source_url || null,
                   external_url: form.external_url || null,
-                  image_url: form.image_url || null,
+                  image_url: cover?.image_url || null,
                   status: form.status,
                   is_visible: form.is_visible,
                   is_pinned: form.is_pinned,
@@ -675,6 +803,67 @@ function NewsRow({
               Elimina
             </button>
           </div>
+
+          {media.length > 0 && (
+            <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
+              <p className="theme-admin-faint text-xs uppercase tracking-[0.18em]">
+                Galleria news
+              </p>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {media.map((m, index) => (
+                  <div
+                    key={m.id}
+                    className="overflow-hidden rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-3)]"
+                  >
+                    <div
+                      className="h-36 w-full bg-cover bg-center"
+                      style={{ backgroundImage: `url('${m.image_url}')` }}
+                    />
+
+                    <div className="space-y-2 p-3">
+                      <p className="text-xs text-[var(--site-text-faint)]">
+                        Immagine {index + 1}
+                      </p>
+
+                      {m.is_cover ? (
+                        <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-300">
+                          Copertina attiva
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleSetCover(m.id)}
+                          disabled={isPending}
+                          className="theme-admin-button-secondary w-full rounded-xl px-3 py-2 text-xs font-medium transition hover:opacity-95 disabled:opacity-60"
+                        >
+                          Imposta copertina
+                        </button>
+                      )}
+
+                      <a
+                        href={m.image_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="theme-admin-button-secondary block w-full rounded-xl px-3 py-2 text-center text-xs font-medium transition hover:opacity-95"
+                      >
+                        Apri immagine
+                      </a>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteMedia(m.id)}
+                        disabled={isPending}
+                        className="w-full rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-300 transition hover:bg-red-500/15 disabled:opacity-60"
+                      >
+                        Elimina immagine
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </article>

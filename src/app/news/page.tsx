@@ -4,6 +4,16 @@ import Footer from '@/components/public/Footer'
 import FooterReveal from '@/components/public/FooterReveal'
 import { createClient } from '@/lib/supabase/server'
 
+type NewsMediaItem = {
+  id: string
+  news_item_id: string
+  image_url: string
+  caption: string | null
+  sort_order: number
+  is_cover: boolean
+  created_at: string
+}
+
 type NewsItem = {
   id: string
   slug: string | null
@@ -22,6 +32,7 @@ type NewsItem = {
   status: 'draft' | 'published'
   published_at: string | null
   created_at: string
+  news_media?: NewsMediaItem[]
 }
 
 function formatDate(value: string | null) {
@@ -42,12 +53,26 @@ function hrefFor(item: NewsItem) {
   return item.external_url || '/news'
 }
 
+function getCover(item: NewsItem) {
+  const media = (item.news_media || []).slice().sort((a, b) => {
+    if ((a.is_cover ? 1 : 0) !== (b.is_cover ? 1 : 0)) {
+      return a.is_cover ? -1 : 1
+    }
+    return (a.sort_order ?? 0) - (b.sort_order ?? 0)
+  })
+
+  return media.find((m) => m.is_cover) || media[0] || null
+}
+
 export default async function NewsPage() {
   const supabase = await createClient()
 
   const { data } = await supabase
     .from('news_items')
-    .select('*')
+    .select(`
+      *,
+      news_media (*)
+    `)
     .eq('status', 'published')
     .eq('is_visible', true)
     .order('is_pinned', { ascending: false })
@@ -89,51 +114,55 @@ export default async function NewsPage() {
             </p>
 
             <div className="mt-6 grid gap-6 xl:grid-cols-3">
-              {pinned.map((item) => (
-                <Link
-                  key={item.id}
-                  href={hrefFor(item)}
-                  className="theme-panel group overflow-hidden rounded-[30px] border transition duration-300 hover:border-[var(--site-border-strong)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.22)]"
-                >
-                  <div className="aspect-[16/10] w-full overflow-hidden bg-[var(--site-surface-2)]">
-                    {item.image_url ? (
-                      <div
-                        className="h-full w-full bg-cover bg-center transition duration-500 group-hover:scale-[1.03]"
-                        style={{ backgroundImage: `url('${item.image_url}')` }}
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-sm text-[var(--site-text-faint)]">
-                        Nessuna immagine
-                      </div>
-                    )}
-                  </div>
+              {pinned.map((item) => {
+                const cover = getCover(item)
 
-                  <div className="p-6 transition duration-300 group-hover:bg-[var(--site-surface-2)]">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="theme-badge rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
-                        In evidenza
-                      </span>
-                      <span className="theme-badge rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
-                        {item.source_type === 'facebook' ? 'Facebook' : 'Editoriale'}
-                      </span>
+                return (
+                  <Link
+                    key={item.id}
+                    href={hrefFor(item)}
+                    className="theme-panel group overflow-hidden rounded-[30px] border transition duration-300 hover:border-[var(--site-border-strong)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.22)]"
+                  >
+                    <div className="aspect-[16/10] w-full overflow-hidden bg-[var(--site-surface-2)]">
+                      {cover?.image_url || item.image_url ? (
+                        <div
+                          className="h-full w-full bg-cover bg-center transition duration-500 group-hover:scale-[1.03]"
+                          style={{ backgroundImage: `url('${cover?.image_url || item.image_url}')` }}
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-sm text-[var(--site-text-faint)]">
+                          Nessuna immagine
+                        </div>
+                      )}
                     </div>
 
-                    <p className="mt-4 text-sm text-[var(--site-text-faint)]">
-                      {formatDate(item.published_at || item.created_at)}
-                    </p>
+                    <div className="p-6 transition duration-300 group-hover:bg-[var(--site-surface-2)]">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="theme-badge rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
+                          In evidenza
+                        </span>
+                        <span className="theme-badge rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
+                          {item.source_type === 'facebook' ? 'Facebook' : 'Editoriale'}
+                        </span>
+                      </div>
 
-                    <h2 className="mt-3 text-2xl font-semibold leading-tight text-[var(--site-text)] transition duration-300 group-hover:text-white">
-                      {item.title || 'News'}
-                    </h2>
-
-                    {item.brief && (
-                      <p className="mt-3 text-sm font-medium text-[var(--site-text-soft)]">
-                        {item.brief}
+                      <p className="mt-4 text-sm text-[var(--site-text-faint)]">
+                        {formatDate(item.published_at || item.created_at)}
                       </p>
-                    )}
-                  </div>
-                </Link>
-              ))}
+
+                      <h2 className="mt-3 text-2xl font-semibold leading-tight text-[var(--site-text)] transition duration-300 group-hover:text-white">
+                        {item.title || 'News'}
+                      </h2>
+
+                      {item.brief && (
+                        <p className="mt-3 text-sm font-medium text-[var(--site-text-soft)]">
+                          {item.brief}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                )
+              })}
             </div>
           </div>
         )}
@@ -145,48 +174,52 @@ export default async function NewsPage() {
             </p>
 
             <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {regular.map((item) => (
-                <Link
-                  key={item.id}
-                  href={hrefFor(item)}
-                  className="theme-panel group overflow-hidden rounded-[30px] border transition duration-300 hover:border-[var(--site-border-strong)] hover:shadow-[0_18px_50px_rgba(0,0,0,0.20)]"
-                >
-                  <div className="aspect-[16/10] w-full overflow-hidden bg-[var(--site-surface-2)]">
-                    {item.image_url ? (
-                      <div
-                        className="h-full w-full bg-cover bg-center transition duration-500 group-hover:scale-[1.03]"
-                        style={{ backgroundImage: `url('${item.image_url}')` }}
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-sm text-[var(--site-text-faint)]">
-                        Nessuna immagine
-                      </div>
-                    )}
-                  </div>
+              {regular.map((item) => {
+                const cover = getCover(item)
 
-                  <div className="p-6 transition duration-300 group-hover:bg-[var(--site-surface-2)]">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="theme-badge rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
-                        {item.source_type === 'facebook' ? 'Facebook' : 'Editoriale'}
-                      </span>
+                return (
+                  <Link
+                    key={item.id}
+                    href={hrefFor(item)}
+                    className="theme-panel group overflow-hidden rounded-[30px] border transition duration-300 hover:border-[var(--site-border-strong)] hover:shadow-[0_18px_50px_rgba(0,0,0,0.20)]"
+                  >
+                    <div className="aspect-[16/10] w-full overflow-hidden bg-[var(--site-surface-2)]">
+                      {cover?.image_url || item.image_url ? (
+                        <div
+                          className="h-full w-full bg-cover bg-center transition duration-500 group-hover:scale-[1.03]"
+                          style={{ backgroundImage: `url('${cover?.image_url || item.image_url}')` }}
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-sm text-[var(--site-text-faint)]">
+                          Nessuna immagine
+                        </div>
+                      )}
                     </div>
 
-                    <p className="mt-4 text-sm text-[var(--site-text-faint)]">
-                      {formatDate(item.published_at || item.created_at)}
-                    </p>
+                    <div className="p-6 transition duration-300 group-hover:bg-[var(--site-surface-2)]">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="theme-badge rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
+                          {item.source_type === 'facebook' ? 'Facebook' : 'Editoriale'}
+                        </span>
+                      </div>
 
-                    <h3 className="mt-3 text-xl font-semibold leading-tight text-[var(--site-text)] transition duration-300 group-hover:text-white">
-                      {item.title || 'News'}
-                    </h3>
-
-                    {item.brief && (
-                      <p className="mt-3 text-sm font-medium text-[var(--site-text-soft)]">
-                        {item.brief}
+                      <p className="mt-4 text-sm text-[var(--site-text-faint)]">
+                        {formatDate(item.published_at || item.created_at)}
                       </p>
-                    )}
-                  </div>
-                </Link>
-              ))}
+
+                      <h3 className="mt-3 text-xl font-semibold leading-tight text-[var(--site-text)] transition duration-300 group-hover:text-white">
+                        {item.title || 'News'}
+                      </h3>
+
+                      {item.brief && (
+                        <p className="mt-3 text-sm font-medium text-[var(--site-text-soft)]">
+                          {item.brief}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                )
+              })}
             </div>
           </div>
         ) : (

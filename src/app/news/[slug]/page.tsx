@@ -4,6 +4,16 @@ import Footer from '@/components/public/Footer'
 import FooterReveal from '@/components/public/FooterReveal'
 import { createClient } from '@/lib/supabase/server'
 
+type NewsMediaItem = {
+  id: string
+  news_item_id: string
+  image_url: string
+  caption: string | null
+  sort_order: number
+  is_cover: boolean
+  created_at: string
+}
+
 type PageProps = {
   params: Promise<{
     slug: string
@@ -25,7 +35,10 @@ export default async function NewsDetailPage({ params }: PageProps) {
 
   const { data: item, error } = await supabase
     .from('news_items')
-    .select('*')
+    .select(`
+      *,
+      news_media (*)
+    `)
     .eq('slug', slug)
     .eq('status', 'published')
     .eq('is_visible', true)
@@ -34,6 +47,16 @@ export default async function NewsDetailPage({ params }: PageProps) {
   if (error || !item) {
     notFound()
   }
+
+  const media = ((item.news_media || []) as NewsMediaItem[]).slice().sort((a, b) => {
+    if ((a.is_cover ? 1 : 0) !== (b.is_cover ? 1 : 0)) {
+      return a.is_cover ? -1 : 1
+    }
+    return (a.sort_order ?? 0) - (b.sort_order ?? 0)
+  })
+
+  const cover = media.find((m) => m.is_cover) || media[0] || null
+  const gallery = media.filter((m) => !cover || m.id !== cover.id)
 
   return (
     <main className="min-h-screen bg-[var(--site-bg)] text-[var(--site-text)]">
@@ -67,10 +90,10 @@ export default async function NewsDetailPage({ params }: PageProps) {
         <div className="grid gap-10 lg:grid-cols-[380px_minmax(0,1fr)] lg:items-start">
           <div>
             <div className="overflow-hidden rounded-[28px] border border-[var(--site-border)] bg-[var(--site-surface-2)]">
-              {item.image_url ? (
+              {cover?.image_url || item.image_url ? (
                 <div
                   className="aspect-[4/3] w-full bg-cover bg-center"
-                  style={{ backgroundImage: `url('${item.image_url}')` }}
+                  style={{ backgroundImage: `url('${cover?.image_url || item.image_url}')` }}
                 />
               ) : (
                 <div className="flex aspect-[4/3] items-center justify-center text-sm text-[var(--site-text-faint)]">
@@ -120,26 +143,53 @@ export default async function NewsDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          <article className="theme-panel rounded-[30px] border p-7">
-            <div className="space-y-5 text-base leading-8 text-[var(--site-text-muted)]">
-              {(item.content || '')
-                .split('\n')
-                .filter((paragraph: string) => paragraph.trim().length > 0)
-                .map((paragraph: string, index: number) => (
-                  <p key={index}>{paragraph}</p>
-                ))}
+          <article className="space-y-8">
+            <div className="theme-panel rounded-[30px] border p-7">
+              <div className="space-y-5 text-base leading-8 text-[var(--site-text-muted)]">
+                {(item.content || '')
+                  .split('\n')
+                  .filter((paragraph: string) => paragraph.trim().length > 0)
+                  .map((paragraph: string, index: number) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
+              </div>
+
+              {item.external_url && (
+                <div className="mt-8">
+                  <a
+                    href={item.external_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="theme-button-primary inline-flex rounded-2xl px-5 py-3 text-sm font-medium transition hover:opacity-95"
+                  >
+                    Apri approfondimento
+                  </a>
+                </div>
+              )}
             </div>
 
-            {item.external_url && (
-              <div className="mt-8">
-                <a
-                  href={item.external_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="theme-button-primary inline-flex rounded-2xl px-5 py-3 text-sm font-medium transition hover:opacity-95"
-                >
-                  Apri approfondimento
-                </a>
+            {gallery.length > 0 && (
+              <div className="theme-panel rounded-[30px] border p-7">
+                <p className="text-xs uppercase tracking-[0.22em] text-[var(--site-text-faint)]">
+                  Galleria
+                </p>
+
+                <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {gallery.map((image) => (
+                    <a
+                      key={image.id}
+                      href={image.image_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="overflow-hidden rounded-[24px] border border-[var(--site-border)] bg-[var(--site-surface-2)] transition hover:border-[var(--site-border-strong)]"
+                    >
+                      <div
+                        className="aspect-[4/3] w-full bg-cover bg-center transition duration-500 hover:scale-[1.02]"
+                        style={{ backgroundImage: `url('${image.image_url}')` }}
+                      />
+                    </a>
+                  ))}
+                </div>
               </div>
             )}
           </article>

@@ -6,7 +6,10 @@ export default async function AdminNewsPage() {
 
   const { data, error } = await supabase
     .from('news_items')
-    .select('*')
+    .select(`
+      *,
+      news_media (*)
+    `)
     .order('is_pinned', { ascending: false })
     .order('pin_order', { ascending: true, nullsFirst: false })
     .order('sort_order', { ascending: true })
