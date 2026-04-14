@@ -72,10 +72,33 @@ function formatDate(value: string | null) {
   })
 }
 
+function sortNewsItems(items: NewsItem[]) {
+  return [...items].sort((a, b) => {
+    if ((a.is_pinned ? 1 : 0) !== (b.is_pinned ? 1 : 0)) {
+      return a.is_pinned ? -1 : 1
+    }
+
+    const aPin = a.pin_order ?? 9999
+    const bPin = b.pin_order ?? 9999
+    if (aPin !== bPin) return aPin - bPin
+
+    const aSort = a.sort_order ?? 0
+    const bSort = b.sort_order ?? 0
+    if (aSort !== bSort) return aSort - bSort
+
+    const aDate = a.published_at || a.created_at
+    const bDate = b.published_at || b.created_at
+    return new Date(bDate).getTime() - new Date(aDate).getTime()
+  })
+}
+
 export default function AdminNewsManager({ items }: Props) {
   const supabase = createClient()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+
+  const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards')
+  const [draggedId, setDraggedId] = useState<string | null>(null)
 
   const [createForm, setCreateForm] = useState({
     title: '',
@@ -88,6 +111,8 @@ export default function AdminNewsManager({ items }: Props) {
     status: 'published',
     sort_order: '0',
   })
+
+  const sortedItems = useMemo(() => sortNewsItems(items), [items])
 
   const visibleCount = useMemo(
     () => items.filter((item) => item.is_visible).length,
@@ -190,6 +215,70 @@ export default function AdminNewsManager({ items }: Props) {
     })
   }
 
+  const persistOrderedList = (ordered: NewsItem[]) => {
+    startTransition(async () => {
+      const updates = ordered.map((item, index) => ({
+        id: item.id,
+        sort_order: (index + 1) * 10,
+      }))
+
+      const changed = updates.filter(
+        (u) =>
+          (items.find((item) => item.id === u.id)?.sort_order ?? 0) !== u.sort_order
+      )
+
+      if (changed.length === 0) return
+
+      const results = await Promise.all(
+        changed.map((u) =>
+          supabase.from('news_items').update({ sort_order: u.sort_order }).eq('id', u.id)
+        )
+      )
+
+      const failed = results.find((r) => r.error)
+      if (failed?.error) {
+        alert(failed.error.message)
+        return
+      }
+
+      router.refresh()
+    })
+  }
+
+  const moveItem = (itemId: string, direction: -1 | 1) => {
+    const list = [...sortedItems]
+    const currentIndex = list.findIndex((item) => item.id === itemId)
+    if (currentIndex === -1) return
+
+    const nextIndex = currentIndex + direction
+    if (nextIndex < 0 || nextIndex >= list.length) return
+
+    ;[list[currentIndex], list[nextIndex]] = [list[nextIndex], list[currentIndex]]
+    persistOrderedList(list)
+  }
+
+  const handleDropReorder = (targetId: string) => {
+    if (!draggedId || draggedId === targetId) {
+      setDraggedId(null)
+      return
+    }
+
+    const list = [...sortedItems]
+    const fromIndex = list.findIndex((item) => item.id === draggedId)
+    const toIndex = list.findIndex((item) => item.id === targetId)
+
+    if (fromIndex === -1 || toIndex === -1) {
+      setDraggedId(null)
+      return
+    }
+
+    const [moved] = list.splice(fromIndex, 1)
+    list.splice(toIndex, 0, moved)
+
+    setDraggedId(null)
+    persistOrderedList(list)
+  }
+
   return (
     <section className="text-[var(--site-text)]">
       <p className="theme-admin-faint text-sm uppercase tracking-[0.2em]">
@@ -201,8 +290,8 @@ export default function AdminNewsManager({ items }: Props) {
       </h2>
 
       <p className="theme-admin-muted mt-3 max-w-3xl">
-        Crea news manuali, gestisci ordine, autore, fonte, visibilità, pin e
-        fino a 10 immagini per news.
+        Crea news manuali, gestisci ordine, autore, fonte, visibilità, pin e fino
+        a 10 immagini per news.
       </p>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
@@ -353,6 +442,32 @@ export default function AdminNewsManager({ items }: Props) {
                 </p>
               </div>
             </div>
+
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => setViewMode('cards')}
+                className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${
+                  viewMode === 'cards'
+                    ? 'theme-admin-chip-active'
+                    : 'theme-admin-button-secondary'
+                }`}
+              >
+                Vista card
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewMode('list')}
+                className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${
+                  viewMode === 'list'
+                    ? 'theme-admin-chip-active'
+                    : 'theme-admin-button-secondary'
+                }`}
+              >
+                Vista lista
+              </button>
+            </div>
           </div>
 
           {items.length === 0 && (
@@ -361,14 +476,108 @@ export default function AdminNewsManager({ items }: Props) {
             </div>
           )}
 
-          {items.map((item) => (
-            <NewsRow
-              key={item.id}
-              item={item}
-              onUpdate={handleUpdate}
-              onDelete={handleDelete}
-            />
-          ))}
+          {viewMode === 'cards' ? (
+            sortedItems.map((item) => (
+              <NewsRow
+                key={item.id}
+                item={item}
+                onUpdate={handleUpdate}
+                onDelete={handleDelete}
+              />
+            ))
+          ) : (
+            <div className="theme-admin-card overflow-hidden rounded-3xl">
+              <div className="grid grid-cols-[minmax(0,1fr)_180px_120px_160px] gap-4 border-b border-[var(--site-border)] px-5 py-4 text-xs uppercase tracking-[0.18em] text-[var(--site-text-faint)]">
+                <div>Titolo</div>
+                <div>Data</div>
+                <div>Stato</div>
+                <div>Ordine</div>
+              </div>
+
+              <div className="divide-y divide-[var(--site-border)]">
+                {sortedItems.map((item, index) => (
+                  <div
+                    key={item.id}
+                    draggable
+                    onDragStart={() => setDraggedId(item.id)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => handleDropReorder(item.id)}
+                    className={`grid grid-cols-[minmax(0,1fr)_180px_120px_160px] gap-4 px-5 py-4 transition ${
+                      draggedId === item.id
+                        ? 'bg-[var(--site-surface-3)]'
+                        : 'hover:bg-[var(--site-surface-2)]'
+                    }`}
+                  >
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          className="theme-admin-button-secondary cursor-grab rounded-xl px-3 py-2 text-xs"
+                          title="Trascina per riordinare"
+                        >
+                          ⇅
+                        </button>
+
+                        <p className="truncate text-sm font-medium text-[var(--site-text)]">
+                          {item.title || 'News senza titolo'}
+                        </p>
+                      </div>
+
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {item.is_pinned && (
+                          <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-amber-300">
+                            Pinnata
+                          </span>
+                        )}
+
+                        {item.is_visible ? (
+                          <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-emerald-300">
+                            Visibile
+                          </span>
+                        ) : (
+                          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--site-text-faint)]">
+                            Nascosta
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-sm text-[var(--site-text-muted)]">
+                      {formatDate(item.published_at || item.created_at)}
+                    </div>
+
+                    <div className="text-sm text-[var(--site-text-soft)]">
+                      {item.status}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => moveItem(item.id, -1)}
+                        disabled={isPending || index === 0}
+                        className="theme-admin-button-secondary rounded-xl px-3 py-2 text-xs disabled:opacity-50"
+                      >
+                        ↑
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => moveItem(item.id, 1)}
+                        disabled={isPending || index === sortedItems.length - 1}
+                        className="theme-admin-button-secondary rounded-xl px-3 py-2 text-xs disabled:opacity-50"
+                      >
+                        ↓
+                      </button>
+
+                      <span className="text-xs text-[var(--site-text-faint)]">
+                        {item.sort_order ?? 0}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>
@@ -548,10 +757,7 @@ function NewsRow({
     if (!ok) return
 
     startTransition(async () => {
-      const { error } = await supabase
-        .from('news_media')
-        .delete()
-        .eq('id', mediaId)
+      const { error } = await supabase.from('news_media').delete().eq('id', mediaId)
 
       if (error) {
         alert(error.message)
