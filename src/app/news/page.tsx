@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import SiteHeader from '@/components/public/SiteHeader'
 import Footer from '@/components/public/Footer'
 import FooterReveal from '@/components/public/FooterReveal'
@@ -5,12 +6,16 @@ import { createClient } from '@/lib/supabase/server'
 
 type NewsItem = {
   id: string
+  slug: string | null
   source_type: 'manual' | 'facebook'
   title: string | null
+  brief: string | null
   excerpt: string | null
   content: string | null
   image_url: string | null
   external_url: string | null
+  source_name: string | null
+  author_name: string | null
   is_visible: boolean
   is_pinned: boolean
   pin_order: number | null
@@ -29,14 +34,19 @@ function formatDate(value: string | null) {
   })
 }
 
-function getPreviewText(item: NewsItem) {
+function preview(item: NewsItem) {
   return item.excerpt || item.content || 'Contenuto in aggiornamento.'
+}
+
+function hrefFor(item: NewsItem) {
+  if (item.slug) return `/news/${item.slug}`
+  return item.external_url || '/news'
 }
 
 export default async function NewsPage() {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('news_items')
     .select('*')
     .eq('status', 'published')
@@ -47,65 +57,49 @@ export default async function NewsPage() {
     .order('published_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
 
-  const newsItems = (data || []) as NewsItem[]
-  const pinnedNews = newsItems.filter((item) => item.is_pinned).slice(0, 3)
-  const regularNews = newsItems.filter((item) => !item.is_pinned)
+  const items = (data || []) as NewsItem[]
+  const pinned = items.filter((item) => item.is_pinned).slice(0, 3)
+  const regular = items.filter((item) => !item.is_pinned)
 
   return (
-    <main className="min-h-screen bg-[var(--site-bg)] text-[var(--site-text)] transition-colors duration-300">
+    <main className="min-h-screen bg-[var(--site-bg)] text-[var(--site-text)]">
       <SiteHeader />
 
-      <section className="border-b border-[var(--site-border)] bg-[var(--site-bg-soft)] transition-colors duration-300">
+      <section className="border-b border-[var(--site-border)] bg-[var(--site-bg-soft)]">
         <div className="mx-auto max-w-7xl px-6 py-16">
           <p className="text-sm uppercase tracking-[0.3em] text-[var(--site-text-faint)]">
             News
           </p>
 
-          <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight text-[var(--site-text)] md:text-5xl">
-            Aggiornamenti, contenuti e notizie dal mondo immobiliare
+          <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight md:text-5xl">
+            Aggiornamenti e contenuti dal mondo immobiliare
           </h1>
 
           <p className="mt-6 max-w-3xl text-base leading-8 text-[var(--site-text-muted)] md:text-lg">
-            In questa sezione trovi contenuti editoriali, aggiornamenti utili e post selezionati
-            dalla comunicazione pubblica di Area Immobiliare.
+            Approfondimenti, contenuti editoriali e aggiornamenti rilevanti per chi segue
+            il mercato immobiliare.
           </p>
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-16">
-        {error && (
-          <div className="theme-panel rounded-[30px] border p-8 text-[var(--site-text-muted)]">
-            Errore nel caricamento delle news.
-          </div>
-        )}
-
-        {!error && newsItems.length === 0 && (
-          <div className="theme-panel rounded-[30px] border p-8 text-[var(--site-text-muted)]">
-            Nessuna news disponibile al momento.
-          </div>
-        )}
-
-        {!error && pinnedNews.length > 0 && (
+        {pinned.length > 0 && (
           <div className="mb-14">
-            <div className="mb-6">
-              <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
-                In evidenza
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold text-[var(--site-text)]">
-                Le news fissate in alto
-              </h2>
-            </div>
+            <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
+              In evidenza
+            </p>
 
-            <div className="grid gap-6 xl:grid-cols-3">
-              {pinnedNews.map((item) => (
-                <article
+            <div className="mt-6 grid gap-6 xl:grid-cols-3">
+              {pinned.map((item) => (
+                <Link
                   key={item.id}
-                  className="theme-panel overflow-hidden rounded-[30px] border"
+                  href={hrefFor(item)}
+                  className="theme-panel group overflow-hidden rounded-[30px] border transition duration-300 hover:border-[var(--site-border-strong)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.22)]"
                 >
                   <div className="aspect-[16/10] w-full overflow-hidden bg-[var(--site-surface-2)]">
                     {item.image_url ? (
                       <div
-                        className="h-full w-full bg-cover bg-center"
+                        className="h-full w-full bg-cover bg-center transition duration-500 group-hover:scale-[1.03]"
                         style={{ backgroundImage: `url('${item.image_url}')` }}
                       />
                     ) : (
@@ -115,12 +109,11 @@ export default async function NewsPage() {
                     )}
                   </div>
 
-                  <div className="p-6">
+                  <div className="p-6 transition duration-300 group-hover:bg-[var(--site-surface-2)]">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="theme-badge rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
                         In evidenza
                       </span>
-
                       <span className="theme-badge rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
                         {item.source_type === 'facebook' ? 'Facebook' : 'Editoriale'}
                       </span>
@@ -130,56 +123,43 @@ export default async function NewsPage() {
                       {formatDate(item.published_at || item.created_at)}
                     </p>
 
-                    <h3 className="mt-3 text-2xl font-semibold leading-tight text-[var(--site-text)]">
+                    <h2 className="mt-3 text-2xl font-semibold leading-tight text-[var(--site-text)] transition duration-300 group-hover:text-white">
                       {item.title || 'News'}
-                    </h3>
+                    </h2>
+
+                    {item.brief && (
+                      <p className="mt-3 text-sm font-medium text-[var(--site-text-soft)]">
+                        {item.brief}
+                      </p>
+                    )}
 
                     <p className="mt-4 text-sm leading-7 text-[var(--site-text-muted)]">
-                      {getPreviewText(item)}
+                      {preview(item)}
                     </p>
-
-                    {(item.external_url || item.content) && (
-                      <div className="mt-6">
-                        {item.external_url ? (
-                          <a
-                            href={item.external_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="theme-button-primary inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-medium transition hover:opacity-95"
-                          >
-                            Apri approfondimento
-                          </a>
-                        ) : null}
-                      </div>
-                    )}
                   </div>
-                </article>
+                </Link>
               ))}
             </div>
           </div>
         )}
 
-        {!error && regularNews.length > 0 && (
+        {regular.length > 0 ? (
           <div>
-            <div className="mb-6">
-              <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
-                Ultime news
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold text-[var(--site-text)]">
-                Aggiornamenti recenti
-              </h2>
-            </div>
+            <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
+              Ultime news
+            </p>
 
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {regularNews.map((item) => (
-                <article
+            <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {regular.map((item) => (
+                <Link
                   key={item.id}
-                  className="theme-panel overflow-hidden rounded-[30px] border"
+                  href={hrefFor(item)}
+                  className="theme-panel group overflow-hidden rounded-[30px] border transition duration-300 hover:border-[var(--site-border-strong)] hover:shadow-[0_18px_50px_rgba(0,0,0,0.20)]"
                 >
                   <div className="aspect-[16/10] w-full overflow-hidden bg-[var(--site-surface-2)]">
                     {item.image_url ? (
                       <div
-                        className="h-full w-full bg-cover bg-center"
+                        className="h-full w-full bg-cover bg-center transition duration-500 group-hover:scale-[1.03]"
                         style={{ backgroundImage: `url('${item.image_url}')` }}
                       />
                     ) : (
@@ -189,7 +169,7 @@ export default async function NewsPage() {
                     )}
                   </div>
 
-                  <div className="p-6">
+                  <div className="p-6 transition duration-300 group-hover:bg-[var(--site-surface-2)]">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="theme-badge rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
                         {item.source_type === 'facebook' ? 'Facebook' : 'Editoriale'}
@@ -200,30 +180,27 @@ export default async function NewsPage() {
                       {formatDate(item.published_at || item.created_at)}
                     </p>
 
-                    <h3 className="mt-3 text-xl font-semibold leading-tight text-[var(--site-text)]">
+                    <h3 className="mt-3 text-xl font-semibold leading-tight text-[var(--site-text)] transition duration-300 group-hover:text-white">
                       {item.title || 'News'}
                     </h3>
 
-                    <p className="mt-4 text-sm leading-7 text-[var(--site-text-muted)]">
-                      {getPreviewText(item)}
-                    </p>
-
-                    {item.external_url && (
-                      <div className="mt-6">
-                        <a
-                          href={item.external_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="theme-button-secondary inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm transition hover:opacity-95"
-                        >
-                          Apri link
-                        </a>
-                      </div>
+                    {item.brief && (
+                      <p className="mt-3 text-sm font-medium text-[var(--site-text-soft)]">
+                        {item.brief}
+                      </p>
                     )}
+
+                    <p className="mt-4 text-sm leading-7 text-[var(--site-text-muted)]">
+                      {preview(item)}
+                    </p>
                   </div>
-                </article>
+                </Link>
               ))}
             </div>
+          </div>
+        ) : (
+          <div className="theme-panel rounded-[30px] border p-8 text-[var(--site-text-muted)]">
+            Nessuna news disponibile al momento.
           </div>
         )}
       </section>

@@ -5,7 +5,7 @@ const links = [
   { href: '/admin/immobili', label: 'Tutti gli immobili' },
   { href: '/admin/immobili?contractType=vendita', label: 'Immobili in vendita' },
   { href: '/admin/immobili?contractType=affitto', label: 'Immobili in affitto' },
-  { href: '/admin/mercato-del-mattone', label: 'Mercato del mattone' },
+  { href: '/admin/news', label: 'News' },
 ]
 
 export default function Sidebar() {
@@ -37,7 +37,7 @@ export default function Sidebar() {
             Gestionale premium in costruzione
           </p>
           <p className="mt-1 text-xs text-[var(--site-text-muted)]">
-            Base admin pronta per immobili, mercato e pubblicazione.
+            Base admin pronta per immobili, news e pubblicazione.
           </p>
         </div>
       </div>
