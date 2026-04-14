@@ -101,17 +101,6 @@ function sortNewsItems(items: NewsItem[]) {
   })
 }
 
-function getCover(item: NewsItem) {
-  const media = (item.news_media || []).slice().sort((a, b) => {
-    if ((a.is_cover ? 1 : 0) !== (b.is_cover ? 1 : 0)) {
-      return a.is_cover ? -1 : 1
-    }
-    return (a.sort_order ?? 0) - (b.sort_order ?? 0)
-  })
-
-  return media.find((m) => m.is_cover) || media[0] || null
-}
-
 function matchesFilter(item: NewsItem, filter: FilterMode) {
   switch (filter) {
     case 'visible':
@@ -129,6 +118,23 @@ function matchesFilter(item: NewsItem, filter: FilterMode) {
   }
 }
 
+function matchesSearch(item: NewsItem, search: string) {
+  const q = search.trim().toLowerCase()
+  if (!q) return true
+
+  const haystack = [
+    item.title || '',
+    item.brief || '',
+    item.content || '',
+    item.author_name || '',
+    item.source_name || '',
+  ]
+    .join(' ')
+    .toLowerCase()
+
+  return haystack.includes(q)
+}
+
 export default function AdminNewsManager({ items }: Props) {
   const supabase = createClient()
   const router = useRouter()
@@ -136,6 +142,7 @@ export default function AdminNewsManager({ items }: Props) {
 
   const [viewMode, setViewMode] = useState<ViewMode>('cards')
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
+  const [searchTerm, setSearchTerm] = useState('')
   const [draggedId, setDraggedId] = useState<string | null>(null)
 
   const [createForm, setCreateForm] = useState({
@@ -153,8 +160,11 @@ export default function AdminNewsManager({ items }: Props) {
   const sortedItems = useMemo(() => sortNewsItems(items), [items])
 
   const filteredItems = useMemo(
-    () => sortedItems.filter((item) => matchesFilter(item, filterMode)),
-    [sortedItems, filterMode]
+    () =>
+      sortedItems.filter(
+        (item) => matchesFilter(item, filterMode) && matchesSearch(item, searchTerm)
+      ),
+    [sortedItems, filterMode, searchTerm]
   )
 
   const visibleCount = useMemo(
@@ -547,11 +557,21 @@ export default function AdminNewsManager({ items }: Props) {
                 </button>
               ))}
             </div>
+
+            <div className="mt-4">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Cerca per titolo, autore, fonte, brief o contenuto..."
+                className="theme-admin-input w-full rounded-2xl px-4 py-3"
+              />
+            </div>
           </div>
 
           {filteredItems.length === 0 && (
             <div className="theme-admin-card rounded-3xl p-8 text-[var(--site-text-muted)]">
-              Nessuna news presente per questo filtro.
+              Nessuna news presente per questo filtro o ricerca.
             </div>
           )}
 
