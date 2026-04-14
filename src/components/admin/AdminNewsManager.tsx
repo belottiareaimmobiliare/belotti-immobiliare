@@ -39,8 +39,16 @@ type NewsItem = {
   news_media?: NewsMediaItem[]
 }
 
+type NewsSettings = {
+  id: string
+  facebook_page_url: string | null
+  facebook_page_name: string | null
+  facebook_sync_enabled: boolean
+} | null
+
 type Props = {
   items: NewsItem[]
+  settings: NewsSettings
 }
 
 type ViewMode = 'cards' | 'list'
@@ -135,7 +143,7 @@ function matchesSearch(item: NewsItem, search: string) {
   return haystack.includes(q)
 }
 
-export default function AdminNewsManager({ items }: Props) {
+export default function AdminNewsManager({ items, settings }: Props) {
   const supabase = createClient()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -144,6 +152,12 @@ export default function AdminNewsManager({ items }: Props) {
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [draggedId, setDraggedId] = useState<string | null>(null)
+
+  const [facebookForm, setFacebookForm] = useState({
+    facebook_page_url: settings?.facebook_page_url || '',
+    facebook_page_name: settings?.facebook_page_name || '',
+    facebook_sync_enabled: settings?.facebook_sync_enabled ?? true,
+  })
 
   const [createForm, setCreateForm] = useState({
     title: '',
@@ -176,6 +190,42 @@ export default function AdminNewsManager({ items }: Props) {
     () => items.filter((item) => item.is_pinned).length,
     [items]
   )
+
+  const handleSaveFacebookSettings = () => {
+    startTransition(async () => {
+      if (!settings?.id) {
+        const { error } = await supabase.from('news_settings').insert({
+          facebook_page_url: facebookForm.facebook_page_url.trim() || null,
+          facebook_page_name: facebookForm.facebook_page_name.trim() || null,
+          facebook_sync_enabled: facebookForm.facebook_sync_enabled,
+        })
+
+        if (error) {
+          alert(error.message)
+          return
+        }
+
+        router.refresh()
+        return
+      }
+
+      const { error } = await supabase
+        .from('news_settings')
+        .update({
+          facebook_page_url: facebookForm.facebook_page_url.trim() || null,
+          facebook_page_name: facebookForm.facebook_page_name.trim() || null,
+          facebook_sync_enabled: facebookForm.facebook_sync_enabled,
+        })
+        .eq('id', settings.id)
+
+      if (error) {
+        alert(error.message)
+        return
+      }
+
+      router.refresh()
+    })
+  }
 
   const handleCreate = () => {
     if (!createForm.title.trim()) {
@@ -359,342 +409,404 @@ export default function AdminNewsManager({ items }: Props) {
         a 10 immagini per news.
       </p>
 
-      <div className="mt-8 grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
+      <div className="mt-8 space-y-6">
         <div className="theme-admin-card rounded-3xl p-6">
           <p className="theme-admin-faint text-xs uppercase tracking-[0.2em]">
-            Nuova news
+            Configurazione Facebook
           </p>
 
-          <div className="mt-5 space-y-4">
+          <div className="mt-5 grid gap-4 xl:grid-cols-[1.3fr_1fr_180px_auto]">
             <input
-              value={createForm.title}
+              value={facebookForm.facebook_page_url}
               onChange={(e) =>
-                setCreateForm((prev) => ({ ...prev, title: e.target.value }))
+                setFacebookForm((prev) => ({
+                  ...prev,
+                  facebook_page_url: e.target.value,
+                }))
               }
-              placeholder="Titolo news"
+              placeholder="Link pagina Facebook pubblica"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
             />
 
             <input
-              value={createForm.brief}
+              value={facebookForm.facebook_page_name}
               onChange={(e) =>
-                setCreateForm((prev) => ({ ...prev, brief: e.target.value }))
+                setFacebookForm((prev) => ({
+                  ...prev,
+                  facebook_page_name: e.target.value,
+                }))
               }
-              placeholder="Brief / occhiello"
+              placeholder="Nome pagina Facebook"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
-            />
-
-            <RichTextEditor
-              value={createForm.content}
-              onChange={(value) =>
-                setCreateForm((prev) => ({ ...prev, content: value }))
-              }
-              placeholder="Testo completo della news"
             />
 
             <select
-              value={createForm.author_name}
+              value={facebookForm.facebook_sync_enabled ? 'true' : 'false'}
               onChange={(e) =>
-                setCreateForm((prev) => ({
+                setFacebookForm((prev) => ({
                   ...prev,
-                  author_name: e.target.value,
+                  facebook_sync_enabled: e.target.value === 'true',
                 }))
               }
               className="theme-admin-select w-full rounded-2xl px-4 py-3"
             >
-              {AUTHORS.map((author) => (
-                <option key={author} value={author}>
-                  {author}
-                </option>
-              ))}
+              <option value="true">Sync attiva</option>
+              <option value="false">Sync disattiva</option>
             </select>
-
-            <input
-              value={createForm.source_name}
-              onChange={(e) =>
-                setCreateForm((prev) => ({
-                  ...prev,
-                  source_name: e.target.value,
-                }))
-              }
-              placeholder="Fonte opzionale, es. Reuters"
-              className="theme-admin-input w-full rounded-2xl px-4 py-3"
-            />
-
-            <input
-              value={createForm.source_url}
-              onChange={(e) =>
-                setCreateForm((prev) => ({
-                  ...prev,
-                  source_url: e.target.value,
-                }))
-              }
-              placeholder="Link fonte opzionale"
-              className="theme-admin-input w-full rounded-2xl px-4 py-3"
-            />
-
-            <input
-              value={createForm.external_url}
-              onChange={(e) =>
-                setCreateForm((prev) => ({
-                  ...prev,
-                  external_url: e.target.value,
-                }))
-              }
-              placeholder="Link esterno opzionale"
-              className="theme-admin-input w-full rounded-2xl px-4 py-3"
-            />
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <select
-                value={createForm.status}
-                onChange={(e) =>
-                  setCreateForm((prev) => ({ ...prev, status: e.target.value }))
-                }
-                className="theme-admin-select w-full rounded-2xl px-4 py-3"
-              >
-                <option value="published">Pubblicata</option>
-                <option value="draft">Bozza</option>
-              </select>
-
-              <input
-                type="number"
-                value={createForm.sort_order}
-                onChange={(e) =>
-                  setCreateForm((prev) => ({
-                    ...prev,
-                    sort_order: e.target.value,
-                  }))
-                }
-                placeholder="Ordine"
-                className="theme-admin-input w-full rounded-2xl px-4 py-3"
-              />
-            </div>
 
             <button
               type="button"
+              onClick={handleSaveFacebookSettings}
               disabled={isPending}
-              onClick={handleCreate}
-              className="theme-admin-button-primary w-full rounded-2xl px-5 py-3 font-medium transition hover:opacity-95 disabled:opacity-60"
+              className="theme-admin-button-primary rounded-2xl px-5 py-3 font-medium transition hover:opacity-95 disabled:opacity-60"
             >
-              Crea news
+              Salva config
             </button>
           </div>
+
+          <p className="theme-admin-muted mt-4 text-sm">
+            Questo link sarà la base per la futura importazione dei post Facebook
+            nella sezione news del sito.
+          </p>
         </div>
 
-        <div className="space-y-6">
+        <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
           <div className="theme-admin-card rounded-3xl p-6">
-            <div className="grid gap-4 md:grid-cols-4">
-              <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
-                <p className="theme-admin-muted text-sm">Totale</p>
-                <p className="mt-2 text-2xl font-semibold">{items.length}</p>
+            <p className="theme-admin-faint text-xs uppercase tracking-[0.2em]">
+              Nuova news
+            </p>
+
+            <div className="mt-5 space-y-4">
+              <input
+                value={createForm.title}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({ ...prev, title: e.target.value }))
+                }
+                placeholder="Titolo news"
+                className="theme-admin-input w-full rounded-2xl px-4 py-3"
+              />
+
+              <input
+                value={createForm.brief}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({ ...prev, brief: e.target.value }))
+                }
+                placeholder="Brief / occhiello"
+                className="theme-admin-input w-full rounded-2xl px-4 py-3"
+              />
+
+              <RichTextEditor
+                value={createForm.content}
+                onChange={(value) =>
+                  setCreateForm((prev) => ({ ...prev, content: value }))
+                }
+                placeholder="Testo completo della news"
+              />
+
+              <select
+                value={createForm.author_name}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    author_name: e.target.value,
+                  }))
+                }
+                className="theme-admin-select w-full rounded-2xl px-4 py-3"
+              >
+                {AUTHORS.map((author) => (
+                  <option key={author} value={author}>
+                    {author}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                value={createForm.source_name}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    source_name: e.target.value,
+                  }))
+                }
+                placeholder="Fonte opzionale, es. Reuters"
+                className="theme-admin-input w-full rounded-2xl px-4 py-3"
+              />
+
+              <input
+                value={createForm.source_url}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    source_url: e.target.value,
+                  }))
+                }
+                placeholder="Link fonte opzionale"
+                className="theme-admin-input w-full rounded-2xl px-4 py-3"
+              />
+
+              <input
+                value={createForm.external_url}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    external_url: e.target.value,
+                  }))
+                }
+                placeholder="Link esterno opzionale"
+                className="theme-admin-input w-full rounded-2xl px-4 py-3"
+              />
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <select
+                  value={createForm.status}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({ ...prev, status: e.target.value }))
+                  }
+                  className="theme-admin-select w-full rounded-2xl px-4 py-3"
+                >
+                  <option value="published">Pubblicata</option>
+                  <option value="draft">Bozza</option>
+                </select>
+
+                <input
+                  type="number"
+                  value={createForm.sort_order}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      sort_order: e.target.value,
+                    }))
+                  }
+                  placeholder="Ordine"
+                  className="theme-admin-input w-full rounded-2xl px-4 py-3"
+                />
               </div>
 
-              <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
-                <p className="theme-admin-muted text-sm">Visibili</p>
-                <p className="mt-2 text-2xl font-semibold">{visibleCount}</p>
-              </div>
-
-              <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
-                <p className="theme-admin-muted text-sm">Pinnate</p>
-                <p className="mt-2 text-2xl font-semibold">{pinnedCount}</p>
-              </div>
-
-              <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
-                <p className="theme-admin-muted text-sm">Facebook</p>
-                <p className="mt-2 text-2xl font-semibold">
-                  {items.filter((item) => item.source_type === 'facebook').length}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-5 flex flex-wrap gap-3">
               <button
                 type="button"
-                onClick={() => setViewMode('cards')}
-                className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${
-                  viewMode === 'cards'
-                    ? 'theme-admin-chip-active'
-                    : 'theme-admin-button-secondary'
-                }`}
+                disabled={isPending}
+                onClick={handleCreate}
+                className="theme-admin-button-primary w-full rounded-2xl px-5 py-3 font-medium transition hover:opacity-95 disabled:opacity-60"
               >
-                Vista card
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setViewMode('list')}
-                className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${
-                  viewMode === 'list'
-                    ? 'theme-admin-chip-active'
-                    : 'theme-admin-button-secondary'
-                }`}
-              >
-                Vista lista
+                Crea news
               </button>
             </div>
+          </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              {[
-                { key: 'all', label: 'Tutte' },
-                { key: 'visible', label: 'Visibili' },
-                { key: 'draft', label: 'Bozze' },
-                { key: 'pinned', label: 'Pinnate' },
-                { key: 'facebook', label: 'Facebook' },
-                { key: 'manual', label: 'Manuali' },
-              ].map((item) => (
+          <div className="space-y-6">
+            <div className="theme-admin-card rounded-3xl p-6">
+              <div className="grid gap-4 md:grid-cols-4">
+                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
+                  <p className="theme-admin-muted text-sm">Totale</p>
+                  <p className="mt-2 text-2xl font-semibold">{items.length}</p>
+                </div>
+
+                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
+                  <p className="theme-admin-muted text-sm">Visibili</p>
+                  <p className="mt-2 text-2xl font-semibold">{visibleCount}</p>
+                </div>
+
+                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
+                  <p className="theme-admin-muted text-sm">Pinnate</p>
+                  <p className="mt-2 text-2xl font-semibold">{pinnedCount}</p>
+                </div>
+
+                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
+                  <p className="theme-admin-muted text-sm">Facebook</p>
+                  <p className="mt-2 text-2xl font-semibold">
+                    {items.filter((item) => item.source_type === 'facebook').length}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-3">
                 <button
-                  key={item.key}
                   type="button"
-                  onClick={() => setFilterMode(item.key as FilterMode)}
-                  className={`rounded-full px-3 py-2 text-xs font-medium transition ${
-                    filterMode === item.key
+                  onClick={() => setViewMode('cards')}
+                  className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${
+                    viewMode === 'cards'
                       ? 'theme-admin-chip-active'
                       : 'theme-admin-button-secondary'
                   }`}
                 >
-                  {item.label}
+                  Vista card
                 </button>
-              ))}
-            </div>
 
-            <div className="mt-4">
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Cerca per titolo, autore, fonte, brief o contenuto..."
-                className="theme-admin-input w-full rounded-2xl px-4 py-3"
-              />
-            </div>
-          </div>
-
-          {filteredItems.length === 0 && (
-            <div className="theme-admin-card rounded-3xl p-8 text-[var(--site-text-muted)]">
-              Nessuna news presente per questo filtro o ricerca.
-            </div>
-          )}
-
-          {viewMode === 'cards' ? (
-            filteredItems.map((item) => (
-              <NewsRow
-                key={item.id}
-                item={item}
-                onUpdate={handleUpdate}
-                onDelete={handleDelete}
-              />
-            ))
-          ) : (
-            <div className="theme-admin-card overflow-hidden rounded-3xl">
-              <div className="grid grid-cols-[52px_minmax(0,1fr)_160px_110px_160px] gap-4 border-b border-[var(--site-border)] px-5 py-4 text-xs uppercase tracking-[0.18em] text-[var(--site-text-faint)]">
-                <div />
-                <div>Titolo</div>
-                <div>Data</div>
-                <div>Stato</div>
-                <div>Ordine</div>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('list')}
+                  className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${
+                    viewMode === 'list'
+                      ? 'theme-admin-chip-active'
+                      : 'theme-admin-button-secondary'
+                  }`}
+                >
+                  Vista lista
+                </button>
               </div>
 
-              <div className="divide-y divide-[var(--site-border)]">
-                {filteredItems.map((item, index) => (
-                  <div
-                    key={item.id}
-                    draggable
-                    onDragStart={() => setDraggedId(item.id)}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={() => handleDropReorder(item.id)}
-                    className={`grid grid-cols-[52px_minmax(0,1fr)_160px_110px_160px] gap-4 px-5 py-4 transition ${
-                      draggedId === item.id
-                        ? 'bg-[var(--site-surface-3)]'
-                        : 'hover:bg-[var(--site-surface-2)]'
+              <div className="mt-4 flex flex-wrap gap-2">
+                {[
+                  { key: 'all', label: 'Tutte' },
+                  { key: 'visible', label: 'Visibili' },
+                  { key: 'draft', label: 'Bozze' },
+                  { key: 'pinned', label: 'Pinnate' },
+                  { key: 'facebook', label: 'Facebook' },
+                  { key: 'manual', label: 'Manuali' },
+                ].map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => setFilterMode(item.key as FilterMode)}
+                    className={`rounded-full px-3 py-2 text-xs font-medium transition ${
+                      filterMode === item.key
+                        ? 'theme-admin-chip-active'
+                        : 'theme-admin-button-secondary'
                     }`}
                   >
-                    <div className="flex items-center">
-                      <button
-                        type="button"
-                        className="theme-admin-button-secondary flex h-10 w-10 cursor-grab items-center justify-center rounded-xl text-sm"
-                        title="Trascina per riordinare"
-                      >
-                        ⋮⋮
-                      </button>
-                    </div>
-
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-3">
-                        <p className="truncate text-sm font-medium text-[var(--site-text)]">
-                          {item.title || 'News senza titolo'}
-                        </p>
-
-                        {item.slug && (
-                          <a
-                            href={`/news/${item.slug}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="theme-admin-button-secondary rounded-xl px-3 py-1.5 text-xs"
-                          >
-                            Apri
-                          </a>
-                        )}
-                      </div>
-
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        <span className="theme-admin-chip rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.16em]">
-                          {item.source_type}
-                        </span>
-
-                        {item.is_pinned && (
-                          <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-amber-300">
-                            Pinnata
-                          </span>
-                        )}
-
-                        {item.is_visible ? (
-                          <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-emerald-300">
-                            Visibile
-                          </span>
-                        ) : (
-                          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--site-text-faint)]">
-                            Nascosta
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="text-sm text-[var(--site-text-muted)]">
-                      {formatDate(item.published_at || item.created_at)}
-                    </div>
-
-                    <div className="text-sm text-[var(--site-text-soft)]">
-                      {item.status}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => moveItem(item.id, -1)}
-                        disabled={isPending || index === 0}
-                        className="theme-admin-button-secondary rounded-xl px-3 py-2 text-xs disabled:opacity-50"
-                      >
-                        ↑
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => moveItem(item.id, 1)}
-                        disabled={isPending || index === filteredItems.length - 1}
-                        className="theme-admin-button-secondary rounded-xl px-3 py-2 text-xs disabled:opacity-50"
-                      >
-                        ↓
-                      </button>
-
-                      <span className="min-w-[34px] text-center text-xs text-[var(--site-text-faint)]">
-                        {item.sort_order ?? 0}
-                      </span>
-                    </div>
-                  </div>
+                    {item.label}
+                  </button>
                 ))}
               </div>
+
+              <div className="mt-4">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Cerca per titolo, autore, fonte, brief o contenuto..."
+                  className="theme-admin-input w-full rounded-2xl px-4 py-3"
+                />
+              </div>
             </div>
-          )}
+
+            {filteredItems.length === 0 && (
+              <div className="theme-admin-card rounded-3xl p-8 text-[var(--site-text-muted)]">
+                Nessuna news presente per questo filtro o ricerca.
+              </div>
+            )}
+
+            {viewMode === 'cards' ? (
+              filteredItems.map((item) => (
+                <NewsRow
+                  key={item.id}
+                  item={item}
+                  onUpdate={handleUpdate}
+                  onDelete={handleDelete}
+                />
+              ))
+            ) : (
+              <div className="theme-admin-card overflow-hidden rounded-3xl">
+                <div className="grid grid-cols-[52px_minmax(0,1fr)_160px_110px_160px] gap-4 border-b border-[var(--site-border)] px-5 py-4 text-xs uppercase tracking-[0.18em] text-[var(--site-text-faint)]">
+                  <div />
+                  <div>Titolo</div>
+                  <div>Data</div>
+                  <div>Stato</div>
+                  <div>Ordine</div>
+                </div>
+
+                <div className="divide-y divide-[var(--site-border)]">
+                  {filteredItems.map((item, index) => (
+                    <div
+                      key={item.id}
+                      draggable
+                      onDragStart={() => setDraggedId(item.id)}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={() => handleDropReorder(item.id)}
+                      className={`grid grid-cols-[52px_minmax(0,1fr)_160px_110px_160px] gap-4 px-5 py-4 transition ${
+                        draggedId === item.id
+                          ? 'bg-[var(--site-surface-3)]'
+                          : 'hover:bg-[var(--site-surface-2)]'
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <button
+                          type="button"
+                          className="theme-admin-button-secondary flex h-10 w-10 cursor-grab items-center justify-center rounded-xl text-sm"
+                          title="Trascina per riordinare"
+                        >
+                          ⋮⋮
+                        </button>
+                      </div>
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-3">
+                          <p className="truncate text-sm font-medium text-[var(--site-text)]">
+                            {item.title || 'News senza titolo'}
+                          </p>
+
+                          {item.slug && (
+                            <a
+                              href={`/news/${item.slug}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="theme-admin-button-secondary rounded-xl px-3 py-1.5 text-xs"
+                            >
+                              Apri
+                            </a>
+                          )}
+                        </div>
+
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <span className="theme-admin-chip rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.16em]">
+                            {item.source_type}
+                          </span>
+
+                          {item.is_pinned && (
+                            <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-amber-300">
+                              Pinnata
+                            </span>
+                          )}
+
+                          {item.is_visible ? (
+                            <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-emerald-300">
+                              Visibile
+                            </span>
+                          ) : (
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--site-text-faint)]">
+                              Nascosta
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="text-sm text-[var(--site-text-muted)]">
+                        {formatDate(item.published_at || item.created_at)}
+                      </div>
+
+                      <div className="text-sm text-[var(--site-text-soft)]">
+                        {item.status}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => moveItem(item.id, -1)}
+                          disabled={isPending || index === 0}
+                          className="theme-admin-button-secondary rounded-xl px-3 py-2 text-xs disabled:opacity-50"
+                        >
+                          ↑
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => moveItem(item.id, 1)}
+                          disabled={isPending || index === filteredItems.length - 1}
+                          className="theme-admin-button-secondary rounded-xl px-3 py-2 text-xs disabled:opacity-50"
+                        >
+                          ↓
+                        </button>
+
+                        <span className="min-w-[34px] text-center text-xs text-[var(--site-text-faint)]">
+                          {item.sort_order ?? 0}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>

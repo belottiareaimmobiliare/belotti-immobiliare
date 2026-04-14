@@ -4,19 +4,27 @@ import AdminNewsManager from '@/components/admin/AdminNewsManager'
 export default async function AdminNewsPage() {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
-    .from('news_items')
-    .select(`
-      *,
-      news_media (*)
-    `)
-    .order('is_pinned', { ascending: false })
-    .order('pin_order', { ascending: true, nullsFirst: false })
-    .order('sort_order', { ascending: true })
-    .order('published_at', { ascending: false, nullsFirst: false })
-    .order('created_at', { ascending: false })
+  const [{ data: newsData, error: newsError }, { data: settingsData, error: settingsError }] =
+    await Promise.all([
+      supabase
+        .from('news_items')
+        .select(`
+          *,
+          news_media (*)
+        `)
+        .order('is_pinned', { ascending: false })
+        .order('pin_order', { ascending: true, nullsFirst: false })
+        .order('sort_order', { ascending: true })
+        .order('published_at', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('news_settings')
+        .select('*')
+        .limit(1)
+        .maybeSingle(),
+    ])
 
-  if (error) {
+  if (newsError) {
     return (
       <section className="text-[var(--site-text)]">
         <p className="theme-admin-faint text-sm uppercase tracking-[0.2em]">
@@ -32,5 +40,21 @@ export default async function AdminNewsPage() {
     )
   }
 
-  return <AdminNewsManager items={data || []} />
+  return (
+    <AdminNewsManager
+      items={newsData || []}
+      settings={
+        settingsError
+          ? null
+          : settingsData
+            ? {
+                id: settingsData.id,
+                facebook_page_url: settingsData.facebook_page_url,
+                facebook_page_name: settingsData.facebook_page_name,
+                facebook_sync_enabled: settingsData.facebook_sync_enabled,
+              }
+            : null
+      }
+    />
+  )
 }
