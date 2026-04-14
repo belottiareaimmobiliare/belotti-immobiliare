@@ -127,14 +127,12 @@ export default async function NewsDetailPage({ params }: PageProps) {
         </div>
 
         <article className="theme-panel mt-8 rounded-[30px] border p-8">
-          <div className="space-y-5 text-base leading-8 text-[var(--site-text-muted)]">
-            {(item.content || '')
-              .split('\n')
-              .filter((paragraph: string) => paragraph.trim().length > 0)
-              .map((paragraph: string, index: number) => (
-                <p key={index}>{paragraph}</p>
-              ))}
-          </div>
+          <div
+            className="news-content prose prose-invert max-w-none text-[var(--site-text-muted)]"
+            dangerouslySetInnerHTML={{
+              __html: item.content || '<p>Contenuto non disponibile.</p>',
+            }}
+          />
 
           {(item.source_url || item.external_url) && (
             <div className="mt-8 flex flex-wrap gap-3">

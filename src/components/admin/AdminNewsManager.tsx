@@ -3,6 +3,7 @@
 import { ChangeEvent, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import RichTextEditor from '@/components/admin/news/RichTextEditor'
 
 type NewsMediaItem = {
   id: string
@@ -150,7 +151,8 @@ export default function AdminNewsManager({ items }: Props) {
 
   const handleUpdate = (item: NewsItem, updates: Partial<NewsItem>) => {
     startTransition(async () => {
-      const title = typeof updates.title === 'string' ? updates.title : item.title || ''
+      const title =
+        typeof updates.title === 'string' ? updates.title : item.title || ''
       const nextSlug = slugify(title)
 
       const payload = {
@@ -199,7 +201,8 @@ export default function AdminNewsManager({ items }: Props) {
       </h2>
 
       <p className="theme-admin-muted mt-3 max-w-3xl">
-        Crea news manuali, gestisci ordine, autore, fonte, visibilità, pin e fino a 10 immagini per news.
+        Crea news manuali, gestisci ordine, autore, fonte, visibilità, pin e
+        fino a 10 immagini per news.
       </p>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
@@ -227,20 +230,21 @@ export default function AdminNewsManager({ items }: Props) {
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
             />
 
-            <textarea
-              rows={7}
+            <RichTextEditor
               value={createForm.content}
-              onChange={(e) =>
-                setCreateForm((prev) => ({ ...prev, content: e.target.value }))
+              onChange={(value) =>
+                setCreateForm((prev) => ({ ...prev, content: value }))
               }
-              placeholder="Testo completo"
-              className="theme-admin-input w-full rounded-2xl px-4 py-3"
+              placeholder="Testo completo della news"
             />
 
             <select
               value={createForm.author_name}
               onChange={(e) =>
-                setCreateForm((prev) => ({ ...prev, author_name: e.target.value }))
+                setCreateForm((prev) => ({
+                  ...prev,
+                  author_name: e.target.value,
+                }))
               }
               className="theme-admin-select w-full rounded-2xl px-4 py-3"
             >
@@ -254,7 +258,10 @@ export default function AdminNewsManager({ items }: Props) {
             <input
               value={createForm.source_name}
               onChange={(e) =>
-                setCreateForm((prev) => ({ ...prev, source_name: e.target.value }))
+                setCreateForm((prev) => ({
+                  ...prev,
+                  source_name: e.target.value,
+                }))
               }
               placeholder="Fonte opzionale, es. Reuters"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
@@ -263,7 +270,10 @@ export default function AdminNewsManager({ items }: Props) {
             <input
               value={createForm.source_url}
               onChange={(e) =>
-                setCreateForm((prev) => ({ ...prev, source_url: e.target.value }))
+                setCreateForm((prev) => ({
+                  ...prev,
+                  source_url: e.target.value,
+                }))
               }
               placeholder="Link fonte opzionale"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
@@ -272,7 +282,10 @@ export default function AdminNewsManager({ items }: Props) {
             <input
               value={createForm.external_url}
               onChange={(e) =>
-                setCreateForm((prev) => ({ ...prev, external_url: e.target.value }))
+                setCreateForm((prev) => ({
+                  ...prev,
+                  external_url: e.target.value,
+                }))
               }
               placeholder="Link esterno opzionale"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
@@ -294,7 +307,10 @@ export default function AdminNewsManager({ items }: Props) {
                 type="number"
                 value={createForm.sort_order}
                 onChange={(e) =>
-                  setCreateForm((prev) => ({ ...prev, sort_order: e.target.value }))
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    sort_order: e.target.value,
+                  }))
                 }
                 placeholder="Ordine"
                 className="theme-admin-input w-full rounded-2xl px-4 py-3"
@@ -402,7 +418,9 @@ function NewsRow({
 
   const uploadNewsImage = async (file: File) => {
     const ext = file.name.split('.').pop() || 'jpg'
-    const fileName = `news-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+    const fileName = `news-${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2)}.${ext}`
     const filePath = `news/${item.id}/${fileName}`
 
     const { error: uploadError } = await supabase.storage
@@ -416,7 +434,10 @@ function NewsRow({
       throw uploadError
     }
 
-    const { data } = supabase.storage.from('property-media').getPublicUrl(filePath)
+    const { data } = supabase.storage
+      .from('property-media')
+      .getPublicUrl(filePath)
+
     return data.publicUrl
   }
 
@@ -527,7 +548,10 @@ function NewsRow({
     if (!ok) return
 
     startTransition(async () => {
-      const { error } = await supabase.from('news_media').delete().eq('id', mediaId)
+      const { error } = await supabase
+        .from('news_media')
+        .delete()
+        .eq('id', mediaId)
 
       if (error) {
         alert(error.message)
@@ -628,31 +652,38 @@ function NewsRow({
         <div className="space-y-4">
           <input
             value={form.title}
-            onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, title: e.target.value }))
+            }
             placeholder="Titolo"
             className="theme-admin-input w-full rounded-2xl px-4 py-3"
           />
 
           <input
             value={form.brief}
-            onChange={(e) => setForm((prev) => ({ ...prev, brief: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, brief: e.target.value }))
+            }
             placeholder="Brief"
             className="theme-admin-input w-full rounded-2xl px-4 py-3"
           />
 
-          <textarea
-            rows={6}
+          <RichTextEditor
             value={form.content}
-            onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
+            onChange={(value) =>
+              setForm((prev) => ({ ...prev, content: value }))
+            }
             placeholder="Testo completo"
-            className="theme-admin-input w-full rounded-2xl px-4 py-3"
           />
 
           <div className="grid gap-4 md:grid-cols-2">
             <select
               value={form.author_name}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, author_name: e.target.value }))
+                setForm((prev) => ({
+                  ...prev,
+                  author_name: e.target.value,
+                }))
               }
               className="theme-admin-select w-full rounded-2xl px-4 py-3"
             >
@@ -666,7 +697,10 @@ function NewsRow({
             <input
               value={form.external_url}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, external_url: e.target.value }))
+                setForm((prev) => ({
+                  ...prev,
+                  external_url: e.target.value,
+                }))
               }
               placeholder="Link esterno"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
@@ -677,7 +711,10 @@ function NewsRow({
             <input
               value={form.source_name}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, source_name: e.target.value }))
+                setForm((prev) => ({
+                  ...prev,
+                  source_name: e.target.value,
+                }))
               }
               placeholder="Fonte"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
@@ -686,7 +723,10 @@ function NewsRow({
             <input
               value={form.source_url}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, source_url: e.target.value }))
+                setForm((prev) => ({
+                  ...prev,
+                  source_url: e.target.value,
+                }))
               }
               placeholder="Link fonte"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
@@ -696,7 +736,10 @@ function NewsRow({
               type="number"
               value={form.sort_order}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, sort_order: e.target.value }))
+                setForm((prev) => ({
+                  ...prev,
+                  sort_order: e.target.value,
+                }))
               }
               placeholder="Ordine"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
@@ -721,7 +764,10 @@ function NewsRow({
             <select
               value={form.is_visible ? 'true' : 'false'}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, is_visible: e.target.value === 'true' }))
+                setForm((prev) => ({
+                  ...prev,
+                  is_visible: e.target.value === 'true',
+                }))
               }
               className="theme-admin-select w-full rounded-2xl px-4 py-3"
             >
@@ -732,7 +778,10 @@ function NewsRow({
             <select
               value={form.is_pinned ? 'true' : 'false'}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, is_pinned: e.target.value === 'true' }))
+                setForm((prev) => ({
+                  ...prev,
+                  is_pinned: e.target.value === 'true',
+                }))
               }
               className="theme-admin-select w-full rounded-2xl px-4 py-3"
             >
@@ -746,7 +795,10 @@ function NewsRow({
               max={3}
               value={form.pin_order}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, pin_order: e.target.value }))
+                setForm((prev) => ({
+                  ...prev,
+                  pin_order: e.target.value,
+                }))
               }
               placeholder="Pin"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
@@ -756,7 +808,9 @@ function NewsRow({
           <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--site-text-faint)]">
             <span>Creata: {formatDate(item.created_at)}</span>
             <span>Aggiornata: {formatDate(item.updated_at)}</span>
-            {item.published_at && <span>Pubblicata: {formatDate(item.published_at)}</span>}
+            {item.published_at && (
+              <span>Pubblicata: {formatDate(item.published_at)}</span>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -775,7 +829,10 @@ function NewsRow({
                   status: form.status,
                   is_visible: form.is_visible,
                   is_pinned: form.is_pinned,
-                  pin_order: form.is_pinned && form.pin_order ? Number(form.pin_order) : null,
+                  pin_order:
+                    form.is_pinned && form.pin_order
+                      ? Number(form.pin_order)
+                      : null,
                   sort_order: Number(form.sort_order || 0),
                 })
               }
