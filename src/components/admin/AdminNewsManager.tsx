@@ -11,7 +11,6 @@ type NewsItem = {
   slug: string | null
   title: string | null
   brief: string | null
-  excerpt: string | null
   content: string | null
   image_url: string | null
   external_url: string | null
@@ -69,7 +68,6 @@ export default function AdminNewsManager({ items }: Props) {
   const [createForm, setCreateForm] = useState({
     title: '',
     brief: '',
-    excerpt: '',
     content: '',
     author_name: 'Area Immobiliare',
     source_name: '',
@@ -147,7 +145,6 @@ export default function AdminNewsManager({ items }: Props) {
         slug,
         title: createForm.title.trim(),
         brief: createForm.brief.trim() || null,
-        excerpt: createForm.excerpt.trim() || null,
         content: createForm.content.trim() || null,
         author_name: createForm.author_name || null,
         source_name: createForm.source_name.trim() || null,
@@ -171,7 +168,6 @@ export default function AdminNewsManager({ items }: Props) {
       setCreateForm({
         title: '',
         brief: '',
-        excerpt: '',
         content: '',
         author_name: 'Area Immobiliare',
         source_name: '',
@@ -237,8 +233,7 @@ export default function AdminNewsManager({ items }: Props) {
       </h2>
 
       <p className="theme-admin-muted mt-3 max-w-3xl">
-        Crea news manuali, gestisci l’ordine, seleziona l’autore, imposta la fonte
-        e controlla cosa compare nel sito pubblico.
+        Crea news manuali, gestisci ordine, autore, fonte, visibilità e apertura nel sito pubblico.
       </p>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
@@ -262,17 +257,7 @@ export default function AdminNewsManager({ items }: Props) {
               onChange={(e) =>
                 setCreateForm((prev) => ({ ...prev, brief: e.target.value }))
               }
-              placeholder="Brief breve / occhiello"
-              className="theme-admin-input w-full rounded-2xl px-4 py-3"
-            />
-
-            <textarea
-              rows={3}
-              value={createForm.excerpt}
-              onChange={(e) =>
-                setCreateForm((prev) => ({ ...prev, excerpt: e.target.value }))
-              }
-              placeholder="Didascalia breve"
+              placeholder="Brief / occhiello"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
             />
 
@@ -448,7 +433,6 @@ function NewsRow({
   const [form, setForm] = useState({
     title: item.title || '',
     brief: item.brief || '',
-    excerpt: item.excerpt || '',
     content: item.content || '',
     author_name: item.author_name || 'Area Immobiliare',
     source_name: item.source_name || '',
@@ -520,14 +504,6 @@ function NewsRow({
           />
 
           <textarea
-            rows={3}
-            value={form.excerpt}
-            onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))}
-            placeholder="Didascalia breve"
-            className="theme-admin-input w-full rounded-2xl px-4 py-3"
-          />
-
-          <textarea
             rows={6}
             value={form.content}
             onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
@@ -592,7 +568,12 @@ function NewsRow({
           <div className="grid gap-4 md:grid-cols-5">
             <select
               value={form.status}
-              onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value as 'draft' | 'published' }))}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  status: e.target.value as 'draft' | 'published',
+                }))
+              }
               className="theme-admin-select w-full rounded-2xl px-4 py-3"
             >
               <option value="published">Pubblicata</option>
@@ -657,7 +638,6 @@ function NewsRow({
                 onUpdate(item, {
                   title: form.title,
                   brief: form.brief,
-                  excerpt: form.excerpt,
                   content: form.content,
                   author_name: form.author_name,
                   source_name: form.source_name || null,

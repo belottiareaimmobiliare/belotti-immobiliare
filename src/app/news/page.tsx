@@ -10,7 +10,6 @@ type NewsItem = {
   source_type: 'manual' | 'facebook'
   title: string | null
   brief: string | null
-  excerpt: string | null
   content: string | null
   image_url: string | null
   external_url: string | null
@@ -35,7 +34,7 @@ function formatDate(value: string | null) {
 }
 
 function preview(item: NewsItem) {
-  return item.excerpt || item.content || 'Contenuto in aggiornamento.'
+  return item.brief || item.content || 'Contenuto in aggiornamento.'
 }
 
 function hrefFor(item: NewsItem) {
@@ -132,10 +131,6 @@ export default async function NewsPage() {
                         {item.brief}
                       </p>
                     )}
-
-                    <p className="mt-4 text-sm leading-7 text-[var(--site-text-muted)]">
-                      {preview(item)}
-                    </p>
                   </div>
                 </Link>
               ))}
@@ -189,10 +184,6 @@ export default async function NewsPage() {
                         {item.brief}
                       </p>
                     )}
-
-                    <p className="mt-4 text-sm leading-7 text-[var(--site-text-muted)]">
-                      {preview(item)}
-                    </p>
                   </div>
                 </Link>
               ))}

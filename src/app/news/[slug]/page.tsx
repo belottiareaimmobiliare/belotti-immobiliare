@@ -121,13 +121,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
           </div>
 
           <article className="theme-panel rounded-[30px] border p-7">
-            {item.excerpt && (
-              <p className="text-lg leading-8 text-[var(--site-text-soft)]">
-                {item.excerpt}
-              </p>
-            )}
-
-            <div className="mt-6 space-y-5 text-base leading-8 text-[var(--site-text-muted)]">
+            <div className="space-y-5 text-base leading-8 text-[var(--site-text-muted)]">
               {(item.content || '')
                 .split('\n')
                 .filter((paragraph: string) => paragraph.trim().length > 0)
