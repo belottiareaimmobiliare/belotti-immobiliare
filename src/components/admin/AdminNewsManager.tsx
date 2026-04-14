@@ -3,7 +3,7 @@
 import { ChangeEvent, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import RichTextEditor from '@/components/admin/news/RichTextEditor'
+import RichTextEditor from '@/components/admin/RichTextEditor'
 
 type NewsMediaItem = {
   id: string
