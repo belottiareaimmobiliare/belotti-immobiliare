@@ -9,6 +9,7 @@ import ThemeToggle from '@/components/shared/ThemeToggle'
 const links = [
   { href: '/', label: 'Home' },
   { href: '/immobili', label: 'Immobili' },
+  { href: '/news', label: 'News' },
   { href: '/chi-siamo', label: 'Chi siamo' },
   { href: '/contatti', label: 'Contatti' },
 ]
@@ -181,9 +182,7 @@ export default function SiteHeader() {
                     key={item.href}
                     href={item.href}
                     className={`rounded-2xl px-4 py-3 text-base transition ${
-                      active
-                        ? 'theme-button-primary'
-                        : 'theme-button-secondary'
+                      active ? 'theme-button-primary' : 'theme-button-secondary'
                     }`}
                   >
                     {item.label}

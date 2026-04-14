@@ -78,13 +78,13 @@ function NewsCard({
   return (
     <Link
       href={hrefFor(item)}
-      className="group relative overflow-hidden rounded-[30px] border border-white/10 bg-[#0c1320] transition duration-300 hover:border-white/20 hover:shadow-[0_18px_60px_rgba(0,0,0,0.28)]"
+      className="theme-panel group relative overflow-hidden rounded-[30px] border transition duration-300 hover:border-[var(--site-border-strong)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.22)]"
     >
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.02)_28%,rgba(255,255,255,0.04)_58%,rgba(255,255,255,0.02)_100%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_16%,rgba(255,255,255,0.10),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(255,255,255,0.05),transparent_22%),radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.04),transparent_30%)] opacity-90" />
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.015)_30%,rgba(255,255,255,0.03)_60%,rgba(255,255,255,0.015)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_14%,rgba(255,255,255,0.08),transparent_30%),radial-gradient(circle_at_82%_18%,rgba(255,255,255,0.04),transparent_24%)]" />
 
       <div className="relative">
-        <div className="relative h-[250px] overflow-hidden bg-[linear-gradient(135deg,#1c2533_0%,#2a313d_100%)]">
+        <div className="relative h-[250px] overflow-hidden bg-[var(--site-surface-2)]">
           {imageSrc ? (
             <>
               <img
@@ -94,35 +94,40 @@ function NewsCard({
                 loading="lazy"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,12,20,0.08)_0%,rgba(7,12,20,0.18)_45%,rgba(7,12,20,0.58)_100%)]" />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,12,20,0.08)_0%,rgba(7,12,20,0.20)_45%,rgba(7,12,20,0.58)_100%)]" />
             </>
           ) : (
-            <div className="flex h-full items-center justify-center text-sm text-white/40">
+            <div className="flex h-full items-center justify-center text-sm text-[var(--site-text-faint)]">
               Nessuna immagine
             </div>
           )}
         </div>
 
-        <div className="relative px-6 pb-7 pt-5">
-          <div className="inline-flex rounded-full border border-white/12 bg-white/[0.04] px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-white/78">
+        <div className="relative px-6 pb-7 pt-5 transition duration-300 group-hover:bg-[var(--site-surface-2)]">
+          <div className="inline-flex rounded-full border border-[var(--site-border)] bg-[var(--site-surface-2)] px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-[var(--site-text-soft)] transition duration-300 group-hover:border-[var(--site-border-strong)] group-hover:text-[var(--site-text)]">
             {item.source_type === 'facebook' ? 'Facebook' : 'Editoriale'}
           </div>
 
-          <p className="mt-4 text-sm text-white/50">
+          <p className="mt-4 text-sm text-[var(--site-text-faint)] transition duration-300 group-hover:text-[var(--site-text-soft)]">
             {formatDate(item.published_at || item.created_at)}
           </p>
 
           <h2
-            className={`mt-4 font-semibold leading-tight text-white ${
+            className={`mt-4 font-semibold leading-tight text-[var(--site-text)] transition duration-300 group-hover:text-white ${
               featured ? 'text-[2rem]' : 'text-[1.9rem]'
             }`}
           >
             {item.title || 'News'}
           </h2>
 
-          <p className="mt-5 text-[15px] leading-8 text-white/80">
+          <p className="mt-5 text-[15px] leading-8 text-[var(--site-text-muted)] transition duration-300 group-hover:text-[var(--site-text-soft)]">
             {getPreview(item)}
           </p>
+
+          <div className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-[var(--site-text-soft)] transition duration-300 group-hover:text-[var(--site-text)]">
+            <span>Apri news</span>
+            <span className="transition duration-300 group-hover:translate-x-1">→</span>
+          </div>
         </div>
       </div>
     </Link>
@@ -151,20 +156,20 @@ export default async function NewsPage() {
   const regular = items.filter((item) => !item.is_pinned)
 
   return (
-    <main className="min-h-screen bg-[#040915] text-white">
+    <main className="min-h-screen bg-[var(--site-bg)] text-[var(--site-text)] transition-colors duration-300">
       <SiteHeader />
 
-      <section className="border-b border-white/10 bg-[#08101c]">
+      <section className="border-b border-[var(--site-border)] bg-[var(--site-bg-soft)] transition-colors duration-300">
         <div className="mx-auto max-w-7xl px-6 py-16">
-          <p className="text-sm uppercase tracking-[0.3em] text-white/40">
+          <p className="text-sm uppercase tracking-[0.3em] text-[var(--site-text-faint)]">
             News
           </p>
 
-          <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight md:text-5xl">
+          <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight md:text-5xl text-[var(--site-text)]">
             Aggiornamenti e contenuti dal mondo immobiliare
           </h1>
 
-          <p className="mt-6 max-w-3xl text-base leading-8 text-white/68 md:text-lg">
+          <p className="mt-6 max-w-3xl text-base leading-8 text-[var(--site-text-muted)] md:text-lg">
             Approfondimenti, contenuti editoriali, aggiornamenti e post selezionati
             per seguire il contesto immobiliare con una lettura più ordinata e utile.
           </p>
@@ -174,7 +179,7 @@ export default async function NewsPage() {
       <section className="mx-auto max-w-7xl px-6 py-16">
         {pinned.length > 0 && (
           <div className="mb-16">
-            <p className="text-xs uppercase tracking-[0.24em] text-white/38">
+            <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
               In evidenza
             </p>
 
@@ -188,7 +193,7 @@ export default async function NewsPage() {
 
         {regular.length > 0 ? (
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-white/38">
+            <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
               Ultime news
             </p>
 
@@ -199,7 +204,7 @@ export default async function NewsPage() {
             </div>
           </div>
         ) : (
-          <div className="rounded-[30px] border border-white/10 bg-[#0c1320] p-8 text-white/60">
+          <div className="theme-panel rounded-[30px] border p-8 text-[var(--site-text-muted)]">
             Nessuna news disponibile al momento.
           </div>
         )}
