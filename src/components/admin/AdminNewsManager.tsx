@@ -43,6 +43,15 @@ type Props = {
   items: NewsItem[]
 }
 
+type ViewMode = 'cards' | 'list'
+type FilterMode =
+  | 'all'
+  | 'visible'
+  | 'draft'
+  | 'pinned'
+  | 'facebook'
+  | 'manual'
+
 const AUTHORS = [
   'Gianfederico Belotti',
   "Omar Martalo'",
@@ -92,12 +101,41 @@ function sortNewsItems(items: NewsItem[]) {
   })
 }
 
+function getCover(item: NewsItem) {
+  const media = (item.news_media || []).slice().sort((a, b) => {
+    if ((a.is_cover ? 1 : 0) !== (b.is_cover ? 1 : 0)) {
+      return a.is_cover ? -1 : 1
+    }
+    return (a.sort_order ?? 0) - (b.sort_order ?? 0)
+  })
+
+  return media.find((m) => m.is_cover) || media[0] || null
+}
+
+function matchesFilter(item: NewsItem, filter: FilterMode) {
+  switch (filter) {
+    case 'visible':
+      return item.is_visible
+    case 'draft':
+      return item.status === 'draft'
+    case 'pinned':
+      return item.is_pinned
+    case 'facebook':
+      return item.source_type === 'facebook'
+    case 'manual':
+      return item.source_type === 'manual'
+    default:
+      return true
+  }
+}
+
 export default function AdminNewsManager({ items }: Props) {
   const supabase = createClient()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
-  const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards')
+  const [viewMode, setViewMode] = useState<ViewMode>('cards')
+  const [filterMode, setFilterMode] = useState<FilterMode>('all')
   const [draggedId, setDraggedId] = useState<string | null>(null)
 
   const [createForm, setCreateForm] = useState({
@@ -113,6 +151,11 @@ export default function AdminNewsManager({ items }: Props) {
   })
 
   const sortedItems = useMemo(() => sortNewsItems(items), [items])
+
+  const filteredItems = useMemo(
+    () => sortedItems.filter((item) => matchesFilter(item, filterMode)),
+    [sortedItems, filterMode]
+  )
 
   const visibleCount = useMemo(
     () => items.filter((item) => item.is_visible).length,
@@ -215,23 +258,35 @@ export default function AdminNewsManager({ items }: Props) {
     })
   }
 
-  const persistOrderedList = (ordered: NewsItem[]) => {
+  const persistOrderedList = (orderedVisibleList: NewsItem[]) => {
     startTransition(async () => {
-      const updates = ordered.map((item, index) => ({
-        id: item.id,
+      const completeList = [...sortedItems]
+
+      const visibleIds = orderedVisibleList.map((item) => item.id)
+      const reorderedVisible = orderedVisibleList.map((item, index) => ({
+        ...item,
         sort_order: (index + 1) * 10,
       }))
 
-      const changed = updates.filter(
-        (u) =>
-          (items.find((item) => item.id === u.id)?.sort_order ?? 0) !== u.sort_order
+      const reorderedMap = new Map(reorderedVisible.map((item) => [item.id, item]))
+
+      const finalList = completeList.map((item) =>
+        visibleIds.includes(item.id) ? reorderedMap.get(item.id)! : item
       )
+
+      const changed = finalList.filter((item) => {
+        const original = items.find((x) => x.id === item.id)
+        return (original?.sort_order ?? 0) !== item.sort_order
+      })
 
       if (changed.length === 0) return
 
       const results = await Promise.all(
-        changed.map((u) =>
-          supabase.from('news_items').update({ sort_order: u.sort_order }).eq('id', u.id)
+        changed.map((item) =>
+          supabase
+            .from('news_items')
+            .update({ sort_order: item.sort_order })
+            .eq('id', item.id)
         )
       )
 
@@ -246,7 +301,7 @@ export default function AdminNewsManager({ items }: Props) {
   }
 
   const moveItem = (itemId: string, direction: -1 | 1) => {
-    const list = [...sortedItems]
+    const list = [...filteredItems]
     const currentIndex = list.findIndex((item) => item.id === itemId)
     if (currentIndex === -1) return
 
@@ -263,7 +318,7 @@ export default function AdminNewsManager({ items }: Props) {
       return
     }
 
-    const list = [...sortedItems]
+    const list = [...filteredItems]
     const fromIndex = list.findIndex((item) => item.id === draggedId)
     const toIndex = list.findIndex((item) => item.id === targetId)
 
@@ -468,16 +523,40 @@ export default function AdminNewsManager({ items }: Props) {
                 Vista lista
               </button>
             </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {[
+                { key: 'all', label: 'Tutte' },
+                { key: 'visible', label: 'Visibili' },
+                { key: 'draft', label: 'Bozze' },
+                { key: 'pinned', label: 'Pinnate' },
+                { key: 'facebook', label: 'Facebook' },
+                { key: 'manual', label: 'Manuali' },
+              ].map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setFilterMode(item.key as FilterMode)}
+                  className={`rounded-full px-3 py-2 text-xs font-medium transition ${
+                    filterMode === item.key
+                      ? 'theme-admin-chip-active'
+                      : 'theme-admin-button-secondary'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {items.length === 0 && (
+          {filteredItems.length === 0 && (
             <div className="theme-admin-card rounded-3xl p-8 text-[var(--site-text-muted)]">
-              Nessuna news presente.
+              Nessuna news presente per questo filtro.
             </div>
           )}
 
           {viewMode === 'cards' ? (
-            sortedItems.map((item) => (
+            filteredItems.map((item) => (
               <NewsRow
                 key={item.id}
                 item={item}
@@ -487,7 +566,8 @@ export default function AdminNewsManager({ items }: Props) {
             ))
           ) : (
             <div className="theme-admin-card overflow-hidden rounded-3xl">
-              <div className="grid grid-cols-[minmax(0,1fr)_180px_120px_160px] gap-4 border-b border-[var(--site-border)] px-5 py-4 text-xs uppercase tracking-[0.18em] text-[var(--site-text-faint)]">
+              <div className="grid grid-cols-[52px_minmax(0,1fr)_160px_110px_160px] gap-4 border-b border-[var(--site-border)] px-5 py-4 text-xs uppercase tracking-[0.18em] text-[var(--site-text-faint)]">
+                <div />
                 <div>Titolo</div>
                 <div>Data</div>
                 <div>Stato</div>
@@ -495,35 +575,52 @@ export default function AdminNewsManager({ items }: Props) {
               </div>
 
               <div className="divide-y divide-[var(--site-border)]">
-                {sortedItems.map((item, index) => (
+                {filteredItems.map((item, index) => (
                   <div
                     key={item.id}
                     draggable
                     onDragStart={() => setDraggedId(item.id)}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={() => handleDropReorder(item.id)}
-                    className={`grid grid-cols-[minmax(0,1fr)_180px_120px_160px] gap-4 px-5 py-4 transition ${
+                    className={`grid grid-cols-[52px_minmax(0,1fr)_160px_110px_160px] gap-4 px-5 py-4 transition ${
                       draggedId === item.id
                         ? 'bg-[var(--site-surface-3)]'
                         : 'hover:bg-[var(--site-surface-2)]'
                     }`}
                   >
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <button
-                          type="button"
-                          className="theme-admin-button-secondary cursor-grab rounded-xl px-3 py-2 text-xs"
-                          title="Trascina per riordinare"
-                        >
-                          ⇅
-                        </button>
+                    <div className="flex items-center">
+                      <button
+                        type="button"
+                        className="theme-admin-button-secondary flex h-10 w-10 cursor-grab items-center justify-center rounded-xl text-sm"
+                        title="Trascina per riordinare"
+                      >
+                        ⋮⋮
+                      </button>
+                    </div>
 
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-3">
                         <p className="truncate text-sm font-medium text-[var(--site-text)]">
                           {item.title || 'News senza titolo'}
                         </p>
+
+                        {item.slug && (
+                          <a
+                            href={`/news/${item.slug}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="theme-admin-button-secondary rounded-xl px-3 py-1.5 text-xs"
+                          >
+                            Apri
+                          </a>
+                        )}
                       </div>
 
                       <div className="mt-2 flex flex-wrap gap-2">
+                        <span className="theme-admin-chip rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.16em]">
+                          {item.source_type}
+                        </span>
+
                         {item.is_pinned && (
                           <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-amber-300">
                             Pinnata
@@ -563,13 +660,13 @@ export default function AdminNewsManager({ items }: Props) {
                       <button
                         type="button"
                         onClick={() => moveItem(item.id, 1)}
-                        disabled={isPending || index === sortedItems.length - 1}
+                        disabled={isPending || index === filteredItems.length - 1}
                         className="theme-admin-button-secondary rounded-xl px-3 py-2 text-xs disabled:opacity-50"
                       >
                         ↓
                       </button>
 
-                      <span className="text-xs text-[var(--site-text-faint)]">
+                      <span className="min-w-[34px] text-center text-xs text-[var(--site-text-faint)]">
                         {item.sort_order ?? 0}
                       </span>
                     </div>
