@@ -44,10 +44,6 @@ function formatDate(value: string | null) {
   })
 }
 
-function preview(item: NewsItem) {
-  return item.brief || item.content || 'Contenuto in aggiornamento.'
-}
-
 function hrefFor(item: NewsItem) {
   if (item.slug) return `/news/${item.slug}`
   return item.external_url || '/news'
@@ -62,6 +58,75 @@ function getCover(item: NewsItem) {
   })
 
   return media.find((m) => m.is_cover) || media[0] || null
+}
+
+function getPreview(item: NewsItem) {
+  const text = item.brief || item.content || 'Contenuto in aggiornamento.'
+  return text.length > 190 ? `${text.slice(0, 190)}...` : text
+}
+
+function NewsCard({
+  item,
+  featured = false,
+}: {
+  item: NewsItem
+  featured?: boolean
+}) {
+  const cover = getCover(item)
+  const imageSrc = cover?.image_url || item.image_url || null
+
+  return (
+    <Link
+      href={hrefFor(item)}
+      className="group relative overflow-hidden rounded-[30px] border border-white/10 bg-[#0c1320] transition duration-300 hover:border-white/20 hover:shadow-[0_18px_60px_rgba(0,0,0,0.28)]"
+    >
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.02)_28%,rgba(255,255,255,0.04)_58%,rgba(255,255,255,0.02)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_16%,rgba(255,255,255,0.10),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(255,255,255,0.05),transparent_22%),radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.04),transparent_30%)] opacity-90" />
+
+      <div className="relative">
+        <div className="relative h-[250px] overflow-hidden bg-[linear-gradient(135deg,#1c2533_0%,#2a313d_100%)]">
+          {imageSrc ? (
+            <>
+              <img
+                src={imageSrc}
+                alt={item.title || 'News'}
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                loading="lazy"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,12,20,0.08)_0%,rgba(7,12,20,0.18)_45%,rgba(7,12,20,0.58)_100%)]" />
+            </>
+          ) : (
+            <div className="flex h-full items-center justify-center text-sm text-white/40">
+              Nessuna immagine
+            </div>
+          )}
+        </div>
+
+        <div className="relative px-6 pb-7 pt-5">
+          <div className="inline-flex rounded-full border border-white/12 bg-white/[0.04] px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-white/78">
+            {item.source_type === 'facebook' ? 'Facebook' : 'Editoriale'}
+          </div>
+
+          <p className="mt-4 text-sm text-white/50">
+            {formatDate(item.published_at || item.created_at)}
+          </p>
+
+          <h2
+            className={`mt-4 font-semibold leading-tight text-white ${
+              featured ? 'text-[2rem]' : 'text-[1.9rem]'
+            }`}
+          >
+            {item.title || 'News'}
+          </h2>
+
+          <p className="mt-5 text-[15px] leading-8 text-white/80">
+            {getPreview(item)}
+          </p>
+        </div>
+      </div>
+    </Link>
+  )
 }
 
 export default async function NewsPage() {
@@ -86,12 +151,12 @@ export default async function NewsPage() {
   const regular = items.filter((item) => !item.is_pinned)
 
   return (
-    <main className="min-h-screen bg-[var(--site-bg)] text-[var(--site-text)]">
+    <main className="min-h-screen bg-[#040915] text-white">
       <SiteHeader />
 
-      <section className="border-b border-[var(--site-border)] bg-[var(--site-bg-soft)]">
+      <section className="border-b border-white/10 bg-[#08101c]">
         <div className="mx-auto max-w-7xl px-6 py-16">
-          <p className="text-sm uppercase tracking-[0.3em] text-[var(--site-text-faint)]">
+          <p className="text-sm uppercase tracking-[0.3em] text-white/40">
             News
           </p>
 
@@ -99,131 +164,42 @@ export default async function NewsPage() {
             Aggiornamenti e contenuti dal mondo immobiliare
           </h1>
 
-          <p className="mt-6 max-w-3xl text-base leading-8 text-[var(--site-text-muted)] md:text-lg">
-            Approfondimenti, contenuti editoriali e aggiornamenti rilevanti per chi segue
-            il mercato immobiliare.
+          <p className="mt-6 max-w-3xl text-base leading-8 text-white/68 md:text-lg">
+            Approfondimenti, contenuti editoriali, aggiornamenti e post selezionati
+            per seguire il contesto immobiliare con una lettura più ordinata e utile.
           </p>
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-16">
         {pinned.length > 0 && (
-          <div className="mb-14">
-            <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
+          <div className="mb-16">
+            <p className="text-xs uppercase tracking-[0.24em] text-white/38">
               In evidenza
             </p>
 
             <div className="mt-6 grid gap-6 xl:grid-cols-3">
-              {pinned.map((item) => {
-                const cover = getCover(item)
-
-                return (
-                  <Link
-                    key={item.id}
-                    href={hrefFor(item)}
-                    className="theme-panel group overflow-hidden rounded-[30px] border transition duration-300 hover:border-[var(--site-border-strong)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.22)]"
-                  >
-                    <div className="aspect-[16/10] w-full overflow-hidden bg-[var(--site-surface-2)]">
-                      {cover?.image_url || item.image_url ? (
-                        <div
-                          className="h-full w-full bg-cover bg-center transition duration-500 group-hover:scale-[1.03]"
-                          style={{ backgroundImage: `url('${cover?.image_url || item.image_url}')` }}
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-sm text-[var(--site-text-faint)]">
-                          Nessuna immagine
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="p-6 transition duration-300 group-hover:bg-[var(--site-surface-2)]">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="theme-badge rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
-                          In evidenza
-                        </span>
-                        <span className="theme-badge rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
-                          {item.source_type === 'facebook' ? 'Facebook' : 'Editoriale'}
-                        </span>
-                      </div>
-
-                      <p className="mt-4 text-sm text-[var(--site-text-faint)]">
-                        {formatDate(item.published_at || item.created_at)}
-                      </p>
-
-                      <h2 className="mt-3 text-2xl font-semibold leading-tight text-[var(--site-text)] transition duration-300 group-hover:text-white">
-                        {item.title || 'News'}
-                      </h2>
-
-                      {item.brief && (
-                        <p className="mt-3 text-sm font-medium text-[var(--site-text-soft)]">
-                          {item.brief}
-                        </p>
-                      )}
-                    </div>
-                  </Link>
-                )
-              })}
+              {pinned.map((item) => (
+                <NewsCard key={item.id} item={item} featured />
+              ))}
             </div>
           </div>
         )}
 
         {regular.length > 0 ? (
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
+            <p className="text-xs uppercase tracking-[0.24em] text-white/38">
               Ultime news
             </p>
 
             <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {regular.map((item) => {
-                const cover = getCover(item)
-
-                return (
-                  <Link
-                    key={item.id}
-                    href={hrefFor(item)}
-                    className="theme-panel group overflow-hidden rounded-[30px] border transition duration-300 hover:border-[var(--site-border-strong)] hover:shadow-[0_18px_50px_rgba(0,0,0,0.20)]"
-                  >
-                    <div className="aspect-[16/10] w-full overflow-hidden bg-[var(--site-surface-2)]">
-                      {cover?.image_url || item.image_url ? (
-                        <div
-                          className="h-full w-full bg-cover bg-center transition duration-500 group-hover:scale-[1.03]"
-                          style={{ backgroundImage: `url('${cover?.image_url || item.image_url}')` }}
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-sm text-[var(--site-text-faint)]">
-                          Nessuna immagine
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="p-6 transition duration-300 group-hover:bg-[var(--site-surface-2)]">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="theme-badge rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
-                          {item.source_type === 'facebook' ? 'Facebook' : 'Editoriale'}
-                        </span>
-                      </div>
-
-                      <p className="mt-4 text-sm text-[var(--site-text-faint)]">
-                        {formatDate(item.published_at || item.created_at)}
-                      </p>
-
-                      <h3 className="mt-3 text-xl font-semibold leading-tight text-[var(--site-text)] transition duration-300 group-hover:text-white">
-                        {item.title || 'News'}
-                      </h3>
-
-                      {item.brief && (
-                        <p className="mt-3 text-sm font-medium text-[var(--site-text-soft)]">
-                          {item.brief}
-                        </p>
-                      )}
-                    </div>
-                  </Link>
-                )
-              })}
+              {regular.map((item) => (
+                <NewsCard key={item.id} item={item} />
+              ))}
             </div>
           </div>
         ) : (
-          <div className="theme-panel rounded-[30px] border p-8 text-[var(--site-text-muted)]">
+          <div className="rounded-[30px] border border-white/10 bg-[#0c1320] p-8 text-white/60">
             Nessuna news disponibile al momento.
           </div>
         )}
