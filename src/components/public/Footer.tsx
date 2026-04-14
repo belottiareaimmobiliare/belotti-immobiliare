@@ -78,6 +78,9 @@ export default function Footer() {
             <Link href="/immobili" className="transition hover:text-white">
               Immobili
             </Link>
+            <Link href="/news" className="transition hover:text-white">
+              News
+            </Link>
             <Link href="/chi-siamo" className="transition hover:text-white">
               Chi siamo
             </Link>
