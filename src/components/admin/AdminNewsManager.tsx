@@ -43,7 +43,12 @@ type NewsSettings = {
   id: string
   facebook_page_url: string | null
   facebook_page_name: string | null
+  facebook_page_id: string | null
+  facebook_access_token: string | null
   facebook_sync_enabled: boolean
+  last_sync_at: string | null
+  last_sync_status: string | null
+  last_sync_message: string | null
 } | null
 
 type Props = {
@@ -156,6 +161,8 @@ export default function AdminNewsManager({ items, settings }: Props) {
   const [facebookForm, setFacebookForm] = useState({
     facebook_page_url: settings?.facebook_page_url || '',
     facebook_page_name: settings?.facebook_page_name || '',
+    facebook_page_id: settings?.facebook_page_id || '',
+    facebook_access_token: settings?.facebook_access_token || '',
     facebook_sync_enabled: settings?.facebook_sync_enabled ?? true,
   })
 
@@ -197,6 +204,8 @@ export default function AdminNewsManager({ items, settings }: Props) {
         const { error } = await supabase.from('news_settings').insert({
           facebook_page_url: facebookForm.facebook_page_url.trim() || null,
           facebook_page_name: facebookForm.facebook_page_name.trim() || null,
+          facebook_page_id: facebookForm.facebook_page_id.trim() || null,
+          facebook_access_token: facebookForm.facebook_access_token.trim() || null,
           facebook_sync_enabled: facebookForm.facebook_sync_enabled,
         })
 
@@ -214,6 +223,8 @@ export default function AdminNewsManager({ items, settings }: Props) {
         .update({
           facebook_page_url: facebookForm.facebook_page_url.trim() || null,
           facebook_page_name: facebookForm.facebook_page_name.trim() || null,
+          facebook_page_id: facebookForm.facebook_page_id.trim() || null,
+          facebook_access_token: facebookForm.facebook_access_token.trim() || null,
           facebook_sync_enabled: facebookForm.facebook_sync_enabled,
         })
         .eq('id', settings.id)
@@ -224,6 +235,30 @@ export default function AdminNewsManager({ items, settings }: Props) {
       }
 
       router.refresh()
+    })
+  }
+
+  const handleRunFacebookSync = () => {
+    startTransition(async () => {
+      try {
+        const response = await fetch('/api/admin/news/facebook-sync', {
+          method: 'POST',
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          alert(data?.message || 'Errore durante la sincronizzazione Facebook.')
+          router.refresh()
+          return
+        }
+
+        alert(data?.message || 'Sincronizzazione completata.')
+        router.refresh()
+      } catch (error) {
+        console.error(error)
+        alert('Errore durante la sincronizzazione Facebook.')
+      }
     })
   }
 
@@ -415,7 +450,7 @@ export default function AdminNewsManager({ items, settings }: Props) {
             Configurazione Facebook
           </p>
 
-          <div className="mt-5 grid gap-4 xl:grid-cols-[1.3fr_1fr_180px_auto]">
+          <div className="mt-5 grid gap-4 xl:grid-cols-2">
             <input
               value={facebookForm.facebook_page_url}
               onChange={(e) =>
@@ -440,6 +475,32 @@ export default function AdminNewsManager({ items, settings }: Props) {
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
             />
 
+            <input
+              value={facebookForm.facebook_page_id}
+              onChange={(e) =>
+                setFacebookForm((prev) => ({
+                  ...prev,
+                  facebook_page_id: e.target.value,
+                }))
+              }
+              placeholder="Facebook Page ID"
+              className="theme-admin-input w-full rounded-2xl px-4 py-3"
+            />
+
+            <input
+              value={facebookForm.facebook_access_token}
+              onChange={(e) =>
+                setFacebookForm((prev) => ({
+                  ...prev,
+                  facebook_access_token: e.target.value,
+                }))
+              }
+              placeholder="Facebook Access Token"
+              className="theme-admin-input w-full rounded-2xl px-4 py-3"
+            />
+          </div>
+
+          <div className="mt-4 grid gap-4 xl:grid-cols-[220px_auto]">
             <select
               value={facebookForm.facebook_sync_enabled ? 'true' : 'false'}
               onChange={(e) =>
@@ -454,19 +515,59 @@ export default function AdminNewsManager({ items, settings }: Props) {
               <option value="false">Sync disattiva</option>
             </select>
 
-            <button
-              type="button"
-              onClick={handleSaveFacebookSettings}
-              disabled={isPending}
-              className="theme-admin-button-primary rounded-2xl px-5 py-3 font-medium transition hover:opacity-95 disabled:opacity-60"
-            >
-              Salva config
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={handleSaveFacebookSettings}
+                disabled={isPending}
+                className="theme-admin-button-primary rounded-2xl px-5 py-3 font-medium transition hover:opacity-95 disabled:opacity-60"
+              >
+                Salva config
+              </button>
+
+              <button
+                type="button"
+                onClick={handleRunFacebookSync}
+                disabled={isPending}
+                className="theme-admin-button-secondary rounded-2xl px-5 py-3 font-medium transition hover:opacity-95 disabled:opacity-60"
+              >
+                Sincronizza ora
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
+              <p className="theme-admin-faint text-xs uppercase tracking-[0.18em]">
+                Ultima sync
+              </p>
+              <p className="mt-2 text-sm text-[var(--site-text)]">
+                {settings?.last_sync_at ? formatDate(settings.last_sync_at) : 'Mai eseguita'}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
+              <p className="theme-admin-faint text-xs uppercase tracking-[0.18em]">
+                Stato
+              </p>
+              <p className="mt-2 text-sm text-[var(--site-text)]">
+                {settings?.last_sync_status || 'Non disponibile'}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
+              <p className="theme-admin-faint text-xs uppercase tracking-[0.18em]">
+                Messaggio
+              </p>
+              <p className="mt-2 text-sm text-[var(--site-text-muted)]">
+                {settings?.last_sync_message || 'Nessun messaggio'}
+              </p>
+            </div>
           </div>
 
           <p className="theme-admin-muted mt-4 text-sm">
-            Questo link sarà la base per la futura importazione dei post Facebook
-            nella sezione news del sito.
+            Inserisci i dati Facebook della pagina e usa “Sincronizza ora” per
+            importare i post come news del sito.
           </p>
         </div>
 
