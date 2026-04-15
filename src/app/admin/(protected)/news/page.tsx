@@ -44,16 +44,19 @@ export default async function AdminNewsPage() {
     <AdminNewsManager
       items={newsData || []}
       settings={
-        settingsError
+        settingsError || !settingsData
           ? null
-          : settingsData
-            ? {
-                id: settingsData.id,
-                facebook_page_url: settingsData.facebook_page_url,
-                facebook_page_name: settingsData.facebook_page_name,
-                facebook_sync_enabled: settingsData.facebook_sync_enabled,
-              }
-            : null
+          : {
+              id: settingsData.id,
+              facebook_page_url: settingsData.facebook_page_url,
+              facebook_page_name: settingsData.facebook_page_name,
+              facebook_page_id: settingsData.facebook_page_id,
+              facebook_access_token: settingsData.facebook_access_token,
+              facebook_sync_enabled: settingsData.facebook_sync_enabled,
+              last_sync_at: settingsData.last_sync_at,
+              last_sync_status: settingsData.last_sync_status,
+              last_sync_message: settingsData.last_sync_message,
+            }
       }
     />
   )
