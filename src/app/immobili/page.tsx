@@ -358,32 +358,36 @@ export default async function PropertiesPage({
 
       <section className="relative overflow-hidden">
         {/* wallpaper background */}
-        <div className="pointer-events-none absolute inset-0 z-0">
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
           {/* base */}
           <div className="absolute inset-0 bg-[#020817]" />
 
-          {/* map image */}
+          {/* map wallpaper grande, senza taglio visibile */}
           <div
-            className="absolute right-0 top-0 h-[760px] w-[72%] bg-cover bg-right-top bg-no-repeat opacity-[0.30]"
+            className="absolute right-[-10%] top-0 h-[980px] w-[92%] bg-cover bg-right-top bg-no-repeat opacity-[0.30]"
             style={{
               backgroundImage: "url('/images/bg-bergamo-map-dark.png')",
             }}
           />
 
-          {/* fade from left */}
-          <div className="absolute inset-y-0 left-0 w-[58%] bg-gradient-to-r from-[#020817] via-[#020817]/92 to-transparent" />
+          {/* fade forte da sinistra verso destra */}
+          <div className="absolute inset-y-0 left-0 w-[62%] bg-gradient-to-r from-[#020817] via-[#020817]/96 via-[70%] to-transparent" />
 
-          {/* fade from bottom */}
-          <div className="absolute bottom-0 left-0 right-0 h-[42%] bg-gradient-to-t from-[#020817] via-[#020817]/88 to-transparent" />
+          {/* fade dal basso verso l'alto */}
+          <div className="absolute bottom-0 left-0 right-0 h-[48%] bg-gradient-to-t from-[#020817] via-[#020817]/94 via-[68%] to-transparent" />
 
-          {/* dark blue film */}
-          <div className="absolute inset-0 bg-[rgba(3,17,39,0.56)]" />
+          {/* fade extra per angoli */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(2,8,23,0.95)_0%,rgba(2,8,23,0.35)_28%,transparent_55%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(2,8,23,0.82)_0%,rgba(2,8,23,0.28)_24%,transparent_46%)]" />
 
-          {/* extra soft gradient */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.10),transparent_38%)]" />
+          {/* pellicola blu sopra la mappa */}
+          <div className="absolute inset-0 bg-[rgba(3,17,39,0.58)]" />
 
-          {/* glow */}
-          <div className="absolute right-[-8%] top-[-40px] h-[520px] w-[520px] rounded-full bg-blue-500/10 blur-3xl" />
+          {/* tono blu elegante in alto a destra */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.12),transparent_36%)]" />
+
+          {/* glow morbido */}
+          <div className="absolute right-[-12%] top-[-60px] h-[560px] w-[560px] rounded-full bg-blue-500/10 blur-3xl" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-7xl px-6 py-16">
