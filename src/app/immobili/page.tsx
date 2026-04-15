@@ -374,7 +374,7 @@ export default async function PropertiesPage({
           <div className="absolute inset-y-0 left-0 w-[62%] bg-gradient-to-r from-[#020817] via-[#020817]/96 via-[70%] to-transparent" />
 
           {/* fade dal basso verso l'alto */}
-          <div className="absolute bottom-0 left-0 right-0 h-[48%] bg-gradient-to-t from-[#020817] via-[#020817]/94 via-[68%] to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-[56%] bg-gradient-to-t from-[#020817] via-[#020817]/96 via-[72%] to-transparent" />
 
           {/* fade extra per angoli */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(2,8,23,0.95)_0%,rgba(2,8,23,0.35)_28%,transparent_55%)]" />
