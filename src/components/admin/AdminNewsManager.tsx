@@ -198,16 +198,7 @@ export default function AdminNewsManager({ items, settings }: Props) {
     sort_order: '0',
   })
 
-  const [facebookImportForm, setFacebookImportForm] = useState({
-    post_url: '',
-    title: '',
-    brief: '',
-    content: '',
-    author_name: settings?.facebook_page_name || 'Area Immobiliare',
-    source_name: settings?.facebook_page_name || 'Facebook',
-    status: 'published',
-    sort_order: '0',
-  })
+  const [facebookImportUrl, setFacebookImportUrl] = useState('')
 
   const sortedItems = useMemo(() => sortNewsItems(items), [items])
 
@@ -316,51 +307,41 @@ export default function AdminNewsManager({ items, settings }: Props) {
   }
 
   const handleImportFacebookLink = () => {
-    if (!facebookImportForm.post_url.trim()) {
+    const postUrl = facebookImportUrl.trim()
+
+    if (!postUrl) {
       alert('Incolla il link del post Facebook.')
       return
     }
 
-    if (!isFacebookUrl(facebookImportForm.post_url)) {
+    if (!isFacebookUrl(postUrl)) {
       alert('Il link inserito non sembra un URL Facebook valido.')
       return
     }
 
-    if (!facebookImportForm.title.trim()) {
-      alert('Inserisci il titolo della news importata.')
-      return
-    }
-
     startTransition(async () => {
-      const postUrl = facebookImportForm.post_url.trim()
       const postId = extractFacebookPostId(postUrl)
-      const slug = slugify(facebookImportForm.title)
+      const fallbackTitle = 'Post Facebook importato'
+      const slug = `${slugify(fallbackTitle)}-${Date.now()}`
 
       const { error } = await supabase.from('news_items').insert({
         source_type: 'facebook',
         facebook_post_id: postId,
         slug,
-        title: facebookImportForm.title.trim(),
-        brief: facebookImportForm.brief.trim() || null,
-        content: facebookImportForm.content.trim() || null,
-        author_name: facebookImportForm.author_name.trim() || null,
-        source_name:
-          facebookImportForm.source_name.trim() ||
-          facebookForm.facebook_page_name.trim() ||
-          'Facebook',
+        title: fallbackTitle,
+        brief: null,
+        content: null,
+        author_name: facebookForm.facebook_page_name.trim() || 'Area Immobiliare',
+        source_name: facebookForm.facebook_page_name.trim() || 'Facebook',
         source_url: facebookForm.facebook_page_url.trim() || null,
         external_url: postUrl,
         image_url: null,
         is_visible: true,
         is_pinned: false,
         pin_order: null,
-        sort_order: Number(facebookImportForm.sort_order || 0),
-        status:
-          facebookImportForm.status === 'draft' ? 'draft' : 'published',
-        published_at:
-          facebookImportForm.status === 'published'
-            ? new Date().toISOString()
-            : null,
+        sort_order: 0,
+        status: 'draft',
+        published_at: null,
       })
 
       if (error) {
@@ -368,17 +349,7 @@ export default function AdminNewsManager({ items, settings }: Props) {
         return
       }
 
-      setFacebookImportForm({
-        post_url: '',
-        title: '',
-        brief: '',
-        content: '',
-        author_name: facebookForm.facebook_page_name || 'Area Immobiliare',
-        source_name: facebookForm.facebook_page_name || 'Facebook',
-        status: 'published',
-        sort_order: '0',
-      })
-
+      setFacebookImportUrl('')
       router.refresh()
     })
   }
@@ -559,8 +530,8 @@ export default function AdminNewsManager({ items, settings }: Props) {
           </div>
 
           <p className="theme-admin-muted mt-4 text-sm">
-            La pagina Facebook viene collegata a livello informativo e come fonte.
-            I post vengono importati manualmente tramite link.
+            La pagina Facebook viene collegata come fonte. I post vengono importati
+            manualmente tramite link e poi rifiniti come news del sito.
           </p>
         </div>
 
@@ -573,106 +544,11 @@ export default function AdminNewsManager({ items, settings }: Props) {
 
               <div className="mt-5 space-y-4">
                 <input
-                  value={facebookImportForm.post_url}
-                  onChange={(e) =>
-                    setFacebookImportForm((prev) => ({
-                      ...prev,
-                      post_url: e.target.value,
-                    }))
-                  }
+                  value={facebookImportUrl}
+                  onChange={(e) => setFacebookImportUrl(e.target.value)}
                   placeholder="Incolla il link del post Facebook"
                   className="theme-admin-input w-full rounded-2xl px-4 py-3"
                 />
-
-                <input
-                  value={facebookImportForm.title}
-                  onChange={(e) =>
-                    setFacebookImportForm((prev) => ({
-                      ...prev,
-                      title: e.target.value,
-                    }))
-                  }
-                  placeholder="Titolo news"
-                  className="theme-admin-input w-full rounded-2xl px-4 py-3"
-                />
-
-                <input
-                  value={facebookImportForm.brief}
-                  onChange={(e) =>
-                    setFacebookImportForm((prev) => ({
-                      ...prev,
-                      brief: e.target.value,
-                    }))
-                  }
-                  placeholder="Brief / occhiello"
-                  className="theme-admin-input w-full rounded-2xl px-4 py-3"
-                />
-
-                <RichTextEditor
-                  value={facebookImportForm.content}
-                  onChange={(value) =>
-                    setFacebookImportForm((prev) => ({
-                      ...prev,
-                      content: value,
-                    }))
-                  }
-                  placeholder="Testo completo della news derivata dal post Facebook"
-                />
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <input
-                    value={facebookImportForm.author_name}
-                    onChange={(e) =>
-                      setFacebookImportForm((prev) => ({
-                        ...prev,
-                        author_name: e.target.value,
-                      }))
-                    }
-                    placeholder="Autore"
-                    className="theme-admin-input w-full rounded-2xl px-4 py-3"
-                  />
-
-                  <input
-                    value={facebookImportForm.source_name}
-                    onChange={(e) =>
-                      setFacebookImportForm((prev) => ({
-                        ...prev,
-                        source_name: e.target.value,
-                      }))
-                    }
-                    placeholder="Fonte"
-                    className="theme-admin-input w-full rounded-2xl px-4 py-3"
-                  />
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <select
-                    value={facebookImportForm.status}
-                    onChange={(e) =>
-                      setFacebookImportForm((prev) => ({
-                        ...prev,
-                        status: e.target.value,
-                      }))
-                    }
-                    className="theme-admin-select w-full rounded-2xl px-4 py-3"
-                  >
-                    <option value="published">Pubblicata</option>
-                    <option value="draft">Bozza</option>
-                  </select>
-
-                  <input
-                    type="number"
-                    value={facebookImportForm.sort_order}
-                    onChange={(e) =>
-                      setFacebookImportForm((prev) => ({
-                        ...prev,
-                        sort_order: e.target.value,
-                      }))
-                    }
-                    placeholder="Ordine"
-                    className="theme-admin-input w-full rounded-2xl px-4 py-3"
-                  />
-                </div>
 
                 <button
                   type="button"
@@ -680,9 +556,15 @@ export default function AdminNewsManager({ items, settings }: Props) {
                   onClick={handleImportFacebookLink}
                   className="theme-admin-button-primary w-full rounded-2xl px-5 py-3 font-medium transition hover:opacity-95 disabled:opacity-60"
                 >
-                  Importa post come news
+                  Importa post
                 </button>
               </div>
+
+              <p className="theme-admin-muted mt-4 text-sm leading-7">
+                L’import crea una bozza Facebook già collegata alla pagina fonte.
+                Dopo l’import la completi dalla lista news con titolo, testo,
+                immagini e ordine.
+              </p>
             </div>
 
             <div className="theme-admin-card rounded-3xl p-6">
