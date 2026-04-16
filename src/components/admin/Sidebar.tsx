@@ -6,6 +6,7 @@ const links = [
   { href: '/admin/immobili?contractType=vendita', label: 'Immobili in vendita' },
   { href: '/admin/immobili?contractType=affitto', label: 'Immobili in affitto' },
   { href: '/admin/news', label: 'News' },
+  { href: '/admin/autori', label: 'Autori' },
 ]
 
 export default function Sidebar() {
