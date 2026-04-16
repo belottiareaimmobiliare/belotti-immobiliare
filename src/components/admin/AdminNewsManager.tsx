@@ -141,11 +141,34 @@ function matchesSearch(item: NewsItem, search: string) {
     item.content || '',
     item.author_name || '',
     item.source_name || '',
+    item.external_url || '',
   ]
     .join(' ')
     .toLowerCase()
 
   return haystack.includes(q)
+}
+
+function extractFacebookPostId(url: string) {
+  const clean = url.trim()
+
+  const storyMatch = clean.match(/story_fbid=(\d+)/i)
+  if (storyMatch?.[1]) return storyMatch[1]
+
+  const postsMatch = clean.match(/\/posts\/(\d+)/i)
+  if (postsMatch?.[1]) return postsMatch[1]
+
+  const videosMatch = clean.match(/\/videos\/(\d+)/i)
+  if (videosMatch?.[1]) return videosMatch[1]
+
+  const reelsMatch = clean.match(/\/reel\/(\d+)/i)
+  if (reelsMatch?.[1]) return reelsMatch[1]
+
+  return null
+}
+
+function isFacebookUrl(url: string) {
+  return /facebook\.com|fb\.watch/i.test(url)
 }
 
 export default function AdminNewsManager({ items, settings }: Props) {
@@ -163,7 +186,7 @@ export default function AdminNewsManager({ items, settings }: Props) {
     facebook_page_name: settings?.facebook_page_name || '',
     facebook_page_id: settings?.facebook_page_id || '',
     facebook_access_token: settings?.facebook_access_token || '',
-    facebook_sync_enabled: settings?.facebook_sync_enabled ?? true,
+    facebook_sync_enabled: settings?.facebook_sync_enabled ?? false,
   })
 
   const [createForm, setCreateForm] = useState({
@@ -174,6 +197,17 @@ export default function AdminNewsManager({ items, settings }: Props) {
     source_name: '',
     source_url: '',
     external_url: '',
+    status: 'published',
+    sort_order: '0',
+  })
+
+  const [facebookImportForm, setFacebookImportForm] = useState({
+    post_url: '',
+    title: '',
+    brief: '',
+    content: '',
+    author_name: settings?.facebook_page_name || 'Area Immobiliare',
+    source_name: settings?.facebook_page_name || 'Facebook',
     status: 'published',
     sort_order: '0',
   })
@@ -207,6 +241,8 @@ export default function AdminNewsManager({ items, settings }: Props) {
           facebook_page_id: facebookForm.facebook_page_id.trim() || null,
           facebook_access_token: facebookForm.facebook_access_token.trim() || null,
           facebook_sync_enabled: facebookForm.facebook_sync_enabled,
+          last_sync_status: 'manual_only',
+          last_sync_message: 'Import Facebook gestito tramite link manuale.',
         })
 
         if (error) {
@@ -226,6 +262,8 @@ export default function AdminNewsManager({ items, settings }: Props) {
           facebook_page_id: facebookForm.facebook_page_id.trim() || null,
           facebook_access_token: facebookForm.facebook_access_token.trim() || null,
           facebook_sync_enabled: facebookForm.facebook_sync_enabled,
+          last_sync_status: 'manual_only',
+          last_sync_message: 'Import Facebook gestito tramite link manuale.',
         })
         .eq('id', settings.id)
 
@@ -235,30 +273,6 @@ export default function AdminNewsManager({ items, settings }: Props) {
       }
 
       router.refresh()
-    })
-  }
-
-  const handleRunFacebookSync = () => {
-    startTransition(async () => {
-      try {
-        const response = await fetch('/api/admin/news/facebook-sync', {
-          method: 'POST',
-        })
-
-        const data = await response.json()
-
-        if (!response.ok) {
-          alert(data?.message || 'Errore durante la sincronizzazione Facebook.')
-          router.refresh()
-          return
-        }
-
-        alert(data?.message || 'Sincronizzazione completata.')
-        router.refresh()
-      } catch (error) {
-        console.error(error)
-        alert('Errore durante la sincronizzazione Facebook.')
-      }
     })
   }
 
@@ -304,6 +318,74 @@ export default function AdminNewsManager({ items, settings }: Props) {
         source_name: '',
         source_url: '',
         external_url: '',
+        status: 'published',
+        sort_order: '0',
+      })
+
+      router.refresh()
+    })
+  }
+
+  const handleImportFacebookLink = () => {
+    if (!facebookImportForm.post_url.trim()) {
+      alert('Incolla il link del post Facebook.')
+      return
+    }
+
+    if (!isFacebookUrl(facebookImportForm.post_url)) {
+      alert('Il link inserito non sembra un URL Facebook valido.')
+      return
+    }
+
+    if (!facebookImportForm.title.trim()) {
+      alert('Inserisci il titolo della news importata.')
+      return
+    }
+
+    startTransition(async () => {
+      const postUrl = facebookImportForm.post_url.trim()
+      const postId = extractFacebookPostId(postUrl)
+      const slug = slugify(facebookImportForm.title)
+
+      const { error } = await supabase.from('news_items').insert({
+        source_type: 'facebook',
+        facebook_post_id: postId,
+        slug,
+        title: facebookImportForm.title.trim(),
+        brief: facebookImportForm.brief.trim() || null,
+        content: facebookImportForm.content.trim() || null,
+        author_name: facebookImportForm.author_name.trim() || null,
+        source_name:
+          facebookImportForm.source_name.trim() ||
+          facebookForm.facebook_page_name.trim() ||
+          'Facebook',
+        source_url: facebookForm.facebook_page_url.trim() || null,
+        external_url: postUrl,
+        image_url: null,
+        is_visible: true,
+        is_pinned: false,
+        pin_order: null,
+        sort_order: Number(facebookImportForm.sort_order || 0),
+        status:
+          facebookImportForm.status === 'draft' ? 'draft' : 'published',
+        published_at:
+          facebookImportForm.status === 'published'
+            ? new Date().toISOString()
+            : null,
+      })
+
+      if (error) {
+        alert(error.message)
+        return
+      }
+
+      setFacebookImportForm({
+        post_url: '',
+        title: '',
+        brief: '',
+        content: '',
+        author_name: facebookForm.facebook_page_name || 'Area Immobiliare',
+        source_name: facebookForm.facebook_page_name || 'Facebook',
         status: 'published',
         sort_order: '0',
       })
@@ -440,8 +522,8 @@ export default function AdminNewsManager({ items, settings }: Props) {
       </h2>
 
       <p className="theme-admin-muted mt-3 max-w-3xl">
-        Crea news manuali, gestisci ordine, autore, fonte, visibilità, pin e fino
-        a 10 immagini per news.
+        Crea news manuali, importa post Facebook tramite link, gestisci ordine,
+        autore, fonte, visibilità, pin e fino a 10 immagini per news.
       </p>
 
       <div className="mt-8 space-y-6">
@@ -511,8 +593,8 @@ export default function AdminNewsManager({ items, settings }: Props) {
               }
               className="theme-admin-select w-full rounded-2xl px-4 py-3"
             >
-              <option value="true">Sync attiva</option>
-              <option value="false">Sync disattiva</option>
+              <option value="false">Import manuale</option>
+              <option value="true">Import manuale</option>
             </select>
 
             <div className="flex flex-wrap gap-3">
@@ -527,11 +609,11 @@ export default function AdminNewsManager({ items, settings }: Props) {
 
               <button
                 type="button"
-                onClick={handleRunFacebookSync}
-                disabled={isPending}
-                className="theme-admin-button-secondary rounded-2xl px-5 py-3 font-medium transition hover:opacity-95 disabled:opacity-60"
+                disabled
+                className="theme-admin-button-secondary rounded-2xl px-5 py-3 font-medium opacity-60"
+                title="Sync automatica disattivata: importiamo tramite link"
               >
-                Sincronizza ora
+                Sync automatica non attiva
               </button>
             </div>
           </div>
@@ -551,7 +633,7 @@ export default function AdminNewsManager({ items, settings }: Props) {
                 Stato
               </p>
               <p className="mt-2 text-sm text-[var(--site-text)]">
-                {settings?.last_sync_status || 'Non disponibile'}
+                {settings?.last_sync_status || 'manual_only'}
               </p>
             </div>
 
@@ -560,137 +642,258 @@ export default function AdminNewsManager({ items, settings }: Props) {
                 Messaggio
               </p>
               <p className="mt-2 text-sm text-[var(--site-text-muted)]">
-                {settings?.last_sync_message || 'Nessun messaggio'}
+                {settings?.last_sync_message || 'Import Facebook gestito tramite link manuale.'}
               </p>
             </div>
           </div>
 
           <p className="theme-admin-muted mt-4 text-sm">
-            Inserisci i dati Facebook della pagina e usa “Sincronizza ora” per
-            importare i post come news del sito.
+            La sincronizzazione automatica Meta è stata messa in pausa. Da qui
+            salvi solo i dati della pagina e usi l’import manuale tramite link post.
           </p>
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
-          <div className="theme-admin-card rounded-3xl p-6">
-            <p className="theme-admin-faint text-xs uppercase tracking-[0.2em]">
-              Nuova news
-            </p>
+          <div className="space-y-6">
+            <div className="theme-admin-card rounded-3xl p-6">
+              <p className="theme-admin-faint text-xs uppercase tracking-[0.2em]">
+                Importa post Facebook da link
+              </p>
 
-            <div className="mt-5 space-y-4">
-              <input
-                value={createForm.title}
-                onChange={(e) =>
-                  setCreateForm((prev) => ({ ...prev, title: e.target.value }))
-                }
-                placeholder="Titolo news"
-                className="theme-admin-input w-full rounded-2xl px-4 py-3"
-              />
-
-              <input
-                value={createForm.brief}
-                onChange={(e) =>
-                  setCreateForm((prev) => ({ ...prev, brief: e.target.value }))
-                }
-                placeholder="Brief / occhiello"
-                className="theme-admin-input w-full rounded-2xl px-4 py-3"
-              />
-
-              <RichTextEditor
-                value={createForm.content}
-                onChange={(value) =>
-                  setCreateForm((prev) => ({ ...prev, content: value }))
-                }
-                placeholder="Testo completo della news"
-              />
-
-              <select
-                value={createForm.author_name}
-                onChange={(e) =>
-                  setCreateForm((prev) => ({
-                    ...prev,
-                    author_name: e.target.value,
-                  }))
-                }
-                className="theme-admin-select w-full rounded-2xl px-4 py-3"
-              >
-                {AUTHORS.map((author) => (
-                  <option key={author} value={author}>
-                    {author}
-                  </option>
-                ))}
-              </select>
-
-              <input
-                value={createForm.source_name}
-                onChange={(e) =>
-                  setCreateForm((prev) => ({
-                    ...prev,
-                    source_name: e.target.value,
-                  }))
-                }
-                placeholder="Fonte opzionale, es. Reuters"
-                className="theme-admin-input w-full rounded-2xl px-4 py-3"
-              />
-
-              <input
-                value={createForm.source_url}
-                onChange={(e) =>
-                  setCreateForm((prev) => ({
-                    ...prev,
-                    source_url: e.target.value,
-                  }))
-                }
-                placeholder="Link fonte opzionale"
-                className="theme-admin-input w-full rounded-2xl px-4 py-3"
-              />
-
-              <input
-                value={createForm.external_url}
-                onChange={(e) =>
-                  setCreateForm((prev) => ({
-                    ...prev,
-                    external_url: e.target.value,
-                  }))
-                }
-                placeholder="Link esterno opzionale"
-                className="theme-admin-input w-full rounded-2xl px-4 py-3"
-              />
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <select
-                  value={createForm.status}
+              <div className="mt-5 space-y-4">
+                <input
+                  value={facebookImportForm.post_url}
                   onChange={(e) =>
-                    setCreateForm((prev) => ({ ...prev, status: e.target.value }))
+                    setFacebookImportForm((prev) => ({
+                      ...prev,
+                      post_url: e.target.value,
+                    }))
                   }
-                  className="theme-admin-select w-full rounded-2xl px-4 py-3"
-                >
-                  <option value="published">Pubblicata</option>
-                  <option value="draft">Bozza</option>
-                </select>
+                  placeholder="Incolla il link del post Facebook"
+                  className="theme-admin-input w-full rounded-2xl px-4 py-3"
+                />
 
                 <input
-                  type="number"
-                  value={createForm.sort_order}
+                  value={facebookImportForm.title}
+                  onChange={(e) =>
+                    setFacebookImportForm((prev) => ({
+                      ...prev,
+                      title: e.target.value,
+                    }))
+                  }
+                  placeholder="Titolo news"
+                  className="theme-admin-input w-full rounded-2xl px-4 py-3"
+                />
+
+                <input
+                  value={facebookImportForm.brief}
+                  onChange={(e) =>
+                    setFacebookImportForm((prev) => ({
+                      ...prev,
+                      brief: e.target.value,
+                    }))
+                  }
+                  placeholder="Brief / occhiello"
+                  className="theme-admin-input w-full rounded-2xl px-4 py-3"
+                />
+
+                <RichTextEditor
+                  value={facebookImportForm.content}
+                  onChange={(value) =>
+                    setFacebookImportForm((prev) => ({
+                      ...prev,
+                      content: value,
+                    }))
+                  }
+                  placeholder="Testo completo della news derivata dal post Facebook"
+                />
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <input
+                    value={facebookImportForm.author_name}
+                    onChange={(e) =>
+                      setFacebookImportForm((prev) => ({
+                        ...prev,
+                        author_name: e.target.value,
+                      }))
+                    }
+                    placeholder="Autore"
+                    className="theme-admin-input w-full rounded-2xl px-4 py-3"
+                  />
+
+                  <input
+                    value={facebookImportForm.source_name}
+                    onChange={(e) =>
+                      setFacebookImportForm((prev) => ({
+                        ...prev,
+                        source_name: e.target.value,
+                      }))
+                    }
+                    placeholder="Fonte"
+                    className="theme-admin-input w-full rounded-2xl px-4 py-3"
+                  />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <select
+                    value={facebookImportForm.status}
+                    onChange={(e) =>
+                      setFacebookImportForm((prev) => ({
+                        ...prev,
+                        status: e.target.value,
+                      }))
+                    }
+                    className="theme-admin-select w-full rounded-2xl px-4 py-3"
+                  >
+                    <option value="published">Pubblicata</option>
+                    <option value="draft">Bozza</option>
+                  </select>
+
+                  <input
+                    type="number"
+                    value={facebookImportForm.sort_order}
+                    onChange={(e) =>
+                      setFacebookImportForm((prev) => ({
+                        ...prev,
+                        sort_order: e.target.value,
+                      }))
+                    }
+                    placeholder="Ordine"
+                    className="theme-admin-input w-full rounded-2xl px-4 py-3"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={handleImportFacebookLink}
+                  className="theme-admin-button-primary w-full rounded-2xl px-5 py-3 font-medium transition hover:opacity-95 disabled:opacity-60"
+                >
+                  Importa post come news
+                </button>
+              </div>
+            </div>
+
+            <div className="theme-admin-card rounded-3xl p-6">
+              <p className="theme-admin-faint text-xs uppercase tracking-[0.2em]">
+                Nuova news manuale
+              </p>
+
+              <div className="mt-5 space-y-4">
+                <input
+                  value={createForm.title}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({ ...prev, title: e.target.value }))
+                  }
+                  placeholder="Titolo news"
+                  className="theme-admin-input w-full rounded-2xl px-4 py-3"
+                />
+
+                <input
+                  value={createForm.brief}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({ ...prev, brief: e.target.value }))
+                  }
+                  placeholder="Brief / occhiello"
+                  className="theme-admin-input w-full rounded-2xl px-4 py-3"
+                />
+
+                <RichTextEditor
+                  value={createForm.content}
+                  onChange={(value) =>
+                    setCreateForm((prev) => ({ ...prev, content: value }))
+                  }
+                  placeholder="Testo completo della news"
+                />
+
+                <select
+                  value={createForm.author_name}
                   onChange={(e) =>
                     setCreateForm((prev) => ({
                       ...prev,
-                      sort_order: e.target.value,
+                      author_name: e.target.value,
                     }))
                   }
-                  placeholder="Ordine"
+                  className="theme-admin-select w-full rounded-2xl px-4 py-3"
+                >
+                  {AUTHORS.map((author) => (
+                    <option key={author} value={author}>
+                      {author}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  value={createForm.source_name}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      source_name: e.target.value,
+                    }))
+                  }
+                  placeholder="Fonte opzionale, es. Reuters"
                   className="theme-admin-input w-full rounded-2xl px-4 py-3"
                 />
-              </div>
 
-              <button
-                type="button"
-                disabled={isPending}
-                onClick={handleCreate}
-                className="theme-admin-button-primary w-full rounded-2xl px-5 py-3 font-medium transition hover:opacity-95 disabled:opacity-60"
-              >
-                Crea news
-              </button>
+                <input
+                  value={createForm.source_url}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      source_url: e.target.value,
+                    }))
+                  }
+                  placeholder="Link fonte opzionale"
+                  className="theme-admin-input w-full rounded-2xl px-4 py-3"
+                />
+
+                <input
+                  value={createForm.external_url}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      external_url: e.target.value,
+                    }))
+                  }
+                  placeholder="Link esterno opzionale"
+                  className="theme-admin-input w-full rounded-2xl px-4 py-3"
+                />
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <select
+                    value={createForm.status}
+                    onChange={(e) =>
+                      setCreateForm((prev) => ({ ...prev, status: e.target.value }))
+                    }
+                    className="theme-admin-select w-full rounded-2xl px-4 py-3"
+                  >
+                    <option value="published">Pubblicata</option>
+                    <option value="draft">Bozza</option>
+                  </select>
+
+                  <input
+                    type="number"
+                    value={createForm.sort_order}
+                    onChange={(e) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        sort_order: e.target.value,
+                      }))
+                    }
+                    placeholder="Ordine"
+                    className="theme-admin-input w-full rounded-2xl px-4 py-3"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={handleCreate}
+                  className="theme-admin-button-primary w-full rounded-2xl px-5 py-3 font-medium transition hover:opacity-95 disabled:opacity-60"
+                >
+                  Crea news
+                </button>
+              </div>
             </div>
           </div>
 
