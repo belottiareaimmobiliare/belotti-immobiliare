@@ -184,9 +184,6 @@ export default function AdminNewsManager({ items, settings }: Props) {
   const [facebookForm, setFacebookForm] = useState({
     facebook_page_url: settings?.facebook_page_url || '',
     facebook_page_name: settings?.facebook_page_name || '',
-    facebook_page_id: settings?.facebook_page_id || '',
-    facebook_access_token: settings?.facebook_access_token || '',
-    facebook_sync_enabled: settings?.facebook_sync_enabled ?? false,
   })
 
   const [createForm, setCreateForm] = useState({
@@ -234,16 +231,16 @@ export default function AdminNewsManager({ items, settings }: Props) {
 
   const handleSaveFacebookSettings = () => {
     startTransition(async () => {
+      const payload = {
+        facebook_page_url: facebookForm.facebook_page_url.trim() || null,
+        facebook_page_name: facebookForm.facebook_page_name.trim() || null,
+        facebook_sync_enabled: false,
+        last_sync_status: 'manual_only',
+        last_sync_message: 'Import Facebook gestito tramite link manuale.',
+      }
+
       if (!settings?.id) {
-        const { error } = await supabase.from('news_settings').insert({
-          facebook_page_url: facebookForm.facebook_page_url.trim() || null,
-          facebook_page_name: facebookForm.facebook_page_name.trim() || null,
-          facebook_page_id: facebookForm.facebook_page_id.trim() || null,
-          facebook_access_token: facebookForm.facebook_access_token.trim() || null,
-          facebook_sync_enabled: facebookForm.facebook_sync_enabled,
-          last_sync_status: 'manual_only',
-          last_sync_message: 'Import Facebook gestito tramite link manuale.',
-        })
+        const { error } = await supabase.from('news_settings').insert(payload)
 
         if (error) {
           alert(error.message)
@@ -256,15 +253,7 @@ export default function AdminNewsManager({ items, settings }: Props) {
 
       const { error } = await supabase
         .from('news_settings')
-        .update({
-          facebook_page_url: facebookForm.facebook_page_url.trim() || null,
-          facebook_page_name: facebookForm.facebook_page_name.trim() || null,
-          facebook_page_id: facebookForm.facebook_page_id.trim() || null,
-          facebook_access_token: facebookForm.facebook_access_token.trim() || null,
-          facebook_sync_enabled: facebookForm.facebook_sync_enabled,
-          last_sync_status: 'manual_only',
-          last_sync_message: 'Import Facebook gestito tramite link manuale.',
-        })
+        .update(payload)
         .eq('id', settings.id)
 
       if (error) {
@@ -532,7 +521,7 @@ export default function AdminNewsManager({ items, settings }: Props) {
             Configurazione Facebook
           </p>
 
-          <div className="mt-5 grid gap-4 xl:grid-cols-2">
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
             <input
               value={facebookForm.facebook_page_url}
               onChange={(e) =>
@@ -556,100 +545,22 @@ export default function AdminNewsManager({ items, settings }: Props) {
               placeholder="Nome pagina Facebook"
               className="theme-admin-input w-full rounded-2xl px-4 py-3"
             />
-
-            <input
-              value={facebookForm.facebook_page_id}
-              onChange={(e) =>
-                setFacebookForm((prev) => ({
-                  ...prev,
-                  facebook_page_id: e.target.value,
-                }))
-              }
-              placeholder="Facebook Page ID"
-              className="theme-admin-input w-full rounded-2xl px-4 py-3"
-            />
-
-            <input
-              value={facebookForm.facebook_access_token}
-              onChange={(e) =>
-                setFacebookForm((prev) => ({
-                  ...prev,
-                  facebook_access_token: e.target.value,
-                }))
-              }
-              placeholder="Facebook Access Token"
-              className="theme-admin-input w-full rounded-2xl px-4 py-3"
-            />
           </div>
 
-          <div className="mt-4 grid gap-4 xl:grid-cols-[220px_auto]">
-            <select
-              value={facebookForm.facebook_sync_enabled ? 'true' : 'false'}
-              onChange={(e) =>
-                setFacebookForm((prev) => ({
-                  ...prev,
-                  facebook_sync_enabled: e.target.value === 'true',
-                }))
-              }
-              className="theme-admin-select w-full rounded-2xl px-4 py-3"
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={handleSaveFacebookSettings}
+              disabled={isPending}
+              className="theme-admin-button-primary rounded-2xl px-5 py-3 font-medium transition hover:opacity-95 disabled:opacity-60"
             >
-              <option value="false">Import manuale</option>
-              <option value="true">Import manuale</option>
-            </select>
-
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={handleSaveFacebookSettings}
-                disabled={isPending}
-                className="theme-admin-button-primary rounded-2xl px-5 py-3 font-medium transition hover:opacity-95 disabled:opacity-60"
-              >
-                Salva config
-              </button>
-
-              <button
-                type="button"
-                disabled
-                className="theme-admin-button-secondary rounded-2xl px-5 py-3 font-medium opacity-60"
-                title="Sync automatica disattivata: importiamo tramite link"
-              >
-                Sync automatica non attiva
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-5 grid gap-3 md:grid-cols-3">
-            <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
-              <p className="theme-admin-faint text-xs uppercase tracking-[0.18em]">
-                Ultima sync
-              </p>
-              <p className="mt-2 text-sm text-[var(--site-text)]">
-                {settings?.last_sync_at ? formatDate(settings.last_sync_at) : 'Mai eseguita'}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
-              <p className="theme-admin-faint text-xs uppercase tracking-[0.18em]">
-                Stato
-              </p>
-              <p className="mt-2 text-sm text-[var(--site-text)]">
-                {settings?.last_sync_status || 'manual_only'}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
-              <p className="theme-admin-faint text-xs uppercase tracking-[0.18em]">
-                Messaggio
-              </p>
-              <p className="mt-2 text-sm text-[var(--site-text-muted)]">
-                {settings?.last_sync_message || 'Import Facebook gestito tramite link manuale.'}
-              </p>
-            </div>
+              Salva config
+            </button>
           </div>
 
           <p className="theme-admin-muted mt-4 text-sm">
-            La sincronizzazione automatica Meta è stata messa in pausa. Da qui
-            salvi solo i dati della pagina e usi l’import manuale tramite link post.
+            La pagina Facebook viene collegata a livello informativo e come fonte.
+            I post vengono importati manualmente tramite link.
           </p>
         </div>
 
