@@ -39,8 +39,17 @@ type NewsItem = {
   news_media?: NewsMediaItem[]
 }
 
+type NewsAuthor = {
+  id: string
+  full_name: string
+  is_active: boolean
+  sort_order: number
+  created_at: string
+}
+
 type Props = {
   items: NewsItem[]
+  authors: NewsAuthor[]
 }
 
 type ViewMode = 'cards' | 'list'
@@ -51,13 +60,6 @@ type FilterMode =
   | 'pinned'
   | 'facebook'
   | 'manual'
-
-const AUTHORS = [
-  'Gianfederico Belotti',
-  "Omar Martalo'",
-  'Francesca',
-  'Area Immobiliare',
-]
 
 function slugify(value: string) {
   return value
@@ -136,7 +138,7 @@ function matchesSearch(item: NewsItem, search: string) {
   return haystack.includes(q)
 }
 
-export default function AdminNewsManager({ items }: Props) {
+export default function AdminNewsManager({ items, authors }: Props) {
   const supabase = createClient()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -146,11 +148,16 @@ export default function AdminNewsManager({ items }: Props) {
   const [searchTerm, setSearchTerm] = useState('')
   const [draggedId, setDraggedId] = useState<string | null>(null)
 
+  const defaultAuthorName =
+    authors.find((author) => author.full_name === 'Area Immobiliare')?.full_name ||
+    authors[0]?.full_name ||
+    'Area Immobiliare'
+
   const [createForm, setCreateForm] = useState({
     title: '',
     brief: '',
     content: '',
-    author_name: 'Area Immobiliare',
+    author_name: defaultAuthorName,
     source_name: '',
     source_url: '',
     external_url: '',
@@ -216,7 +223,7 @@ export default function AdminNewsManager({ items }: Props) {
         title: '',
         brief: '',
         content: '',
-        author_name: 'Area Immobiliare',
+        author_name: defaultAuthorName,
         source_name: '',
         source_url: '',
         external_url: '',
@@ -418,9 +425,9 @@ export default function AdminNewsManager({ items }: Props) {
                 }
                 className="theme-admin-select w-full rounded-2xl px-4 py-3"
               >
-                {AUTHORS.map((author) => (
-                  <option key={author} value={author}>
-                    {author}
+                {authors.map((author) => (
+                  <option key={author.id} value={author.full_name}>
+                    {author.full_name}
                   </option>
                 ))}
               </select>
@@ -600,6 +607,7 @@ export default function AdminNewsManager({ items }: Props) {
               <NewsRow
                 key={item.id}
                 item={item}
+                authors={authors}
                 onUpdate={handleUpdate}
                 onDelete={handleDelete}
               />
@@ -723,10 +731,12 @@ export default function AdminNewsManager({ items }: Props) {
 
 function NewsRow({
   item,
+  authors,
   onUpdate,
   onDelete,
 }: {
   item: NewsItem
+  authors: NewsAuthor[]
   onUpdate: (item: NewsItem, updates: Partial<NewsItem>) => void
   onDelete: (id: string) => void
 }) {
@@ -748,7 +758,7 @@ function NewsRow({
     title: item.title || '',
     brief: item.brief || '',
     content: item.content || '',
-    author_name: item.author_name || 'Area Immobiliare',
+    author_name: item.author_name || authors[0]?.full_name || 'Area Immobiliare',
     source_name: item.source_name || '',
     source_url: item.source_url || '',
     external_url: item.external_url || '',
@@ -1030,9 +1040,9 @@ function NewsRow({
               }
               className="theme-admin-select w-full rounded-2xl px-4 py-3"
             >
-              {AUTHORS.map((author) => (
-                <option key={author} value={author}>
-                  {author}
+              {authors.map((author) => (
+                <option key={author.id} value={author.full_name}>
+                  {author.full_name}
                 </option>
               ))}
             </select>
