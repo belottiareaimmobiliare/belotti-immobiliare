@@ -197,6 +197,27 @@ function isFacebookUrl(value: string) {
   return /facebook\.com|fb\.watch/i.test(clean)
 }
 
+function buildFacebookImportDefaults(pageName: string) {
+  const now = new Date()
+  const dateLabel = now.toLocaleDateString('it-IT', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  })
+
+  const safePageName = pageName.trim() || 'Facebook'
+
+  return {
+    title: `Post da ${safePageName} · ${dateLabel}`,
+    brief: `Contenuto importato dalla pagina Facebook ${safePageName}. Apri il post originale per vedere il contenuto completo pubblicato sul social.`,
+    content: `
+<p>Questo contenuto è stato importato dalla pagina Facebook <strong>${safePageName}</strong>.</p>
+<p>Per leggere o visualizzare il post originale completo, usa il link esterno collegato a questa news.</p>
+<p>Questa scheda può essere arricchita dal gestionale con titolo definitivo, testo completo e immagini dedicate.</p>
+`.trim(),
+  }
+}
+
 export default function AdminNewsManager({ items, settings }: Props) {
   const supabase = createClient()
   const router = useRouter()
@@ -347,18 +368,19 @@ export default function AdminNewsManager({ items, settings }: Props) {
 
     startTransition(async () => {
       const postId = extractFacebookPostId(postUrl)
-      const fallbackTitle = 'Post Facebook importato'
-      const slug = `${slugify(fallbackTitle)}-${Date.now()}`
+      const pageName = facebookForm.facebook_page_name.trim() || 'Facebook'
+      const defaults = buildFacebookImportDefaults(pageName)
+      const slug = `${slugify(defaults.title)}-${Date.now()}`
 
       const { error } = await supabase.from('news_items').insert({
         source_type: 'facebook',
         facebook_post_id: postId,
         slug,
-        title: fallbackTitle,
-        brief: null,
-        content: null,
-        author_name: facebookForm.facebook_page_name.trim() || 'Area Immobiliare',
-        source_name: facebookForm.facebook_page_name.trim() || 'Facebook',
+        title: defaults.title,
+        brief: defaults.brief,
+        content: defaults.content,
+        author_name: pageName,
+        source_name: pageName,
         source_url: facebookForm.facebook_page_url.trim() || null,
         external_url: postUrl,
         image_url: null,
@@ -366,8 +388,8 @@ export default function AdminNewsManager({ items, settings }: Props) {
         is_pinned: false,
         pin_order: null,
         sort_order: 0,
-        status: 'draft',
-        published_at: null,
+        status: 'published',
+        published_at: new Date().toISOString(),
       })
 
       if (error) {
@@ -431,7 +453,9 @@ export default function AdminNewsManager({ items, settings }: Props) {
         sort_order: (index + 1) * 10,
       }))
 
-      const reorderedMap = new Map(reorderedVisible.map((item) => [item.id, item]))
+      const reorderedMap = new Map(
+        reorderedVisible.map((item) => [item.id, item])
+      )
 
       const finalList = completeList.map((item) =>
         visibleIds.includes(item.id) ? reorderedMap.get(item.id)! : item
@@ -471,7 +495,10 @@ export default function AdminNewsManager({ items, settings }: Props) {
     const nextIndex = currentIndex + direction
     if (nextIndex < 0 || nextIndex >= list.length) return
 
-    ;[list[currentIndex], list[nextIndex]] = [list[nextIndex], list[currentIndex]]
+    ;[list[currentIndex], list[nextIndex]] = [
+      list[nextIndex],
+      list[currentIndex],
+    ]
     persistOrderedList(list)
   }
 
@@ -587,9 +614,9 @@ export default function AdminNewsManager({ items, settings }: Props) {
               </div>
 
               <p className="theme-admin-muted mt-4 text-sm leading-7">
-                L’import crea una bozza Facebook già collegata alla pagina fonte.
-                Dopo l’import la completi dalla lista news con titolo, testo,
-                immagini e ordine.
+                L’import crea subito una news Facebook pubblicata, già collegata
+                alla pagina fonte. Dopo l’import puoi rifinirla dalla lista news
+                con testo definitivo, immagini e ordine.
               </p>
             </div>
 
@@ -602,7 +629,10 @@ export default function AdminNewsManager({ items, settings }: Props) {
                 <input
                   value={createForm.title}
                   onChange={(e) =>
-                    setCreateForm((prev) => ({ ...prev, title: e.target.value }))
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      title: e.target.value,
+                    }))
                   }
                   placeholder="Titolo news"
                   className="theme-admin-input w-full rounded-2xl px-4 py-3"
@@ -611,7 +641,10 @@ export default function AdminNewsManager({ items, settings }: Props) {
                 <input
                   value={createForm.brief}
                   onChange={(e) =>
-                    setCreateForm((prev) => ({ ...prev, brief: e.target.value }))
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      brief: e.target.value,
+                    }))
                   }
                   placeholder="Brief / occhiello"
                   className="theme-admin-input w-full rounded-2xl px-4 py-3"
@@ -620,7 +653,10 @@ export default function AdminNewsManager({ items, settings }: Props) {
                 <RichTextEditor
                   value={createForm.content}
                   onChange={(value) =>
-                    setCreateForm((prev) => ({ ...prev, content: value }))
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      content: value,
+                    }))
                   }
                   placeholder="Testo completo della news"
                 />
@@ -682,7 +718,10 @@ export default function AdminNewsManager({ items, settings }: Props) {
                   <select
                     value={createForm.status}
                     onChange={(e) =>
-                      setCreateForm((prev) => ({ ...prev, status: e.target.value }))
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        status: e.target.value,
+                      }))
                     }
                     className="theme-admin-select w-full rounded-2xl px-4 py-3"
                   >
