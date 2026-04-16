@@ -149,26 +149,52 @@ function matchesSearch(item: NewsItem, search: string) {
   return haystack.includes(q)
 }
 
-function extractFacebookPostId(url: string) {
-  const clean = url.trim()
+function normalizeFacebookInput(value: string) {
+  const raw = value.trim()
 
-  const storyMatch = clean.match(/story_fbid=(\d+)/i)
+  if (!raw) return ''
+
+  if (raw.includes('<iframe')) {
+    const srcMatch = raw.match(/src="([^"]+)"/i)
+    if (!srcMatch?.[1]) return raw
+
+    try {
+      const srcUrl = new URL(srcMatch[1])
+      const href = srcUrl.searchParams.get('href')
+      if (!href) return srcMatch[1]
+      return decodeURIComponent(href)
+    } catch {
+      return srcMatch[1]
+    }
+  }
+
+  return raw
+}
+
+function extractFacebookPostId(value: string) {
+  const clean = normalizeFacebookInput(value)
+
+  const storyMatch = clean.match(/story_fbid=([A-Za-z0-9_-]+)/i)
   if (storyMatch?.[1]) return storyMatch[1]
 
-  const postsMatch = clean.match(/\/posts\/(\d+)/i)
+  const postIdMatch = clean.match(/[?&]fbid=(\d+)/i)
+  if (postIdMatch?.[1]) return postIdMatch[1]
+
+  const postsMatch = clean.match(/\/posts\/([A-Za-z0-9_-]+)/i)
   if (postsMatch?.[1]) return postsMatch[1]
 
-  const videosMatch = clean.match(/\/videos\/(\d+)/i)
+  const videosMatch = clean.match(/\/videos\/([A-Za-z0-9_-]+)/i)
   if (videosMatch?.[1]) return videosMatch[1]
 
-  const reelsMatch = clean.match(/\/reel\/(\d+)/i)
+  const reelsMatch = clean.match(/\/reel\/([A-Za-z0-9_-]+)/i)
   if (reelsMatch?.[1]) return reelsMatch[1]
 
   return null
 }
 
-function isFacebookUrl(url: string) {
-  return /facebook\.com|fb\.watch/i.test(url)
+function isFacebookUrl(value: string) {
+  const clean = normalizeFacebookInput(value)
+  return /facebook\.com|fb\.watch/i.test(clean)
 }
 
 export default function AdminNewsManager({ items, settings }: Props) {
@@ -307,7 +333,7 @@ export default function AdminNewsManager({ items, settings }: Props) {
   }
 
   const handleImportFacebookLink = () => {
-    const postUrl = facebookImportUrl.trim()
+    const postUrl = normalizeFacebookInput(facebookImportUrl)
 
     if (!postUrl) {
       alert('Incolla il link del post Facebook.')
@@ -546,7 +572,7 @@ export default function AdminNewsManager({ items, settings }: Props) {
                 <input
                   value={facebookImportUrl}
                   onChange={(e) => setFacebookImportUrl(e.target.value)}
-                  placeholder="Incolla il link del post Facebook"
+                  placeholder="Incolla il link del post Facebook o l'iframe embed"
                   className="theme-admin-input w-full rounded-2xl px-4 py-3"
                 />
 
