@@ -613,16 +613,9 @@ export default function AdminNewsManager({ items, authors }: Props) {
               />
             ))
           ) : (
-            <div className="theme-admin-card overflow-hidden rounded-3xl">
-              <div className="grid grid-cols-[52px_minmax(0,1fr)_160px_110px_160px] gap-4 border-b border-[var(--site-border)] px-5 py-4 text-xs uppercase tracking-[0.18em] text-[var(--site-text-faint)]">
-                <div />
-                <div>Titolo</div>
-                <div>Data</div>
-                <div>Stato</div>
-                <div>Ordine</div>
-              </div>
-
-              <div className="divide-y divide-[var(--site-border)]">
+            <>
+              {/* MOBILE */}
+              <div className="space-y-4 lg:hidden">
                 {filteredItems.map((item, index) => (
                   <div
                     key={item.id}
@@ -630,98 +623,217 @@ export default function AdminNewsManager({ items, authors }: Props) {
                     onDragStart={() => setDraggedId(item.id)}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={() => handleDropReorder(item.id)}
-                    className={`grid grid-cols-[52px_minmax(0,1fr)_160px_110px_160px] gap-4 px-5 py-4 transition ${
+                    className={`theme-admin-card rounded-3xl p-4 transition ${
                       draggedId === item.id
                         ? 'bg-[var(--site-surface-3)]'
-                        : 'hover:bg-[var(--site-surface-2)]'
+                        : ''
                     }`}
                   >
-                    <div className="flex items-center">
+                    <div className="flex items-start gap-3">
                       <button
                         type="button"
-                        className="theme-admin-button-secondary flex h-10 w-10 cursor-grab items-center justify-center rounded-xl text-sm"
+                        className="theme-admin-button-secondary flex h-10 w-10 shrink-0 cursor-grab items-center justify-center rounded-xl text-sm"
                         title="Trascina per riordinare"
                       >
                         ⋮⋮
                       </button>
-                    </div>
 
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-3">
-                        <p className="truncate text-sm font-medium text-[var(--site-text)]">
-                          {item.title || 'News senza titolo'}
-                        </p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="min-w-0 text-sm font-medium text-[var(--site-text)]">
+                            {item.title || 'News senza titolo'}
+                          </p>
 
-                        {item.slug && (
-                          <a
-                            href={`/news/${item.slug}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="theme-admin-button-secondary rounded-xl px-3 py-1.5 text-xs"
+                          {item.slug && (
+                            <a
+                              href={`/news/${item.slug}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="theme-admin-button-secondary rounded-xl px-3 py-1.5 text-xs"
+                            >
+                              Apri
+                            </a>
+                          )}
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <span className="theme-admin-chip rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.16em]">
+                            {item.source_type}
+                          </span>
+
+                          <span className="theme-admin-chip rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.16em]">
+                            {item.status}
+                          </span>
+
+                          {item.is_pinned && (
+                            <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-amber-300">
+                              Pinnata
+                            </span>
+                          )}
+
+                          {item.is_visible ? (
+                            <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-emerald-300">
+                              Visibile
+                            </span>
+                          ) : (
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--site-text-faint)]">
+                              Nascosta
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                          <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-3">
+                            <p className="theme-admin-muted">Data</p>
+                            <p className="mt-1 text-[var(--site-text)]">
+                              {formatDate(item.published_at || item.created_at)}
+                            </p>
+                          </div>
+
+                          <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-3">
+                            <p className="theme-admin-muted">Ordine</p>
+                            <p className="mt-1 text-[var(--site-text)]">
+                              {item.sort_order ?? 0}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => moveItem(item.id, -1)}
+                            disabled={isPending || index === 0}
+                            className="theme-admin-button-secondary rounded-xl px-3 py-2 text-xs disabled:opacity-50"
                           >
-                            Apri
-                          </a>
-                        )}
+                            ↑
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => moveItem(item.id, 1)}
+                            disabled={isPending || index === filteredItems.length - 1}
+                            className="theme-admin-button-secondary rounded-xl px-3 py-2 text-xs disabled:opacity-50"
+                          >
+                            ↓
+                          </button>
+                        </div>
                       </div>
-
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        <span className="theme-admin-chip rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.16em]">
-                          {item.source_type}
-                        </span>
-
-                        {item.is_pinned && (
-                          <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-amber-300">
-                            Pinnata
-                          </span>
-                        )}
-
-                        {item.is_visible ? (
-                          <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-emerald-300">
-                            Visibile
-                          </span>
-                        ) : (
-                          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--site-text-faint)]">
-                            Nascosta
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="text-sm text-[var(--site-text-muted)]">
-                      {formatDate(item.published_at || item.created_at)}
-                    </div>
-
-                    <div className="text-sm text-[var(--site-text-soft)]">
-                      {item.status}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => moveItem(item.id, -1)}
-                        disabled={isPending || index === 0}
-                        className="theme-admin-button-secondary rounded-xl px-3 py-2 text-xs disabled:opacity-50"
-                      >
-                        ↑
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => moveItem(item.id, 1)}
-                        disabled={isPending || index === filteredItems.length - 1}
-                        className="theme-admin-button-secondary rounded-xl px-3 py-2 text-xs disabled:opacity-50"
-                      >
-                        ↓
-                      </button>
-
-                      <span className="min-w-[34px] text-center text-xs text-[var(--site-text-faint)]">
-                        {item.sort_order ?? 0}
-                      </span>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+
+              {/* DESKTOP */}
+              <div className="theme-admin-card hidden overflow-hidden rounded-3xl lg:block">
+                <div className="grid grid-cols-[52px_minmax(0,1fr)_160px_110px_160px] gap-4 border-b border-[var(--site-border)] px-5 py-4 text-xs uppercase tracking-[0.18em] text-[var(--site-text-faint)]">
+                  <div />
+                  <div>Titolo</div>
+                  <div>Data</div>
+                  <div>Stato</div>
+                  <div>Ordine</div>
+                </div>
+
+                <div className="divide-y divide-[var(--site-border)]">
+                  {filteredItems.map((item, index) => (
+                    <div
+                      key={item.id}
+                      draggable
+                      onDragStart={() => setDraggedId(item.id)}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={() => handleDropReorder(item.id)}
+                      className={`grid grid-cols-[52px_minmax(0,1fr)_160px_110px_160px] gap-4 px-5 py-4 transition ${
+                        draggedId === item.id
+                          ? 'bg-[var(--site-surface-3)]'
+                          : 'hover:bg-[var(--site-surface-2)]'
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <button
+                          type="button"
+                          className="theme-admin-button-secondary flex h-10 w-10 cursor-grab items-center justify-center rounded-xl text-sm"
+                          title="Trascina per riordinare"
+                        >
+                          ⋮⋮
+                        </button>
+                      </div>
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-3">
+                          <p className="truncate text-sm font-medium text-[var(--site-text)]">
+                            {item.title || 'News senza titolo'}
+                          </p>
+
+                          {item.slug && (
+                            <a
+                              href={`/news/${item.slug}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="theme-admin-button-secondary rounded-xl px-3 py-1.5 text-xs"
+                            >
+                              Apri
+                            </a>
+                          )}
+                        </div>
+
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <span className="theme-admin-chip rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.16em]">
+                            {item.source_type}
+                          </span>
+
+                          {item.is_pinned && (
+                            <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-amber-300">
+                              Pinnata
+                            </span>
+                          )}
+
+                          {item.is_visible ? (
+                            <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-emerald-300">
+                              Visibile
+                            </span>
+                          ) : (
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--site-text-faint)]">
+                              Nascosta
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="text-sm text-[var(--site-text-muted)]">
+                        {formatDate(item.published_at || item.created_at)}
+                      </div>
+
+                      <div className="text-sm text-[var(--site-text-soft)]">
+                        {item.status}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => moveItem(item.id, -1)}
+                          disabled={isPending || index === 0}
+                          className="theme-admin-button-secondary rounded-xl px-3 py-2 text-xs disabled:opacity-50"
+                        >
+                          ↑
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => moveItem(item.id, 1)}
+                          disabled={isPending || index === filteredItems.length - 1}
+                          className="theme-admin-button-secondary rounded-xl px-3 py-2 text-xs disabled:opacity-50"
+                        >
+                          ↓
+                        </button>
+
+                        <span className="min-w-[34px] text-center text-xs text-[var(--site-text-faint)]">
+                          {item.sort_order ?? 0}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>
