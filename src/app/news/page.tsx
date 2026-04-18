@@ -165,7 +165,7 @@ export default async function NewsPage() {
             News
           </p>
 
-          <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight md:text-5xl text-[var(--site-text)]">
+          <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight text-[var(--site-text)] md:text-5xl">
             Aggiornamenti e contenuti dal mondo immobiliare
           </h1>
 
@@ -173,6 +173,50 @@ export default async function NewsPage() {
             Approfondimenti, contenuti editoriali, aggiornamenti e post selezionati
             per seguire il contesto immobiliare con una lettura più ordinata e utile.
           </p>
+
+          <div className="mt-8">
+            <p className="text-sm text-[var(--site-text-muted)] md:text-base">
+              Seguici sui social per rimanere aggiornato sulle ultime news
+            </p>
+
+            <div className="mt-4 flex items-center gap-3">
+              <a
+                href="https://www.facebook.com/profile.php?id=61569251094453"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Facebook Area Immobiliare | Consigli Immobiliari e dintorni"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition hover:scale-[1.04] hover:border-white/25 hover:bg-white/10"
+                title="Area Immobiliare | Consigli Immobiliari e dintorni"
+              >
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-5 w-5 fill-current"
+                >
+                  <path d="M13.5 22v-8h2.7l.4-3h-3.1V9.1c0-.9.3-1.6 1.7-1.6H16.7V4.8c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V11H8v3h2.5v8h3z" />
+                </svg>
+              </a>
+
+              <span className="text-base text-white/40">|</span>
+
+              <a
+                href="https://www.tiktok.com/@consigli.immobili"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="TikTok Consigli Immobiliari AI"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition hover:scale-[1.04] hover:border-white/25 hover:bg-white/10"
+                title="Consigli Immobiliari AI"
+              >
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-5 w-5 fill-current"
+                >
+                  <path d="M16.6 3c.2 1.6 1.1 3 2.4 3.8.8.5 1.6.8 2.5.9v2.7c-1.3 0-2.7-.4-3.9-1.1v5.7c0 1.6-.6 3.1-1.8 4.2A6.2 6.2 0 0 1 11.5 21a6 6 0 0 1-4.2-1.7A6 6 0 0 1 5.6 15c0-3.3 2.7-6 6-6 .3 0 .7 0 1 .1v2.9a3.2 3.2 0 0 0-1-.2 3.2 3.2 0 1 0 3.2 3.2V3h2.8z" />
+                </svg>
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
