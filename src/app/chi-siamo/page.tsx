@@ -22,7 +22,7 @@ export default function ChiSiamoPage() {
               />
             </div>
 
-            <div className="mt-5 flex items-center justify-center gap-3 self-center lg:self-start">
+            <div className="mt-5 flex w-[270px] items-center justify-center gap-3">
               <a
                 href="https://www.facebook.com/profile.php?id=61569251094453"
                 target="_blank"
