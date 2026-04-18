@@ -47,9 +47,55 @@ export default function Footer() {
         ))}
       </div>
 
+      <div className="mt-10 block xl:hidden">
+        <p className="text-[11px] uppercase tracking-[0.26em] text-white/30">
+          Social
+        </p>
+
+        <div className="mt-4 flex flex-col gap-4 text-base text-white/72">
+          <a
+            href="https://www.facebook.com/profile.php?id=61569251094453"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-3 transition hover:text-white"
+            aria-label="Facebook AreaImmobiliare_BG"
+          >
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="h-4.5 w-4.5 fill-current"
+              >
+                <path d="M13.5 22v-8h2.7l.4-3h-3.1V9.1c0-.9.3-1.6 1.7-1.6H16.7V4.8c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V11H8v3h2.5v8h3z" />
+              </svg>
+            </span>
+            <span>/AreaImmobiliare_BG</span>
+          </a>
+
+          <a
+            href="https://www.tiktok.com/@consigli.immobili"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-3 transition hover:text-white"
+            aria-label="TikTok @AreaImmobiliare_BG"
+          >
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="h-4.5 w-4.5 fill-current"
+              >
+                <path d="M16.6 3c.2 1.6 1.1 3 2.4 3.8.8.5 1.6.8 2.5.9v2.7c-1.3 0-2.7-.4-3.9-1.1v5.7c0 1.6-.6 3.1-1.8 4.2A6.2 6.2 0 0 1 11.5 21a6 6 0 0 1-4.2-1.7A6 6 0 0 1 5.6 15c0-3.3 2.7-6 6-6 .3 0 .7 0 1 .1v2.9a3.2 3.2 0 0 0-1-.2 3.2 3.2 0 1 0 3.2 3.2V3h2.8z" />
+              </svg>
+            </span>
+            <span>/@AreaImmobiliare_BG</span>
+          </a>
+        </div>
+      </div>
+
       <div className="mt-12 h-px w-full bg-white/10" />
 
-      <div className="mt-12 grid gap-12 xl:grid-cols-4">
+      <div className="mt-12 grid gap-12 xl:grid-cols-5">
         <div>
           <p className="text-[11px] uppercase tracking-[0.26em] text-white/30">
             Brand
@@ -106,6 +152,51 @@ export default function Footer() {
             >
               Modifica preferenze cookie
             </button>
+          </div>
+        </div>
+
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.26em] text-white/30">
+            Social
+          </p>
+          <div className="mt-4 hidden flex-col gap-4 text-base text-white/72 xl:flex">
+            <a
+              href="https://www.facebook.com/profile.php?id=61569251094453"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-3 transition hover:text-white"
+              aria-label="Facebook AreaImmobiliare_BG"
+            >
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-4.5 w-4.5 fill-current"
+                >
+                  <path d="M13.5 22v-8h2.7l.4-3h-3.1V9.1c0-.9.3-1.6 1.7-1.6H16.7V4.8c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V11H8v3h2.5v8h3z" />
+                </svg>
+              </span>
+              <span>/AreaImmobiliare_BG</span>
+            </a>
+
+            <a
+              href="https://www.tiktok.com/@consigli.immobili"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-3 transition hover:text-white"
+              aria-label="TikTok @AreaImmobiliare_BG"
+            >
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-4.5 w-4.5 fill-current"
+                >
+                  <path d="M16.6 3c.2 1.6 1.1 3 2.4 3.8.8.5 1.6.8 2.5.9v2.7c-1.3 0-2.7-.4-3.9-1.1v5.7c0 1.6-.6 3.1-1.8 4.2A6.2 6.2 0 0 1 11.5 21a6 6 0 0 1-4.2-1.7A6 6 0 0 1 5.6 15c0-3.3 2.7-6 6-6 .3 0 .7 0 1 .1v2.9a3.2 3.2 0 0 0-1-.2 3.2 3.2 0 1 0 3.2 3.2V3h2.8z" />
+                </svg>
+              </span>
+              <span>/@AreaImmobiliare_BG</span>
+            </a>
           </div>
         </div>
 
