@@ -114,13 +114,12 @@ export default function HomeHero() {
             </p>
 
             <h1 className="mt-6 max-w-[900px] text-5xl font-semibold leading-[0.98] text-white md:text-7xl xl:text-[5.5rem]">
-              Bergamo, case e scelte immobiliari lette con esperienza vera.
+              Vendere, comprare o affittare casa a Bergamo con più chiarezza e meno stress.
             </h1>
 
             <p className="mt-7 max-w-[760px] text-base leading-8 text-white/88 [text-shadow:0_2px_4px_rgba(0,0,0,0.6)] md:text-lg xl:text-[1.15rem]">
-              Un approccio più chiaro, più solido e più umano alla compravendita e
-              alla locazione. Analisi, verifica e conoscenza del territorio per
-              trovare la soluzione giusta senza rumore inutile.
+              Ogni scelta immobiliare merita tempo, competenza e informazioni corrette:
+              per questo lavoriamo in modo chiaro, concreto e vicino alle persone.
             </p>
 
             <div className="mt-8 hidden flex-wrap gap-3 md:flex">
@@ -211,35 +210,35 @@ export default function HomeHero() {
                     </p>
                   </div>
 
-<Link
-  href="/immobili/mappa-area"
-  className="group relative overflow-hidden rounded-[26px] border border-white/18 bg-white/[0.10] shadow-[0_10px_28px_rgba(0,0,0,0.16)] backdrop-blur-sm transition hover:border-white/24"
->
-  <div
-    className="absolute inset-0 bg-cover bg-center opacity-100"
-    style={{ backgroundImage: "url('/images/bergamo-map.jpg')" }}
-  />
-  <div className="absolute inset-0 bg-white/68 backdrop-blur-[4px]" />
-  <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.42)_0%,rgba(255,255,255,0.18)_100%)]" />
+                  <Link
+                    href="/immobili/mappa-area"
+                    className="group relative overflow-hidden rounded-[26px] border border-white/18 bg-white/[0.10] shadow-[0_10px_28px_rgba(0,0,0,0.16)] backdrop-blur-sm transition hover:border-white/24"
+                  >
+                    <div
+                      className="absolute inset-0 bg-cover bg-center opacity-100"
+                      style={{ backgroundImage: "url('/images/bergamo-map.jpg')" }}
+                    />
+                    <div className="absolute inset-0 bg-white/68 backdrop-blur-[4px]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.42)_0%,rgba(255,255,255,0.18)_100%)]" />
 
-  <div className="relative flex h-full min-h-[220px] flex-col justify-between p-5">
-    <div>
-      <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-black/60">
-        Mappa interattiva
-      </p>
-      <p className="mt-3 text-[2rem] font-semibold leading-tight text-black">
-        Vai alla mappa
-      </p>
-      <p className="mt-3 max-w-[220px] text-sm leading-7 text-black/68">
-        Apri la vista mappa completa e disegna la zona che vuoi analizzare.
-      </p>
-    </div>
+                    <div className="relative flex h-full min-h-[220px] flex-col justify-between p-5">
+                      <div>
+                        <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-black/60">
+                          Mappa interattiva
+                        </p>
+                        <p className="mt-3 text-[2rem] font-semibold leading-tight text-black">
+                          Vai alla mappa
+                        </p>
+                        <p className="mt-3 max-w-[220px] text-sm leading-7 text-black/68">
+                          Apri la vista mappa completa e disegna la zona che vuoi analizzare.
+                        </p>
+                      </div>
 
-    <div className="mt-6 inline-flex w-fit items-center rounded-full border border-black/10 bg-black px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(0,0,0,0.18)] transition group-hover:translate-x-0.5">
-      Apri
-    </div>
-  </div>
-</Link>
+                      <div className="mt-6 inline-flex w-fit items-center rounded-full border border-black/10 bg-black px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(0,0,0,0.18)] transition group-hover:translate-x-0.5">
+                        Apri
+                      </div>
+                    </div>
+                  </Link>
                 </div>
               </div>
             </div>

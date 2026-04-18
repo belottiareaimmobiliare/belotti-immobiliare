@@ -61,10 +61,10 @@ export default function HomeSearchBoxDesktop() {
             Cerca immobile
           </p>
           <h2 className="mt-2 text-3xl font-semibold text-[var(--site-text)]">
-            Trova il tuo spazio
+            Cerca la tua casa
           </h2>
           <p className="mt-2 text-sm text-[var(--site-text-muted)]">
-            Ricerca rapida, filtri reali e risultati già allineati al gestionale.
+            Filtri chiari, ricerca veloce e risultati utili per trovare più facilmente la soluzione giusta.
           </p>
         </div>
 

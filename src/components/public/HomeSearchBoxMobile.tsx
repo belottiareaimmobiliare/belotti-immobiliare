@@ -47,7 +47,7 @@ export default function HomeSearchBoxMobile() {
       </p>
 
       <h2 className="mt-2 text-2xl font-semibold text-[var(--site-text)]">
-        Trova il tuo spazio
+        Cerca la tua casa
       </h2>
 
       <p className="mt-2 text-sm text-[var(--site-text-muted)]">
