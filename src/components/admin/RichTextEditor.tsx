@@ -102,52 +102,54 @@ export default function RichTextEditor({
   }
 
   return (
-    <div className="theme-admin-card overflow-hidden rounded-2xl border">
-      <div className="flex flex-wrap gap-2 border-b border-[var(--site-border)] p-3">
-        <ToolbarButton
-          label="B"
-          active={editor.isActive('bold')}
-          onClick={() => editor.chain().focus().toggleBold().run()}
-        />
-        <ToolbarButton
-          label="I"
-          active={editor.isActive('italic')}
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-        />
-        <ToolbarButton
-          label="U"
-          active={editor.isActive('underline')}
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-        />
-        <ToolbarButton
-          label="Evidenzia"
-          active={editor.isActive('highlight')}
-          onClick={() => editor.chain().focus().toggleHighlight().run()}
-        />
-        <ToolbarButton
-          label="• Lista"
-          active={editor.isActive('bulletList')}
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-        />
-        <ToolbarButton
-          label="1. Lista"
-          active={editor.isActive('orderedList')}
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        />
-        <ToolbarButton
-          label="Link"
-          active={editor.isActive('link')}
-          onClick={setLink}
-        />
-        <ToolbarButton
-          label="Pulisci"
-          onClick={() =>
-            editor.chain().focus().unsetAllMarks().clearNodes().run()
-          }
-        />
+    <div className="theme-admin-card min-w-0 overflow-hidden rounded-2xl border">
+      <div className="min-w-0 overflow-x-auto border-b border-[var(--site-border)] p-3">
+        <div className="flex min-w-0 flex-wrap gap-2">
+          <ToolbarButton
+            label="B"
+            active={editor.isActive('bold')}
+            onClick={() => editor.chain().focus().toggleBold().run()}
+          />
+          <ToolbarButton
+            label="I"
+            active={editor.isActive('italic')}
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+          />
+          <ToolbarButton
+            label="U"
+            active={editor.isActive('underline')}
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+          />
+          <ToolbarButton
+            label="Evidenzia"
+            active={editor.isActive('highlight')}
+            onClick={() => editor.chain().focus().toggleHighlight().run()}
+          />
+          <ToolbarButton
+            label="• Lista"
+            active={editor.isActive('bulletList')}
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+          />
+          <ToolbarButton
+            label="1. Lista"
+            active={editor.isActive('orderedList')}
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          />
+          <ToolbarButton
+            label="Link"
+            active={editor.isActive('link')}
+            onClick={setLink}
+          />
+          <ToolbarButton
+            label="Pulisci"
+            onClick={() =>
+              editor.chain().focus().unsetAllMarks().clearNodes().run()
+            }
+          />
+        </div>
       </div>
 
-      <div className="relative">
+      <div className="relative min-w-0">
         {!value && (
           <div className="pointer-events-none absolute left-4 top-4 text-sm text-[var(--site-text-faint)]">
             {placeholder}

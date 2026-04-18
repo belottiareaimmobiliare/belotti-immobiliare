@@ -358,7 +358,7 @@ export default function AdminNewsManager({ items, authors }: Props) {
   }
 
   return (
-    <section className="text-[var(--site-text)]">
+    <section className="min-w-0 overflow-x-hidden text-[var(--site-text)]">
       <p className="theme-admin-faint text-sm uppercase tracking-[0.2em]">
         News
       </p>
@@ -372,8 +372,8 @@ export default function AdminNewsManager({ items, authors }: Props) {
         a 10 immagini per news.
       </p>
 
-      <div className="mt-8 grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
-        <div className="space-y-6">
+      <div className="mt-8 grid min-w-0 gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-6">
           <div className="theme-admin-card rounded-3xl p-6">
             <p className="theme-admin-faint text-xs uppercase tracking-[0.2em]">
               Nuova news manuale
@@ -509,7 +509,7 @@ export default function AdminNewsManager({ items, authors }: Props) {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <div className="theme-admin-card rounded-3xl p-6">
             <div className="grid gap-4 md:grid-cols-4">
               <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] p-4">
@@ -916,7 +916,7 @@ function NewsRow({
   }
 
   return (
-    <article className="theme-admin-card rounded-3xl p-6">
+    <article className="theme-admin-card min-w-0 rounded-3xl p-6">
       <div className="flex flex-wrap items-center gap-2">
         <span className="theme-admin-chip rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
           {item.source_type}
@@ -947,8 +947,8 @@ function NewsRow({
         </span>
       </div>
 
-      <div className="mt-5 grid gap-6 xl:grid-cols-[220px_minmax(0,1fr)]">
-        <div className="space-y-4">
+      <div className="mt-5 grid min-w-0 gap-6 xl:grid-cols-[220px_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-4">
           <div className="overflow-hidden rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)]">
             {cover ? (
               <div
@@ -1002,7 +1002,7 @@ function NewsRow({
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           <input
             value={form.title}
             onChange={(e) =>
