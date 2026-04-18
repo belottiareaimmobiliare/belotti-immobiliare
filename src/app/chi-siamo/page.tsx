@@ -22,7 +22,7 @@ export default function ChiSiamoPage() {
               />
             </div>
 
-            <div className="mt-5 flex items-center gap-3">
+            <div className="mt-5 flex items-center justify-center gap-3 self-center lg:self-start">
               <a
                 href="https://www.facebook.com/profile.php?id=61569251094453"
                 target="_blank"
@@ -39,6 +39,8 @@ export default function ChiSiamoPage() {
                   <path d="M13.5 22v-8h2.7l.4-3h-3.1V9.1c0-.9.3-1.6 1.7-1.6H16.7V4.8c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V11H8v3h2.5v8h3z" />
                 </svg>
               </a>
+
+              <span className="text-base text-[var(--site-text-faint)]">|</span>
 
               <a
                 href="https://www.tiktok.com/@consigli.immobili"
