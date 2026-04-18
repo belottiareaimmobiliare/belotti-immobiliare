@@ -1,5 +1,7 @@
 'use client'
 
+import ThemeToggle from '@/components/shared/ThemeToggle'
+
 type HeaderProps = {
   onOpenMobileMenu?: () => void
 }
@@ -26,6 +28,10 @@ export default function Header({ onOpenMobileMenu }: HeaderProps) {
               Area Immobiliare Admin
             </h1>
           </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
         </div>
       </div>
     </header>
