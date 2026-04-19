@@ -155,8 +155,8 @@ export default function PropertiesFiltersSidebar({
     const timeout = window.setTimeout(() => {
       const queryString = buildQueryString()
       router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
-  scroll: false,
-})
+        scroll: false,
+      })
       setIsAutoApplying(false)
     }, 1000)
 
@@ -244,8 +244,8 @@ export default function PropertiesFiltersSidebar({
     }
 
     router.replace(params.toString() ? `${pathname}?${params.toString()}` : pathname, {
-  scroll: false,
-})
+      scroll: false,
+    })
   }
 
   const handleResetMap = () => {
@@ -261,8 +261,8 @@ export default function PropertiesFiltersSidebar({
     setComuneSearch('')
 
     router.replace(params.toString() ? `${pathname}?${params.toString()}` : pathname, {
-  scroll: false,
-})
+      scroll: false,
+    })
   }
 
   return (
@@ -285,11 +285,11 @@ export default function PropertiesFiltersSidebar({
 
       {hideLocationFilters && (
         <div className="mt-4 space-y-3">
-          <div className="rounded-[24px] border border-[var(--site-border)] bg-[var(--site-surface-2)] px-4 py-3 text-sm text-[var(--site-text-soft)]">
-            <div className="font-medium text-[var(--site-text)]">
+          <div className="rounded-[24px] border border-sky-200/70 bg-sky-50/80 px-4 py-3 text-sm text-sky-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:border-sky-400/20 dark:bg-sky-500/10 dark:text-sky-100">
+            <div className="font-medium text-sky-900 dark:text-sky-100">
               Ricerca per area attiva
             </div>
-            <div className="mt-1 text-[var(--site-text-muted)]">
+            <div className="mt-1 text-sky-800/90 dark:text-sky-100/80">
               Stai visualizzando gli immobili contenuti nella zona che hai
               disegnato sulla mappa. I filtri di provincia e comuni sono nascosti
               per evitare conflitti con l’area selezionata.
