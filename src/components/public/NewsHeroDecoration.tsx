@@ -2,7 +2,7 @@ export default function NewsHeroDecoration() {
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 hidden h-[470px] overflow-hidden xl:block">
       <div
-        className="absolute right-[-120px] top-0 h-[470px] w-[1380px] opacity-[0.17]"
+        className="absolute right-[120px] top-0 h-[470px] w-[1380px] opacity-[0.17]"
         style={{
           maskImage:
             'radial-gradient(circle at top right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.97) 22%, rgba(0,0,0,0.82) 44%, rgba(0,0,0,0.4) 66%, transparent 87%)',

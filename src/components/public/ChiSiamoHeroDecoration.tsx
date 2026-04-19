@@ -2,7 +2,7 @@ export default function ChiSiamoHeroDecoration() {
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 hidden h-[430px] overflow-hidden xl:block">
       <div
-        className="absolute right-[120px] top-0 h-[430px] w-[980px] opacity-[0.16]"
+        className="absolute right-[180px] top-0 h-[430px] w-[980px] opacity-[0.16]"
         style={{
           maskImage:
             'radial-gradient(circle at 84% 24%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.96) 22%, rgba(0,0,0,0.8) 46%, rgba(0,0,0,0.34) 68%, transparent 88%)',
