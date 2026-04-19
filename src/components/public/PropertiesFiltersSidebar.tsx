@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import italyLocations from '@/data/italyLocations.json'
 import FilterSwitch from '@/components/public/FilterSwitch'
@@ -79,6 +79,9 @@ export default function PropertiesFiltersSidebar({
   const [hasGarden, setHasGarden] = useState(initialHasGarden)
   const [hasElevator, setHasElevator] = useState(initialHasElevator)
   const [isAuction, setIsAuction] = useState(initialIsAuction)
+  const [isAutoApplying, setIsAutoApplying] = useState(false)
+
+  const isFirstRender = useRef(true)
 
   const currentProvince = useMemo(
     () => provinces.find((item) => item.code === province) || null,
@@ -97,23 +100,7 @@ export default function PropertiesFiltersSidebar({
     )
   }, [currentProvince, comuneSearch])
 
-  const toggleComune = (comuneName: string) => {
-    if (selectedComuni.includes(comuneName)) {
-      setSelectedComuni((prev) => prev.filter((item) => item !== comuneName))
-      return
-    }
-
-    if (selectedComuni.length >= 8) {
-      alert('Puoi selezionare al massimo 8 comuni.')
-      return
-    }
-
-    setSelectedComuni((prev) => [...prev, comuneName])
-  }
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
-
+  const buildQueryString = () => {
     const params = new URLSearchParams(searchParams.toString())
 
     params.delete('q')
@@ -131,6 +118,7 @@ export default function PropertiesFiltersSidebar({
     params.delete('hasGarden')
     params.delete('hasElevator')
     params.delete('isAuction')
+    params.delete('page')
 
     if (q.trim()) params.set('q', q.trim())
     if (maxPrice.trim()) params.set('maxPrice', maxPrice.trim())
@@ -153,7 +141,61 @@ export default function PropertiesFiltersSidebar({
     if (hasElevator) params.set('hasElevator', 'true')
     if (isAuction) params.set('isAuction', 'true')
 
-    router.push(`${pathname}?${params.toString()}`)
+    return params.toString()
+  }
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+
+    setIsAutoApplying(true)
+
+    const timeout = window.setTimeout(() => {
+      const queryString = buildQueryString()
+      router.replace(queryString ? `${pathname}?${queryString}` : pathname)
+      setIsAutoApplying(false)
+    }, 1000)
+
+    return () => {
+      window.clearTimeout(timeout)
+      setIsAutoApplying(false)
+    }
+  }, [
+    q,
+    maxPrice,
+    minRooms,
+    contractType,
+    propertyType,
+    province,
+    selectedComuni,
+    minSurface,
+    maxSurface,
+    minBathrooms,
+    hasGarage,
+    hasParking,
+    hasGarden,
+    hasElevator,
+    isAuction,
+    hideLocationFilters,
+    pathname,
+    router,
+    searchParams,
+  ])
+
+  const toggleComune = (comuneName: string) => {
+    if (selectedComuni.includes(comuneName)) {
+      setSelectedComuni((prev) => prev.filter((item) => item !== comuneName))
+      return
+    }
+
+    if (selectedComuni.length >= 8) {
+      alert('Puoi selezionare al massimo 8 comuni.')
+      return
+    }
+
+    setSelectedComuni((prev) => [...prev, comuneName])
   }
 
   const handleResetFilters = () => {
@@ -172,13 +214,34 @@ export default function PropertiesFiltersSidebar({
     params.delete('hasGarden')
     params.delete('hasElevator')
     params.delete('isAuction')
+    params.delete('page')
 
     if (!hideLocationFilters) {
       params.delete('province')
       params.delete('comune')
     }
 
-    router.push(`${pathname}?${params.toString()}`)
+    setQ('')
+    setMaxPrice('')
+    setMinRooms('')
+    setContractType('')
+    setPropertyType('')
+    setMinSurface('')
+    setMaxSurface('')
+    setMinBathrooms('')
+    setHasGarage(false)
+    setHasParking(false)
+    setHasGarden(false)
+    setHasElevator(false)
+    setIsAuction(false)
+
+    if (!hideLocationFilters) {
+      setProvince('')
+      setSelectedComuni([])
+      setComuneSearch('')
+    }
+
+    router.replace(params.toString() ? `${pathname}?${params.toString()}` : pathname)
   }
 
   const handleResetMap = () => {
@@ -187,18 +250,32 @@ export default function PropertiesFiltersSidebar({
     params.delete('mapMode')
     params.delete('province')
     params.delete('comune')
-    router.push(`${pathname}?${params.toString()}`)
+    params.delete('page')
+
+    setProvince('')
+    setSelectedComuni([])
+    setComuneSearch('')
+
+    router.replace(params.toString() ? `${pathname}?${params.toString()}` : pathname)
   }
 
   return (
     <div className="theme-panel rounded-[28px] border p-5 transition-colors duration-300">
-      <p className="text-xs uppercase tracking-[0.22em] text-[var(--site-text-faint)]">
-        Filtri di ricerca
-      </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.22em] text-[var(--site-text-faint)]">
+            Filtri di ricerca
+          </p>
 
-      <h2 className="mt-3 text-2xl font-semibold text-[var(--site-text)]">
-        Affina i risultati
-      </h2>
+          <h2 className="mt-3 text-2xl font-semibold text-[var(--site-text)]">
+            Affina i risultati
+          </h2>
+        </div>
+
+        <div className="shrink-0 pt-1 text-xs text-[var(--site-text-faint)]">
+          {isAutoApplying ? 'Aggiorno…' : 'Auto'}
+        </div>
+      </div>
 
       {hideLocationFilters && (
         <div className="mt-4 space-y-3">
@@ -223,7 +300,7 @@ export default function PropertiesFiltersSidebar({
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+      <div className="mt-6 space-y-4">
         <div>
           <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
             Cerca
@@ -504,13 +581,6 @@ export default function PropertiesFiltersSidebar({
 
         <div className="flex flex-col gap-3">
           <button
-            type="submit"
-            className="theme-button-primary liquid-button liquid-button-vertical w-full rounded-2xl px-5 py-3 text-sm font-semibold transition"
-          >
-            <span>Applica filtri</span>
-          </button>
-
-          <button
             type="button"
             onClick={handleResetFilters}
             className="theme-button-secondary liquid-button liquid-button-vertical w-full rounded-2xl px-5 py-3 text-sm transition"
@@ -528,7 +598,7 @@ export default function PropertiesFiltersSidebar({
             </button>
           )}
         </div>
-      </form>
+      </div>
     </div>
   )
 }
