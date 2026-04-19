@@ -114,7 +114,7 @@ export default function HomeHero() {
             </p>
 
             <h1 className="mt-6 max-w-[900px] text-5xl font-semibold leading-[0.98] text-white md:text-7xl xl:text-[5.5rem]">
-              Vendere, comprare o affittare casa a Bergamo con più chiarezza e meno stress.
+              Vendere, comprare o affittare casa e terreni a Bergamo con più chiarezza e meno stress.
             </h1>
 
             <p className="mt-7 max-w-[760px] text-base leading-8 text-white/88 [text-shadow:0_2px_4px_rgba(0,0,0,0.6)] md:text-lg xl:text-[1.15rem]">
