@@ -198,11 +198,24 @@ export default function PropertiesMapSection({
       </div>
 
       {hasActivePolygon && (
-        <div className="mb-5 rounded-[28px] border border-sky-200 bg-sky-50 px-4 py-4 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:border-sky-400/20 dark:bg-sky-500/10">
-          <div className="font-semibold text-[#0f3b66] dark:text-sky-100">
+        <div
+          className="mb-5 rounded-[28px] border px-4 py-4 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+          style={{
+            background: '#eaf6ff',
+            borderColor: '#9bd8ff',
+            color: '#0f3b66',
+          }}
+        >
+          <div
+            className="font-semibold"
+            style={{ color: '#0f3b66' }}
+          >
             Area disegnata attiva
           </div>
-          <div className="mt-1 text-[#0f3b66] dark:text-sky-100/80">
+          <div
+            className="mt-1"
+            style={{ color: '#0f3b66' }}
+          >
             La mappa e i risultati stanno usando il poligono selezionato. Se vuoi cambiare zona,
             puoi ridisegnare l’area oppure rimuoverla dai filtri laterali.
           </div>
@@ -210,7 +223,14 @@ export default function PropertiesMapSection({
       )}
 
       {emptyInsidePolygon && (
-        <div className="mb-5 rounded-[28px] border border-sky-200 bg-sky-50 px-4 py-4 text-sm text-[#0f3b66] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:border-sky-400/20 dark:bg-sky-500/10 dark:text-sky-100/80">
+        <div
+          className="mb-5 rounded-[28px] border px-4 py-4 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+          style={{
+            background: '#eaf6ff',
+            borderColor: '#9bd8ff',
+            color: '#0f3b66',
+          }}
+        >
           Nessun immobile è presente dentro l’area disegnata con i filtri attuali. La mappa continua
           comunque a mostrarti gli immobili disponibili con posizione per aiutarti a ridefinire meglio la zona.
         </div>
