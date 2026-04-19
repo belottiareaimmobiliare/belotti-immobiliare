@@ -260,7 +260,7 @@ export default function PropertiesFiltersSidebar({
     setSelectedComuni([])
     setComuneSearch('')
 
-    rrouter.replace(params.toString() ? `${pathname}?${params.toString()}` : pathname, {
+    router.replace(params.toString() ? `${pathname}?${params.toString()}` : pathname, {
   scroll: false,
 })
   }
