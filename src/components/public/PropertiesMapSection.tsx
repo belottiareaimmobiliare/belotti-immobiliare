@@ -198,19 +198,19 @@ export default function PropertiesMapSection({
       </div>
 
       {hasActivePolygon && (
-        <div className="mb-5 rounded-[28px] border border-sky-200 bg-sky-50 px-4 py-4 text-sm text-sky-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:border-sky-400/20 dark:bg-sky-500/10 dark:text-sky-100">
-  <div className="font-medium text-sky-900 dark:text-sky-100">
-    Area disegnata attiva
-  </div>
-  <div className="mt-1 text-sky-900 dark:text-sky-100/80">
-    La mappa e i risultati stanno usando il poligono selezionato. Se vuoi cambiare zona,
-    puoi ridisegnare l’area oppure rimuoverla dai filtri laterali.
-  </div>
-</div>
+        <div className="mb-5 rounded-[28px] border border-sky-200 bg-sky-50 px-4 py-4 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:border-sky-400/20 dark:bg-sky-500/10">
+          <div className="font-medium text-blue-900 dark:text-sky-100">
+            Area disegnata attiva
+          </div>
+          <div className="mt-1 text-blue-800 dark:text-sky-100/80">
+            La mappa e i risultati stanno usando il poligono selezionato. Se vuoi cambiare zona,
+            puoi ridisegnare l’area oppure rimuoverla dai filtri laterali.
+          </div>
+        </div>
       )}
 
-      {emptyInsidePolygon && (<div className="mb-5 rounded-[28px] border border-sky-200 bg-sky-50 px-4 py-4 text-sm text-sky-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:border-sky-400/20 dark:bg-sky-500/10 dark:text-sky-100/80">
-        
+      {emptyInsidePolygon && (
+        <div className="mb-5 rounded-[28px] border border-sky-200 bg-sky-50 px-4 py-4 text-sm text-blue-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:border-sky-400/20 dark:bg-sky-500/10 dark:text-sky-100/80">
           Nessun immobile è presente dentro l’area disegnata con i filtri attuali. La mappa continua
           comunque a mostrarti gli immobili disponibili con posizione per aiutarti a ridefinire meglio la zona.
         </div>
@@ -228,7 +228,7 @@ export default function PropertiesMapSection({
               </p>
 
               {hasActivePolygon && (
-                <div className="mt-3 rounded-2xl border border-sky-200/70 bg-sky-50/80 px-4 py-3 text-sm text-sky-800/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:border-sky-400/20 dark:bg-sky-500/10 dark:text-sky-100/80">
+                <div className="mt-3 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-blue-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:border-sky-400/20 dark:bg-sky-500/10 dark:text-sky-100/80">
                   Applicando i comuni, l’area disegnata verrà rimossa per evitare sovrapposizioni tra due modalità di selezione diverse.
                 </div>
               )}

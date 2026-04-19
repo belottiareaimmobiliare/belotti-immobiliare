@@ -285,16 +285,16 @@ export default function PropertiesFiltersSidebar({
 
       {hideLocationFilters && (
         <div className="mt-4 space-y-3">
-          <div className="rounded-[24px] border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:border-sky-400/20 dark:bg-sky-500/10 dark:text-sky-100">
-  <div className="font-medium text-sky-900 dark:text-sky-100">
-    Ricerca per area attiva
-  </div>
-  <div className="mt-1 text-sky-900 dark:text-sky-100/80">
-    Stai visualizzando gli immobili contenuti nella zona che hai
-    disegnato sulla mappa. I filtri di provincia e comuni sono nascosti
-    per evitare conflitti con l’area selezionata.
-  </div>
-</div>
+          <div className="rounded-[24px] border border-sky-200 bg-sky-50 px-4 py-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:border-sky-400/20 dark:bg-sky-500/10">
+            <div className="font-medium text-blue-900 dark:text-sky-100">
+              Ricerca per area attiva
+            </div>
+            <div className="mt-1 text-blue-800 dark:text-sky-100/80">
+              Stai visualizzando gli immobili contenuti nella zona che hai
+              disegnato sulla mappa. I filtri di provincia e comuni sono nascosti
+              per evitare conflitti con l’area selezionata.
+            </div>
+          </div>
 
           <button
             type="button"
