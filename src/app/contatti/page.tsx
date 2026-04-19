@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import SiteHeader from '@/components/public/SiteHeader'
 import Footer from '@/components/public/Footer'
 import FooterReveal from '@/components/public/FooterReveal'
+import ContattiHeroDecoration from '@/components/public/ContattiHeroDecoration'
 import { readCookiePreferences } from '@/lib/cookie-consent'
 
 const googleMapsQuery = encodeURIComponent('Via A. Locatelli 62, 24121 Bergamo')
@@ -72,8 +73,10 @@ export default function ContattiPage() {
     <main className="min-h-screen bg-[var(--site-bg)] text-[var(--site-text)] transition-colors duration-300">
       <SiteHeader />
 
-      <section className="border-b border-[var(--site-border)] bg-[var(--site-bg-soft)] transition-colors duration-300">
-        <div className="mx-auto max-w-7xl px-6 py-16">
+      <section className="relative overflow-hidden border-b border-[var(--site-border)] bg-[var(--site-bg-soft)] transition-colors duration-300">
+        <ContattiHeroDecoration />
+
+        <div className="relative z-10 mx-auto max-w-7xl px-6 py-16">
           <p className="text-sm uppercase tracking-[0.3em] text-[var(--site-text-faint)]">
             Contatti
           </p>
