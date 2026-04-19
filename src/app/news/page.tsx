@@ -2,6 +2,7 @@ import Link from 'next/link'
 import SiteHeader from '@/components/public/SiteHeader'
 import Footer from '@/components/public/Footer'
 import FooterReveal from '@/components/public/FooterReveal'
+import NewsHeroDecoration from '@/components/public/NewsHeroDecoration'
 import { createClient } from '@/lib/supabase/server'
 
 type NewsMediaItem = {
@@ -159,8 +160,10 @@ export default async function NewsPage() {
     <main className="min-h-screen bg-[var(--site-bg)] text-[var(--site-text)] transition-colors duration-300">
       <SiteHeader />
 
-      <section className="border-b border-[var(--site-border)] bg-[var(--site-bg-soft)] transition-colors duration-300">
-        <div className="mx-auto max-w-7xl px-6 py-16">
+      <section className="relative overflow-hidden border-b border-[var(--site-border)] bg-[var(--site-bg-soft)] transition-colors duration-300">
+        <NewsHeroDecoration />
+
+        <div className="relative z-10 mx-auto max-w-7xl px-6 py-16">
           <p className="text-sm uppercase tracking-[0.3em] text-[var(--site-text-faint)]">
             News
           </p>
