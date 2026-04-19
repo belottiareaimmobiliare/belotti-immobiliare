@@ -33,19 +33,19 @@ export default function Footer() {
       </p>
 
       <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {partnerLogos.map((partner) => (
-          <div
-            key={partner.label}
-            className="flex min-h-[96px] items-center justify-center border-b border-white/10 pb-4 md:border-b-0 md:pb-0"
-          >
-            <img
-              src={partner.src}
-              alt={partner.label}
-              className="max-h-[70px] w-auto max-w-[200px] object-contain opacity-95"
-            />
-          </div>
-        ))}
-      </div>
+  {partnerLogos.map((partner) => (
+    <div
+      key={partner.label}
+      className="flex min-h-[96px] items-center justify-start border-b border-white/10 pb-4 md:justify-center md:border-b-0 md:pb-0"
+    >
+      <img
+        src={partner.src}
+        alt={partner.label}
+        className="max-h-[70px] w-auto max-w-[200px] object-contain opacity-95"
+      />
+    </div>
+  ))}
+</div>
 
       <div className="mt-10 block xl:hidden">
         <p className="text-[11px] uppercase tracking-[0.26em] text-white/30">
