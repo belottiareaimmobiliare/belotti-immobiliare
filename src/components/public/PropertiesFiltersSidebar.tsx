@@ -154,7 +154,9 @@ export default function PropertiesFiltersSidebar({
 
     const timeout = window.setTimeout(() => {
       const queryString = buildQueryString()
-      router.replace(queryString ? `${pathname}?${queryString}` : pathname)
+      router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
+  scroll: false,
+})
       setIsAutoApplying(false)
     }, 1000)
 
@@ -241,7 +243,9 @@ export default function PropertiesFiltersSidebar({
       setComuneSearch('')
     }
 
-    router.replace(params.toString() ? `${pathname}?${params.toString()}` : pathname)
+    router.replace(params.toString() ? `${pathname}?${params.toString()}` : pathname, {
+  scroll: false,
+})
   }
 
   const handleResetMap = () => {
@@ -256,7 +260,9 @@ export default function PropertiesFiltersSidebar({
     setSelectedComuni([])
     setComuneSearch('')
 
-    router.replace(params.toString() ? `${pathname}?${params.toString()}` : pathname)
+    rrouter.replace(params.toString() ? `${pathname}?${params.toString()}` : pathname, {
+  scroll: false,
+})
   }
 
   return (
