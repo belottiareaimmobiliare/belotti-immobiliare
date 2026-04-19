@@ -3,14 +3,17 @@ import FooterReveal from '@/components/public/FooterReveal'
 import Image from 'next/image'
 import Link from 'next/link'
 import SiteHeader from '@/components/public/SiteHeader'
+import ChiSiamoHeroDecoration from '@/components/public/ChiSiamoHeroDecoration'
 
 export default function ChiSiamoPage() {
   return (
     <main className="min-h-screen bg-[var(--site-bg)] text-[var(--site-text)] transition-colors duration-300">
       <SiteHeader />
 
-      <section className="border-b border-[var(--site-border)] bg-[var(--site-bg-soft)] transition-colors duration-300">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-center">
+      <section className="relative overflow-hidden border-b border-[var(--site-border)] bg-[var(--site-bg-soft)] transition-colors duration-300">
+        <ChiSiamoHeroDecoration />
+
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 py-16 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-center">
           <div className="flex flex-col items-center justify-center lg:items-start lg:justify-start">
             <div className="relative h-[270px] w-[270px] overflow-hidden rounded-full border-2 border-[var(--site-border-strong)] bg-[var(--site-surface)] shadow-[var(--site-card-shadow)]">
               <Image
