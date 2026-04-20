@@ -188,7 +188,7 @@ export default async function NewsPage() {
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Facebook Area Immobiliare | Consigli Immobiliari e dintorni"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition hover:scale-[1.04] hover:border-white/25 hover:bg-white/10"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--site-border)] bg-[var(--site-surface-strong)] text-[var(--site-text)] transition hover:scale-[1.04] hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface)]"
                 title="Area Immobiliare | Consigli Immobiliari e dintorni"
               >
                 <svg
@@ -200,14 +200,14 @@ export default async function NewsPage() {
                 </svg>
               </a>
 
-              <span className="text-base text-white/40">|</span>
+              <span className="text-base text-[var(--site-text-faint)]">|</span>
 
               <a
                 href="https://www.tiktok.com/@consigli.immobili"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="TikTok Consigli Immobiliari AI"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition hover:scale-[1.04] hover:border-white/25 hover:bg-white/10"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--site-border)] bg-[var(--site-surface-strong)] text-[var(--site-text)] transition hover:scale-[1.04] hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface)]"
                 title="Consigli Immobiliari AI"
               >
                 <svg
