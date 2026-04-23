@@ -37,7 +37,7 @@ export type AboutContent = {
 }
 
 export const homeLimits = {
-  overline: 24,
+  overline: 50,
   title: 120,
   subtitle: 220,
   stat1: 40,

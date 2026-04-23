@@ -425,56 +425,107 @@ export default function AboutContentEditor({ initialContent }: Props) {
           </p>
         </div>
 
-        <div className="theme-panel rounded-[30px] border p-8">
-          <h3 className="text-2xl font-semibold text-[var(--site-text)]">
-            {form.box1Title}
-          </h3>
-          <div className="mt-5 space-y-5 text-[var(--site-text-muted)]">
-            <p className="leading-8">{form.box1Paragraph1}</p>
-            <p className="leading-8">{form.box1Paragraph2}</p>
-            <p className="leading-8">{form.box1Paragraph3}</p>
-          </div>
-        </div>
+        <div className="mx-auto w-full max-w-7xl">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="space-y-8">
+              <div className="theme-panel rounded-[30px] border p-8">
+                <h3 className="text-2xl font-semibold text-[var(--site-text)]">
+                  {form.box1Title}
+                </h3>
+                <div className="mt-5 space-y-5 text-[var(--site-text-muted)]">
+                  <p className="leading-8">{form.box1Paragraph1}</p>
+                  <p className="leading-8">{form.box1Paragraph2}</p>
+                  <p className="leading-8">{form.box1Paragraph3}</p>
+                </div>
+              </div>
 
-        <div className="theme-panel rounded-[30px] border p-8">
-          <h3 className="text-2xl font-semibold text-[var(--site-text)]">
-            {form.box2Title}
-          </h3>
+              <div className="theme-panel rounded-[30px] border p-8">
+                <h3 className="text-2xl font-semibold text-[var(--site-text)]">
+                  {form.box2Title}
+                </h3>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {visibleQuadrants.map((item, index) => (
-              <div
-                key={`${item.title}-${index}`}
-                className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5"
-              >
-                <h4 className="text-lg font-medium text-[var(--site-text)]">
-                  {item.title}
-                </h4>
-                <p className="mt-3 text-sm leading-7 text-[var(--site-text-muted)]">
-                  {item.text}
+                <div className="mt-6 grid gap-4 md:grid-cols-2">
+                  {visibleQuadrants.length > 0 ? (
+                    visibleQuadrants.map((item, index) => (
+                      <div
+                        key={`${item.title}-${index}`}
+                        className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5"
+                      >
+                        <h4 className="text-lg font-medium text-[var(--site-text)]">
+                          {item.title}
+                        </h4>
+                        <p className="mt-3 text-sm leading-7 text-[var(--site-text-muted)]">
+                          {item.text}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="rounded-2xl border border-dashed border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5 text-sm text-[var(--site-text-faint)] md:col-span-2">
+                      Nessun quadrante attivo.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="theme-panel rounded-[30px] border p-8">
+                <h3 className="text-2xl font-semibold text-[var(--site-text)]">
+                  {form.box3Title}
+                </h3>
+                <div className="mt-5 space-y-5 text-[var(--site-text-muted)]">
+                  <p className="leading-8">{form.box3Paragraph1}</p>
+                  <p className="leading-8">{form.box3Paragraph2}</p>
+                </div>
+              </div>
+
+              <div className="theme-panel rounded-[30px] border p-8">
+                <h3 className="text-2xl font-semibold text-[var(--site-text)]">
+                  {form.box4Title}
+                </h3>
+                <p className="mt-5 leading-8 text-[var(--site-text-muted)]">
+                  {form.box4Text}
                 </p>
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        <div className="theme-panel rounded-[30px] border p-8">
-          <h3 className="text-2xl font-semibold text-[var(--site-text)]">
-            {form.box3Title}
-          </h3>
-          <div className="mt-5 space-y-5 text-[var(--site-text-muted)]">
-            <p className="leading-8">{form.box3Paragraph1}</p>
-            <p className="leading-8">{form.box3Paragraph2}</p>
-          </div>
-        </div>
+            <aside className="hidden space-y-6 lg:block">
+              <div className="theme-panel rounded-[30px] border p-7">
+                <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
+                  Riferimenti
+                </p>
 
-        <div className="theme-panel rounded-[30px] border p-8">
-          <h3 className="text-2xl font-semibold text-[var(--site-text)]">
-            {form.box4Title}
-          </h3>
-          <p className="mt-5 leading-8 text-[var(--site-text-muted)]">
-            {form.box4Text}
-          </p>
+                <div className="mt-5 space-y-4 text-sm text-[var(--site-text-soft)]">
+                  <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
+                    <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                      Sede
+                    </p>
+                    <p className="mt-2 leading-6">
+                      Via A. Locatelli 62
+                      <br />
+                      24121 Bergamo
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
+                    <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                      Telefono
+                    </p>
+                    <p className="mt-2">035 221206</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
+                    <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                      Email
+                    </p>
+                    <p className="mt-2 break-all">info@areaimmobiliare.com</p>
+                  </div>
+                </div>
+
+                <div className="theme-button-primary mt-6 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold opacity-80">
+                  <span>Contattaci</span>
+                </div>
+              </div>
+            </aside>
+          </div>
         </div>
       </section>
     </div>
