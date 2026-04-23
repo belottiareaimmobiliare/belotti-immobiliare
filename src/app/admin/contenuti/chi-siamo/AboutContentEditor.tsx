@@ -163,6 +163,13 @@ export default function AboutContentEditor({ initialContent }: Props) {
 
   const isDark = theme === 'dark'
   const visibleQuadrants = form.quadrants.filter((item) => item.enabled)
+  const activeBoxCount = [
+    form.box1Enabled,
+    form.box2Enabled,
+    form.box3Enabled,
+    form.box4Enabled,
+  ].filter(Boolean).length
+  const noActiveBoxes = activeBoxCount === 0
 
   const hasErrors = useMemo(() => {
     const checks = [
@@ -192,6 +199,8 @@ export default function AboutContentEditor({ initialContent }: Props) {
     return checks.some(Boolean)
   }, [form])
 
+  const saveBlocked = hasErrors || noActiveBoxes
+
   function update<K extends keyof AboutContent>(key: K, value: AboutContent[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
     setMessage('')
@@ -208,6 +217,14 @@ export default function AboutContentEditor({ initialContent }: Props) {
         i === index ? { ...item, [field]: value } : item
       ),
     }))
+    setMessage('')
+  }
+
+  function updateBoxEnabled(
+    field: 'box1Enabled' | 'box2Enabled' | 'box3Enabled' | 'box4Enabled',
+    value: boolean
+  ) {
+    setForm((prev) => ({ ...prev, [field]: value }))
     setMessage('')
   }
 
@@ -228,7 +245,7 @@ export default function AboutContentEditor({ initialContent }: Props) {
   }
 
   async function save() {
-    if (hasErrors) return
+    if (saveBlocked) return
 
     setMessage('')
 
@@ -318,9 +335,20 @@ export default function AboutContentEditor({ initialContent }: Props) {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-                Box 1
-              </h2>
+              <div className="flex items-center justify-between gap-4">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                  Box 1
+                </h2>
+
+                <label className="flex items-center gap-2 text-sm text-[var(--site-text)]">
+                  <input
+                    type="checkbox"
+                    checked={form.box1Enabled}
+                    onChange={(e) => updateBoxEnabled('box1Enabled', e.target.checked)}
+                  />
+                  Mostra box
+                </label>
+              </div>
 
               <InputField
                 label="Titolo box 1"
@@ -355,9 +383,20 @@ export default function AboutContentEditor({ initialContent }: Props) {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-                Box 2 + quadranti
-              </h2>
+              <div className="flex items-center justify-between gap-4">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                  Box 2 + quadranti
+                </h2>
+
+                <label className="flex items-center gap-2 text-sm text-[var(--site-text)]">
+                  <input
+                    type="checkbox"
+                    checked={form.box2Enabled}
+                    onChange={(e) => updateBoxEnabled('box2Enabled', e.target.checked)}
+                  />
+                  Mostra box
+                </label>
+              </div>
 
               <InputField
                 label="Titolo box 2"
@@ -409,9 +448,20 @@ export default function AboutContentEditor({ initialContent }: Props) {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-                Box 3
-              </h2>
+              <div className="flex items-center justify-between gap-4">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                  Box 3
+                </h2>
+
+                <label className="flex items-center gap-2 text-sm text-[var(--site-text)]">
+                  <input
+                    type="checkbox"
+                    checked={form.box3Enabled}
+                    onChange={(e) => updateBoxEnabled('box3Enabled', e.target.checked)}
+                  />
+                  Mostra box
+                </label>
+              </div>
 
               <InputField
                 label="Titolo box 3"
@@ -438,9 +488,20 @@ export default function AboutContentEditor({ initialContent }: Props) {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-                Box 4
-              </h2>
+              <div className="flex items-center justify-between gap-4">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                  Box 4
+                </h2>
+
+                <label className="flex items-center gap-2 text-sm text-[var(--site-text)]">
+                  <input
+                    type="checkbox"
+                    checked={form.box4Enabled}
+                    onChange={(e) => updateBoxEnabled('box4Enabled', e.target.checked)}
+                  />
+                  Mostra box
+                </label>
+              </div>
 
               <InputField
                 label="Titolo box 4"
@@ -465,11 +526,17 @@ export default function AboutContentEditor({ initialContent }: Props) {
             </p>
           ) : null}
 
+          {noActiveBoxes ? (
+            <p className="mt-3 text-sm text-red-500">
+              Deve rimanere almeno 1 box attivo tra Box 1, 2, 3 e 4.
+            </p>
+          ) : null}
+
           <div className="mt-6 flex flex-wrap gap-3">
             <button
               type="button"
               onClick={save}
-              disabled={isPending || hasErrors}
+              disabled={isPending || saveBlocked}
               className="theme-button-primary rounded-2xl px-5 py-3 text-sm font-semibold disabled:opacity-50"
             >
               {isPending ? 'Salvataggio...' : 'Salva'}
@@ -725,124 +792,144 @@ export default function AboutContentEditor({ initialContent }: Props) {
             <section className="mx-auto max-w-7xl px-6 py-16">
               <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
                 <div className="space-y-8">
-                  <div
-                    className={`rounded-[30px] border p-8 shadow-[0_18px_48px_rgba(0,0,0,0.10)] ${
-                      isDark
-                        ? 'border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]'
-                        : 'border-[#d9e2ec] bg-white'
-                    }`}
-                  >
-                    <h3
-                      className={`text-2xl font-semibold ${
-                        isDark ? 'text-white' : 'text-slate-900'
+                  {form.box1Enabled ? (
+                    <div
+                      className={`rounded-[30px] border p-8 shadow-[0_18px_48px_rgba(0,0,0,0.10)] ${
+                        isDark
+                          ? 'border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]'
+                          : 'border-[#d9e2ec] bg-white'
                       }`}
                     >
-                      {form.box1Title}
-                    </h3>
+                      <h3
+                        className={`text-2xl font-semibold ${
+                          isDark ? 'text-white' : 'text-slate-900'
+                        }`}
+                      >
+                        {form.box1Title}
+                      </h3>
 
-                    <div className={`mt-5 space-y-5 ${isDark ? 'text-white/62' : 'text-slate-700'}`}>
-                      <p className="leading-8">{form.box1Paragraph1}</p>
-                      <p className="leading-8">{form.box1Paragraph2}</p>
-                      <p className="leading-8">{form.box1Paragraph3}</p>
+                      <div className={`mt-5 space-y-5 ${isDark ? 'text-white/62' : 'text-slate-700'}`}>
+                        <p className="leading-8">{form.box1Paragraph1}</p>
+                        <p className="leading-8">{form.box1Paragraph2}</p>
+                        <p className="leading-8">{form.box1Paragraph3}</p>
+                      </div>
                     </div>
-                  </div>
+                  ) : null}
 
-                  <div
-                    className={`rounded-[30px] border p-8 shadow-[0_18px_48px_rgba(0,0,0,0.10)] ${
-                      isDark
-                        ? 'border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]'
-                        : 'border-[#d9e2ec] bg-white'
-                    }`}
-                  >
-                    <h3
-                      className={`text-2xl font-semibold ${
-                        isDark ? 'text-white' : 'text-slate-900'
+                  {form.box2Enabled ? (
+                    <div
+                      className={`rounded-[30px] border p-8 shadow-[0_18px_48px_rgba(0,0,0,0.10)] ${
+                        isDark
+                          ? 'border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]'
+                          : 'border-[#d9e2ec] bg-white'
                       }`}
                     >
-                      {form.box2Title}
-                    </h3>
+                      <h3
+                        className={`text-2xl font-semibold ${
+                          isDark ? 'text-white' : 'text-slate-900'
+                        }`}
+                      >
+                        {form.box2Title}
+                      </h3>
 
-                    <div className="mt-6 grid gap-4 md:grid-cols-2">
-                      {visibleQuadrants.length > 0 ? (
-                        visibleQuadrants.map((item, index) => (
+                      <div className="mt-6 grid gap-4 md:grid-cols-2">
+                        {visibleQuadrants.length > 0 ? (
+                          visibleQuadrants.map((item, index) => (
+                            <div
+                              key={`${item.title}-${index}`}
+                              className={`rounded-2xl border p-5 ${
+                                isDark
+                                  ? 'border-white/10 bg-[rgba(3,9,19,0.72)]'
+                                  : 'border-[#d9e2ec] bg-[#f8fafc]'
+                              }`}
+                            >
+                              <h4
+                                className={`text-lg font-medium ${
+                                  isDark ? 'text-white' : 'text-slate-900'
+                                }`}
+                              >
+                                {item.title}
+                              </h4>
+                              <p
+                                className={`mt-3 text-sm leading-7 ${
+                                  isDark ? 'text-white/58' : 'text-slate-600'
+                                }`}
+                              >
+                                {item.text}
+                              </p>
+                            </div>
+                          ))
+                        ) : (
                           <div
-                            key={`${item.title}-${index}`}
-                            className={`rounded-2xl border p-5 ${
+                            className={`rounded-2xl border border-dashed p-5 text-sm md:col-span-2 ${
                               isDark
-                                ? 'border-white/10 bg-[rgba(3,9,19,0.72)]'
-                                : 'border-[#d9e2ec] bg-[#f8fafc]'
+                                ? 'border-white/12 bg-[rgba(3,9,19,0.55)] text-white/45'
+                                : 'border-[#d9e2ec] bg-[#f8fafc] text-slate-500'
                             }`}
                           >
-                            <h4
-                              className={`text-lg font-medium ${
-                                isDark ? 'text-white' : 'text-slate-900'
-                              }`}
-                            >
-                              {item.title}
-                            </h4>
-                            <p
-                              className={`mt-3 text-sm leading-7 ${
-                                isDark ? 'text-white/58' : 'text-slate-600'
-                              }`}
-                            >
-                              {item.text}
-                            </p>
+                            Nessun quadrante attivo.
                           </div>
-                        ))
-                      ) : (
-                        <div
-                          className={`rounded-2xl border border-dashed p-5 text-sm md:col-span-2 ${
-                            isDark
-                              ? 'border-white/12 bg-[rgba(3,9,19,0.55)] text-white/45'
-                              : 'border-[#d9e2ec] bg-[#f8fafc] text-slate-500'
-                          }`}
-                        >
-                          Nessun quadrante attivo.
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  ) : null}
 
-                  <div
-                    className={`rounded-[30px] border p-8 shadow-[0_18px_48px_rgba(0,0,0,0.10)] ${
-                      isDark
-                        ? 'border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]'
-                        : 'border-[#d9e2ec] bg-white'
-                    }`}
-                  >
-                    <h3
-                      className={`text-2xl font-semibold ${
-                        isDark ? 'text-white' : 'text-slate-900'
+                  {form.box3Enabled ? (
+                    <div
+                      className={`rounded-[30px] border p-8 shadow-[0_18px_48px_rgba(0,0,0,0.10)] ${
+                        isDark
+                          ? 'border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]'
+                          : 'border-[#d9e2ec] bg-white'
                       }`}
                     >
-                      {form.box3Title}
-                    </h3>
+                      <h3
+                        className={`text-2xl font-semibold ${
+                          isDark ? 'text-white' : 'text-slate-900'
+                        }`}
+                      >
+                        {form.box3Title}
+                      </h3>
 
-                    <div className={`mt-5 space-y-5 ${isDark ? 'text-white/62' : 'text-slate-700'}`}>
-                      <p className="leading-8">{form.box3Paragraph1}</p>
-                      <p className="leading-8">{form.box3Paragraph2}</p>
+                      <div className={`mt-5 space-y-5 ${isDark ? 'text-white/62' : 'text-slate-700'}`}>
+                        <p className="leading-8">{form.box3Paragraph1}</p>
+                        <p className="leading-8">{form.box3Paragraph2}</p>
+                      </div>
                     </div>
-                  </div>
+                  ) : null}
 
-                  <div
-                    className={`rounded-[30px] border p-8 shadow-[0_18px_48px_rgba(0,0,0,0.10)] ${
-                      isDark
-                        ? 'border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]'
-                        : 'border-[#d9e2ec] bg-white'
-                    }`}
-                  >
-                    <h3
-                      className={`text-2xl font-semibold ${
-                        isDark ? 'text-white' : 'text-slate-900'
+                  {form.box4Enabled ? (
+                    <div
+                      className={`rounded-[30px] border p-8 shadow-[0_18px_48px_rgba(0,0,0,0.10)] ${
+                        isDark
+                          ? 'border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]'
+                          : 'border-[#d9e2ec] bg-white'
                       }`}
                     >
-                      {form.box4Title}
-                    </h3>
+                      <h3
+                        className={`text-2xl font-semibold ${
+                          isDark ? 'text-white' : 'text-slate-900'
+                        }`}
+                      >
+                        {form.box4Title}
+                      </h3>
 
-                    <p className={`mt-5 leading-8 ${isDark ? 'text-white/62' : 'text-slate-700'}`}>
-                      {form.box4Text}
-                    </p>
-                  </div>
+                      <p className={`mt-5 leading-8 ${isDark ? 'text-white/62' : 'text-slate-700'}`}>
+                        {form.box4Text}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  {noActiveBoxes ? (
+                    <div
+                      className={`rounded-[30px] border border-dashed p-8 text-sm ${
+                        isDark
+                          ? 'border-white/12 bg-[rgba(3,9,19,0.55)] text-white/45'
+                          : 'border-[#d9e2ec] bg-[#f8fafc] text-slate-500'
+                      }`}
+                    >
+                      Attiva almeno un box per vedere l’anteprima corretta.
+                    </div>
+                  ) : null}
                 </div>
 
                 <aside className="hidden space-y-6 lg:block">

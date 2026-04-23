@@ -11,6 +11,14 @@ export const dynamic = 'force-dynamic'
 export default async function ChiSiamoPage() {
   const content = await getAboutContent()
 
+  const safeBox1Enabled =
+    content.box1Enabled ||
+    (!content.box2Enabled && !content.box3Enabled && !content.box4Enabled)
+
+  const safeBox2Enabled = content.box2Enabled
+  const safeBox3Enabled = content.box3Enabled
+  const safeBox4Enabled = content.box4Enabled
+
   return (
     <main className="min-h-screen bg-[var(--site-bg)] text-[var(--site-text)] transition-colors duration-300">
       <SiteHeader />
@@ -88,62 +96,70 @@ export default async function ChiSiamoPage() {
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-8">
-            <div className="theme-panel rounded-[30px] border p-8">
-              <h2 className="text-2xl font-semibold text-[var(--site-text)]">
-                {content.box1Title}
-              </h2>
+            {safeBox1Enabled ? (
+              <div className="theme-panel rounded-[30px] border p-8">
+                <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+                  {content.box1Title}
+                </h2>
 
-              <div className="mt-5 space-y-5 text-[var(--site-text-muted)]">
-                <p className="leading-8">{content.box1Paragraph1}</p>
-                <p className="leading-8">{content.box1Paragraph2}</p>
-                <p className="leading-8">{content.box1Paragraph3}</p>
+                <div className="mt-5 space-y-5 text-[var(--site-text-muted)]">
+                  <p className="leading-8">{content.box1Paragraph1}</p>
+                  <p className="leading-8">{content.box1Paragraph2}</p>
+                  <p className="leading-8">{content.box1Paragraph3}</p>
+                </div>
               </div>
-            </div>
+            ) : null}
 
-            <div className="theme-panel rounded-[30px] border p-8">
-              <h2 className="text-2xl font-semibold text-[var(--site-text)]">
-                {content.box2Title}
-              </h2>
+            {safeBox2Enabled ? (
+              <div className="theme-panel rounded-[30px] border p-8">
+                <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+                  {content.box2Title}
+                </h2>
 
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                {content.quadrants
-                  .filter((item) => item.enabled)
-                  .map((item, index) => (
-                    <div
-                      key={`${item.title}-${index}`}
-                      className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5"
-                    >
-                      <h3 className="text-lg font-medium text-[var(--site-text)]">
-                        {item.title}
-                      </h3>
-                      <p className="mt-3 text-sm leading-7 text-[var(--site-text-muted)]">
-                        {item.text}
-                      </p>
-                    </div>
-                  ))}
+                <div className="mt-6 grid gap-4 md:grid-cols-2">
+                  {content.quadrants
+                    .filter((item) => item.enabled)
+                    .map((item, index) => (
+                      <div
+                        key={`${item.title}-${index}`}
+                        className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5"
+                      >
+                        <h3 className="text-lg font-medium text-[var(--site-text)]">
+                          {item.title}
+                        </h3>
+                        <p className="mt-3 text-sm leading-7 text-[var(--site-text-muted)]">
+                          {item.text}
+                        </p>
+                      </div>
+                    ))}
+                </div>
               </div>
-            </div>
+            ) : null}
 
-            <div className="theme-panel rounded-[30px] border p-8">
-              <h2 className="text-2xl font-semibold text-[var(--site-text)]">
-                {content.box3Title}
-              </h2>
+            {safeBox3Enabled ? (
+              <div className="theme-panel rounded-[30px] border p-8">
+                <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+                  {content.box3Title}
+                </h2>
 
-              <div className="mt-5 space-y-5 text-[var(--site-text-muted)]">
-                <p className="leading-8">{content.box3Paragraph1}</p>
-                <p className="leading-8">{content.box3Paragraph2}</p>
+                <div className="mt-5 space-y-5 text-[var(--site-text-muted)]">
+                  <p className="leading-8">{content.box3Paragraph1}</p>
+                  <p className="leading-8">{content.box3Paragraph2}</p>
+                </div>
               </div>
-            </div>
+            ) : null}
 
-            <div className="theme-panel rounded-[30px] border p-8">
-              <h2 className="text-2xl font-semibold text-[var(--site-text)]">
-                {content.box4Title}
-              </h2>
+            {safeBox4Enabled ? (
+              <div className="theme-panel rounded-[30px] border p-8">
+                <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+                  {content.box4Title}
+                </h2>
 
-              <p className="mt-5 leading-8 text-[var(--site-text-muted)]">
-                {content.box4Text}
-              </p>
-            </div>
+                <p className="mt-5 leading-8 text-[var(--site-text-muted)]">
+                  {content.box4Text}
+                </p>
+              </div>
+            ) : null}
           </div>
 
           <aside className="space-y-6 lg:sticky lg:top-24 lg:h-fit">

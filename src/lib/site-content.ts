@@ -20,18 +20,22 @@ export type AboutContent = {
   heroTitle: string
   heroIntro: string
 
+  box1Enabled: boolean
   box1Title: string
   box1Paragraph1: string
   box1Paragraph2: string
   box1Paragraph3: string
 
+  box2Enabled: boolean
   box2Title: string
   quadrants: AboutQuadrant[]
 
+  box3Enabled: boolean
   box3Title: string
   box3Paragraph1: string
   box3Paragraph2: string
 
+  box4Enabled: boolean
   box4Title: string
   box4Text: string
 }
@@ -75,6 +79,7 @@ export const defaultAboutContent: AboutContent = {
   heroIntro:
     'Area Immobiliare affianca da decenni chi desidera acquistare, vendere o locare un immobile con un metodo fondato su conoscenza del territorio, valutazione corretta e attenzione concreta alla qualità dell’operazione.',
 
+  box1Enabled: true,
   box1Title: 'Una presenza storica a Bergamo',
   box1Paragraph1:
     'Il mercato immobiliare è un ambito complesso, fatto di opportunità ma anche di aspetti tecnici, economici e documentali che richiedono esperienza. Area Immobiliare nasce con l’idea di accompagnare il cliente con sobrietà, metodo e visione concreta.',
@@ -83,6 +88,7 @@ export const defaultAboutContent: AboutContent = {
   box1Paragraph3:
     'Gianfederico Belotti ha costruito negli anni una realtà riconosciuta per la conoscenza del territorio, per la sensibilità nel leggere il mercato e per l’attenzione al valore corretto degli immobili.',
 
+  box2Enabled: true,
   box2Title: 'Un metodo fondato su valutazione, verifica e tutela',
   quadrants: [
     {
@@ -107,12 +113,14 @@ export const defaultAboutContent: AboutContent = {
     },
   ],
 
+  box3Enabled: true,
   box3Title: 'La cultura del prezzo giusto',
   box3Paragraph1:
     'Uno degli aspetti distintivi dell’approccio di Gianfederico Belotti è l’attenzione alla trasparenza del mercato. La valutazione dell’immobile non è solo una cifra: è un lavoro di equilibrio tra desiderio, realtà e prospettiva futura.',
   box3Paragraph2:
     'Questo approccio ha contribuito a costruire un profilo professionale autorevole, orientato a tutelare chi compra, chi vende e chi cerca una soluzione in affitto con maggiore consapevolezza.',
 
+  box4Enabled: true,
   box4Title: 'Uno stile di lavoro sobrio e concreto',
   box4Text:
     'Area Immobiliare si rivolge a chi cerca non soltanto un immobile, ma un interlocutore affidabile. L’obiettivo è accompagnare il cliente in un percorso serio, ordinato e ben seguito, senza eccessi comunicativi ma con attenzione reale alla qualità della scelta.',
