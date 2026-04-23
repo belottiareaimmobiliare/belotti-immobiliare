@@ -2,6 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import {
+  HOME_CONTENT_KEY,
+  defaultHomeContent,
+  type HomeContent,
+} from '@/lib/site-content'
 
 const slides = [
   '/images/bergamo-1.jpg',
@@ -10,10 +15,42 @@ const slides = [
 ]
 
 export default function HomeHero() {
+  const [content, setContent] = useState<HomeContent>(defaultHomeContent)
   const [current, setCurrent] = useState(0)
   const [previous, setPrevious] = useState<number | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
   const [scrollY, setScrollY] = useState(0)
+
+  useEffect(() => {
+    let active = true
+
+    const loadContent = async () => {
+      try {
+        const res = await fetch(`/api/site-content?key=${HOME_CONTENT_KEY}`, {
+          method: 'GET',
+        })
+
+        if (!res.ok) return
+
+        const data = (await res.json()) as Partial<HomeContent>
+
+        if (!active) return
+
+        setContent({
+          ...defaultHomeContent,
+          ...data,
+        })
+      } catch {
+        // fallback silenzioso ai default
+      }
+    }
+
+    loadContent()
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -110,16 +147,15 @@ export default function HomeHero() {
             className="transition-[opacity,transform] duration-150"
           >
             <p className="text-sm font-semibold uppercase tracking-[0.34em] text-white/90 [text-shadow:0_1px_2px_rgba(0,0,0,0.72)]">
-              Area Immobiliare dal 1980
+              {content.overline}
             </p>
 
             <h1 className="mt-6 max-w-[900px] text-5xl font-semibold leading-[0.98] text-white md:text-7xl xl:text-[5.5rem]">
-              Vendere, comprare o affittare casa e terreni a Bergamo con più chiarezza e meno stress.
+              {content.title}
             </h1>
 
             <p className="mt-7 max-w-[760px] text-base leading-8 text-white/88 [text-shadow:0_2px_4px_rgba(0,0,0,0.6)] md:text-lg xl:text-[1.15rem]">
-              Ogni scelta immobiliare merita tempo, competenza e informazioni corrette:
-              per questo lavoriamo in modo chiaro, concreto e vicino alle persone.
+              {content.subtitle}
             </p>
 
             <div className="mt-8 hidden flex-wrap gap-3 md:flex">
@@ -154,7 +190,9 @@ export default function HomeHero() {
               <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/86 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
                 Storia
               </p>
-              <p className="mt-2 text-2xl font-semibold text-white">Dal 1980</p>
+              <p className="mt-2 text-2xl font-semibold text-white">
+                {content.stat1}
+              </p>
             </div>
 
             <div className="rounded-[24px] border border-white/20 bg-white/[0.13] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.16)] backdrop-blur-md">
@@ -162,7 +200,7 @@ export default function HomeHero() {
                 Territorio
               </p>
               <p className="mt-2 text-2xl font-semibold text-white">
-                Bergamo e provincia
+                {content.stat2}
               </p>
             </div>
 
@@ -171,7 +209,7 @@ export default function HomeHero() {
                 Metodo
               </p>
               <p className="mt-2 text-2xl font-semibold text-white">
-                Analisi e verifica
+                {content.stat3}
               </p>
             </div>
           </div>

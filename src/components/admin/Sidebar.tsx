@@ -9,6 +9,8 @@ const links = [
   { href: '/admin/immobili?contractType=vendita', label: 'Immobili in vendita' },
   { href: '/admin/immobili?contractType=affitto', label: 'Immobili in affitto' },
   { href: '/admin/news', label: 'News' },
+  { href: '/admin/contenuti/home', label: 'Modifica Home' },
+  { href: '/admin/contenuti/chi-siamo', label: 'Modifica Chi siamo' },
   { href: '/admin/autori', label: 'Autori' },
 ]
 

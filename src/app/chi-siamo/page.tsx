@@ -4,8 +4,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import SiteHeader from '@/components/public/SiteHeader'
 import ChiSiamoHeroDecoration from '@/components/public/ChiSiamoHeroDecoration'
+import { getAboutContent } from '@/lib/site-content.server'
 
-export default function ChiSiamoPage() {
+export const dynamic = 'force-dynamic'
+
+export default async function ChiSiamoPage() {
+  const content = await getAboutContent()
+
   return (
     <main className="min-h-screen bg-[var(--site-bg)] text-[var(--site-text)] transition-colors duration-300">
       <SiteHeader />
@@ -70,16 +75,11 @@ export default function ChiSiamoPage() {
             </p>
 
             <h1 className="mt-4 text-4xl font-semibold leading-tight text-[var(--site-text)] md:text-5xl">
-              Gianfederico Belotti,
-              <br />
-              una storia immobiliare costruita su esperienza e trasparenza
+              {content.heroTitle}
             </h1>
 
             <p className="mt-6 max-w-3xl text-base leading-8 text-[var(--site-text-muted)] md:text-lg">
-              Area Immobiliare affianca da decenni chi desidera acquistare,
-              vendere o locare un immobile con un metodo fondato su conoscenza
-              del territorio, valutazione corretta e attenzione concreta alla
-              qualità dell’operazione.
+              {content.heroIntro}
             </p>
           </div>
         </div>
@@ -90,116 +90,58 @@ export default function ChiSiamoPage() {
           <div className="space-y-8">
             <div className="theme-panel rounded-[30px] border p-8">
               <h2 className="text-2xl font-semibold text-[var(--site-text)]">
-                Una presenza storica a Bergamo
+                {content.box1Title}
               </h2>
 
               <div className="mt-5 space-y-5 text-[var(--site-text-muted)]">
-                <p className="leading-8">
-                  Il mercato immobiliare è un ambito complesso, fatto di
-                  opportunità ma anche di aspetti tecnici, economici e
-                  documentali che richiedono esperienza. Area Immobiliare nasce
-                  con l’idea di accompagnare il cliente con sobrietà, metodo e
-                  visione concreta.
-                </p>
-
-                <p className="leading-8">
-                  Dal 1980, l’agenzia opera a Bergamo aiutando famiglie, privati
-                  e investitori nella scelta di abitazioni, uffici, negozi e
-                  altre soluzioni immobiliari, con attenzione alla reale
-                  commerciabilità dell’immobile e alla sostenibilità
-                  dell’operazione.
-                </p>
-
-                <p className="leading-8">
-                  Gianfederico Belotti ha costruito negli anni una realtà
-                  riconosciuta per la conoscenza del territorio, per la
-                  sensibilità nel leggere il mercato e per l’attenzione al
-                  valore corretto degli immobili.
-                </p>
+                <p className="leading-8">{content.box1Paragraph1}</p>
+                <p className="leading-8">{content.box1Paragraph2}</p>
+                <p className="leading-8">{content.box1Paragraph3}</p>
               </div>
             </div>
 
             <div className="theme-panel rounded-[30px] border p-8">
               <h2 className="text-2xl font-semibold text-[var(--site-text)]">
-                Un metodo fondato su valutazione, verifica e tutela
+                {content.box2Title}
               </h2>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5">
-                  <h3 className="text-lg font-medium text-[var(--site-text)]">
-                    Valutazione corretta
-                  </h3>
-                  <p className="mt-3 text-sm leading-7 text-[var(--site-text-muted)]">
-                    Ogni immobile viene letto con attenzione per comprenderne il
-                    valore reale e il suo posizionamento di mercato.
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5">
-                  <h3 className="text-lg font-medium text-[var(--site-text)]">
-                    Controlli documentali
-                  </h3>
-                  <p className="mt-3 text-sm leading-7 text-[var(--site-text-muted)]">
-                    Provenienze, conformità, libertà da criticità e aspetti
-                    essenziali vengono verificati con metodo.
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5">
-                  <h3 className="text-lg font-medium text-[var(--site-text)]">
-                    Conoscenza del territorio
-                  </h3>
-                  <p className="mt-3 text-sm leading-7 text-[var(--site-text-muted)]">
-                    Bergamo, Città Alta, Città Bassa, Colli e hinterland vengono
-                    interpretati con esperienza maturata sul campo.
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5">
-                  <h3 className="text-lg font-medium text-[var(--site-text)]">
-                    Rete di professionisti
-                  </h3>
-                  <p className="mt-3 text-sm leading-7 text-[var(--site-text-muted)]">
-                    Quando serve, il cliente può contare anche su notai, tecnici,
-                    istituti di credito e partner selezionati.
-                  </p>
-                </div>
+                {content.quadrants
+                  .filter((item) => item.enabled)
+                  .map((item, index) => (
+                    <div
+                      key={`${item.title}-${index}`}
+                      className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5"
+                    >
+                      <h3 className="text-lg font-medium text-[var(--site-text)]">
+                        {item.title}
+                      </h3>
+                      <p className="mt-3 text-sm leading-7 text-[var(--site-text-muted)]">
+                        {item.text}
+                      </p>
+                    </div>
+                  ))}
               </div>
             </div>
 
             <div className="theme-panel rounded-[30px] border p-8">
               <h2 className="text-2xl font-semibold text-[var(--site-text)]">
-                La cultura del prezzo giusto
+                {content.box3Title}
               </h2>
 
               <div className="mt-5 space-y-5 text-[var(--site-text-muted)]">
-                <p className="leading-8">
-                  Uno degli aspetti distintivi dell’approccio di Gianfederico
-                  Belotti è l’attenzione alla trasparenza del mercato. La
-                  valutazione dell’immobile non è solo una cifra: è un lavoro di
-                  equilibrio tra desiderio, realtà e prospettiva futura.
-                </p>
-
-                <p className="leading-8">
-                  Questo approccio ha contribuito a costruire un profilo
-                  professionale autorevole, orientato a tutelare chi compra, chi
-                  vende e chi cerca una soluzione in affitto con maggiore
-                  consapevolezza.
-                </p>
+                <p className="leading-8">{content.box3Paragraph1}</p>
+                <p className="leading-8">{content.box3Paragraph2}</p>
               </div>
             </div>
 
             <div className="theme-panel rounded-[30px] border p-8">
               <h2 className="text-2xl font-semibold text-[var(--site-text)]">
-                Uno stile di lavoro sobrio e concreto
+                {content.box4Title}
               </h2>
 
               <p className="mt-5 leading-8 text-[var(--site-text-muted)]">
-                Area Immobiliare si rivolge a chi cerca non soltanto un immobile,
-                ma un interlocutore affidabile. L’obiettivo è accompagnare il
-                cliente in un percorso serio, ordinato e ben seguito, senza
-                eccessi comunicativi ma con attenzione reale alla qualità della
-                scelta.
+                {content.box4Text}
               </p>
             </div>
           </div>
