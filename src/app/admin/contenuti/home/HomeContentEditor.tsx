@@ -116,8 +116,34 @@ export default function HomeContentEditor({ initialContent }: Props) {
 
   const hasErrors = Object.values(errors).some(Boolean)
 
+  const visibleStats = [
+    {
+      enabled: form.stat1Enabled,
+      label: 'Storia',
+      value: form.stat1,
+    },
+    {
+      enabled: form.stat2Enabled,
+      label: 'Territorio',
+      value: form.stat2,
+    },
+    {
+      enabled: form.stat3Enabled,
+      label: 'Metodo',
+      value: form.stat3,
+    },
+  ].filter((item) => item.enabled)
+
   function update<K extends keyof HomeContent>(key: K, value: HomeContent[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
+    setMessage('')
+  }
+
+  function updateStatEnabled(
+    field: 'stat1Enabled' | 'stat2Enabled' | 'stat3Enabled',
+    value: boolean
+  ) {
+    setForm((prev) => ({ ...prev, [field]: value }))
     setMessage('')
   }
 
@@ -258,12 +284,23 @@ export default function HomeContentEditor({ initialContent }: Props) {
               />
             </div>
 
-            <div>
-              <FieldLabel
-                label="Box 1"
-                current={form.stat1.length}
-                max={homeLimits.stat1}
-              />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <FieldLabel
+                  label="Box 1"
+                  current={form.stat1.length}
+                  max={homeLimits.stat1}
+                />
+                <label className="flex items-center gap-2 text-sm text-[var(--site-text)]">
+                  <input
+                    type="checkbox"
+                    checked={form.stat1Enabled}
+                    onChange={(e) => updateStatEnabled('stat1Enabled', e.target.checked)}
+                  />
+                  Mostra box
+                </label>
+              </div>
+
               <input
                 value={form.stat1}
                 onChange={(e) => update('stat1', e.target.value)}
@@ -275,12 +312,23 @@ export default function HomeContentEditor({ initialContent }: Props) {
               />
             </div>
 
-            <div>
-              <FieldLabel
-                label="Box 2"
-                current={form.stat2.length}
-                max={homeLimits.stat2}
-              />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <FieldLabel
+                  label="Box 2"
+                  current={form.stat2.length}
+                  max={homeLimits.stat2}
+                />
+                <label className="flex items-center gap-2 text-sm text-[var(--site-text)]">
+                  <input
+                    type="checkbox"
+                    checked={form.stat2Enabled}
+                    onChange={(e) => updateStatEnabled('stat2Enabled', e.target.checked)}
+                  />
+                  Mostra box
+                </label>
+              </div>
+
               <input
                 value={form.stat2}
                 onChange={(e) => update('stat2', e.target.value)}
@@ -292,12 +340,23 @@ export default function HomeContentEditor({ initialContent }: Props) {
               />
             </div>
 
-            <div>
-              <FieldLabel
-                label="Box 3"
-                current={form.stat3.length}
-                max={homeLimits.stat3}
-              />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <FieldLabel
+                  label="Box 3"
+                  current={form.stat3.length}
+                  max={homeLimits.stat3}
+                />
+                <label className="flex items-center gap-2 text-sm text-[var(--site-text)]">
+                  <input
+                    type="checkbox"
+                    checked={form.stat3Enabled}
+                    onChange={(e) => updateStatEnabled('stat3Enabled', e.target.checked)}
+                  />
+                  Mostra box
+                </label>
+              </div>
+
               <input
                 value={form.stat3}
                 onChange={(e) => update('stat3', e.target.value)}
@@ -545,76 +604,43 @@ export default function HomeContentEditor({ initialContent }: Props) {
                   </div>
                 </div>
 
-                <div className="mt-10 grid gap-4 md:grid-cols-3">
+                {visibleStats.length > 0 ? (
                   <div
-                    className={`rounded-[24px] border px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.10)] ${
-                      isDark
-                        ? 'border-white/20 bg-white/[0.13] backdrop-blur-md'
-                        : 'border-[#d9e2ec] bg-white/90 backdrop-blur-sm'
+                    className={`mt-10 grid gap-4 ${
+                      visibleStats.length === 1
+                        ? 'md:grid-cols-1'
+                        : visibleStats.length === 2
+                          ? 'md:grid-cols-2'
+                          : 'md:grid-cols-3'
                     }`}
                   >
-                    <p
-                      className={`text-[12px] font-semibold uppercase tracking-[0.22em] ${
-                        isDark ? 'text-white/86' : 'text-slate-500'
-                      }`}
-                    >
-                      Storia
-                    </p>
-                    <p
-                      className={`mt-2 text-2xl font-semibold ${
-                        isDark ? 'text-white' : 'text-slate-900'
-                      }`}
-                    >
-                      {form.stat1}
-                    </p>
+                    {visibleStats.map((item) => (
+                      <div
+                        key={item.label}
+                        className={`rounded-[24px] border px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.10)] ${
+                          isDark
+                            ? 'border-white/20 bg-white/[0.13] backdrop-blur-md'
+                            : 'border-[#d9e2ec] bg-white/90 backdrop-blur-sm'
+                        }`}
+                      >
+                        <p
+                          className={`text-[12px] font-semibold uppercase tracking-[0.22em] ${
+                            isDark ? 'text-white/86' : 'text-slate-500'
+                          }`}
+                        >
+                          {item.label}
+                        </p>
+                        <p
+                          className={`mt-2 text-2xl font-semibold ${
+                            isDark ? 'text-white' : 'text-slate-900'
+                          }`}
+                        >
+                          {item.value}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-
-                  <div
-                    className={`rounded-[24px] border px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.10)] ${
-                      isDark
-                        ? 'border-white/20 bg-white/[0.13] backdrop-blur-md'
-                        : 'border-[#d9e2ec] bg-white/90 backdrop-blur-sm'
-                    }`}
-                  >
-                    <p
-                      className={`text-[12px] font-semibold uppercase tracking-[0.22em] ${
-                        isDark ? 'text-white/86' : 'text-slate-500'
-                      }`}
-                    >
-                      Territorio
-                    </p>
-                    <p
-                      className={`mt-2 text-2xl font-semibold ${
-                        isDark ? 'text-white' : 'text-slate-900'
-                      }`}
-                    >
-                      {form.stat2}
-                    </p>
-                  </div>
-
-                  <div
-                    className={`rounded-[24px] border px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.10)] ${
-                      isDark
-                        ? 'border-white/20 bg-white/[0.13] backdrop-blur-md'
-                        : 'border-[#d9e2ec] bg-white/90 backdrop-blur-sm'
-                    }`}
-                  >
-                    <p
-                      className={`text-[12px] font-semibold uppercase tracking-[0.22em] ${
-                        isDark ? 'text-white/86' : 'text-slate-500'
-                      }`}
-                    >
-                      Metodo
-                    </p>
-                    <p
-                      className={`mt-2 text-2xl font-semibold ${
-                        isDark ? 'text-white' : 'text-slate-900'
-                      }`}
-                    >
-                      {form.stat3}
-                    </p>
-                  </div>
-                </div>
+                ) : null}
               </div>
 
               <div className="hidden xl:flex xl:justify-end xl:self-end">

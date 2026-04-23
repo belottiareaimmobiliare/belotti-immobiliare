@@ -5,8 +5,14 @@ export type HomeContent = {
   overline: string
   title: string
   subtitle: string
+
+  stat1Enabled: boolean
   stat1: string
+
+  stat2Enabled: boolean
   stat2: string
+
+  stat3Enabled: boolean
   stat3: string
 }
 
@@ -68,8 +74,14 @@ export const defaultHomeContent: HomeContent = {
     'Vendere, comprare o affittare casa e terreni a Bergamo con più chiarezza e meno stress.',
   subtitle:
     'Ogni scelta immobiliare merita tempo, competenza e informazioni corrette: per questo lavoriamo in modo chiaro, concreto e vicino alle persone.',
+
+  stat1Enabled: true,
   stat1: 'Dal 1980',
+
+  stat2Enabled: true,
   stat2: 'Bergamo e provincia',
+
+  stat3Enabled: true,
   stat3: 'Analisi e verifica',
 }
 

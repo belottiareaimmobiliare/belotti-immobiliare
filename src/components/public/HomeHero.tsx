@@ -41,7 +41,7 @@ export default function HomeHero() {
           ...data,
         })
       } catch {
-        // fallback silenzioso ai default
+        // fallback silenzioso
       }
     }
 
@@ -109,6 +109,24 @@ export default function HomeHero() {
       opacity: Math.max(opacity, 0),
     }
   }, [scrollY])
+
+  const visibleStats = [
+    {
+      enabled: content.stat1Enabled,
+      label: 'Storia',
+      value: content.stat1,
+    },
+    {
+      enabled: content.stat2Enabled,
+      label: 'Territorio',
+      value: content.stat2,
+    },
+    {
+      enabled: content.stat3Enabled,
+      label: 'Metodo',
+      value: content.stat3,
+    },
+  ].filter((item) => item.enabled)
 
   return (
     <section className="relative min-h-[92vh] overflow-hidden border-b border-white/10 bg-[#09101b]">
@@ -182,37 +200,32 @@ export default function HomeHero() {
             </div>
           </div>
 
-          <div
-            style={statsStyle}
-            className="mt-10 grid gap-4 md:grid-cols-3 transition-[opacity,transform] duration-150"
-          >
-            <div className="rounded-[24px] border border-white/20 bg-white/[0.13] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.16)] backdrop-blur-md">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/86 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
-                Storia
-              </p>
-              <p className="mt-2 text-2xl font-semibold text-white">
-                {content.stat1}
-              </p>
+          {visibleStats.length > 0 ? (
+            <div
+              style={statsStyle}
+              className={`mt-10 grid gap-4 transition-[opacity,transform] duration-150 ${
+                visibleStats.length === 1
+                  ? 'md:grid-cols-1'
+                  : visibleStats.length === 2
+                    ? 'md:grid-cols-2'
+                    : 'md:grid-cols-3'
+              }`}
+            >
+              {visibleStats.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-[24px] border border-white/20 bg-white/[0.13] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.16)] backdrop-blur-md"
+                >
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/86 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
+                    {item.label}
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold text-white">
+                    {item.value}
+                  </p>
+                </div>
+              ))}
             </div>
-
-            <div className="rounded-[24px] border border-white/20 bg-white/[0.13] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.16)] backdrop-blur-md">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/86 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
-                Territorio
-              </p>
-              <p className="mt-2 text-2xl font-semibold text-white">
-                {content.stat2}
-              </p>
-            </div>
-
-            <div className="rounded-[24px] border border-white/20 bg-white/[0.13] px-5 py-5 shadow-[0_10px_24px_rgba(0,0,0,0.16)] backdrop-blur-md">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-white/86 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
-                Metodo
-              </p>
-              <p className="mt-2 text-2xl font-semibold text-white">
-                {content.stat3}
-              </p>
-            </div>
-          </div>
+          ) : null}
         </div>
 
         <div
