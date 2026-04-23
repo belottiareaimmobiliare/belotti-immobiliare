@@ -1,6 +1,7 @@
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
+import Link from 'next/link'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import {
   ABOUT_CONTENT_KEY,
   aboutLimits,
@@ -11,6 +12,8 @@ import {
 type Props = {
   initialContent: AboutContent
 }
+
+type ThemeMode = 'light' | 'dark'
 
 function getCounterClass(current: number, max: number) {
   if (current > max) return 'text-red-500'
@@ -99,11 +102,68 @@ function TextareaField({
   )
 }
 
+function FacebookIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-4 w-4 fill-current"
+    >
+      <path d="M13.5 22v-8h2.7l.4-3h-3.1V9.1c0-.9.3-1.6 1.7-1.6H16.7V4.8c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V11H8v3h2.5v8h3z" />
+    </svg>
+  )
+}
+
+function TikTokIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-4 w-4 fill-current"
+    >
+      <path d="M16.6 3c.2 1.6 1.1 3 2.4 3.8.8.5 1.6.8 2.5.9v2.7c-1.3 0-2.7-.4-3.9-1.1v5.7c0 1.6-.6 3.1-1.8 4.2A6.2 6.2 0 0 1 11.5 21a6 6 0 0 1-4.2-1.7A6 6 0 0 1 5.6 15c0-3.3 2.7-6 6-6 .3 0 .7 0 1 .1v2.9a3.2 3.2 0 0 0-1-.2 3.2 3.2 0 1 0 3.2 3.2V3h2.8z" />
+    </svg>
+  )
+}
+
+function applyTheme(nextTheme: ThemeMode) {
+  const root = document.documentElement
+
+  root.setAttribute('data-theme', nextTheme)
+  root.style.colorScheme = nextTheme
+  root.classList.toggle('dark', nextTheme === 'dark')
+  root.classList.toggle('light', nextTheme === 'light')
+
+  localStorage.setItem('site-theme', nextTheme)
+  localStorage.setItem('theme', nextTheme)
+}
+
+function getInitialTheme(): ThemeMode {
+  if (typeof window === 'undefined') return 'dark'
+
+  const root = document.documentElement
+  const attrTheme = root.getAttribute('data-theme')
+  const storedTheme =
+    localStorage.getItem('site-theme') || localStorage.getItem('theme')
+
+  if (attrTheme === 'light' || storedTheme === 'light' || root.classList.contains('light')) {
+    return 'light'
+  }
+
+  return 'dark'
+}
+
 export default function AboutContentEditor({ initialContent }: Props) {
   const [form, setForm] = useState<AboutContent>(initialContent)
   const [saved, setSaved] = useState<AboutContent>(initialContent)
   const [message, setMessage] = useState('')
+  const [theme, setTheme] = useState<ThemeMode>('dark')
   const [isPending, startTransition] = useTransition()
+
+  useEffect(() => {
+    const currentTheme = getInitialTheme()
+    setTheme(currentTheme)
+  }, [])
 
   const visibleQuadrants = form.quadrants.filter((item) => item.enabled)
 
@@ -164,6 +224,12 @@ export default function AboutContentEditor({ initialContent }: Props) {
     setMessage('')
   }
 
+  function toggleTheme() {
+    const nextTheme: ThemeMode = theme === 'dark' ? 'light' : 'dark'
+    applyTheme(nextTheme)
+    setTheme(nextTheme)
+  }
+
   async function save() {
     if (hasErrors) return
 
@@ -196,338 +262,446 @@ export default function AboutContentEditor({ initialContent }: Props) {
   }
 
   return (
-    <div className="grid gap-8 xl:grid-cols-[520px_minmax(0,1fr)]">
-      <section className="theme-panel rounded-[30px] border p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-[var(--site-text)]">
-            Modifica Chi siamo
-          </h1>
-          <p className="mt-2 text-sm text-[var(--site-text-muted)]">
-            Modifica guidata dei blocchi testuali e dei quadranti con anteprima live.
-          </p>
+    <div className="space-y-6">
+      <div className="theme-panel rounded-[26px] border p-4 sm:p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <Link
+            href="/admin"
+            className="inline-flex items-center justify-center rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-2.5 text-sm font-semibold text-[var(--site-text)] transition hover:bg-[var(--site-surface-2)]"
+          >
+            ← Torna alla dashboard
+          </Link>
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-2.5 text-sm font-semibold text-[var(--site-text)] transition hover:bg-[var(--site-surface-2)]"
+          >
+            <span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span>
+            <span>{theme === 'dark' ? 'Tema chiaro' : 'Tema scuro'}</span>
+          </button>
         </div>
+      </div>
 
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-              Hero
-            </h2>
-
-            <TextareaField
-              label="Titolo hero"
-              value={form.heroTitle}
-              max={aboutLimits.heroTitle}
-              rows={4}
-              onChange={(value) => update('heroTitle', value)}
-            />
-
-            <TextareaField
-              label="Testo hero"
-              value={form.heroIntro}
-              max={aboutLimits.heroIntro}
-              rows={5}
-              onChange={(value) => update('heroIntro', value)}
-            />
+      <div className="grid gap-8 xl:grid-cols-[520px_minmax(0,1fr)]">
+        <section className="theme-panel rounded-[30px] border p-6">
+          <div className="mb-6">
+            <h1 className="text-2xl font-semibold text-[var(--site-text)]">
+              Modifica Chi siamo
+            </h1>
+            <p className="mt-2 text-sm text-[var(--site-text-muted)]">
+              Modifica guidata dei blocchi testuali e dei quadranti con anteprima live.
+            </p>
           </div>
 
-          <div className="space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-              Box 1
-            </h2>
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                Hero
+              </h2>
 
-            <InputField
-              label="Titolo box 1"
-              value={form.box1Title}
-              max={aboutLimits.boxTitle}
-              onChange={(value) => update('box1Title', value)}
-            />
+              <TextareaField
+                label="Titolo hero"
+                value={form.heroTitle}
+                max={aboutLimits.heroTitle}
+                rows={4}
+                onChange={(value) => update('heroTitle', value)}
+              />
 
-            <TextareaField
-              label="Paragrafo 1"
-              value={form.box1Paragraph1}
-              max={aboutLimits.paragraph}
-              rows={5}
-              onChange={(value) => update('box1Paragraph1', value)}
-            />
-
-            <TextareaField
-              label="Paragrafo 2"
-              value={form.box1Paragraph2}
-              max={aboutLimits.paragraph}
-              rows={5}
-              onChange={(value) => update('box1Paragraph2', value)}
-            />
-
-            <TextareaField
-              label="Paragrafo 3"
-              value={form.box1Paragraph3}
-              max={aboutLimits.paragraph}
-              rows={5}
-              onChange={(value) => update('box1Paragraph3', value)}
-            />
-          </div>
-
-          <div className="space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-              Box 2 + quadranti
-            </h2>
-
-            <InputField
-              label="Titolo box 2"
-              value={form.box2Title}
-              max={aboutLimits.boxTitle}
-              onChange={(value) => update('box2Title', value)}
-            />
+              <TextareaField
+                label="Testo hero"
+                value={form.heroIntro}
+                max={aboutLimits.heroIntro}
+                rows={5}
+                onChange={(value) => update('heroIntro', value)}
+              />
+            </div>
 
             <div className="space-y-4">
-              {form.quadrants.map((item, index) => (
-                <div
-                  key={index}
-                  className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] p-4"
-                >
-                  <label className="mb-4 flex items-center gap-3 text-sm text-[var(--site-text)]">
-                    <input
-                      type="checkbox"
-                      checked={item.enabled}
-                      onChange={(e) =>
-                        updateQuadrant(index, 'enabled', e.target.checked)
-                      }
-                    />
-                    Mostra quadrante {index + 1}
-                  </label>
+              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                Box 1
+              </h2>
 
-                  <InputField
-                    label={`Titolo quadrante ${index + 1}`}
-                    value={item.title}
-                    max={aboutLimits.quadrantTitle}
-                    onChange={(value) =>
-                      updateQuadrant(index, 'title', value)
-                    }
-                  />
+              <InputField
+                label="Titolo box 1"
+                value={form.box1Title}
+                max={aboutLimits.boxTitle}
+                onChange={(value) => update('box1Title', value)}
+              />
 
-                  <div className="mt-4">
-                    <TextareaField
-                      label={`Testo quadrante ${index + 1}`}
-                      value={item.text}
-                      max={aboutLimits.quadrantText}
-                      rows={4}
+              <TextareaField
+                label="Paragrafo 1"
+                value={form.box1Paragraph1}
+                max={aboutLimits.paragraph}
+                rows={5}
+                onChange={(value) => update('box1Paragraph1', value)}
+              />
+
+              <TextareaField
+                label="Paragrafo 2"
+                value={form.box1Paragraph2}
+                max={aboutLimits.paragraph}
+                rows={5}
+                onChange={(value) => update('box1Paragraph2', value)}
+              />
+
+              <TextareaField
+                label="Paragrafo 3"
+                value={form.box1Paragraph3}
+                max={aboutLimits.paragraph}
+                rows={5}
+                onChange={(value) => update('box1Paragraph3', value)}
+              />
+            </div>
+
+            <div className="space-y-4">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                Box 2 + quadranti
+              </h2>
+
+              <InputField
+                label="Titolo box 2"
+                value={form.box2Title}
+                max={aboutLimits.boxTitle}
+                onChange={(value) => update('box2Title', value)}
+              />
+
+              <div className="space-y-4">
+                {form.quadrants.map((item, index) => (
+                  <div
+                    key={index}
+                    className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] p-4"
+                  >
+                    <label className="mb-4 flex items-center gap-3 text-sm text-[var(--site-text)]">
+                      <input
+                        type="checkbox"
+                        checked={item.enabled}
+                        onChange={(e) =>
+                          updateQuadrant(index, 'enabled', e.target.checked)
+                        }
+                      />
+                      Mostra quadrante {index + 1}
+                    </label>
+
+                    <InputField
+                      label={`Titolo quadrante ${index + 1}`}
+                      value={item.title}
+                      max={aboutLimits.quadrantTitle}
                       onChange={(value) =>
-                        updateQuadrant(index, 'text', value)
+                        updateQuadrant(index, 'title', value)
                       }
                     />
+
+                    <div className="mt-4">
+                      <TextareaField
+                        label={`Testo quadrante ${index + 1}`}
+                        value={item.text}
+                        max={aboutLimits.quadrantText}
+                        rows={4}
+                        onChange={(value) =>
+                          updateQuadrant(index, 'text', value)
+                        }
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                Box 3
+              </h2>
+
+              <InputField
+                label="Titolo box 3"
+                value={form.box3Title}
+                max={aboutLimits.boxTitle}
+                onChange={(value) => update('box3Title', value)}
+              />
+
+              <TextareaField
+                label="Paragrafo 1"
+                value={form.box3Paragraph1}
+                max={aboutLimits.paragraph}
+                rows={5}
+                onChange={(value) => update('box3Paragraph1', value)}
+              />
+
+              <TextareaField
+                label="Paragrafo 2"
+                value={form.box3Paragraph2}
+                max={aboutLimits.paragraph}
+                rows={5}
+                onChange={(value) => update('box3Paragraph2', value)}
+              />
+            </div>
+
+            <div className="space-y-4">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                Box 4
+              </h2>
+
+              <InputField
+                label="Titolo box 4"
+                value={form.box4Title}
+                max={aboutLimits.boxTitle}
+                onChange={(value) => update('box4Title', value)}
+              />
+
+              <TextareaField
+                label="Testo box 4"
+                value={form.box4Text}
+                max={aboutLimits.box4Text}
+                rows={6}
+                onChange={(value) => update('box4Text', value)}
+              />
             </div>
           </div>
 
-          <div className="space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-              Box 3
-            </h2>
+          {hasErrors ? (
+            <p className="mt-5 text-sm text-red-500">
+              Alcuni campi superano il limite e il salvataggio è bloccato.
+            </p>
+          ) : null}
 
-            <InputField
-              label="Titolo box 3"
-              value={form.box3Title}
-              max={aboutLimits.boxTitle}
-              onChange={(value) => update('box3Title', value)}
-            />
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={save}
+              disabled={isPending || hasErrors}
+              className="theme-button-primary rounded-2xl px-5 py-3 text-sm font-semibold disabled:opacity-50"
+            >
+              {isPending ? 'Salvataggio...' : 'Salva'}
+            </button>
 
-            <TextareaField
-              label="Paragrafo 1"
-              value={form.box3Paragraph1}
-              max={aboutLimits.paragraph}
-              rows={5}
-              onChange={(value) => update('box3Paragraph1', value)}
-            />
+            <button
+              type="button"
+              onClick={cancelChanges}
+              disabled={isPending}
+              className="rounded-2xl border border-[var(--site-border)] px-5 py-3 text-sm font-semibold text-[var(--site-text)]"
+            >
+              Annulla
+            </button>
 
-            <TextareaField
-              label="Paragrafo 2"
-              value={form.box3Paragraph2}
-              max={aboutLimits.paragraph}
-              rows={5}
-              onChange={(value) => update('box3Paragraph2', value)}
-            />
+            <button
+              type="button"
+              onClick={restoreDefaults}
+              disabled={isPending}
+              className="rounded-2xl border border-[var(--site-border)] px-5 py-3 text-sm font-semibold text-[var(--site-text)]"
+            >
+              Ripristina default
+            </button>
           </div>
 
-          <div className="space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-              Box 4
-            </h2>
+          {message ? (
+            <p className="mt-4 text-sm text-[var(--site-text-muted)]">{message}</p>
+          ) : null}
+        </section>
 
-            <InputField
-              label="Titolo box 4"
-              value={form.box4Title}
-              max={aboutLimits.boxTitle}
-              onChange={(value) => update('box4Title', value)}
-            />
-
-            <TextareaField
-              label="Testo box 4"
-              value={form.box4Text}
-              max={aboutLimits.box4Text}
-              rows={6}
-              onChange={(value) => update('box4Text', value)}
-            />
-          </div>
-        </div>
-
-        {hasErrors ? (
-          <p className="mt-5 text-sm text-red-500">
-            Alcuni campi superano il limite e il salvataggio è bloccato.
-          </p>
-        ) : null}
-
-        <div className="mt-6 flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={save}
-            disabled={isPending || hasErrors}
-            className="theme-button-primary rounded-2xl px-5 py-3 text-sm font-semibold disabled:opacity-50"
-          >
-            {isPending ? 'Salvataggio...' : 'Salva'}
-          </button>
-
-          <button
-            type="button"
-            onClick={cancelChanges}
-            disabled={isPending}
-            className="rounded-2xl border border-[var(--site-border)] px-5 py-3 text-sm font-semibold text-[var(--site-text)]"
-          >
-            Annulla
-          </button>
-
-          <button
-            type="button"
-            onClick={restoreDefaults}
-            disabled={isPending}
-            className="rounded-2xl border border-[var(--site-border)] px-5 py-3 text-sm font-semibold text-[var(--site-text)]"
-          >
-            Ripristina default
-          </button>
-        </div>
-
-        {message ? (
-          <p className="mt-4 text-sm text-[var(--site-text-muted)]">{message}</p>
-        ) : null}
-      </section>
-
-      <section className="space-y-6">
-        <div className="theme-panel rounded-[30px] border p-8">
-          <p className="text-sm uppercase tracking-[0.3em] text-[var(--site-text-faint)]">
-            Chi siamo
-          </p>
-          <h2 className="mt-4 text-4xl font-semibold leading-tight text-[var(--site-text)]">
-            {form.heroTitle}
-          </h2>
-          <p className="mt-6 max-w-3xl text-base leading-8 text-[var(--site-text-muted)]">
-            {form.heroIntro}
-          </p>
-        </div>
-
-        <div className="mx-auto w-full max-w-7xl">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="space-y-8">
-              <div className="theme-panel rounded-[30px] border p-8">
-                <h3 className="text-2xl font-semibold text-[var(--site-text)]">
-                  {form.box1Title}
-                </h3>
-                <div className="mt-5 space-y-5 text-[var(--site-text-muted)]">
-                  <p className="leading-8">{form.box1Paragraph1}</p>
-                  <p className="leading-8">{form.box1Paragraph2}</p>
-                  <p className="leading-8">{form.box1Paragraph3}</p>
-                </div>
+        <section className="overflow-hidden rounded-[34px] border border-white/10 bg-[#040b16] shadow-[0_24px_80px_rgba(0,0,0,0.32)]">
+          <div className="border-b border-white/10 bg-[#07101d]">
+            <div className="flex items-center justify-between gap-6 px-6 py-4 text-white/80">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/images/brand/areaimmobiliare.png"
+                  alt="Area Immobiliare"
+                  className="h-10 w-auto object-contain opacity-95"
+                />
               </div>
 
-              <div className="theme-panel rounded-[30px] border p-8">
-                <h3 className="text-2xl font-semibold text-[var(--site-text)]">
-                  {form.box2Title}
-                </h3>
+              <div className="hidden items-center gap-8 text-sm lg:flex">
+                <span className="opacity-75">Home</span>
+                <span className="opacity-75">Immobili</span>
+                <span className="opacity-75">News</span>
+                <span className="font-medium text-white">Chi siamo</span>
+                <span className="opacity-75">Contatti</span>
+              </div>
 
-                <div className="mt-6 grid gap-4 md:grid-cols-2">
-                  {visibleQuadrants.length > 0 ? (
-                    visibleQuadrants.map((item, index) => (
-                      <div
-                        key={`${item.title}-${index}`}
-                        className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5"
-                      >
-                        <h4 className="text-lg font-medium text-[var(--site-text)]">
-                          {item.title}
-                        </h4>
-                        <p className="mt-3 text-sm leading-7 text-[var(--site-text-muted)]">
-                          {item.text}
+              <div className="hidden items-center gap-3 lg:flex">
+                <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-white/90">
+                  ☾
+                </div>
+                <div className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm text-white/88">
+                  info@areaimmobiliare.com
+                </div>
+                <div className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm text-white/88">
+                  035 221206
+                </div>
+                <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-white/90">
+                  <FacebookIcon />
+                </div>
+                <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-white/90">
+                  <TikTokIcon />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-[#040b16]">
+            <section className="relative overflow-hidden border-b border-white/10 bg-[linear-gradient(180deg,#061022_0%,#061021_100%)]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_34%,rgba(255,255,255,0.04),transparent_24%),radial-gradient(circle_at_84%_30%,rgba(255,255,255,0.025),transparent_28%)]" />
+
+              <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 py-16 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-center">
+                <div className="flex flex-col items-center justify-center lg:items-start lg:justify-start">
+                  <div className="relative h-[240px] w-[240px] overflow-hidden rounded-full border-2 border-white/12 bg-white/5 shadow-[0_10px_40px_rgba(0,0,0,0.28)] lg:h-[270px] lg:w-[270px]">
+                    <img
+                      src="/images/gianfederico-belotti.jpg"
+                      alt="Gianfederico Belotti"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+
+                  <div className="mt-5 flex w-[270px] items-center justify-center gap-3">
+                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-white/[0.03] text-white/90">
+                      <FacebookIcon />
+                    </div>
+
+                    <span className="text-base text-white/35">|</span>
+
+                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-white/[0.03] text-white/90">
+                      <TikTokIcon />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <div className="pointer-events-none absolute right-0 top-0 hidden h-[280px] w-[360px] opacity-[0.10] xl:block">
+                    <div className="absolute left-8 top-10 h-24 w-24 rounded-full border border-white/30" />
+                    <div className="absolute right-10 top-2 h-16 w-24 rounded-[18px] border border-white/20" />
+                    <div className="absolute left-20 top-28 h-[2px] w-36 bg-white/30" />
+                    <div className="absolute left-20 top-48 h-[2px] w-40 bg-white/20" />
+                    <div className="absolute left-24 top-68 h-[2px] w-56 bg-white/15" />
+                    <div className="absolute left-28 top-92 h-[2px] w-52 bg-white/12" />
+                    <div className="absolute left-[82px] top-[76px] h-[130px] w-[130px] rounded-full border border-white/20" />
+                    <div className="absolute left-[180px] top-[154px] h-[56px] w-[2px] rotate-[-44deg] bg-white/18" />
+                  </div>
+
+                  <p className="text-sm uppercase tracking-[0.3em] text-white/45">
+                    Chi siamo
+                  </p>
+
+                  <h2 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight text-white md:text-5xl xl:text-[3.8rem]">
+                    {form.heroTitle}
+                  </h2>
+
+                  <p className="mt-6 max-w-3xl text-base leading-8 text-white/70 md:text-lg">
+                    {form.heroIntro}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section className="mx-auto max-w-7xl px-6 py-16">
+              <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+                <div className="space-y-8">
+                  <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-8 shadow-[0_18px_48px_rgba(0,0,0,0.20)]">
+                    <h3 className="text-2xl font-semibold text-white">
+                      {form.box1Title}
+                    </h3>
+
+                    <div className="mt-5 space-y-5 text-white/62">
+                      <p className="leading-8">{form.box1Paragraph1}</p>
+                      <p className="leading-8">{form.box1Paragraph2}</p>
+                      <p className="leading-8">{form.box1Paragraph3}</p>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-8 shadow-[0_18px_48px_rgba(0,0,0,0.20)]">
+                    <h3 className="text-2xl font-semibold text-white">
+                      {form.box2Title}
+                    </h3>
+
+                    <div className="mt-6 grid gap-4 md:grid-cols-2">
+                      {visibleQuadrants.length > 0 ? (
+                        visibleQuadrants.map((item, index) => (
+                          <div
+                            key={`${item.title}-${index}`}
+                            className="rounded-2xl border border-white/10 bg-[rgba(3,9,19,0.72)] p-5"
+                          >
+                            <h4 className="text-lg font-medium text-white">
+                              {item.title}
+                            </h4>
+                            <p className="mt-3 text-sm leading-7 text-white/58">
+                              {item.text}
+                            </p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="rounded-2xl border border-dashed border-white/12 bg-[rgba(3,9,19,0.55)] p-5 text-sm text-white/45 md:col-span-2">
+                          Nessun quadrante attivo.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-8 shadow-[0_18px_48px_rgba(0,0,0,0.20)]">
+                    <h3 className="text-2xl font-semibold text-white">
+                      {form.box3Title}
+                    </h3>
+
+                    <div className="mt-5 space-y-5 text-white/62">
+                      <p className="leading-8">{form.box3Paragraph1}</p>
+                      <p className="leading-8">{form.box3Paragraph2}</p>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-8 shadow-[0_18px_48px_rgba(0,0,0,0.20)]">
+                    <h3 className="text-2xl font-semibold text-white">
+                      {form.box4Title}
+                    </h3>
+
+                    <p className="mt-5 leading-8 text-white/62">
+                      {form.box4Text}
+                    </p>
+                  </div>
+                </div>
+
+                <aside className="hidden space-y-6 lg:block">
+                  <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-7 shadow-[0_18px_48px_rgba(0,0,0,0.20)]">
+                    <p className="text-xs uppercase tracking-[0.24em] text-white/45">
+                      Riferimenti
+                    </p>
+
+                    <div className="mt-5 space-y-4 text-sm text-white/72">
+                      <div className="rounded-2xl border border-white/10 bg-[rgba(3,9,19,0.55)] px-4 py-4">
+                        <p className="text-xs uppercase tracking-[0.2em] text-white/40">
+                          Sede
+                        </p>
+                        <p className="mt-2 leading-6 text-white/80">
+                          Via A. Locatelli 62
+                          <br />
+                          24121 Bergamo
                         </p>
                       </div>
-                    ))
-                  ) : (
-                    <div className="rounded-2xl border border-dashed border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5 text-sm text-[var(--site-text-faint)] md:col-span-2">
-                      Nessun quadrante attivo.
+
+                      <div className="rounded-2xl border border-white/10 bg-[rgba(3,9,19,0.55)] px-4 py-4">
+                        <p className="text-xs uppercase tracking-[0.2em] text-white/40">
+                          Telefono
+                        </p>
+                        <p className="mt-2 text-white/80">035 221206</p>
+                      </div>
+
+                      <div className="rounded-2xl border border-white/10 bg-[rgba(3,9,19,0.55)] px-4 py-4">
+                        <p className="text-xs uppercase tracking-[0.2em] text-white/40">
+                          Email
+                        </p>
+                        <p className="mt-2 break-all text-white/80">
+                          info@areaimmobiliare.com
+                        </p>
+                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
 
-              <div className="theme-panel rounded-[30px] border p-8">
-                <h3 className="text-2xl font-semibold text-[var(--site-text)]">
-                  {form.box3Title}
-                </h3>
-                <div className="mt-5 space-y-5 text-[var(--site-text-muted)]">
-                  <p className="leading-8">{form.box3Paragraph1}</p>
-                  <p className="leading-8">{form.box3Paragraph2}</p>
-                </div>
-              </div>
-
-              <div className="theme-panel rounded-[30px] border p-8">
-                <h3 className="text-2xl font-semibold text-[var(--site-text)]">
-                  {form.box4Title}
-                </h3>
-                <p className="mt-5 leading-8 text-[var(--site-text-muted)]">
-                  {form.box4Text}
-                </p>
-              </div>
-            </div>
-
-            <aside className="hidden space-y-6 lg:block">
-              <div className="theme-panel rounded-[30px] border p-7">
-                <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
-                  Riferimenti
-                </p>
-
-                <div className="mt-5 space-y-4 text-sm text-[var(--site-text-soft)]">
-                  <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-                      Sede
-                    </p>
-                    <p className="mt-2 leading-6">
-                      Via A. Locatelli 62
-                      <br />
-                      24121 Bergamo
-                    </p>
+                    <div className="mt-6 inline-flex w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black opacity-95">
+                      <span>Contattaci</span>
+                    </div>
                   </div>
-
-                  <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-                      Telefono
-                    </p>
-                    <p className="mt-2">035 221206</p>
-                  </div>
-
-                  <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-                      Email
-                    </p>
-                    <p className="mt-2 break-all">info@areaimmobiliare.com</p>
-                  </div>
-                </div>
-
-                <div className="theme-button-primary mt-6 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold opacity-80">
-                  <span>Contattaci</span>
-                </div>
+                </aside>
               </div>
-            </aside>
+            </section>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   )
 }
