@@ -89,6 +89,20 @@ function buildInitialCreateState(): CreateFormState {
   }
 }
 
+function sortUsers(users: ManagedUser[]) {
+  const roleOrder: Record<UserRole, number> = {
+    owner: 0,
+    agent: 1,
+    editor: 2,
+  }
+
+  return [...users].sort((a, b) => {
+    const roleDiff = roleOrder[a.role] - roleOrder[b.role]
+    if (roleDiff !== 0) return roleDiff
+    return a.full_name.localeCompare(b.full_name, 'it')
+  })
+}
+
 function RoleBadge({ role }: { role: UserRole }) {
   const label =
     role === 'owner' ? 'Proprietario' : role === 'editor' ? 'Editor' : 'Agente'
@@ -239,7 +253,7 @@ function CreateUserForm({
         <input
           value={form.authorized_google_email}
           onChange={(e) => patch('authorized_google_email', e.target.value)}
-          placeholder="Gmail autorizzata opzionale"
+          placeholder="Gmail autorizzata (opzionale)"
           className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm text-[var(--site-text)] md:col-span-2"
         />
       </div>
@@ -251,13 +265,18 @@ function CreateUserForm({
           </label>
           <select
             value={form.role}
-            onChange={(e) => patch('role', e.target.value as UserRole)}
+            onChange={(e) => applyPreset(e.target.value as UserRole)}
             className="mt-3 w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-bg)] px-3 py-2 text-sm text-[var(--site-text)]"
           >
             <option value="agent">Agente</option>
             <option value="editor">Editor</option>
             <option value="owner">Proprietario</option>
           </select>
+
+          <p className="mt-3 text-xs text-[var(--site-text-muted)]">
+            Se cambi ruolo da qui, vengono applicati i permessi base del preset.
+            Poi puoi personalizzare i singoli check prima di salvare.
+          </p>
 
           <label className="mt-4 flex items-center gap-3 text-sm text-[var(--site-text)]">
             <input
@@ -426,10 +445,10 @@ function ManagedUserCard({
           </div>
 
           <h3 className="mt-3 text-2xl font-semibold text-[var(--site-text)]">
-            {user.full_name}
+            {form.full_name}
           </h3>
           <p className="mt-1 text-sm text-[var(--site-text-muted)]">
-            @{user.username}
+            @{form.username}
           </p>
         </div>
 
@@ -483,12 +502,18 @@ function ManagedUserCard({
           placeholder="Gmail autorizzata"
           className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm text-[var(--site-text)]"
         />
-        <input
-          value={form.new_password}
-          onChange={(e) => patch('new_password', e.target.value)}
-          placeholder="Nuova password (opzionale)"
-          className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm text-[var(--site-text)] md:col-span-2"
-        />
+
+        <div className="md:col-span-2">
+          <input
+            value={form.new_password}
+            onChange={(e) => patch('new_password', e.target.value)}
+            placeholder="Resetta la password (inserisci la nuova qui e salva)"
+            className="w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm text-[var(--site-text)]"
+          />
+          <p className="mt-2 text-xs text-[var(--site-text-muted)]">
+            Se lasci vuoto questo campo, la password attuale non viene modificata.
+          </p>
+        </div>
       </div>
 
       <div className="mt-4 grid gap-4 md:grid-cols-[220px_1fr]">
@@ -498,13 +523,18 @@ function ManagedUserCard({
           </label>
           <select
             value={form.role}
-            onChange={(e) => patch('role', e.target.value as UserRole)}
+            onChange={(e) => applyPreset(e.target.value as UserRole)}
             className="mt-3 w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-bg)] px-3 py-2 text-sm text-[var(--site-text)]"
           >
             <option value="agent">Agente</option>
             <option value="editor">Editor</option>
             <option value="owner">Proprietario</option>
           </select>
+
+          <p className="mt-3 text-xs text-[var(--site-text-muted)]">
+            Se cambi ruolo da qui, vengono ricaricati i permessi base del preset.
+            Poi puoi personalizzarli come vuoi e salvare.
+          </p>
 
           <label className="mt-4 flex items-center gap-3 text-sm text-[var(--site-text)]">
             <input
@@ -596,7 +626,7 @@ export default function UserManagementPanel() {
         return
       }
 
-      setUsers((data.users as ManagedUser[]) ?? [])
+      setUsers(sortUsers((data.users as ManagedUser[]) ?? []))
     } catch {
       setError('Errore caricamento utenti.')
     }
@@ -665,10 +695,7 @@ export default function UserManagementPanel() {
 
       <CreateUserForm
         onCreated={(createdUser) => {
-          setUsers((prev) => {
-            const next = [...prev, createdUser]
-            return next.sort((a, b) => a.full_name.localeCompare(b.full_name, 'it'))
-          })
+          setUsers((prev) => sortUsers([...prev, createdUser]))
         }}
       />
 
@@ -708,7 +735,9 @@ export default function UserManagementPanel() {
                 user={user}
                 onUpdated={(updatedUser) => {
                   setUsers((prev) =>
-                    prev.map((item) => (item.id === updatedUser.id ? updatedUser : item))
+                    sortUsers(
+                      prev.map((item) => (item.id === updatedUser.id ? updatedUser : item))
+                    )
                   )
                 }}
               />
