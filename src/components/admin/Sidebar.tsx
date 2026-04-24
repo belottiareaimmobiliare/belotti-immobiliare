@@ -1,18 +1,29 @@
 'use client'
 
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 
-const links = [
-  { href: '/admin', label: 'Dashboard' },
-  { href: '/admin/immobili', label: 'Tutti gli immobili' },
-  { href: '/admin/immobili?contractType=vendita', label: 'Immobili in vendita' },
-  { href: '/admin/immobili?contractType=affitto', label: 'Immobili in affitto' },
-  { href: '/admin/news', label: 'News' },
-  { href: '/admin/contenuti/home', label: 'Modifica Home' },
-  { href: '/admin/contenuti/chi-siamo', label: 'Modifica Chi siamo' },
-  { href: '/admin/autori', label: 'Autori' },
-]
+type SidebarLink = {
+  href: string
+  label: string
+}
+
+type AdminProfile = {
+  full_name: string
+  username: string
+  role: 'owner' | 'agent' | 'editor'
+  is_active: boolean
+  can_manage_properties: boolean
+  can_manage_news: boolean
+  can_manage_site_content: boolean
+  can_manage_users: boolean
+  can_view_logs: boolean
+  can_view_kpis: boolean
+  can_publish_properties: boolean
+} | null
+
+const defaultLinks: SidebarLink[] = [{ href: '/admin', label: 'Dashboard' }]
 
 function isLinkActive(href: string, pathname: string, currentSearch: string) {
   const [basePath, queryString] = href.split('?')
@@ -40,6 +51,69 @@ function SidebarContent({
   const searchParams = useSearchParams()
   const currentSearch = searchParams.toString()
 
+  const [links, setLinks] = useState<SidebarLink[]>(defaultLinks)
+  const [profile, setProfile] = useState<AdminProfile>(null)
+
+  useEffect(() => {
+    let mounted = true
+
+    const loadSidebar = async () => {
+      try {
+        const res = await fetch('/api/admin/me', {
+          method: 'GET',
+          cache: 'no-store',
+        })
+
+        if (!res.ok) return
+
+        const data = (await res.json()) as {
+          profile: AdminProfile
+          links: SidebarLink[]
+        }
+
+        if (!mounted) return
+
+        setProfile(data.profile ?? null)
+        setLinks(data.links?.length ? data.links : defaultLinks)
+      } catch {
+        // fallback silenzioso
+      }
+    }
+
+    loadSidebar()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  const roleLabel =
+    profile?.role === 'owner'
+      ? 'Admin Proprietario'
+      : profile?.role === 'editor'
+        ? 'Editor'
+        : profile?.role === 'agent'
+          ? 'Agente'
+          : 'Accesso base'
+
+  const footerTitle =
+    profile?.role === 'owner'
+      ? 'Pannello proprietario attivo'
+      : profile?.role === 'editor'
+        ? 'Pannello editor attivo'
+        : profile?.role === 'agent'
+          ? 'Pannello agente attivo'
+          : 'Gestionale in inizializzazione'
+
+  const footerText =
+    profile?.role === 'owner'
+      ? 'Gestione completa sito, utenti, logs e contenuti.'
+      : profile?.role === 'editor'
+        ? 'Accesso abilitato a immobili e news.'
+        : profile?.role === 'agent'
+          ? 'Accesso abilitato alla gestione immobili.'
+          : 'Profilo o permessi non ancora caricati.'
+
   return (
     <div className="flex h-full flex-col px-6 py-8">
       <div className="mb-10 flex items-start justify-between gap-4">
@@ -58,6 +132,20 @@ function SidebarContent({
           >
             ✕
           </button>
+        ) : null}
+      </div>
+
+      <div className="mb-5 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3">
+        <p className="text-xs uppercase tracking-[0.18em] text-[var(--site-text-faint)]">
+          Profilo
+        </p>
+        <p className="mt-2 text-sm font-semibold text-[var(--site-text)]">
+          {roleLabel}
+        </p>
+        {profile?.full_name ? (
+          <p className="mt-1 text-xs text-[var(--site-text-muted)]">
+            {profile.full_name}
+          </p>
         ) : null}
       </div>
 
@@ -86,11 +174,9 @@ function SidebarContent({
       </nav>
 
       <div className="theme-admin-card mt-auto rounded-2xl p-4">
-        <p className="text-sm text-[var(--site-text)]">
-          Gestionale premium in costruzione
-        </p>
+        <p className="text-sm text-[var(--site-text)]">{footerTitle}</p>
         <p className="mt-1 text-xs text-[var(--site-text-muted)]">
-          Base admin pronta per immobili, news e pubblicazione.
+          {footerText}
         </p>
       </div>
     </div>
