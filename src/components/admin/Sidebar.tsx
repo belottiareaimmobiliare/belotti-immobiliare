@@ -135,7 +135,7 @@ function SidebarContent({
         ) : null}
       </div>
 
-      <div className="mb-5 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3">
+      <div className="mb-5 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-4">
         <p className="text-xs uppercase tracking-[0.18em] text-[var(--site-text-faint)]">
           Profilo
         </p>
@@ -145,6 +145,11 @@ function SidebarContent({
         {profile?.full_name ? (
           <p className="mt-1 text-xs text-[var(--site-text-muted)]">
             {profile.full_name}
+          </p>
+        ) : null}
+        {profile?.username ? (
+          <p className="mt-1 text-xs text-[var(--site-text-faint)]">
+            @{profile.username}
           </p>
         ) : null}
       </div>
@@ -173,7 +178,18 @@ function SidebarContent({
         })}
       </nav>
 
-      <div className="theme-admin-card mt-auto rounded-2xl p-4">
+      <div className="mt-5">
+        <form action="/logout" method="post">
+          <button
+            type="submit"
+            className="inline-flex w-full items-center justify-center rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm font-semibold text-[var(--site-text)] transition hover:bg-[var(--site-surface-2)]"
+          >
+            Logout
+          </button>
+        </form>
+      </div>
+
+      <div className="theme-admin-card mt-5 rounded-2xl p-4">
         <p className="text-sm text-[var(--site-text)]">{footerTitle}</p>
         <p className="mt-1 text-xs text-[var(--site-text-muted)]">
           {footerText}
