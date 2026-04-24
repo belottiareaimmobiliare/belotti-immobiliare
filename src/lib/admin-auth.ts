@@ -116,7 +116,7 @@ export async function requireAdminProfile() {
   const profile = await getCurrentAdminProfile()
 
   if (!profile || !profile.is_active) {
-    redirect('/')
+    redirect('/admin/login')
   }
 
   return profile

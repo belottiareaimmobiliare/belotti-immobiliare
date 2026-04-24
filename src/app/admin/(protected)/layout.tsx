@@ -1,21 +1,26 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import AdminProtectedShell from '@/components/admin/AdminProtectedShell'
+import type { ReactNode } from 'react'
+import AdminShell from '@/components/admin/AdminShell'
+import { getSidebarLinks, requireAdminProfile } from '@/lib/admin-auth'
 
-export default async function AdminLayout({
+export default async function AdminProtectedLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
-  const supabase = await createClient()
+  const profile = await requireAdminProfile()
+  const links = getSidebarLinks(profile)
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/admin/login')
-  }
-
-  return <AdminProtectedShell>{children}</AdminProtectedShell>
+  return (
+    <AdminShell
+      profile={{
+        full_name: profile.full_name,
+        username: profile.username,
+        role: profile.role,
+        is_active: profile.is_active,
+      }}
+      links={links}
+    >
+      {children}
+    </AdminShell>
+  )
 }
