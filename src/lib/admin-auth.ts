@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
-import { createClient as createServerClient } from '@/lib/server'
-import { createClient as createServiceClient } from '@/lib/service'
+import { createClient as createServerClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@/lib/supabase/service'
 
 export type AdminProfile = {
   id: string
