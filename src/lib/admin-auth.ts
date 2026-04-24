@@ -24,6 +24,15 @@ export type SidebarLink = {
   label: string
 }
 
+export type AdminPermission =
+  | 'can_manage_properties'
+  | 'can_manage_news'
+  | 'can_manage_site_content'
+  | 'can_manage_users'
+  | 'can_view_logs'
+  | 'can_view_kpis'
+  | 'can_publish_properties'
+
 export function isOwner(profile: AdminProfile | null) {
   return profile?.role === 'owner'
 }
@@ -45,6 +54,10 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
 
   if (profile.can_manage_news) {
     links.push({ href: '/admin/news', label: 'News' })
+  }
+
+  if (profile.can_view_kpis) {
+    links.push({ href: '/admin/kpi', label: 'KPI agenti' })
   }
 
   if (profile.role === 'owner') {
@@ -113,6 +126,20 @@ export async function requireOwner() {
   const profile = await requireAdminProfile()
 
   if (profile.role !== 'owner') {
+    redirect('/admin')
+  }
+
+  return profile
+}
+
+export async function requirePermission(permission: AdminPermission) {
+  const profile = await requireAdminProfile()
+
+  if (profile.role === 'owner') {
+    return profile
+  }
+
+  if (!profile[permission]) {
     redirect('/admin')
   }
 

@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 
 type SidebarLink = {
@@ -9,21 +8,20 @@ type SidebarLink = {
   label: string
 }
 
-type AdminProfile = {
+type SidebarProfile = {
   full_name: string
   username: string
   role: 'owner' | 'agent' | 'editor'
   is_active: boolean
-  can_manage_properties: boolean
-  can_manage_news: boolean
-  can_manage_site_content: boolean
-  can_manage_users: boolean
-  can_view_logs: boolean
-  can_view_kpis: boolean
-  can_publish_properties: boolean
-} | null
+}
 
-const defaultLinks: SidebarLink[] = [{ href: '/admin', label: 'Dashboard' }]
+type SidebarProps = {
+  profile: SidebarProfile
+  links: SidebarLink[]
+  mobile?: boolean
+  mobileOpen?: boolean
+  onClose?: () => void
+}
 
 function isLinkActive(href: string, pathname: string, currentSearch: string) {
   const [basePath, queryString] = href.split('?')
@@ -34,16 +32,14 @@ function isLinkActive(href: string, pathname: string, currentSearch: string) {
   return currentSearch === queryString
 }
 
-type SidebarProps = {
-  mobile?: boolean
-  mobileOpen?: boolean
-  onClose?: () => void
-}
-
 function SidebarContent({
+  profile,
+  links,
   mobile = false,
   onClose,
 }: {
+  profile: SidebarProfile
+  links: SidebarLink[]
   mobile?: boolean
   onClose?: () => void
 }) {
@@ -51,72 +47,30 @@ function SidebarContent({
   const searchParams = useSearchParams()
   const currentSearch = searchParams.toString()
 
-  const [links, setLinks] = useState<SidebarLink[]>(defaultLinks)
-  const [profile, setProfile] = useState<AdminProfile>(null)
-
-  useEffect(() => {
-    let mounted = true
-
-    const loadSidebar = async () => {
-      try {
-        const res = await fetch('/api/admin/me', {
-          method: 'GET',
-          cache: 'no-store',
-        })
-
-        if (!res.ok) return
-
-        const data = (await res.json()) as {
-          profile: AdminProfile
-          links: SidebarLink[]
-        }
-
-        if (!mounted) return
-
-        setProfile(data.profile ?? null)
-        setLinks(data.links?.length ? data.links : defaultLinks)
-      } catch {
-        // fallback silenzioso
-      }
-    }
-
-    loadSidebar()
-
-    return () => {
-      mounted = false
-    }
-  }, [])
-
   const roleLabel =
-    profile?.role === 'owner'
+    profile.role === 'owner'
       ? 'Admin Proprietario'
-      : profile?.role === 'editor'
+      : profile.role === 'editor'
         ? 'Editor'
-        : profile?.role === 'agent'
-          ? 'Agente'
-          : 'Accesso base'
+        : 'Agente'
 
   const footerTitle =
-    profile?.role === 'owner'
+    profile.role === 'owner'
       ? 'Pannello proprietario attivo'
-      : profile?.role === 'editor'
+      : profile.role === 'editor'
         ? 'Pannello editor attivo'
-        : profile?.role === 'agent'
-          ? 'Pannello agente attivo'
-          : 'Gestionale in inizializzazione'
+        : 'Pannello agente attivo'
 
   const footerText =
-    profile?.role === 'owner'
-      ? 'Gestione completa sito, utenti, logs e contenuti.'
-      : profile?.role === 'editor'
-        ? 'Accesso abilitato a immobili e news.'
-        : profile?.role === 'agent'
-          ? 'Accesso abilitato alla gestione immobili.'
-          : 'Profilo o permessi non ancora caricati.'
+    profile.role === 'owner'
+      ? 'Gestione completa di contenuti, utenti, logs e controllo generale del sito.'
+      : profile.role === 'editor'
+        ? 'Accesso abilitato alle sezioni editoriali e ai contenuti consentiti.'
+        : 'Accesso abilitato alle sezioni immobiliari assegnate dai permessi.'
 
   return (
     <div className="flex h-full flex-col px-6 py-8">
-      <div className="mb-10 flex items-start justify-between gap-4">
+      <div className="mb-8 flex items-start justify-between gap-4">
         <img
           src="/images/brand/areaimmobiliare.png"
           alt="Area Immobiliare"
@@ -142,16 +96,12 @@ function SidebarContent({
         <p className="mt-2 text-sm font-semibold text-[var(--site-text)]">
           {roleLabel}
         </p>
-        {profile?.full_name ? (
-          <p className="mt-1 text-xs text-[var(--site-text-muted)]">
-            {profile.full_name}
-          </p>
-        ) : null}
-        {profile?.username ? (
-          <p className="mt-1 text-xs text-[var(--site-text-faint)]">
-            @{profile.username}
-          </p>
-        ) : null}
+        <p className="mt-1 text-xs text-[var(--site-text-muted)]">
+          {profile.full_name}
+        </p>
+        <p className="mt-1 text-xs text-[var(--site-text-faint)]">
+          @{profile.username}
+        </p>
       </div>
 
       <nav className="space-y-2">
@@ -191,7 +141,7 @@ function SidebarContent({
 
       <div className="theme-admin-card mt-5 rounded-2xl p-4">
         <p className="text-sm text-[var(--site-text)]">{footerTitle}</p>
-        <p className="mt-1 text-xs text-[var(--site-text-muted)]">
+        <p className="mt-1 text-xs leading-6 text-[var(--site-text-muted)]">
           {footerText}
         </p>
       </div>
@@ -200,6 +150,8 @@ function SidebarContent({
 }
 
 export default function Sidebar({
+  profile,
+  links,
   mobile = false,
   mobileOpen = false,
   onClose,
@@ -223,7 +175,12 @@ export default function Sidebar({
             mobileOpen ? 'translate-x-0' : '-translate-x-full',
           ].join(' ')}
         >
-          <SidebarContent mobile onClose={onClose} />
+          <SidebarContent
+            profile={profile}
+            links={links}
+            mobile
+            onClose={onClose}
+          />
         </aside>
       </>
     )
@@ -231,7 +188,7 @@ export default function Sidebar({
 
   return (
     <aside className="hidden w-72 shrink-0 border-r border-[var(--site-border)] bg-[var(--site-bg-soft)] lg:block">
-      <SidebarContent />
+      <SidebarContent profile={profile} links={links} />
     </aside>
   )
 }
