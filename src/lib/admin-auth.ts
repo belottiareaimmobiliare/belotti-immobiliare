@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient as createServerClient } from '@/lib/supabase/server'
-import { createClient as createServiceClient } from '@/lib/supabase/service'
+import { createServiceClient } from '@/lib/supabase/service'
 
 export type AdminProfile = {
   id: string
@@ -69,7 +69,7 @@ export async function getCurrentAdminProfile(): Promise<AdminProfile | null> {
 
   if (!user) return null
 
-  const service = await createServiceClient()
+  const service = createServiceClient()
 
   const { data, error } = await service
     .from('profiles')
