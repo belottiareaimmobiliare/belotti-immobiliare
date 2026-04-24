@@ -1,15 +1,41 @@
 import { redirect } from 'next/navigation'
 import AdminLoginForm from '@/components/admin/AdminLoginForm'
+import AdminGoogleLoginButton from '@/components/admin/AdminGoogleLoginButton'
 import { getCurrentAdminProfile } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminLoginPage() {
-  const profile = await getCurrentAdminProfile()
+function getErrorMessage(code?: string) {
+  if (code === 'google_not_authorized') {
+    return 'Questa Gmail non è autorizzata per l’accesso admin.'
+  }
+
+  if (code === 'google_exchange_failed') {
+    return 'Errore durante il completamento del login Google.'
+  }
+
+  if (code === 'google_missing_code') {
+    return 'Callback Google non valido.'
+  }
+
+  return ''
+}
+
+export default async function AdminLoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>
+}) {
+  const [profile, params] = await Promise.all([
+    getCurrentAdminProfile(),
+    searchParams,
+  ])
 
   if (profile?.is_active) {
     redirect('/admin')
   }
+
+  const errorMessage = getErrorMessage(params.error)
 
   return (
     <main className="min-h-screen bg-[var(--site-bg)] px-4 py-10 text-[var(--site-text)]">
@@ -31,12 +57,30 @@ export default async function AdminLoginPage() {
             </h1>
 
             <p className="mt-4 text-sm leading-7 text-[var(--site-text-muted)]">
-              Inserisci le credenziali del tuo account amministrativo per entrare
-              nell’area riservata.
+              Usa email e password oppure prova l’accesso con Google se la tua
+              Gmail è stata autorizzata nel sistema.
             </p>
           </div>
 
-          <AdminLoginForm />
+          {errorMessage ? (
+            <div className="mb-5 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+              {errorMessage}
+            </div>
+          ) : null}
+
+          <div className="space-y-5">
+            <AdminGoogleLoginButton />
+
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-[var(--site-border)]" />
+              <span className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                oppure
+              </span>
+              <div className="h-px flex-1 bg-[var(--site-border)]" />
+            </div>
+
+            <AdminLoginForm />
+          </div>
         </div>
       </div>
     </main>

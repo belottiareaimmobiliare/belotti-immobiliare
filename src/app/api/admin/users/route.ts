@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { getAdminProfileByAuthIdentity } from '@/lib/admin-auth'
 
 type UserRole = 'owner' | 'agent' | 'editor'
 
@@ -30,8 +31,7 @@ function normalizeEmail(value: unknown) {
 }
 
 function normalizeRequiredEmail(value: unknown) {
-  const str = String(value ?? '').trim().toLowerCase()
-  return str
+  return String(value ?? '').trim().toLowerCase()
 }
 
 function normalizeUsername(value: unknown) {
@@ -74,51 +74,58 @@ async function getActorOwner() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: NextResponse.json({ error: 'Non autenticato.' }, { status: 401 }) }
+    return {
+      error: NextResponse.json({ error: 'Non autenticato.' }, { status: 401 }),
+    }
   }
 
   const service = createServiceClient()
 
-  const { data: actor } = await service
-    .from('profiles')
-    .select('id, full_name, username, role, is_active')
-    .eq('id', user.id)
-    .maybeSingle()
+  const profile = await getAdminProfileByAuthIdentity({
+    id: user.id,
+    email: user.email,
+  })
 
-  if (!actor || actor.role !== 'owner' || !actor.is_active) {
+  if (!profile || profile.role !== 'owner' || !profile.is_active) {
     return {
-      error: NextResponse.json({ error: 'Accesso riservato ai proprietari.' }, { status: 403 }),
+      error: NextResponse.json(
+        { error: 'Accesso riservato ai proprietari.' },
+        { status: 403 }
+      ),
     }
   }
 
-  return { actor, service }
+  return { actor: profile, service }
 }
 
-async function insertActivityLog(service: ReturnType<typeof createServiceClient>, input: {
-  actor_user_id: string
-  actor_username: string | null
-  actor_full_name: string | null
-  entity_type: 'user'
-  entity_id: string
-  action:
-    | 'create'
-    | 'update'
-    | 'delete'
-    | 'publish'
-    | 'unpublish'
-    | 'assign'
-    | 'login_success'
-    | 'login_failed'
-    | 'qr_approved'
-    | 'qr_rejected'
-    | 'role_change'
-    | 'permission_change'
-    | 'activate_user'
-    | 'deactivate_user'
-  summary: string
-  before_data?: Record<string, unknown> | null
-  after_data?: Record<string, unknown> | null
-}) {
+async function insertActivityLog(
+  service: ReturnType<typeof createServiceClient>,
+  input: {
+    actor_user_id: string
+    actor_username: string | null
+    actor_full_name: string | null
+    entity_type: 'user'
+    entity_id: string
+    action:
+      | 'create'
+      | 'update'
+      | 'delete'
+      | 'publish'
+      | 'unpublish'
+      | 'assign'
+      | 'login_success'
+      | 'login_failed'
+      | 'qr_approved'
+      | 'qr_rejected'
+      | 'role_change'
+      | 'permission_change'
+      | 'activate_user'
+      | 'deactivate_user'
+    summary: string
+    before_data?: Record<string, unknown> | null
+    after_data?: Record<string, unknown> | null
+  }
+) {
   try {
     await service.from('activity_log').insert({
       actor_user_id: input.actor_user_id,
@@ -142,9 +149,7 @@ export async function GET() {
 
   const { service } = auth
 
-  const { data, error } = await service
-    .from('profiles')
-    .select(`
+  const { data, error } = await service.from('profiles').select(`
       id,
       full_name,
       username,
@@ -164,7 +169,10 @@ export async function GET() {
     `)
 
   if (error) {
-    return NextResponse.json({ error: 'Errore nel caricamento utenti.' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Errore nel caricamento utenti.' },
+      { status: 500 }
+    )
   }
 
   const roleOrder = { owner: 0, agent: 1, editor: 2 }
@@ -239,7 +247,10 @@ export async function POST(request: Request) {
 
   if (createdAuth.error || !createdAuth.data.user) {
     return NextResponse.json(
-      { error: createdAuth.error?.message ?? 'Errore nella creazione utente auth.' },
+      {
+        error:
+          createdAuth.error?.message ?? 'Errore nella creazione utente auth.',
+      },
       { status: 400 }
     )
   }

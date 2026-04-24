@@ -27,18 +27,14 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
-  const isLoginPage = request.nextUrl.pathname === '/admin/login'
+  const pathname = request.nextUrl.pathname
+  const isAdminRoute = pathname.startsWith('/admin')
+  const isPublicAdminRoute =
+    pathname === '/admin/login' || pathname === '/admin/callback'
 
-  if (isAdminRoute && !isLoginPage && !user) {
+  if (isAdminRoute && !isPublicAdminRoute && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/admin/login'
-    return NextResponse.redirect(url)
-  }
-
-  if (isLoginPage && user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/admin'
     return NextResponse.redirect(url)
   }
 

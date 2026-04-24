@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { getAdminProfileByAuthIdentity } from '@/lib/admin-auth'
 
 type UserRole = 'owner' | 'agent' | 'editor'
 
@@ -59,50 +60,57 @@ async function getActorOwner() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: NextResponse.json({ error: 'Non autenticato.' }, { status: 401 }) }
+    return {
+      error: NextResponse.json({ error: 'Non autenticato.' }, { status: 401 }),
+    }
   }
 
   const service = createServiceClient()
 
-  const { data: actor } = await service
-    .from('profiles')
-    .select('id, full_name, username, role, is_active')
-    .eq('id', user.id)
-    .maybeSingle()
+  const profile = await getAdminProfileByAuthIdentity({
+    id: user.id,
+    email: user.email,
+  })
 
-  if (!actor || actor.role !== 'owner' || !actor.is_active) {
+  if (!profile || profile.role !== 'owner' || !profile.is_active) {
     return {
-      error: NextResponse.json({ error: 'Accesso riservato ai proprietari.' }, { status: 403 }),
+      error: NextResponse.json(
+        { error: 'Accesso riservato ai proprietari.' },
+        { status: 403 }
+      ),
     }
   }
 
-  return { actor, service }
+  return { actor: profile, service }
 }
 
-async function insertActivityLog(service: ReturnType<typeof createServiceClient>, input: {
-  actor_user_id: string
-  actor_username: string | null
-  actor_full_name: string | null
-  entity_id: string
-  action:
-    | 'create'
-    | 'update'
-    | 'delete'
-    | 'publish'
-    | 'unpublish'
-    | 'assign'
-    | 'login_success'
-    | 'login_failed'
-    | 'qr_approved'
-    | 'qr_rejected'
-    | 'role_change'
-    | 'permission_change'
-    | 'activate_user'
-    | 'deactivate_user'
-  summary: string
-  before_data?: Record<string, unknown> | null
-  after_data?: Record<string, unknown> | null
-}) {
+async function insertActivityLog(
+  service: ReturnType<typeof createServiceClient>,
+  input: {
+    actor_user_id: string
+    actor_username: string | null
+    actor_full_name: string | null
+    entity_id: string
+    action:
+      | 'create'
+      | 'update'
+      | 'delete'
+      | 'publish'
+      | 'unpublish'
+      | 'assign'
+      | 'login_success'
+      | 'login_failed'
+      | 'qr_approved'
+      | 'qr_rejected'
+      | 'role_change'
+      | 'permission_change'
+      | 'activate_user'
+      | 'deactivate_user'
+    summary: string
+    before_data?: Record<string, unknown> | null
+    after_data?: Record<string, unknown> | null
+  }
+) {
   try {
     await service.from('activity_log').insert({
       actor_user_id: input.actor_user_id,
@@ -175,10 +183,7 @@ export async function PATCH(
     .maybeSingle()
 
   if (existingError || !existingProfile) {
-    return NextResponse.json(
-      { error: 'Utente non trovato.' },
-      { status: 404 }
-    )
+    return NextResponse.json({ error: 'Utente non trovato.' }, { status: 404 })
   }
 
   if (role === 'owner' && is_active) {
@@ -217,7 +222,12 @@ export async function PATCH(
     }
   }
 
-  const authUpdatePayload: { email?: string; password?: string; user_metadata?: Record<string, unknown>; app_metadata?: Record<string, unknown> } = {
+  const authUpdatePayload: {
+    email?: string
+    password?: string
+    user_metadata?: Record<string, unknown>
+    app_metadata?: Record<string, unknown>
+  } = {
     email: login_email,
     user_metadata: {
       full_name,
@@ -233,7 +243,10 @@ export async function PATCH(
     authUpdatePayload.password = new_password
   }
 
-  const updatedAuth = await service.auth.admin.updateUserById(userId, authUpdatePayload)
+  const updatedAuth = await service.auth.admin.updateUserById(
+    userId,
+    authUpdatePayload
+  )
 
   if (updatedAuth.error) {
     return NextResponse.json(
@@ -292,11 +305,13 @@ export async function PATCH(
   const permissionsChanged =
     existingProfile.can_manage_properties !== updatePayload.can_manage_properties ||
     existingProfile.can_manage_news !== updatePayload.can_manage_news ||
-    existingProfile.can_manage_site_content !== updatePayload.can_manage_site_content ||
+    existingProfile.can_manage_site_content !==
+      updatePayload.can_manage_site_content ||
     existingProfile.can_manage_users !== updatePayload.can_manage_users ||
     existingProfile.can_view_logs !== updatePayload.can_view_logs ||
     existingProfile.can_view_kpis !== updatePayload.can_view_kpis ||
-    existingProfile.can_publish_properties !== updatePayload.can_publish_properties
+    existingProfile.can_publish_properties !==
+      updatePayload.can_publish_properties
 
   await insertActivityLog(service, {
     actor_user_id: actor.id,

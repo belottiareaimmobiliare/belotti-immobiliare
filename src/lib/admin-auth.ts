@@ -33,6 +33,28 @@ export type AdminPermission =
   | 'can_view_kpis'
   | 'can_publish_properties'
 
+type AuthIdentity = {
+  id: string
+  email?: string | null
+}
+
+const PROFILE_SELECT = `
+  id,
+  full_name,
+  username,
+  login_email,
+  authorized_google_email,
+  role,
+  is_active,
+  can_manage_properties,
+  can_manage_news,
+  can_manage_site_content,
+  can_manage_users,
+  can_view_logs,
+  can_view_kpis,
+  can_publish_properties
+`
+
 export function isOwner(profile: AdminProfile | null) {
   return profile?.role === 'owner'
 }
@@ -73,6 +95,39 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
   return links
 }
 
+export async function getAdminProfileByAuthIdentity(
+  identity: AuthIdentity | null | undefined
+): Promise<AdminProfile | null> {
+  if (!identity?.id) return null
+
+  const service = createServiceClient()
+
+  const { data: byId, error: byIdError } = await service
+    .from('profiles')
+    .select(PROFILE_SELECT)
+    .eq('id', identity.id)
+    .maybeSingle()
+
+  if (!byIdError && byId) {
+    return byId as AdminProfile
+  }
+
+  const normalizedEmail = identity.email?.trim().toLowerCase()
+  if (!normalizedEmail) return null
+
+  const { data: byGoogleEmail, error: byGoogleEmailError } = await service
+    .from('profiles')
+    .select(PROFILE_SELECT)
+    .eq('authorized_google_email', normalizedEmail)
+    .maybeSingle()
+
+  if (!byGoogleEmailError && byGoogleEmail) {
+    return byGoogleEmail as AdminProfile
+  }
+
+  return null
+}
+
 export async function getCurrentAdminProfile(): Promise<AdminProfile | null> {
   const supabase = await createServerClient()
 
@@ -80,36 +135,14 @@ export async function getCurrentAdminProfile(): Promise<AdminProfile | null> {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) return null
-
-  const service = createServiceClient()
-
-  const { data, error } = await service
-    .from('profiles')
-    .select(
-      `
-      id,
-      full_name,
-      username,
-      login_email,
-      authorized_google_email,
-      role,
-      is_active,
-      can_manage_properties,
-      can_manage_news,
-      can_manage_site_content,
-      can_manage_users,
-      can_view_logs,
-      can_view_kpis,
-      can_publish_properties
-    `
-    )
-    .eq('id', user.id)
-    .maybeSingle()
-
-  if (error || !data) return null
-
-  return data as AdminProfile
+  return getAdminProfileByAuthIdentity(
+    user
+      ? {
+          id: user.id,
+          email: user.email,
+        }
+      : null
+  )
 }
 
 export async function requireAdminProfile() {
