@@ -193,7 +193,7 @@ function CreateUserForm({
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-            Nuovo utente
+            Active Directory
           </p>
           <h2 className="mt-2 text-2xl font-semibold text-[var(--site-text)]">
             Crea agente, editor o proprietario
@@ -273,9 +273,9 @@ function CreateUserForm({
             <option value="owner">Proprietario</option>
           </select>
 
-          <p className="mt-3 text-xs text-[var(--site-text-muted)]">
-            Se cambi ruolo da qui, vengono applicati i permessi base del preset.
-            Poi puoi personalizzare i singoli check prima di salvare.
+          <p className="mt-3 text-xs leading-6 text-[var(--site-text-muted)]">
+            Se cambi ruolo da qui, vengono applicati subito i permessi base del
+            preset. Poi puoi aggiustare a mano i singoli check prima del salvataggio.
           </p>
 
           <label className="mt-4 flex items-center gap-3 text-sm text-[var(--site-text)]">
@@ -357,11 +357,15 @@ function CreateUserForm({
   )
 }
 
-function ManagedUserCard({
+function ManagedUserAccordionItem({
   user,
+  isOpen,
+  onToggle,
   onUpdated,
 }: {
   user: ManagedUser
+  isOpen: boolean
+  onToggle: () => void
   onUpdated: (user: ManagedUser) => void
 }) {
   const [form, setForm] = useState({
@@ -432,174 +436,188 @@ function ManagedUserCard({
   }
 
   return (
-    <section className="theme-panel rounded-[30px] border p-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div>
+    <article className="rounded-[28px] border border-[var(--site-border)] bg-[var(--site-surface)]">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full flex-col gap-4 px-5 py-5 text-left transition hover:bg-[var(--site-surface-2)] md:flex-row md:items-center md:justify-between"
+      >
+        <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <RoleBadge role={form.role} />
             {!form.is_active ? (
-              <span className="inline-flex rounded-full border border-[var(--site-border)] bg-[var(--site-surface)] px-3 py-1 text-xs font-semibold text-[var(--site-text-faint)]">
+              <span className="inline-flex rounded-full border border-[var(--site-border)] px-3 py-1 text-xs font-semibold text-[var(--site-text-faint)]">
                 Disattivo
               </span>
             ) : null}
           </div>
 
-          <h3 className="mt-3 text-2xl font-semibold text-[var(--site-text)]">
+          <h3 className="mt-3 text-xl font-semibold text-[var(--site-text)]">
             {form.full_name}
           </h3>
-          <p className="mt-1 text-sm text-[var(--site-text-muted)]">
-            @{form.username}
-          </p>
+
+          <div className="mt-2 flex flex-wrap gap-3 text-sm text-[var(--site-text-muted)]">
+            <span>@{form.username}</span>
+            <span>{form.login_email}</span>
+          </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => applyPreset('agent')}
-            className="rounded-2xl border border-[var(--site-border)] px-3 py-2 text-sm text-[var(--site-text)]"
-          >
-            Preset agente
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('editor')}
-            className="rounded-2xl border border-[var(--site-border)] px-3 py-2 text-sm text-[var(--site-text)]"
-          >
-            Preset editor
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('owner')}
-            className="rounded-2xl border border-[var(--site-border)] px-3 py-2 text-sm text-[var(--site-text)]"
-          >
-            Preset owner
-          </button>
+        <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--site-border)] text-[var(--site-text)]">
+          {isOpen ? '−' : '+'}
         </div>
-      </div>
+      </button>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <input
-          value={form.full_name}
-          onChange={(e) => patch('full_name', e.target.value)}
-          placeholder="Nome e cognome"
-          className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm text-[var(--site-text)]"
-        />
-        <input
-          value={form.username}
-          onChange={(e) => patch('username', e.target.value)}
-          placeholder="Username"
-          className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm text-[var(--site-text)]"
-        />
-        <input
-          value={form.login_email}
-          onChange={(e) => patch('login_email', e.target.value)}
-          placeholder="Email login"
-          className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm text-[var(--site-text)]"
-        />
-        <input
-          value={form.authorized_google_email}
-          onChange={(e) => patch('authorized_google_email', e.target.value)}
-          placeholder="Gmail autorizzata"
-          className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm text-[var(--site-text)]"
-        />
+      {isOpen ? (
+        <div className="border-t border-[var(--site-border)] px-5 py-5">
+          <div className="mb-5 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => applyPreset('agent')}
+              className="rounded-2xl border border-[var(--site-border)] px-3 py-2 text-sm text-[var(--site-text)]"
+            >
+              Preset agente
+            </button>
+            <button
+              type="button"
+              onClick={() => applyPreset('editor')}
+              className="rounded-2xl border border-[var(--site-border)] px-3 py-2 text-sm text-[var(--site-text)]"
+            >
+              Preset editor
+            </button>
+            <button
+              type="button"
+              onClick={() => applyPreset('owner')}
+              className="rounded-2xl border border-[var(--site-border)] px-3 py-2 text-sm text-[var(--site-text)]"
+            >
+              Preset owner
+            </button>
+          </div>
 
-        <div className="md:col-span-2">
-          <input
-            value={form.new_password}
-            onChange={(e) => patch('new_password', e.target.value)}
-            placeholder="Resetta la password (inserisci la nuova qui e salva)"
-            className="w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm text-[var(--site-text)]"
-          />
-          <p className="mt-2 text-xs text-[var(--site-text-muted)]">
-            Se lasci vuoto questo campo, la password attuale non viene modificata.
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-4 grid gap-4 md:grid-cols-[220px_1fr]">
-        <div className="rounded-[24px] border border-[var(--site-border)] bg-[var(--site-surface)] p-4">
-          <label className="block text-sm font-medium text-[var(--site-text)]">
-            Ruolo
-          </label>
-          <select
-            value={form.role}
-            onChange={(e) => applyPreset(e.target.value as UserRole)}
-            className="mt-3 w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-bg)] px-3 py-2 text-sm text-[var(--site-text)]"
-          >
-            <option value="agent">Agente</option>
-            <option value="editor">Editor</option>
-            <option value="owner">Proprietario</option>
-          </select>
-
-          <p className="mt-3 text-xs text-[var(--site-text-muted)]">
-            Se cambi ruolo da qui, vengono ricaricati i permessi base del preset.
-            Poi puoi personalizzarli come vuoi e salvare.
-          </p>
-
-          <label className="mt-4 flex items-center gap-3 text-sm text-[var(--site-text)]">
+          <div className="grid gap-4 md:grid-cols-2">
             <input
-              type="checkbox"
-              checked={form.is_active}
-              onChange={(e) => patch('is_active', e.target.checked)}
+              value={form.full_name}
+              onChange={(e) => patch('full_name', e.target.value)}
+              placeholder="Nome e cognome"
+              className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-bg)] px-4 py-3 text-sm text-[var(--site-text)]"
             />
-            Account attivo
-          </label>
+            <input
+              value={form.username}
+              onChange={(e) => patch('username', e.target.value)}
+              placeholder="Username"
+              className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-bg)] px-4 py-3 text-sm text-[var(--site-text)]"
+            />
+            <input
+              value={form.login_email}
+              onChange={(e) => patch('login_email', e.target.value)}
+              placeholder="Email login"
+              className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-bg)] px-4 py-3 text-sm text-[var(--site-text)]"
+            />
+            <input
+              value={form.authorized_google_email}
+              onChange={(e) => patch('authorized_google_email', e.target.value)}
+              placeholder="Gmail autorizzata"
+              className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-bg)] px-4 py-3 text-sm text-[var(--site-text)]"
+            />
+
+            <div className="md:col-span-2">
+              <input
+                value={form.new_password}
+                onChange={(e) => patch('new_password', e.target.value)}
+                placeholder="Resetta la password (inserisci la nuova qui e salva)"
+                className="w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-bg)] px-4 py-3 text-sm text-[var(--site-text)]"
+              />
+              <p className="mt-2 text-xs text-[var(--site-text-muted)]">
+                Se lasci vuoto questo campo, la password attuale non viene modificata.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-[220px_1fr]">
+            <div className="rounded-[24px] border border-[var(--site-border)] bg-[var(--site-bg)] p-4">
+              <label className="block text-sm font-medium text-[var(--site-text)]">
+                Ruolo
+              </label>
+              <select
+                value={form.role}
+                onChange={(e) => applyPreset(e.target.value as UserRole)}
+                className="mt-3 w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-3 py-2 text-sm text-[var(--site-text)]"
+              >
+                <option value="agent">Agente</option>
+                <option value="editor">Editor</option>
+                <option value="owner">Proprietario</option>
+              </select>
+
+              <p className="mt-3 text-xs leading-6 text-[var(--site-text-muted)]">
+                Se cambi ruolo da qui, vengono ricaricati i permessi base del preset.
+                Poi puoi personalizzarli come vuoi e salvare.
+              </p>
+
+              <label className="mt-4 flex items-center gap-3 text-sm text-[var(--site-text)]">
+                <input
+                  type="checkbox"
+                  checked={form.is_active}
+                  onChange={(e) => patch('is_active', e.target.checked)}
+                />
+                Account attivo
+              </label>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <PermissionCheckbox
+                label="Gestione immobili"
+                checked={form.can_manage_properties}
+                onChange={(value) => patch('can_manage_properties', value)}
+              />
+              <PermissionCheckbox
+                label="Gestione news"
+                checked={form.can_manage_news}
+                onChange={(value) => patch('can_manage_news', value)}
+              />
+              <PermissionCheckbox
+                label="Modifica contenuti sito"
+                checked={form.can_manage_site_content}
+                onChange={(value) => patch('can_manage_site_content', value)}
+              />
+              <PermissionCheckbox
+                label="Gestione utenti"
+                checked={form.can_manage_users}
+                onChange={(value) => patch('can_manage_users', value)}
+              />
+              <PermissionCheckbox
+                label="Visualizza logs"
+                checked={form.can_view_logs}
+                onChange={(value) => patch('can_view_logs', value)}
+              />
+              <PermissionCheckbox
+                label="Visualizza KPI"
+                checked={form.can_view_kpis}
+                onChange={(value) => patch('can_view_kpis', value)}
+              />
+              <PermissionCheckbox
+                label="Può pubblicare immobili"
+                checked={form.can_publish_properties}
+                onChange={(value) => patch('can_publish_properties', value)}
+              />
+            </div>
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={save}
+              disabled={loading}
+              className="theme-button-primary rounded-2xl px-5 py-3 text-sm font-semibold disabled:opacity-50"
+            >
+              {loading ? 'Salvataggio...' : 'Salva modifiche'}
+            </button>
+
+            {message ? (
+              <p className="text-sm text-[var(--site-text-muted)]">{message}</p>
+            ) : null}
+          </div>
         </div>
-
-        <div className="grid gap-3 md:grid-cols-2">
-          <PermissionCheckbox
-            label="Gestione immobili"
-            checked={form.can_manage_properties}
-            onChange={(value) => patch('can_manage_properties', value)}
-          />
-          <PermissionCheckbox
-            label="Gestione news"
-            checked={form.can_manage_news}
-            onChange={(value) => patch('can_manage_news', value)}
-          />
-          <PermissionCheckbox
-            label="Modifica contenuti sito"
-            checked={form.can_manage_site_content}
-            onChange={(value) => patch('can_manage_site_content', value)}
-          />
-          <PermissionCheckbox
-            label="Gestione utenti"
-            checked={form.can_manage_users}
-            onChange={(value) => patch('can_manage_users', value)}
-          />
-          <PermissionCheckbox
-            label="Visualizza logs"
-            checked={form.can_view_logs}
-            onChange={(value) => patch('can_view_logs', value)}
-          />
-          <PermissionCheckbox
-            label="Visualizza KPI"
-            checked={form.can_view_kpis}
-            onChange={(value) => patch('can_view_kpis', value)}
-          />
-          <PermissionCheckbox
-            label="Può pubblicare immobili"
-            checked={form.can_publish_properties}
-            onChange={(value) => patch('can_publish_properties', value)}
-          />
-        </div>
-      </div>
-
-      <div className="mt-6 flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={save}
-          disabled={loading}
-          className="theme-button-primary rounded-2xl px-5 py-3 text-sm font-semibold disabled:opacity-50"
-        >
-          {loading ? 'Salvataggio...' : 'Salva modifiche'}
-        </button>
-
-        {message ? (
-          <p className="text-sm text-[var(--site-text-muted)]">{message}</p>
-        ) : null}
-      </div>
-    </section>
+      ) : null}
+    </article>
   )
 }
 
@@ -607,6 +625,7 @@ export default function UserManagementPanel() {
   const [users, setUsers] = useState<ManagedUser[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [openUserId, setOpenUserId] = useState<string | null>(null)
 
   async function loadUsers() {
     setLoading(true)
@@ -652,15 +671,14 @@ export default function UserManagementPanel() {
     <div className="space-y-6">
       <section className="theme-panel rounded-[34px] border p-6 md:p-8">
         <p className="text-sm uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
-          Gestione utenti reale
+          Active Directory
         </p>
         <h1 className="mt-3 text-3xl font-semibold text-[var(--site-text)] md:text-4xl">
           Agenti, editor e proprietari
         </h1>
         <p className="mt-4 max-w-4xl text-sm leading-8 text-[var(--site-text-muted)] md:text-base">
           Da qui puoi creare utenti veri, assegnare permessi, definire la Gmail
-          autorizzata opzionale e gestire l’accesso interno con username e
-          password.
+          autorizzata opzionale e gestire l’accesso interno con username e password.
         </p>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
@@ -696,6 +714,7 @@ export default function UserManagementPanel() {
       <CreateUserForm
         onCreated={(createdUser) => {
           setUsers((prev) => sortUsers([...prev, createdUser]))
+          setOpenUserId(createdUser.id)
         }}
       />
 
@@ -706,7 +725,7 @@ export default function UserManagementPanel() {
               Lista utenti
             </h2>
             <p className="mt-2 text-sm text-[var(--site-text-muted)]">
-              Modifica ruolo, permessi, stato account, Gmail autorizzata e password.
+              Visualizza la lista e apri solo l’utente che vuoi modificare.
             </p>
           </div>
 
@@ -720,7 +739,9 @@ export default function UserManagementPanel() {
         </div>
 
         {loading ? (
-          <p className="mt-6 text-sm text-[var(--site-text-muted)]">Caricamento utenti...</p>
+          <p className="mt-6 text-sm text-[var(--site-text-muted)]">
+            Caricamento utenti...
+          </p>
         ) : error ? (
           <p className="mt-6 text-sm text-red-500">{error}</p>
         ) : users.length === 0 ? (
@@ -728,11 +749,15 @@ export default function UserManagementPanel() {
             Nessun utente trovato.
           </p>
         ) : (
-          <div className="mt-6 space-y-6">
+          <div className="mt-6 space-y-4">
             {users.map((user) => (
-              <ManagedUserCard
+              <ManagedUserAccordionItem
                 key={user.id}
                 user={user}
+                isOpen={openUserId === user.id}
+                onToggle={() =>
+                  setOpenUserId((prev) => (prev === user.id ? null : user.id))
+                }
                 onUpdated={(updatedUser) => {
                   setUsers((prev) =>
                     sortUsers(

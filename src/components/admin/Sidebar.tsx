@@ -21,6 +21,7 @@ type SidebarProps = {
   mobile?: boolean
   mobileOpen?: boolean
   onClose?: () => void
+  collapsed?: boolean
 }
 
 function isLinkActive(href: string, pathname: string, currentSearch: string) {
@@ -155,6 +156,7 @@ export default function Sidebar({
   mobile = false,
   mobileOpen = false,
   onClose,
+  collapsed = false,
 }: SidebarProps) {
   if (mobile) {
     return (
@@ -187,8 +189,14 @@ export default function Sidebar({
   }
 
   return (
-    <aside className="hidden w-72 shrink-0 border-r border-[var(--site-border)] bg-[var(--site-bg-soft)] lg:block">
-      <SidebarContent profile={profile} links={links} />
+    <aside
+      className={[
+        'hidden shrink-0 overflow-hidden border-r border-[var(--site-border)] bg-[var(--site-bg-soft)] transition-[width,opacity] duration-300 lg:block',
+        collapsed ? 'w-0 opacity-0' : 'w-72 opacity-100',
+      ].join(' ')}
+      aria-hidden={collapsed}
+    >
+      {!collapsed ? <SidebarContent profile={profile} links={links} /> : null}
     </aside>
   )
 }
