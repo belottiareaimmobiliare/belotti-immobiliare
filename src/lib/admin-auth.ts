@@ -1,6 +1,11 @@
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import {
+  ADMIN_QR_SESSION_COOKIE,
+  verifyAdminQrSessionToken,
+} from '@/lib/admin-qr-session'
 
 export type AdminProfile = {
   id: string
@@ -95,6 +100,19 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
   return links
 }
 
+export async function getAdminProfileById(id: string): Promise<AdminProfile | null> {
+  const service = createServiceClient()
+
+  const { data, error } = await service
+    .from('profiles')
+    .select(PROFILE_SELECT)
+    .eq('id', id)
+    .maybeSingle()
+
+  if (error || !data) return null
+  return data as AdminProfile
+}
+
 export async function getAdminProfileByAuthIdentity(
   identity: AuthIdentity | null | undefined
 ): Promise<AdminProfile | null> {
@@ -102,30 +120,28 @@ export async function getAdminProfileByAuthIdentity(
 
   const service = createServiceClient()
 
-  const { data: byId, error: byIdError } = await service
+  const { data: byId } = await service
     .from('profiles')
     .select(PROFILE_SELECT)
     .eq('id', identity.id)
     .maybeSingle()
 
-  if (!byIdError && byId) {
+  if (byId) {
     return byId as AdminProfile
   }
 
   const normalizedEmail = identity.email?.trim().toLowerCase()
   if (!normalizedEmail) return null
 
-  const { data: byGoogleEmail, error: byGoogleEmailError } = await service
+  const { data: byGoogleEmail } = await service
     .from('profiles')
     .select(PROFILE_SELECT)
     .eq('authorized_google_email', normalizedEmail)
     .maybeSingle()
 
-  if (!byGoogleEmailError && byGoogleEmail) {
-    return byGoogleEmail as AdminProfile
-  }
+  if (!byGoogleEmail) return null
 
-  return null
+  return byGoogleEmail as AdminProfile
 }
 
 export async function getCurrentAdminProfile(): Promise<AdminProfile | null> {
@@ -135,14 +151,24 @@ export async function getCurrentAdminProfile(): Promise<AdminProfile | null> {
     data: { user },
   } = await supabase.auth.getUser()
 
-  return getAdminProfileByAuthIdentity(
-    user
-      ? {
-          id: user.id,
-          email: user.email,
-        }
-      : null
-  )
+  if (user) {
+    const byAuth = await getAdminProfileByAuthIdentity({
+      id: user.id,
+      email: user.email,
+    })
+
+    if (byAuth) return byAuth
+  }
+
+  const cookieStore = await cookies()
+  const qrCookie = cookieStore.get(ADMIN_QR_SESSION_COOKIE)?.value
+
+  if (!qrCookie) return null
+
+  const session = verifyAdminQrSessionToken(qrCookie)
+  if (!session?.profileId) return null
+
+  return getAdminProfileById(session.profileId)
 }
 
 export async function requireAdminProfile() {
