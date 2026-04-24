@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
-import { createClient as createServerClient } from '@/supabase/server'
-import { createClient as createServiceClient } from '@/supabase/service'
+import { createClient as createServerClient } from '@/lib/server'
+import { createClient as createServiceClient } from '@/lib/service'
 
 export type AdminProfile = {
   id: string
@@ -23,10 +23,6 @@ export type SidebarLink = {
   href: string
   label: string
 }
-
-export const dashboardOnlyLinks: SidebarLink[] = [
-  { href: '/admin', label: 'Dashboard' },
-]
 
 export function isOwner(profile: AdminProfile | null) {
   return profile?.role === 'owner'
