@@ -96,7 +96,7 @@ export default function WhatsAppChatButton() {
     <>
       {showOwnerCta ? (
         <div
-          className={`fixed right-4 z-[109] w-[calc(100vw-2rem)] max-w-[340px] rounded-[24px] border border-white/20 bg-[#25D366]/70 p-4 text-white shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl md:right-6 ${bubbleBottomClass}`}
+          className={`fixed right-4 z-[109] w-[calc(100vw-2rem)] max-w-[340px] rounded-[24px] border border-white/20 bg-[#25D366]/80 p-4 text-white shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl md:right-6 ${bubbleBottomClass}`}
         >
           <button
             type="button"
@@ -126,7 +126,7 @@ export default function WhatsAppChatButton() {
             oppure scrivici su WhatsApp dal pulsante verde qui sotto.
           </p>
 
-          <div className="absolute -bottom-2 right-9 h-4 w-4 rotate-45 border-b border-r border-white/20 bg-[#25D366]/70" />
+          <div className="absolute -bottom-2 right-9 h-4 w-4 rotate-45 border-b border-r border-white/20 bg-[#25D366]/80" />
         </div>
       ) : null}
 
