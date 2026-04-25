@@ -22,6 +22,20 @@ type Property = {
   id: string
   slug: string | null
   title: string | null
+  reference_code: string | null
+  condition: string | null
+  availability: string | null
+  year_built: number | null
+  floor: string | null
+  total_floors: string | null
+  bedrooms: number | null
+  balconies: number | null
+  terraces: number | null
+  exposure: string | null
+  heating_source: string | null
+  energy_epgl: string | null
+  condo_fees_amount: number | null
+  condo_fees_period: string | null
   price: number | null
   province: string | null
   comune: string | null
@@ -105,6 +119,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     currentProperty.surface ? `${currentProperty.surface} mq` : null,
     currentProperty.rooms ? `${currentProperty.rooms} locali` : null,
     currentProperty.bathrooms ? `${currentProperty.bathrooms} bagni` : null,
+    currentProperty.bedrooms ? `${currentProperty.bedrooms} camere` : null,
     currentProperty.contract_type
       ? currentProperty.contract_type.charAt(0).toUpperCase() +
         currentProperty.contract_type.slice(1)
@@ -125,6 +140,48 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
   const infoCards = [
     {
+      label: 'Codice immobile',
+      value: formatLabel(currentProperty.reference_code),
+      visible: shouldRenderOptionalField(currentProperty.reference_code),
+      spanClass: '',
+    },
+    {
+      label: 'Stato immobile',
+      value: formatLabel(currentProperty.condition, 'Da definire'),
+      visible: shouldRenderOptionalField(currentProperty.condition),
+      spanClass: '',
+    },
+    {
+      label: 'Disponibilità',
+      value: formatLabel(currentProperty.availability, 'Da definire'),
+      visible: shouldRenderOptionalField(currentProperty.availability),
+      spanClass: '',
+    },
+    {
+      label: 'Anno costruzione',
+      value: currentProperty.year_built ? String(currentProperty.year_built) : 'Da definire',
+      visible: Boolean(currentProperty.year_built),
+      spanClass: '',
+    },
+    {
+      label: 'Piano',
+      value: [currentProperty.floor, currentProperty.total_floors ? `di ${currentProperty.total_floors}` : null].filter(Boolean).join(' ') || 'Da definire',
+      visible: shouldRenderOptionalField(currentProperty.floor) || shouldRenderOptionalField(currentProperty.total_floors),
+      spanClass: '',
+    },
+    {
+      label: 'Balconi / terrazzi',
+      value: `${currentProperty.balconies || 0} balconi · ${currentProperty.terraces || 0} terrazzi`,
+      visible: Boolean(currentProperty.balconies || currentProperty.terraces),
+      spanClass: '',
+    },
+    {
+      label: 'Esposizione',
+      value: formatLabel(currentProperty.exposure, 'Da definire'),
+      visible: shouldRenderOptionalField(currentProperty.exposure),
+      spanClass: '',
+    },
+    {
       label: 'Classe energetica',
       value: formatLabel(currentProperty.energy_class, '-'),
       visible: true,
@@ -132,7 +189,9 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     },
     {
       label: 'Spese condominiali',
-      value: formatLabel(currentProperty.condo_fees, 'Da definire'),
+      value: currentProperty.condo_fees_amount
+        ? `€ ${currentProperty.condo_fees_amount.toLocaleString('it-IT')}${currentProperty.condo_fees_period ? ` / ${currentProperty.condo_fees_period}` : ''}`
+        : formatLabel(currentProperty.condo_fees, 'Da definire'),
       visible: true,
       spanClass: '',
     },
@@ -140,6 +199,18 @@ export default async function PropertyDetailPage({ params }: PageProps) {
       label: 'Riscaldamento',
       value: formatLabel(currentProperty.heating_type, 'Da definire'),
       visible: true,
+      spanClass: '',
+    },
+    {
+      label: 'Fonte riscaldamento',
+      value: formatLabel(currentProperty.heating_source, 'Da definire'),
+      visible: shouldRenderOptionalField(currentProperty.heating_source),
+      spanClass: '',
+    },
+    {
+      label: 'Prestazione energetica',
+      value: formatLabel(currentProperty.energy_epgl),
+      visible: shouldRenderOptionalField(currentProperty.energy_epgl),
       spanClass: '',
     },
     {

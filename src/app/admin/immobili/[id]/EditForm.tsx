@@ -16,6 +16,20 @@ type ProvinceItem = {
 type PropertyFormData = {
   id: string
   title: string | null
+  reference_code: string | null
+  condition: string | null
+  availability: string | null
+  year_built: number | null
+  floor: string | null
+  total_floors: string | null
+  bedrooms: number | null
+  balconies: number | null
+  terraces: number | null
+  exposure: string | null
+  heating_source: string | null
+  energy_epgl: string | null
+  condo_fees_amount: number | null
+  condo_fees_period: string | null
   price: number | null
   province: string | null
   comune: string | null
@@ -101,6 +115,17 @@ export default function EditForm({ property }: EditFormProps) {
 
   const [form, setForm] = useState({
     title: property.title || '',
+    reference_code: property.reference_code || '',
+    condition: property.condition || '',
+    availability: property.availability || '',
+    year_built: property.year_built?.toString() || '',
+    floor: property.floor || '',
+    total_floors: property.total_floors || '',
+    bedrooms: property.bedrooms?.toString() || '',
+    balconies: property.balconies?.toString() || '',
+    terraces: property.terraces?.toString() || '',
+    exposure: property.exposure || '',
+
     price: property.price?.toString() || '',
     province: property.province || '',
     comune: property.comune || '',
@@ -120,6 +145,10 @@ export default function EditForm({ property }: EditFormProps) {
     energy_class: property.energy_class || '',
     condo_fees: property.condo_fees || '',
     heating_type: property.heating_type || '',
+    heating_source: property.heating_source || '',
+    energy_epgl: property.energy_epgl || '',
+    condo_fees_amount: property.condo_fees_amount?.toString() || '',
+    condo_fees_period: property.condo_fees_period || '',
     furnished_status: property.furnished_status || '',
     deposit_amount: property.deposit_amount || '',
     advance_amount: property.advance_amount || '',
@@ -232,6 +261,16 @@ export default function EditForm({ property }: EditFormProps) {
       .from('properties')
       .update({
         title: form.title,
+        reference_code: form.reference_code || null,
+        condition: form.condition || null,
+        availability: form.availability || null,
+        year_built: form.year_built ? Number(form.year_built) : null,
+        floor: form.floor || null,
+        total_floors: form.total_floors || null,
+        bedrooms: form.bedrooms ? Number(form.bedrooms) : null,
+        balconies: form.balconies ? Number(form.balconies) : null,
+        terraces: form.terraces ? Number(form.terraces) : null,
+        exposure: form.exposure || null,
         slug,
         price: form.price ? Number(form.price) : null,
         province: form.province || null,
@@ -253,6 +292,10 @@ export default function EditForm({ property }: EditFormProps) {
         energy_class: form.energy_class || null,
         condo_fees: form.condo_fees || null,
         heating_type: form.heating_type || null,
+        heating_source: form.heating_source || null,
+        energy_epgl: form.energy_epgl || null,
+        condo_fees_amount: form.condo_fees_amount ? Number(form.condo_fees_amount) : null,
+        condo_fees_period: form.condo_fees_period || null,
         furnished_status: form.furnished_status || null,
         deposit_amount: normalizeOptionalField(form.deposit_amount),
         advance_amount: normalizeOptionalField(form.advance_amount),
@@ -310,6 +353,53 @@ export default function EditForm({ property }: EditFormProps) {
             onChange={handleChange}
             className="theme-admin-input rounded-xl px-4 py-3"
           />
+
+          <div className="theme-admin-card rounded-2xl p-4">
+            <p className="theme-admin-faint mb-4 text-xs uppercase tracking-[0.22em]">
+              Dati gestionali e stato immobile
+            </p>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <input
+                name="reference_code"
+                placeholder="Codice immobile / riferimento"
+                value={form.reference_code}
+                onChange={handleChange}
+                className="theme-admin-input rounded-xl px-4 py-3"
+              />
+
+              <select
+                name="condition"
+                value={form.condition}
+                onChange={handleChange}
+                className="theme-admin-select rounded-xl px-4 py-3"
+              >
+                <option value="">Stato immobile</option>
+                <option value="nuovo">Nuovo</option>
+                <option value="ottimo">Ottimo</option>
+                <option value="buono">Buono</option>
+                <option value="abitabile">Abitabile</option>
+                <option value="da_ristrutturare">Da ristrutturare</option>
+                <option value="ristrutturato">Ristrutturato</option>
+                <option value="rustico">Rustico / rudere</option>
+              </select>
+
+              <select
+                name="availability"
+                value={form.availability}
+                onChange={handleChange}
+                className="theme-admin-select rounded-xl px-4 py-3"
+              >
+                <option value="">Disponibilità</option>
+                <option value="libero">Libero</option>
+                <option value="libero_subito">Libero subito</option>
+                <option value="occupato">Occupato</option>
+                <option value="locato">Locato</option>
+                <option value="al_rogito">Al rogito</option>
+                <option value="da_concordare">Da concordare</option>
+              </select>
+            </div>
+          </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <select
@@ -513,6 +603,84 @@ export default function EditForm({ property }: EditFormProps) {
             </div>
           </div>
 
+          <div className="theme-admin-card rounded-2xl p-4">
+            <p className="theme-admin-faint mb-4 text-xs uppercase tracking-[0.22em]">
+              Dati strutturali
+            </p>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <input
+                name="year_built"
+                placeholder="Anno costruzione"
+                type="number"
+                value={form.year_built}
+                onChange={handleChange}
+                className="theme-admin-input rounded-xl px-4 py-3"
+              />
+
+              <input
+                name="floor"
+                placeholder="Piano"
+                value={form.floor}
+                onChange={handleChange}
+                className="theme-admin-input rounded-xl px-4 py-3"
+              />
+
+              <input
+                name="total_floors"
+                placeholder="Totale piani"
+                value={form.total_floors}
+                onChange={handleChange}
+                className="theme-admin-input rounded-xl px-4 py-3"
+              />
+
+              <input
+                name="bedrooms"
+                placeholder="Camere"
+                type="number"
+                value={form.bedrooms}
+                onChange={handleChange}
+                className="theme-admin-input rounded-xl px-4 py-3"
+              />
+
+              <input
+                name="balconies"
+                placeholder="Balconi"
+                type="number"
+                value={form.balconies}
+                onChange={handleChange}
+                className="theme-admin-input rounded-xl px-4 py-3"
+              />
+
+              <input
+                name="terraces"
+                placeholder="Terrazzi"
+                type="number"
+                value={form.terraces}
+                onChange={handleChange}
+                className="theme-admin-input rounded-xl px-4 py-3"
+              />
+
+              <select
+                name="exposure"
+                value={form.exposure}
+                onChange={handleChange}
+                className="theme-admin-select rounded-xl px-4 py-3 md:col-span-3"
+              >
+                <option value="">Esposizione</option>
+                <option value="nord">Nord</option>
+                <option value="sud">Sud</option>
+                <option value="est">Est</option>
+                <option value="ovest">Ovest</option>
+                <option value="nord_sud">Nord / Sud</option>
+                <option value="est_ovest">Est / Ovest</option>
+                <option value="doppia">Doppia esposizione</option>
+                <option value="tripla">Tripla esposizione</option>
+                <option value="quadrupla">Quadrupla esposizione</option>
+              </select>
+            </div>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
@@ -541,6 +709,36 @@ export default function EditForm({ property }: EditFormProps) {
             </div>
           </div>
 
+          <div className="grid gap-4 md:grid-cols-3">
+            <input
+              name="energy_epgl"
+              placeholder="EPgl / indice prestazione energetica"
+              value={form.energy_epgl}
+              onChange={handleChange}
+              className="theme-admin-input rounded-xl px-4 py-3"
+            />
+
+            <input
+              name="condo_fees_amount"
+              placeholder="Spese condominiali €"
+              type="number"
+              value={form.condo_fees_amount}
+              onChange={handleChange}
+              className="theme-admin-input rounded-xl px-4 py-3"
+            />
+
+            <select
+              name="condo_fees_period"
+              value={form.condo_fees_period}
+              onChange={handleChange}
+              className="theme-admin-select rounded-xl px-4 py-3"
+            >
+              <option value="">Periodo spese</option>
+              <option value="mese">Mensili</option>
+              <option value="anno">Annuali</option>
+            </select>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
@@ -553,6 +751,27 @@ export default function EditForm({ property }: EditFormProps) {
                 onChange={handleChange}
                 className="theme-admin-input w-full rounded-xl px-4 py-3"
               />
+            </div>
+
+            <div>
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                Alimentazione riscaldamento
+              </label>
+              <select
+                name="heating_source"
+                value={form.heating_source}
+                onChange={handleChange}
+                className="theme-admin-select w-full rounded-xl px-4 py-3"
+              >
+                <option value="">Da definire</option>
+                <option value="gas">Gas</option>
+                <option value="metano">Metano</option>
+                <option value="pompa_calore">Pompa di calore</option>
+                <option value="elettrico">Elettrico</option>
+                <option value="gasolio">Gasolio</option>
+                <option value="teleriscaldamento">Teleriscaldamento</option>
+                <option value="altro">Altro</option>
+              </select>
             </div>
 
             <div>
