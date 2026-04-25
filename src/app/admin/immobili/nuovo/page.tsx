@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getCurrentAdminUserId } from '@/lib/admin-current-user-client'
 import italyLocations from '@/data/italyLocations.json'
 
 type ProvinceItem = {
@@ -193,6 +194,7 @@ export default function NewPropertyPage() {
     setLoading(true)
 
     const slug = generateSlug(form.title)
+    const currentUserId = await getCurrentAdminUserId()
 
     const { data, error } = await supabase
       .from('properties')
@@ -211,6 +213,11 @@ export default function NewPropertyPage() {
         property_type: form.property_type || null,
         description: form.description || null,
         status: form.status || 'draft',
+        created_by: currentUserId,
+        updated_by: currentUserId,
+        assigned_agent_id: currentUserId,
+        published_by: form.status === 'published' ? currentUserId : null,
+        published_at: form.status === 'published' ? new Date().toISOString() : null,
         has_garage: form.has_garage,
         has_parking: form.has_parking,
         has_garden: form.has_garden,

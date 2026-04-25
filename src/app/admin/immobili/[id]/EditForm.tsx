@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getCurrentAdminUserId } from '@/lib/admin-current-user-client'
 import italyLocations from '@/data/italyLocations.json'
 
 type ProvinceItem = {
@@ -225,6 +226,7 @@ export default function EditForm({ property }: EditFormProps) {
     setLoading(true)
 
     const slug = generateSlug(form.title)
+    const currentUserId = await getCurrentAdminUserId()
 
     const { error } = await supabase
       .from('properties')
@@ -242,6 +244,7 @@ export default function EditForm({ property }: EditFormProps) {
         contract_type: form.contract_type || null,
         property_type: form.property_type || null,
         description: form.description || null,
+        updated_by: currentUserId,
         has_garage: form.has_garage,
         has_parking: form.has_parking,
         has_garden: form.has_garden,
