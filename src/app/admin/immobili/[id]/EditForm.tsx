@@ -697,11 +697,11 @@ export default function EditForm({ property }: EditFormProps) {
 
             <div>
               <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
-                Spese condominiali
+                Note spese condominiali
               </label>
               <input
                 name="condo_fees"
-                placeholder="Es. 120€/mese, comprese, da definire"
+                placeholder="Nota libera opzionale, es. comprese / da definire"
                 value={form.condo_fees}
                 onChange={handleChange}
                 className="theme-admin-input w-full rounded-xl px-4 py-3"
@@ -720,7 +720,7 @@ export default function EditForm({ property }: EditFormProps) {
 
             <input
               name="condo_fees_amount"
-              placeholder="Spese condominiali €"
+              placeholder="Importo spese condominiali €"
               type="number"
               value={form.condo_fees_amount}
               onChange={handleChange}
