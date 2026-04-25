@@ -7,6 +7,7 @@ import {
   deletePropertyMedia,
   setPropertyMediaAsCover,
   updatePropertyMediaLabel,
+  updatePropertyPhotoFlags,
 } from '../../app/admin/immobili/[id]/media-actions'
 
 type PropertyMediaItem = {
@@ -22,9 +23,16 @@ type PropertyMediaItem = {
 type Props = {
   propertyId: string
   media: PropertyMediaItem[]
+  photoComingSoon?: boolean
+  noPhotoAvailable?: boolean
 }
 
-export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
+export default function PropertyMediaManagerV2({
+  propertyId,
+  media,
+  photoComingSoon = false,
+  noPhotoAvailable = false,
+}: Props) {
   const supabase = createClient()
   const router = useRouter()
 
@@ -41,6 +49,7 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
   const [pendingLabelId, setPendingLabelId] = useState<string | null>(null)
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
   const [pendingCoverId, setPendingCoverId] = useState<string | null>(null)
+  const [pendingPhotoFlags, setPendingPhotoFlags] = useState(false)
 
   const [, startTransition] = useTransition()
 
@@ -100,7 +109,12 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
     if (mediaType === 'image' && isCover) {
       const { error: propertyError } = await supabase
         .from('properties')
-        .update({ main_image: fileUrl })
+        .update({
+          main_image: fileUrl,
+          photo_coming_soon: false,
+          no_photo_available: false,
+          last_activity_at: new Date().toISOString(),
+        })
         .eq('id', propertyId)
 
       if (propertyError) {
@@ -261,6 +275,28 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
     })
   }
 
+
+  const handlePhotoFlagChange = (
+    nextFlags: {
+      photoComingSoon: boolean
+      noPhotoAvailable: boolean
+    }
+  ) => {
+    setPendingPhotoFlags(true)
+
+    startTransition(async () => {
+      try {
+        await updatePropertyPhotoFlags(propertyId, nextFlags)
+        router.refresh()
+      } catch (error) {
+        console.error(error)
+        alert('Errore aggiornamento stato foto.')
+      } finally {
+        setPendingPhotoFlags(false)
+      }
+    })
+  }
+
   return (
     <div className="mt-8 space-y-8">
       <div className="theme-admin-card rounded-3xl p-5 md:p-6">
@@ -328,6 +364,55 @@ export default function PropertyMediaManagerV2({ propertyId, media }: Props) {
               </div>
             </div>
           )}
+        </div>
+
+
+        <div className="mt-5 grid gap-3 md:grid-cols-2">
+          <button
+            type="button"
+            onClick={() =>
+              handlePhotoFlagChange({
+                photoComingSoon: !photoComingSoon,
+                noPhotoAvailable: false,
+              })
+            }
+            disabled={pendingPhotoFlags}
+            className={`rounded-2xl border px-4 py-3 text-left text-sm transition disabled:opacity-60 ${
+              photoComingSoon
+                ? 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300'
+                : 'border-[var(--site-border)] bg-[var(--site-surface)] text-[var(--site-text-muted)]'
+            }`}
+          >
+            <span className="block font-semibold text-[var(--site-text)]">
+              Foto in arrivo
+            </span>
+            <span className="mt-1 block text-xs opacity-75">
+              Usa il placeholder “Foto in arrivo” finché non vengono caricate immagini reali.
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              handlePhotoFlagChange({
+                photoComingSoon: false,
+                noPhotoAvailable: !noPhotoAvailable,
+              })
+            }
+            disabled={pendingPhotoFlags}
+            className={`rounded-2xl border px-4 py-3 text-left text-sm transition disabled:opacity-60 ${
+              noPhotoAvailable
+                ? 'border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300'
+                : 'border-[var(--site-border)] bg-[var(--site-surface)] text-[var(--site-text-muted)]'
+            }`}
+          >
+            <span className="block font-semibold text-[var(--site-text)]">
+              Nessuna foto prevista
+            </span>
+            <span className="mt-1 block text-xs opacity-75">
+              Per box, ruderi o immobili dove non sono disponibili foto.
+            </span>
+          </button>
         </div>
 
         {images.length > 0 && (

@@ -47,6 +47,8 @@ export default async function EditPropertyPage({
       <PropertyMediaManagerV2
         propertyId={property.id}
         media={media || []}
+        photoComingSoon={Boolean(property.photo_coming_soon)}
+        noPhotoAvailable={Boolean(property.no_photo_available)}
       />
 
       <EditForm property={property} />

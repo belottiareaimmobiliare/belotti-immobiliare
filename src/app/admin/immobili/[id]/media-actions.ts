@@ -5,8 +5,55 @@ import { createClient } from '@/lib/supabase/server'
 
 type MediaType = 'image' | 'plan'
 
+const PHOTO_COMING_SOON_PLACEHOLDER = '/images/placeholders/foto-in-arrivo.svg'
+const NO_PHOTO_PLACEHOLDER = '/images/placeholders/no-foto.svg'
+
+export async function updatePropertyPhotoFlags(
+  propertyId: string,
+  flags: {
+    photoComingSoon: boolean
+    noPhotoAvailable: boolean
+  }
+) {
+  const supabase = await createClient()
+
+  const photoComingSoon = Boolean(flags.photoComingSoon)
+  const noPhotoAvailable = Boolean(flags.noPhotoAvailable)
+
+  const mainImage = noPhotoAvailable
+    ? NO_PHOTO_PLACEHOLDER
+    : photoComingSoon
+      ? PHOTO_COMING_SOON_PLACEHOLDER
+      : null
+
+  const { error } = await supabase
+    .from('properties')
+    .update({
+      photo_coming_soon: noPhotoAvailable ? false : photoComingSoon,
+      no_photo_available: noPhotoAvailable,
+      main_image: mainImage,
+      last_activity_at: new Date().toISOString(),
+    })
+    .eq('id', propertyId)
+
+  if (error) {
+    console.error(error)
+    throw new Error('Errore aggiornamento stato foto immobile')
+  }
+
+  revalidatePath(`/admin/immobili/${propertyId}`)
+  revalidatePath('/admin/immobili')
+  revalidatePath('/immobili')
+}
+
 export async function updatePropertyMediaLabel(mediaId: string, label: string) {
   const supabase = await createClient()
+
+  const { data: media, error: mediaFetchError } = await supabase
+    .from('property_media')
+    .select('property_id')
+    .eq('id', mediaId)
+    .single()
 
   const { error } = await supabase
     .from('property_media')
@@ -16,6 +63,15 @@ export async function updatePropertyMediaLabel(mediaId: string, label: string) {
   if (error) {
     console.error(error)
     throw new Error('Errore aggiornamento etichetta media')
+  }
+
+  if (!mediaFetchError && media?.property_id) {
+    await supabase
+      .from('properties')
+      .update({ last_activity_at: new Date().toISOString() })
+      .eq('id', media.property_id)
+
+    revalidatePath(`/admin/immobili/${media.property_id}`)
   }
 }
 
@@ -56,7 +112,12 @@ export async function setPropertyMediaAsCover(propertyId: string, mediaId: strin
 
   const { error: propertyError } = await supabase
     .from('properties')
-    .update({ main_image: selectedMedia.file_url })
+    .update({
+      main_image: selectedMedia.file_url,
+      photo_coming_soon: false,
+      no_photo_available: false,
+      last_activity_at: new Date().toISOString(),
+    })
     .eq('id', propertyId)
 
   if (propertyError) {
@@ -114,14 +175,27 @@ export async function deletePropertyMedia(
 
       await supabase
         .from('properties')
-        .update({ main_image: nextCover[0].file_url })
+        .update({
+          main_image: nextCover[0].file_url,
+          photo_coming_soon: false,
+          no_photo_available: false,
+          last_activity_at: new Date().toISOString(),
+        })
         .eq('id', propertyId)
     } else {
       await supabase
         .from('properties')
-        .update({ main_image: null })
+        .update({
+          main_image: null,
+          last_activity_at: new Date().toISOString(),
+        })
         .eq('id', propertyId)
     }
+  } else {
+    await supabase
+      .from('properties')
+      .update({ last_activity_at: new Date().toISOString() })
+      .eq('id', propertyId)
   }
 
   revalidatePath(`/admin/immobili/${propertyId}`)
