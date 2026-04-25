@@ -3,10 +3,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { MessageCircle, X } from 'lucide-react'
+import { CONTACTS_CONTENT_KEY, defaultContactsContent, type ContactsContent } from '@/lib/site-content'
 import { readCookiePreferences } from '@/lib/cookie-consent'
 
-const WHATSAPP_NUMBER = '393938149279'
-const PHONE_LABEL = '035 221206'
 const OWNER_CTA_STORAGE_KEY = 'area-owner-whatsapp-cta-closed'
 
 export default function WhatsAppChatButton() {
@@ -14,6 +13,7 @@ export default function WhatsAppChatButton() {
   const [hasCookieChoice, setHasCookieChoice] = useState(true)
   const [siteOrigin, setSiteOrigin] = useState('')
   const [showOwnerCta, setShowOwnerCta] = useState(false)
+  const [contacts, setContacts] = useState<ContactsContent>(defaultContactsContent)
 
   useEffect(() => {
     const syncCookieState = () => {
@@ -21,7 +21,26 @@ export default function WhatsAppChatButton() {
       setHasCookieChoice(Boolean(preferences))
     }
 
+    async function loadContacts() {
+      try {
+        const res = await fetch(`/api/site-content?key=${CONTACTS_CONTENT_KEY}`, {
+          cache: 'no-store',
+        })
+
+        if (!res.ok) return
+
+        const data = await res.json()
+        setContacts({
+          ...defaultContactsContent,
+          ...data,
+        })
+      } catch {
+        setContacts(defaultContactsContent)
+      }
+    }
+
     syncCookieState()
+    loadContacts()
 
     if (typeof window !== 'undefined') {
       setSiteOrigin(window.location.origin)
@@ -48,15 +67,16 @@ export default function WhatsAppChatButton() {
       pathname.startsWith('/immobili/') && pathname !== '/immobili/mappa-area'
 
     if (propertyPage && siteOrigin) {
-      return `Ciao, ho visto questo immobile sul vostro sito Area Immobiliare: ${siteOrigin}${pathname}. Vorrei ricevere maggiori informazioni. Grazie.`
+      return contacts.whatsappPropertyMessage.replace('{url}', `${siteOrigin}${pathname}`)
     }
 
-    return 'Ciao, sono proprietario di un immobile e vorrei ricevere informazioni per venderlo, affittarlo o farlo valutare. Grazie.'
-  }, [pathname, siteOrigin])
+    return contacts.whatsappDefaultMessage
+  }, [contacts.whatsappDefaultMessage, contacts.whatsappPropertyMessage, pathname, siteOrigin])
 
   const whatsappHref = useMemo(() => {
-    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(messageText)}`
-  }, [messageText])
+    const cleanNumber = contacts.whatsappNumber.replace(/[^\d]/g, '')
+    return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(messageText)}`
+  }, [contacts.whatsappNumber, messageText])
 
   function closeOwnerCta() {
     setShowOwnerCta(false)
@@ -70,6 +90,7 @@ export default function WhatsAppChatButton() {
 
   const bottomClass = hasCookieChoice ? 'bottom-6' : 'bottom-28'
   const bubbleBottomClass = hasCookieChoice ? 'bottom-[104px]' : 'bottom-[190px]'
+  const phoneHref = contacts.phoneHref.replace(/\s+/g, '')
 
   return (
     <>
@@ -87,20 +108,20 @@ export default function WhatsAppChatButton() {
           </button>
 
           <p className="pr-9 text-sm font-semibold leading-6">
-            Sei proprietario di un immobile?
+            {contacts.ownerCtaTitle}
           </p>
 
           <p className="mt-2 pr-2 text-sm leading-6 text-[var(--site-text-muted)]">
-            Vuoi venderlo, affittarlo o farlo valutare?
+            {contacts.ownerCtaText}
           </p>
 
           <p className="mt-3 text-sm leading-6 text-[var(--site-text-muted)]">
-            Chiamaci al{' '}
+            {contacts.ownerCtaPhoneText}{' '}
             <a
-              href="tel:035221206"
+              href={`tel:${phoneHref}`}
               className="font-semibold text-[var(--site-text)] underline underline-offset-4"
             >
-              {PHONE_LABEL}
+              {contacts.phoneLabel}
             </a>{' '}
             oppure scrivici su WhatsApp dal pulsante verde qui sotto.
           </p>

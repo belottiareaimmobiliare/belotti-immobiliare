@@ -1,10 +1,18 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { ABOUT_CONTENT_KEY, HOME_CONTENT_KEY } from '@/lib/site-content'
+import {
+  ABOUT_CONTENT_KEY,
+  CONTACTS_CONTENT_KEY,
+  HOME_CONTENT_KEY,
+} from '@/lib/site-content'
 
 export const dynamic = 'force-dynamic'
 
-const allowedKeys = new Set([HOME_CONTENT_KEY, ABOUT_CONTENT_KEY])
+const allowedKeys = new Set([
+  HOME_CONTENT_KEY,
+  ABOUT_CONTENT_KEY,
+  CONTACTS_CONTENT_KEY,
+])
 
 export async function POST(request: Request) {
   try {
@@ -13,10 +21,7 @@ export async function POST(request: Request) {
     const value = body?.value
 
     if (!key || !allowedKeys.has(key) || !value || typeof value !== 'object') {
-      return NextResponse.json(
-        { error: 'Payload non valido' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Payload non valido' }, { status: 400 })
     }
 
     const supabase = await createClient()

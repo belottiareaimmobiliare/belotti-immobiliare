@@ -1,10 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import {
   ABOUT_CONTENT_KEY,
+  CONTACTS_CONTENT_KEY,
   HOME_CONTENT_KEY,
   defaultAboutContent,
+  defaultContactsContent,
   defaultHomeContent,
   type AboutContent,
+  type ContactsContent,
   type HomeContent,
 } from '@/lib/site-content'
 
@@ -33,4 +36,8 @@ export async function getHomeContent() {
 
 export async function getAboutContent() {
   return readContent<AboutContent>(ABOUT_CONTENT_KEY, defaultAboutContent)
+}
+
+export async function getContactsContent() {
+  return readContent<ContactsContent>(CONTACTS_CONTENT_KEY, defaultContactsContent)
 }
