@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Sidebar from '@/components/admin/Sidebar'
+import ThemeToggle from '@/components/shared/ThemeToggle'
 
 type SidebarLink = {
   href: string
@@ -15,38 +16,6 @@ type ShellProfile = {
   is_active: boolean
 }
 
-type ThemeMode = 'light' | 'dark'
-
-function applyTheme(nextTheme: ThemeMode) {
-  const root = document.documentElement
-
-  root.setAttribute('data-theme', nextTheme)
-  root.style.colorScheme = nextTheme
-  root.classList.toggle('dark', nextTheme === 'dark')
-  root.classList.toggle('light', nextTheme === 'light')
-
-  localStorage.setItem('site-theme', nextTheme)
-  localStorage.setItem('theme', nextTheme)
-}
-
-function getInitialTheme(): ThemeMode {
-  if (typeof window === 'undefined') return 'dark'
-
-  const root = document.documentElement
-  const attrTheme = root.getAttribute('data-theme')
-  const storedTheme =
-    localStorage.getItem('site-theme') || localStorage.getItem('theme')
-
-  if (
-    attrTheme === 'light' ||
-    storedTheme === 'light' ||
-    root.classList.contains('light')
-  ) {
-    return 'light'
-  }
-
-  return 'dark'
-}
 
 export default function AdminShell({
   profile,
@@ -59,14 +28,11 @@ export default function AdminShell({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [theme, setTheme] = useState<ThemeMode>('dark')
 
   useEffect(() => {
     const storedSidebar = localStorage.getItem('admin-sidebar-collapsed')
     setSidebarCollapsed(storedSidebar === 'true')
 
-    const currentTheme = getInitialTheme()
-    setTheme(currentTheme)
   }, [])
 
   function toggleSidebar() {
@@ -77,13 +43,7 @@ export default function AdminShell({
     })
   }
 
-  function toggleTheme() {
-    const nextTheme: ThemeMode = theme === 'dark' ? 'light' : 'dark'
-    applyTheme(nextTheme)
-    setTheme(nextTheme)
-  }
 
-  const isDark = theme === 'dark'
 
   const roleLabel = useMemo(() => {
     if (profile.role === 'owner') return 'Admin Proprietario'
@@ -129,17 +89,7 @@ export default function AdminShell({
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={toggleTheme}
-                aria-label={isDark ? 'Attiva tema chiaro' : 'Attiva tema scuro'}
-                title={isDark ? 'Attiva tema chiaro' : 'Attiva tema scuro'}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] text-[var(--site-text)] transition hover:bg-[var(--site-surface-2)]"
-              >
-                <span aria-hidden="true" className="text-base leading-none">
-                  {isDark ? '☀' : '☾'}
-                </span>
-              </button>
+              <ThemeToggle />
 
               <form action="/logout" method="post">
                 <button
@@ -171,17 +121,7 @@ export default function AdminShell({
                 {sidebarCollapsed ? 'Mostra menu' : 'Nascondi menu'}
               </button>
 
-              <button
-                type="button"
-                onClick={toggleTheme}
-                aria-label={isDark ? 'Attiva tema chiaro' : 'Attiva tema scuro'}
-                title={isDark ? 'Attiva tema chiaro' : 'Attiva tema scuro'}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] text-[var(--site-text)] transition hover:bg-[var(--site-surface-2)]"
-              >
-                <span aria-hidden="true" className="text-base leading-none">
-                  {isDark ? '☀' : '☾'}
-                </span>
-              </button>
+              <ThemeToggle />
             </div>
           </div>
 
