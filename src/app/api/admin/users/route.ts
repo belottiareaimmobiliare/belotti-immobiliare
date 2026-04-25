@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient as createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { getAdminProfileByAuthIdentity } from '@/lib/admin-auth'
+import { getCurrentAdminProfile } from '@/lib/admin-auth'
 
 type UserRole = 'owner' | 'agent' | 'editor'
 
@@ -68,25 +67,15 @@ function getPermissions(payload: Partial<CreateUserPayload>): PermissionPayload 
 }
 
 async function getActorOwner() {
-  const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const profile = await getCurrentAdminProfile()
 
-  if (!user) {
+  if (!profile) {
     return {
       error: NextResponse.json({ error: 'Non autenticato.' }, { status: 401 }),
     }
   }
 
-  const service = createServiceClient()
-
-  const profile = await getAdminProfileByAuthIdentity({
-    id: user.id,
-    email: user.email,
-  })
-
-  if (!profile || profile.role !== 'owner' || !profile.is_active) {
+  if (profile.role !== 'owner' || !profile.is_active) {
     return {
       error: NextResponse.json(
         { error: 'Accesso riservato ai proprietari.' },
@@ -94,6 +83,8 @@ async function getActorOwner() {
       ),
     }
   }
+
+  const service = createServiceClient()
 
   return { actor: profile, service }
 }
