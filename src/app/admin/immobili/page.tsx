@@ -52,6 +52,30 @@ type Property = {
   property_media?: PropertyMediaItem[]
 }
 
+
+function formatOptionLabel(value: string | null | undefined, fallback = '—') {
+  const clean = String(value || '').trim()
+  if (!clean) return fallback
+
+  const labels: Record<string, string> = {
+    nuovo: 'Nuovo',
+    ottimo: 'Ottimo',
+    buono: 'Buono',
+    abitabile: 'Abitabile',
+    da_ristrutturare: 'Da ristrutturare',
+    ristrutturato: 'Ristrutturato',
+    rustico: 'Rustico / rudere',
+    libero: 'Libero',
+    libero_subito: 'Libero subito',
+    occupato: 'Occupato',
+    locato: 'Locato',
+    al_rogito: 'Al rogito',
+    da_concordare: 'Da concordare',
+  }
+
+  return labels[clean] || clean.replaceAll('_', ' ')
+}
+
 function formatPrice(price: number | null) {
   if (!price) return 'Trattativa riservata'
   return `€ ${price.toLocaleString('it-IT')}`
@@ -344,12 +368,12 @@ export default async function AdminPropertiesPage({
                   <div className="mt-4 flex flex-wrap gap-2">
                     {property.condition && (
                       <span className="theme-admin-chip rounded-full px-3 py-1 text-xs">
-                        Stato: {property.condition}
+                        Stato: {formatOptionLabel(property.condition)}
                       </span>
                     )}
                     {property.availability && (
                       <span className="theme-admin-chip rounded-full px-3 py-1 text-xs">
-                        Disponibilità: {property.availability}
+                        Disponibilità: {formatOptionLabel(property.availability)}
                       </span>
                     )}
                     {(property.floor || property.total_floors) && (

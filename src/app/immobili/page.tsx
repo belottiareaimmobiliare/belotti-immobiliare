@@ -83,6 +83,30 @@ type PolygonValue = {
   points: [number, number][]
 }
 
+
+function formatOptionLabel(value: string | null | undefined, fallback = '—') {
+  const clean = String(value || '').trim()
+  if (!clean) return fallback
+
+  const labels: Record<string, string> = {
+    nuovo: 'Nuovo',
+    ottimo: 'Ottimo',
+    buono: 'Buono',
+    abitabile: 'Abitabile',
+    da_ristrutturare: 'Da ristrutturare',
+    ristrutturato: 'Ristrutturato',
+    rustico: 'Rustico / rudere',
+    libero: 'Libero',
+    libero_subito: 'Libero subito',
+    occupato: 'Occupato',
+    locato: 'Locato',
+    al_rogito: 'Al rogito',
+    da_concordare: 'Da concordare',
+  }
+
+  return labels[clean] || clean.replaceAll('_', ' ')
+}
+
 function parsePolygon(polygonRaw: string | undefined): PolygonValue | null {
   if (!polygonRaw) return null
 
@@ -591,12 +615,12 @@ export default async function PropertiesPage({
                               <div className="mt-3 flex flex-wrap gap-2">
                                 {property.condition && (
                                   <span className="theme-badge rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.16em]">
-                                    {property.condition}
+                                    {formatOptionLabel(property.condition)}
                                   </span>
                                 )}
                                 {property.availability && (
                                   <span className="theme-badge rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.16em]">
-                                    {property.availability}
+                                    {formatOptionLabel(property.availability)}
                                   </span>
                                 )}
                               </div>

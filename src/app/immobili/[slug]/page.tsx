@@ -77,6 +77,51 @@ function formatLabel(value: string | null | undefined, fallback = '—') {
   return clean || fallback
 }
 
+
+function formatOptionLabel(value: string | null | undefined, fallback = '—') {
+  const clean = String(value || '').trim()
+  if (!clean) return fallback
+
+  const labels: Record<string, string> = {
+    nuovo: 'Nuovo',
+    ottimo: 'Ottimo',
+    buono: 'Buono',
+    abitabile: 'Abitabile',
+    da_ristrutturare: 'Da ristrutturare',
+    ristrutturato: 'Ristrutturato',
+    rustico: 'Rustico / rudere',
+    libero: 'Libero',
+    libero_subito: 'Libero subito',
+    occupato: 'Occupato',
+    locato: 'Locato',
+    al_rogito: 'Al rogito',
+    da_concordare: 'Da concordare',
+    gas: 'Gas',
+    metano: 'Metano',
+    pompa_calore: 'Pompa di calore',
+    elettrico: 'Elettrico',
+    gasolio: 'Gasolio',
+    teleriscaldamento: 'Teleriscaldamento',
+    altro: 'Altro',
+    nord: 'Nord',
+    sud: 'Sud',
+    est: 'Est',
+    ovest: 'Ovest',
+    nord_sud: 'Nord / Sud',
+    est_ovest: 'Est / Ovest',
+    doppia: 'Doppia esposizione',
+    tripla: 'Tripla esposizione',
+    quadrupla: 'Quadrupla esposizione',
+    si: 'Sì',
+    no: 'No',
+    parzialmente: 'Parzialmente',
+    mese: 'mese',
+    anno: 'anno',
+  }
+
+  return labels[clean] || clean.replaceAll('_', ' ')
+}
+
 function shouldRenderOptionalField(value: string | null | undefined) {
   const clean = String(value || '').trim()
   return clean !== '' && clean !== '-'
@@ -147,13 +192,13 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     },
     {
       label: 'Stato immobile',
-      value: formatLabel(currentProperty.condition, 'Da definire'),
+      value: formatOptionLabel(currentProperty.condition, 'Da definire'),
       visible: shouldRenderOptionalField(currentProperty.condition),
       spanClass: '',
     },
     {
       label: 'Disponibilità',
-      value: formatLabel(currentProperty.availability, 'Da definire'),
+      value: formatOptionLabel(currentProperty.availability, 'Da definire'),
       visible: shouldRenderOptionalField(currentProperty.availability),
       spanClass: '',
     },
@@ -177,7 +222,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     },
     {
       label: 'Esposizione',
-      value: formatLabel(currentProperty.exposure, 'Da definire'),
+      value: formatOptionLabel(currentProperty.exposure, 'Da definire'),
       visible: shouldRenderOptionalField(currentProperty.exposure),
       spanClass: '',
     },
@@ -190,7 +235,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     {
       label: 'Spese condominiali',
       value: currentProperty.condo_fees_amount
-        ? `€ ${currentProperty.condo_fees_amount.toLocaleString('it-IT')}${currentProperty.condo_fees_period ? ` / ${currentProperty.condo_fees_period}` : ''}`
+        ? `€ ${currentProperty.condo_fees_amount.toLocaleString('it-IT')}${currentProperty.condo_fees_period ? ` / ${formatOptionLabel(currentProperty.condo_fees_period)}` : ''}`
         : formatLabel(currentProperty.condo_fees, 'Da definire'),
       visible: true,
       spanClass: '',
@@ -203,7 +248,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     },
     {
       label: 'Fonte riscaldamento',
-      value: formatLabel(currentProperty.heating_source, 'Da definire'),
+      value: formatOptionLabel(currentProperty.heating_source, 'Da definire'),
       visible: shouldRenderOptionalField(currentProperty.heating_source),
       spanClass: '',
     },
@@ -215,7 +260,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     },
     {
       label: 'Ammobiliato',
-      value: formatLabel(currentProperty.furnished_status, 'Da definire'),
+      value: formatOptionLabel(currentProperty.furnished_status, 'Da definire'),
       visible: true,
       spanClass: '',
     },
