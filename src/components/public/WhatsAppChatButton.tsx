@@ -96,13 +96,13 @@ export default function WhatsAppChatButton() {
     <>
       {showOwnerCta ? (
         <div
-          className={`fixed right-4 z-[109] w-[calc(100vw-2rem)] max-w-[340px] rounded-[24px] border border-[var(--site-border)] bg-[var(--site-surface)] p-4 text-[var(--site-text)] shadow-[0_18px_50px_rgba(0,0,0,0.28)] md:right-6 ${bubbleBottomClass}`}
+          className={`fixed right-4 z-[109] w-[calc(100vw-2rem)] max-w-[340px] rounded-[24px] border border-white/20 bg-[#25D366]/70 p-4 text-white shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl md:right-6 ${bubbleBottomClass}`}
         >
           <button
             type="button"
             onClick={closeOwnerCta}
             aria-label="Chiudi messaggio"
-            className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--site-border)] bg-[var(--site-bg)] text-[var(--site-text-muted)] transition hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]"
+            className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white/80 transition hover:bg-black/30 hover:text-white"
           >
             <X className="h-4 w-4" />
           </button>
@@ -111,22 +111,22 @@ export default function WhatsAppChatButton() {
             {contacts.ownerCtaTitle}
           </p>
 
-          <p className="mt-2 pr-2 text-sm leading-6 text-[var(--site-text-muted)]">
+          <p className="mt-2 pr-2 text-sm leading-6 text-white/85">
             {contacts.ownerCtaText}
           </p>
 
-          <p className="mt-3 text-sm leading-6 text-[var(--site-text-muted)]">
+          <p className="mt-3 text-sm leading-6 text-white/85">
             {contacts.ownerCtaPhoneText}{' '}
             <a
               href={`tel:${phoneHref}`}
-              className="font-semibold text-[var(--site-text)] underline underline-offset-4"
+              className="font-semibold text-white underline underline-offset-4"
             >
               {contacts.phoneLabel}
             </a>{' '}
             oppure scrivici su WhatsApp dal pulsante verde qui sotto.
           </p>
 
-          <div className="absolute -bottom-2 right-9 h-4 w-4 rotate-45 border-b border-r border-[var(--site-border)] bg-[var(--site-surface)]" />
+          <div className="absolute -bottom-2 right-9 h-4 w-4 rotate-45 border-b border-r border-white/20 bg-[#25D366]/70" />
         </div>
       ) : null}
 
