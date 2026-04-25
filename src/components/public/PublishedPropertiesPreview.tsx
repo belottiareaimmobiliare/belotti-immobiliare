@@ -72,6 +72,12 @@ export default async function PublishedPropertiesPreview() {
             </div>
 
             <div className="mt-5">
+              {property.reference_code && (
+                <p className="mb-2 text-xs uppercase tracking-[0.18em] text-white/35">
+                  Rif. {property.reference_code}
+                </p>
+              )}
+
               <h3 className="text-xl font-semibold text-white transition group-hover:text-white/90">
                 {property.title}
               </h3>
@@ -81,8 +87,18 @@ export default async function PublishedPropertiesPreview() {
                 {property.frazione ? ` • ${property.frazione}` : ''}
               </p>
 
+              {(property.surface || property.rooms || property.bedrooms) && (
+                <p className="mt-3 text-sm text-white/50">
+                  {property.surface ? `${property.surface} mq` : ''}
+                  {property.surface && (property.rooms || property.bedrooms) ? ' · ' : ''}
+                  {property.rooms ? `${property.rooms} locali` : ''}
+                  {property.rooms && property.bedrooms ? ' · ' : ''}
+                  {property.bedrooms ? `${property.bedrooms} camere` : ''}
+                </p>
+              )}
+
               <p className="mt-4 text-2xl font-semibold text-white">
-                € {property.price?.toLocaleString()}
+                {property.price ? `€ ${property.price.toLocaleString('it-IT')}` : 'Trattativa riservata'}
               </p>
             </div>
           </Link>

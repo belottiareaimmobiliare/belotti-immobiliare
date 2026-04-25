@@ -43,6 +43,12 @@ type PropertyWithMedia = {
   id: string
   slug: string | null
   title: string | null
+  reference_code: string | null
+  condition: string | null
+  availability: string | null
+  bedrooms: number | null
+  floor: string | null
+  total_floors: string | null
   price: number | null
   province: string | null
   comune: string | null
@@ -566,6 +572,7 @@ export default async function PropertiesPage({
                             )}
 
                             <p className="text-sm text-[var(--site-text-faint)]">
+                              {property.reference_code ? `Rif. ${property.reference_code} · ` : ''}
                               {property.comune || '—'} ({property.province || '—'})
                               {property.frazione ? ` • ${property.frazione}` : ''}
                             </p>
@@ -577,7 +584,23 @@ export default async function PropertiesPage({
                             <p className="mt-3 text-sm text-[var(--site-text-muted)]">
                               {property.surface || '—'} mq · {property.rooms || '—'} locali ·{' '}
                               {property.bathrooms || '—'} bagni
+                              {property.bedrooms ? ` · ${property.bedrooms} camere` : ''}
                             </p>
+
+                            {(property.condition || property.availability) && (
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {property.condition && (
+                                  <span className="theme-badge rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.16em]">
+                                    {property.condition}
+                                  </span>
+                                )}
+                                {property.availability && (
+                                  <span className="theme-badge rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.16em]">
+                                    {property.availability}
+                                  </span>
+                                )}
+                              </div>
+                            )}
 
                             <p className="mt-3 line-clamp-1 text-sm leading-6 text-[var(--site-text-muted)]">
                               {property.description || 'Descrizione in aggiornamento.'}

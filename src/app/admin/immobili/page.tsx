@@ -22,6 +22,12 @@ type Property = {
   id: string
   slug: string | null
   title: string | null
+  reference_code: string | null
+  condition: string | null
+  availability: string | null
+  bedrooms: number | null
+  floor: string | null
+  total_floors: string | null
   price: number | null
   province: string | null
   comune: string | null
@@ -313,6 +319,7 @@ export default async function AdminPropertiesPage({
                 </div>
 
                 <p className="theme-admin-faint mt-4 text-sm">
+                  {property.reference_code ? `Rif. ${property.reference_code} · ` : ''}
                   {property.comune || '—'} ({property.province || '—'})
                   {property.frazione ? ` • ${property.frazione}` : ''}
                 </p>
@@ -330,7 +337,28 @@ export default async function AdminPropertiesPage({
                 <p className="theme-admin-muted mt-2 text-sm">
                   {property.surface || '—'} mq · {property.rooms || '—'} locali ·{' '}
                   {property.bathrooms || '—'} bagni
+                  {property.bedrooms ? ` · ${property.bedrooms} camere` : ''}
                 </p>
+
+                {(property.condition || property.availability || property.floor || property.total_floors) && (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {property.condition && (
+                      <span className="theme-admin-chip rounded-full px-3 py-1 text-xs">
+                        Stato: {property.condition}
+                      </span>
+                    )}
+                    {property.availability && (
+                      <span className="theme-admin-chip rounded-full px-3 py-1 text-xs">
+                        Disponibilità: {property.availability}
+                      </span>
+                    )}
+                    {(property.floor || property.total_floors) && (
+                      <span className="theme-admin-chip rounded-full px-3 py-1 text-xs">
+                        Piano: {property.floor || '—'}{property.total_floors ? ` / ${property.total_floors}` : ''}
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 <div className="mt-4 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-xs text-[var(--site-text-muted)]">
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
