@@ -37,9 +37,9 @@ const statusOptions: Array<{ value: LeadStatus; label: string }> = [
 ]
 
 const statusStyle: Record<LeadStatus, string> = {
-  new: 'border-amber-400/40 bg-amber-400/10 text-amber-200',
-  contacted: 'border-sky-400/40 bg-sky-400/10 text-sky-200',
-  closed: 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200',
+  new: 'border-amber-400/40 bg-amber-400/10 text-[var(--site-text)]',
+  contacted: 'border-sky-400/40 bg-sky-400/10 text-[var(--site-text)]',
+  closed: 'border-emerald-400/40 bg-emerald-400/10 text-[var(--site-text)]',
   archived: 'border-[var(--site-border)] bg-[var(--site-surface)] text-[var(--site-text-muted)]',
 }
 
@@ -246,18 +246,18 @@ export default async function AdminLeadsPage({
           </div>
 
           <div className="rounded-3xl border border-amber-400/20 bg-amber-400/10 p-5">
-            <p className="text-sm text-amber-100/70">Nuovi</p>
-            <p className="mt-3 text-3xl font-semibold text-amber-100">{newLeads}</p>
+            <p className="text-sm text-[var(--site-text-muted)]">Nuovi</p>
+            <p className="mt-3 text-3xl font-semibold text-[var(--site-text)]">{newLeads}</p>
           </div>
 
           <div className="rounded-3xl border border-sky-400/20 bg-sky-400/10 p-5">
-            <p className="text-sm text-sky-100/70">Contattati</p>
-            <p className="mt-3 text-3xl font-semibold text-sky-100">{contactedLeads}</p>
+            <p className="text-sm text-[var(--site-text-muted)]">Contattati</p>
+            <p className="mt-3 text-3xl font-semibold text-[var(--site-text)]">{contactedLeads}</p>
           </div>
 
           <div className="rounded-3xl border border-emerald-400/20 bg-emerald-400/10 p-5">
-            <p className="text-sm text-emerald-100/70">Chiusi</p>
-            <p className="mt-3 text-3xl font-semibold text-emerald-100">{closedLeads}</p>
+            <p className="text-sm text-[var(--site-text-muted)]">Chiusi</p>
+            <p className="mt-3 text-3xl font-semibold text-[var(--site-text)]">{closedLeads}</p>
           </div>
 
           <div className="rounded-3xl border border-[var(--site-border)] bg-[var(--site-surface)] p-5">
