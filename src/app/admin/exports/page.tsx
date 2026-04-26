@@ -1,89 +1,89 @@
 import Link from 'next/link'
 import { requireAdminProfile } from '@/lib/admin-auth'
-
-export const dynamic = 'force-dynamic'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function AdminExportsPage() {
-  const profile = await requireAdminProfile()
+  await requireAdminProfile()
+  const supabase = await createClient()
 
-  if (profile.role !== 'owner' && !profile.can_manage_properties) {
-    return (
-      <div className="theme-panel rounded-[30px] border p-6">
-        <h1 className="text-2xl font-semibold">Accesso non autorizzato</h1>
-      </div>
-    )
+  const { data: all } = await supabase
+    .from('properties')
+    .select('export_immobiliare_it, export_idealista, export_casa_it')
+    .eq('status', 'published')
+
+  const counts = {
+    immobiliare: all?.filter(p => p.export_immobiliare_it).length || 0,
+    idealista: all?.filter(p => p.export_idealista).length || 0,
+    casa: all?.filter(p => p.export_casa_it).length || 0,
   }
 
   return (
-    <section className="mx-auto w-full max-w-5xl text-[var(--site-text)]">
-      <p className="theme-admin-faint text-sm uppercase tracking-[0.2em]">
-        Export portali
-      </p>
+    <div className="space-y-8">
+      <h1 className="text-2xl font-semibold">Export Portali</h1>
 
-      <h1 className="mt-2 text-3xl font-semibold">
-        Esportazione immobili
-      </h1>
+      <div className="grid gap-6 md:grid-cols-3">
 
-      <p className="theme-admin-muted mt-3">
-        Da qui puoi verificare il pacchetto dati degli immobili pubblicati, pronto per essere adattato ai portali partner.
-      </p>
+        {/* IMMOBILIARE.IT */}
+        <div className="rounded-2xl border p-6 bg-[var(--site-surface)]">
+          <h2 className="text-lg font-semibold">Immobiliare.it</h2>
+          <p className="text-sm opacity-70 mt-1">
+            XML pronto per portale
+          </p>
 
-      <div className="mt-8 grid gap-5 md:grid-cols-3">
-        <ExportCard
-          title="Export base JSON"
-          text="Formato interno unico con immobili, immagini, planimetrie e campi strutturati."
-          href="/api/admin/exports/properties"
-          status="Attivo"
-        />
+          <p className="mt-4 text-2xl font-bold">
+            {counts.immobiliare}
+          </p>
 
-        <ExportCard
-          title="Immobiliare.it"
-          text="Cartella predisposta. XML base generato dagli immobili selezionati per Immobiliare.it."
-          href="/api/admin/exports/immobiliare-it"
-          status="XML attivo"
-        />
+          <a
+            href="/api/admin/exports/immobiliare-it"
+            target="_blank"
+            className="mt-4 inline-block rounded-xl px-4 py-2 bg-black text-white text-sm"
+          >
+            Apri XML
+          </a>
+        </div>
 
-        <ExportCard
-          title="Idealista / Casa.it"
-          text="Cartelle predisposte. Formato da confermare con i portali o con Belotti."
-          href="/api/admin/exports/properties"
-          status="In attesa metodo"
-        />
+        {/* IDEALISTA */}
+        <div className="rounded-2xl border p-6 bg-[var(--site-surface)]">
+          <h2 className="text-lg font-semibold">Idealista</h2>
+          <p className="text-sm opacity-70 mt-1">
+            JSON (da adattare)
+          </p>
+
+          <p className="mt-4 text-2xl font-bold">
+            {counts.idealista}
+          </p>
+
+          <a
+            href="/api/admin/exports/idealista"
+            target="_blank"
+            className="mt-4 inline-block rounded-xl px-4 py-2 bg-black text-white text-sm"
+          >
+            Apri feed
+          </a>
+        </div>
+
+        {/* CASA.IT */}
+        <div className="rounded-2xl border p-6 bg-[var(--site-surface)]">
+          <h2 className="text-lg font-semibold">Casa.it</h2>
+          <p className="text-sm opacity-70 mt-1">
+            JSON (da adattare)
+          </p>
+
+          <p className="mt-4 text-2xl font-bold">
+            {counts.casa}
+          </p>
+
+          <a
+            href="/api/admin/exports/casa-it"
+            target="_blank"
+            className="mt-4 inline-block rounded-xl px-4 py-2 bg-black text-white text-sm"
+          >
+            Apri feed
+          </a>
+        </div>
+
       </div>
-    </section>
-  )
-}
-
-function ExportCard({
-  title,
-  text,
-  href,
-  status,
-}: {
-  title: string
-  text: string
-  href: string
-  status: string
-}) {
-  return (
-    <div className="theme-admin-card rounded-3xl p-5">
-      <span className="theme-admin-chip rounded-full px-3 py-1 text-xs">
-        {status}
-      </span>
-
-      <h2 className="mt-4 text-xl font-semibold">{title}</h2>
-
-      <p className="theme-admin-muted mt-3 text-sm leading-6">
-        {text}
-      </p>
-
-      <Link
-        href={href}
-        target="_blank"
-        className="theme-admin-button-primary mt-5 inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold"
-      >
-        Apri
-      </Link>
     </div>
   )
 }
