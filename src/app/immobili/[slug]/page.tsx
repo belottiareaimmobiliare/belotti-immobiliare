@@ -185,7 +185,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
   const infoCards = [
     {
-      label: 'Codice immobile',
+      label: 'Codice annuncio',
       value: formatLabel(currentProperty.reference_code),
       visible: shouldRenderOptionalField(currentProperty.reference_code),
       spanClass: '',

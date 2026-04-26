@@ -379,7 +379,7 @@ export default async function AdminPropertiesPage({
 
                 {property.reference_code && (
                   <p className="theme-admin-faint mt-3 text-xs uppercase tracking-[0.18em]">
-                    Codice interno: {property.reference_code}
+                    Codice annuncio: {property.reference_code}
                   </p>
                 )}
 
