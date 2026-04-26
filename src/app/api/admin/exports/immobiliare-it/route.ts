@@ -32,6 +32,27 @@ function mapContractType(value: string | null) {
   return 'sale'
 }
 
+function todayIt() {
+  return new Intl.DateTimeFormat('it-IT', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: 'Europe/Rome',
+  })
+    .format(new Date())
+    .replaceAll('/', '-')
+}
+
+function safeFilePart(value: unknown) {
+  return String(value || 'immobile')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+}
+
 function propertyToXml(property: any) {
   const pictures = (property.images || [])
     .map((image: any, index: number) => {
@@ -106,16 +127,19 @@ function propertyToXml(property: any) {
     </property>`
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const profile = await requireAdminProfile()
 
   if (profile.role !== 'owner' && !profile.can_manage_properties) {
     return NextResponse.json({ error: 'Non autorizzato.' }, { status: 403 })
   }
 
+  const { searchParams } = new URL(request.url)
+  const propertyId = searchParams.get('id')
+
   const service = createServiceClient()
 
-  const { data, error } = await service
+  let query = service
     .from('properties')
     .select(`
       *,
@@ -124,6 +148,12 @@ export async function GET() {
     .eq('status', 'published')
     .eq('export_immobiliare_it', true)
     .order('updated_at', { ascending: false })
+
+  if (propertyId) {
+    query = query.eq('id', propertyId)
+  }
+
+  const { data, error } = await query
 
   if (error) {
     return NextResponse.json(
@@ -141,11 +171,17 @@ ${properties.map(propertyToXml).join('\n')}
   </properties>
 </feed>`
 
+  const first = properties[0]
+  const fileBase = propertyId && first
+    ? `export_${safeFilePart(first.reference_code || first.id)}_immobiliare-it_${todayIt()}.xml`
+    : `export_feed_immobiliare-it_${todayIt()}.xml`
+
   return new NextResponse(xml, {
     status: 200,
     headers: {
       'Content-Type': 'application/xml; charset=utf-8',
       'Cache-Control': 'no-store',
+      'Content-Disposition': `attachment; filename="${fileBase}"`,
     },
   })
 }

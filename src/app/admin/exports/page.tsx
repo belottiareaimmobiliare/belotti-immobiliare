@@ -113,7 +113,7 @@ export default async function AdminExportsPage() {
                   name="Immobiliare.it"
                   enabled={property.export_immobiliare_it}
                   status={property.export_immobiliare_it_status}
-                  href="/api/admin/exports/immobiliare-it"
+                  href={`/api/admin/exports/immobiliare-it?id=${property.id}`}
                   downloadLabel="Download XML"
                 />
 
@@ -121,7 +121,7 @@ export default async function AdminExportsPage() {
                   name="Idealista"
                   enabled={property.export_idealista}
                   status={property.export_idealista_status}
-                  href="/api/admin/exports/idealista"
+                  href={`/api/admin/exports/idealista?id=${property.id}`}
                   downloadLabel="Download JSON"
                 />
 
@@ -129,7 +129,7 @@ export default async function AdminExportsPage() {
                   name="Casa.it"
                   enabled={property.export_casa_it}
                   status={property.export_casa_it_status}
-                  href="/api/admin/exports/casa-it"
+                  href={`/api/admin/exports/casa-it?id=${property.id}`}
                   downloadLabel="Download JSON"
                 />
               </div>

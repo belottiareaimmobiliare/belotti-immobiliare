@@ -1,38 +1,83 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { requireAdminProfile } from '@/lib/admin-auth'
+import { createServiceClient } from '@/lib/supabase/service'
+import { normalizeExportProperty } from '@/lib/exports/properties-export'
 
-export async function GET() {
-  await requireAdminProfile()
-  const supabase = await createClient()
+export const dynamic = 'force-dynamic'
 
-  const { data, error } = await supabase
+function todayIt() {
+  return new Intl.DateTimeFormat('it-IT', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: 'Europe/Rome',
+  })
+    .format(new Date())
+    .replaceAll('/', '-')
+}
+
+function safeFilePart(value: unknown) {
+  return String(value || 'immobile')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+}
+
+export async function GET(request: Request) {
+  const profile = await requireAdminProfile()
+
+  if (profile.role !== 'owner' && !profile.can_manage_properties) {
+    return NextResponse.json({ error: 'Non autorizzato.' }, { status: 403 })
+  }
+
+  const { searchParams } = new URL(request.url)
+  const propertyId = searchParams.get('id')
+
+  const service = createServiceClient()
+
+  let query = service
     .from('properties')
-    .select('*')
+    .select(`
+      *,
+      property_media (*)
+    `)
     .eq('status', 'published')
     .eq('export_idealista', true)
+    .order('updated_at', { ascending: false })
+
+  if (propertyId) {
+    query = query.eq('id', propertyId)
+  }
+
+  const { data, error } = await query
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const result = (data || []).map(p => ({
-    id: p.id,
-    titolo: p.title,
-    prezzo: p.price,
-    mq: p.surface,
-    comune: p.comune,
-    provincia: p.province,
-    contratto: p.contract_type,
-    tipo: p.property_type,
-    descrizione: p.description,
-    lat: p.latitude,
-    lng: p.longitude
-  }))
+  const properties = (data || []).map(normalizeExportProperty)
 
-  return NextResponse.json({
-    provider: "idealista",
-    count: result.length,
-    properties: result
+  const body = {
+    provider: 'idealista',
+    generated_at: new Date().toISOString(),
+    count: properties.length,
+    properties,
+  }
+
+  const first = properties[0]
+  const fileBase = propertyId && first
+    ? `export_${safeFilePart(first.reference_code || first.id)}_idealista_${todayIt()}.json`
+    : `export_feed_idealista_${todayIt()}.json`
+
+  return new NextResponse(JSON.stringify(body, null, 2), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'Content-Disposition': `attachment; filename="${fileBase}"`,
+    },
   })
 }
