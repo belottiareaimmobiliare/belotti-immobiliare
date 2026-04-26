@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import DeleteLeadButton from './DeleteLeadButton'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import DeleteLeadButton from './DeleteLeadButton'
 
 type LeadStatus = 'new' | 'contacted' | 'closed' | 'archived'
 
@@ -21,11 +21,26 @@ type Lead = {
   created_at: string
 }
 
+type AdminLeadsPageProps = {
+  searchParams?: Promise<{
+    status?: string
+    q?: string
+  }>
+}
+
 const statusOptions: Array<{ value: LeadStatus; label: string }> = [
   { value: 'new', label: 'Nuovo' },
   { value: 'contacted', label: 'Contattato' },
   { value: 'closed', label: 'Chiuso' },
   { value: 'archived', label: 'Archiviato' },
+]
+
+const filterStatusOptions: Array<{ value: 'all' | LeadStatus; label: string }> = [
+  { value: 'all', label: 'Tutti gli stati' },
+  { value: 'new', label: 'Nuovi' },
+  { value: 'contacted', label: 'Contattati' },
+  { value: 'closed', label: 'Chiusi' },
+  { value: 'archived', label: 'Archiviati' },
 ]
 
 const statusStyle: Record<LeadStatus, string> = {
@@ -42,6 +57,10 @@ const statusLabel: Record<LeadStatus, string> = {
   archived: 'Archiviato',
 }
 
+function isLeadStatus(value: string): value is LeadStatus {
+  return statusOptions.some((item) => item.value === value)
+}
+
 function formatDate(value: string | null) {
   if (!value) return '-'
 
@@ -53,6 +72,29 @@ function formatDate(value: string | null) {
   } catch {
     return value
   }
+}
+
+function normalizeText(value: string | null | undefined) {
+  return String(value ?? '').trim().toLowerCase()
+}
+
+function leadMatchesSearch(lead: Lead, query: string) {
+  const cleanQuery = normalizeText(query)
+
+  if (!cleanQuery) return true
+
+  const searchableText = [
+    lead.full_name,
+    lead.email,
+    lead.phone,
+    lead.message,
+    lead.property_title,
+    lead.property_slug,
+  ]
+    .map(normalizeText)
+    .join(' ')
+
+  return searchableText.includes(cleanQuery)
 }
 
 async function updateLeadStatus(formData: FormData) {
@@ -82,6 +124,7 @@ async function updateLeadStatus(formData: FormData) {
   await supabase.from('leads').update(payload).eq('id', id)
 
   revalidatePath('/admin/leads')
+  revalidatePath('/admin')
 }
 
 async function updateLeadNote(formData: FormData) {
@@ -128,7 +171,15 @@ async function deleteLead(formData: FormData) {
   revalidatePath('/admin')
 }
 
-export default async function AdminLeadsPage() {
+export default async function AdminLeadsPage({
+  searchParams,
+}: AdminLeadsPageProps) {
+  const params = searchParams ? await searchParams : {}
+  const selectedStatus = isLeadStatus(String(params.status ?? ''))
+    ? String(params.status)
+    : 'all'
+  const searchQuery = String(params.q ?? '').trim()
+
   const supabase = await createClient()
 
   const { data, error } = await supabase
@@ -158,6 +209,17 @@ export default async function AdminLeadsPage() {
   const newLeads = leads.filter((lead) => lead.status === 'new').length
   const contactedLeads = leads.filter((lead) => lead.status === 'contacted').length
   const closedLeads = leads.filter((lead) => lead.status === 'closed').length
+  const archivedLeads = leads.filter((lead) => lead.status === 'archived').length
+
+  const filteredLeads = leads.filter((lead) => {
+    const statusMatch =
+      selectedStatus === 'all' ? true : lead.status === selectedStatus
+
+    return statusMatch && leadMatchesSearch(lead, searchQuery)
+  })
+
+  const activeFilters =
+    selectedStatus !== 'all' || searchQuery.length > 0
 
   return (
     <main className="min-h-screen bg-[var(--site-bg)] px-4 py-8 text-[var(--site-text)] sm:px-6 lg:px-8">
@@ -184,7 +246,7 @@ export default async function AdminLeadsPage() {
           </Link>
         </header>
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
             <p className="text-sm text-white/50">Totale lead</p>
             <p className="mt-3 text-3xl font-semibold text-white">{totalLeads}</p>
@@ -204,6 +266,69 @@ export default async function AdminLeadsPage() {
             <p className="text-sm text-emerald-100/70">Chiusi</p>
             <p className="mt-3 text-3xl font-semibold text-emerald-100">{closedLeads}</p>
           </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+            <p className="text-sm text-white/50">Archiviati</p>
+            <p className="mt-3 text-3xl font-semibold text-white/70">{archivedLeads}</p>
+          </div>
+        </section>
+
+        <section className="rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-white/35">
+                Ricerca e filtri
+              </p>
+              <h2 className="mt-2 text-xl font-semibold text-white">
+                Trova rapidamente una richiesta
+              </h2>
+              <p className="mt-2 text-sm text-white/50">
+                Risultati visualizzati: {filteredLeads.length} su {totalLeads}
+              </p>
+            </div>
+
+            {activeFilters ? (
+              <Link
+                href="/admin/leads"
+                className="inline-flex items-center justify-center rounded-full border border-white/10 px-4 py-2.5 text-sm font-medium text-white/70 transition hover:border-white/25 hover:bg-white/10 hover:text-white"
+              >
+                Pulisci filtri
+              </Link>
+            ) : null}
+          </div>
+
+          <form
+            action="/admin/leads"
+            method="get"
+            className="mt-5 grid gap-3 lg:grid-cols-[220px_minmax(0,1fr)_auto]"
+          >
+            <select
+              name="status"
+              defaultValue={selectedStatus}
+              className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-white/30"
+            >
+              {filterStatusOptions.map((option) => (
+                <option key={option.value} value={option.value} className="bg-slate-950">
+                  {option.label}
+                </option>
+              ))}
+            </select>
+
+            <input
+              type="search"
+              name="q"
+              defaultValue={searchQuery}
+              placeholder="Cerca nome, email, telefono, messaggio o immobile..."
+              className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
+            />
+
+            <button
+              type="submit"
+              className="rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/85"
+            >
+              Cerca
+            </button>
+          </form>
         </section>
 
         {error ? (
@@ -221,8 +346,17 @@ export default async function AdminLeadsPage() {
           </div>
         ) : null}
 
+        {!error && leads.length > 0 && filteredLeads.length === 0 ? (
+          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-10 text-center">
+            <h2 className="text-xl font-semibold text-white">Nessun risultato</h2>
+            <p className="mt-3 text-sm text-white/55">
+              Nessun lead corrisponde ai filtri applicati.
+            </p>
+          </div>
+        ) : null}
+
         <section className="grid gap-5">
-          {leads.map((lead) => (
+          {filteredLeads.map((lead) => (
             <article
               key={lead.id}
               className="rounded-[28px] border border-white/10 bg-white/[0.03] p-5 shadow-xl shadow-black/10"
