@@ -596,7 +596,6 @@ export default async function PropertiesPage({
                             )}
 
                             <p className="text-sm text-[var(--site-text-faint)]">
-                              {property.reference_code ? `Rif. ${property.reference_code} · ` : ''}
                               {property.comune || '—'} ({property.province || '—'})
                               {property.frazione ? ` • ${property.frazione}` : ''}
                             </p>

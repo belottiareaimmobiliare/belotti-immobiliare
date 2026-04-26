@@ -185,12 +185,6 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
   const infoCards = [
     {
-      label: 'Codice annuncio',
-      value: formatLabel(currentProperty.reference_code),
-      visible: shouldRenderOptionalField(currentProperty.reference_code),
-      spanClass: '',
-    },
-    {
       label: 'Stato immobile',
       value: formatOptionLabel(currentProperty.condition, 'Da definire'),
       visible: shouldRenderOptionalField(currentProperty.condition),
@@ -335,6 +329,12 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               <h1 className="mt-4 text-3xl font-semibold leading-tight text-[var(--site-text)] md:text-5xl">
                 {currentProperty.title || 'Immobile'}
               </h1>
+
+              {currentProperty.reference_code && (
+                <div className="mt-4 inline-flex rounded-full border border-[var(--site-border)] bg-[var(--site-surface-2)] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--site-text-soft)]">
+                  Codice annuncio {currentProperty.reference_code}
+                </div>
+              )}
 
               <p className="mt-3 text-base text-[var(--site-text-muted)] md:text-lg">
                 {currentProperty.comune || '—'} ({currentProperty.province || '—'})

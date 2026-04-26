@@ -368,7 +368,6 @@ export default async function AdminPropertiesPage({
                 </div>
 
                 <p className="theme-admin-faint mt-4 text-sm">
-                  {property.reference_code ? `Rif. ${property.reference_code} · ` : ''}
                   {property.comune || '—'} ({property.province || '—'})
                   {property.frazione ? ` • ${property.frazione}` : ''}
                 </p>
