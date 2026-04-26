@@ -7,6 +7,7 @@ import SiteHeader from '@/components/public/SiteHeader'
 import SinglePropertyMapSection from '@/components/public/SinglePropertyMapSection'
 import PropertyContactForm from '@/components/public/PropertyContactForm'
 import PropertyGalleryClient from '@/components/public/PropertyGalleryClient'
+import CopyReferenceButton from '@/components/public/CopyReferenceButton'
 
 type PropertyMediaItem = {
   id: string
@@ -332,7 +333,8 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
               {currentProperty.reference_code && (
                 <div className="mt-4 inline-flex rounded-full border border-[var(--site-border)] bg-[var(--site-surface-2)] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--site-text-soft)]">
-                  Codice annuncio {currentProperty.reference_code}
+                  <span>Codice annuncio {currentProperty.reference_code}</span>
+                  <CopyReferenceButton value={currentProperty.reference_code} />
                 </div>
               )}
 
