@@ -47,6 +47,12 @@ type Property = {
   has_garden: boolean | null
   has_elevator: boolean | null
   is_auction: boolean | null
+  export_immobiliare_it: boolean | null
+  export_idealista: boolean | null
+  export_casa_it: boolean | null
+  export_immobiliare_it_status: string | null
+  export_idealista_status: string | null
+  export_casa_it_status: string | null
   updated_at?: string | null
   created_at?: string | null
   property_media?: PropertyMediaItem[]
@@ -74,6 +80,25 @@ function formatOptionLabel(value: string | null | undefined, fallback = '—') {
   }
 
   return labels[clean] || clean.replaceAll('_', ' ')
+}
+
+
+function getExportLed(portalEnabled: boolean | null, status: string | null) {
+  if (status === 'synced') {
+    return 'bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]'
+  }
+
+  if (portalEnabled || status === 'generated') {
+    return 'bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.85)]'
+  }
+
+  return 'bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.75)]'
+}
+
+function getExportLabel(portal: string, enabled: boolean | null, status: string | null) {
+  if (status === 'synced') return `${portal}: sincronizzato`
+  if (enabled || status === 'generated') return `${portal}: generato`
+  return `${portal}: non generato`
 }
 
 function formatPrice(price: number | null) {
@@ -357,6 +382,59 @@ export default async function AdminPropertiesPage({
                 </h2>
 
                 <p className="mt-4 text-2xl font-semibold">{formatPrice(property.price)}</p>
+
+                <div className="mt-4 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3">
+                  <p className="theme-admin-faint mb-3 text-xs uppercase tracking-[0.18em]">
+                    Export portali
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--site-text-muted)]">
+                    <span className="inline-flex items-center gap-2">
+                      <span
+                        className={`h-3 w-3 rounded-full ${getExportLed(
+                          property.export_immobiliare_it,
+                          property.export_immobiliare_it_status
+                        )}`}
+                        title={getExportLabel(
+                          'Immobiliare.it',
+                          property.export_immobiliare_it,
+                          property.export_immobiliare_it_status
+                        )}
+                      />
+                      Immobiliare.it
+                    </span>
+
+                    <span className="inline-flex items-center gap-2">
+                      <span
+                        className={`h-3 w-3 rounded-full ${getExportLed(
+                          property.export_casa_it,
+                          property.export_casa_it_status
+                        )}`}
+                        title={getExportLabel(
+                          'Casa.it',
+                          property.export_casa_it,
+                          property.export_casa_it_status
+                        )}
+                      />
+                      Casa.it
+                    </span>
+
+                    <span className="inline-flex items-center gap-2">
+                      <span
+                        className={`h-3 w-3 rounded-full ${getExportLed(
+                          property.export_idealista,
+                          property.export_idealista_status
+                        )}`}
+                        title={getExportLabel(
+                          'Idealista',
+                          property.export_idealista,
+                          property.export_idealista_status
+                        )}
+                      />
+                      Idealista
+                    </span>
+                  </div>
+                </div>
 
                 <p className="theme-admin-muted mt-2 text-sm">
                   {property.surface || '—'} mq · {property.rooms || '—'} locali ·{' '}
