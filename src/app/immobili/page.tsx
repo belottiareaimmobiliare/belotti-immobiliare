@@ -6,6 +6,7 @@ import PropertiesMapSection from '@/components/public/PropertiesMapSection'
 import Footer from '@/components/public/Footer'
 import FooterReveal from '@/components/public/FooterReveal'
 import Link from 'next/link'
+import CopyReferenceButton from '@/components/public/CopyReferenceButton'
 
 type SearchParams = Promise<{
   q?: string
@@ -595,10 +596,24 @@ export default async function PropertiesPage({
                               </div>
                             )}
 
-                            <p className="text-sm text-[var(--site-text-faint)]">
-                              {property.comune || '—'} ({property.province || '—'})
-                              {property.frazione ? ` • ${property.frazione}` : ''}
-                            </p>
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--site-text-faint)]">
+                              <span>
+                                {property.comune || '—'} ({property.province || '—'})
+                                {property.frazione ? ` • ${property.frazione}` : ''}
+                              </span>
+
+                              {property.reference_code && (
+                                <span className="inline-flex items-center gap-1.5 text-xs text-[var(--site-text-muted)]">
+                                  <span>
+                                    Cod. ann.{' '}
+                                    <span className="font-semibold tracking-[0.12em] text-[var(--site-text-soft)]">
+                                      {property.reference_code}
+                                    </span>
+                                  </span>
+                                  <CopyReferenceButton value={property.reference_code} />
+                                </span>
+                              )}
+                            </div>
 
                             <h3 className="mt-2 line-clamp-2 text-[1.2rem] font-semibold leading-tight text-[var(--site-text)] md:text-[1.45rem]">
                               {property.title}
