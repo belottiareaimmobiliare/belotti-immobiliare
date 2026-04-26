@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import DeleteLeadButton from './DeleteLeadButton'
+import LeadsFilters from './LeadsFilters'
 
 type LeadStatus = 'new' | 'contacted' | 'closed' | 'archived'
 
@@ -33,14 +34,6 @@ const statusOptions: Array<{ value: LeadStatus; label: string }> = [
   { value: 'contacted', label: 'Contattato' },
   { value: 'closed', label: 'Chiuso' },
   { value: 'archived', label: 'Archiviato' },
-]
-
-const filterStatusOptions: Array<{ value: 'all' | LeadStatus; label: string }> = [
-  { value: 'all', label: 'Tutti gli stati' },
-  { value: 'new', label: 'Nuovi' },
-  { value: 'contacted', label: 'Contattati' },
-  { value: 'closed', label: 'Chiusi' },
-  { value: 'archived', label: 'Archiviati' },
 ]
 
 const statusStyle: Record<LeadStatus, string> = {
@@ -175,8 +168,9 @@ export default async function AdminLeadsPage({
   searchParams,
 }: AdminLeadsPageProps) {
   const params = searchParams ? await searchParams : {}
-  const selectedStatus = isLeadStatus(String(params.status ?? ''))
-    ? String(params.status)
+  const rawStatus = String(params.status ?? '')
+  const selectedStatus: 'all' | LeadStatus = isLeadStatus(rawStatus)
+    ? rawStatus
     : 'all'
   const searchQuery = String(params.q ?? '').trim()
 
@@ -217,9 +211,6 @@ export default async function AdminLeadsPage({
 
     return statusMatch && leadMatchesSearch(lead, searchQuery)
   })
-
-  const activeFilters =
-    selectedStatus !== 'all' || searchQuery.length > 0
 
   return (
     <main className="min-h-screen bg-[var(--site-bg)] px-4 py-8 text-[var(--site-text)] sm:px-6 lg:px-8">
@@ -273,63 +264,12 @@ export default async function AdminLeadsPage({
           </div>
         </section>
 
-        <section className="rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-white/35">
-                Ricerca e filtri
-              </p>
-              <h2 className="mt-2 text-xl font-semibold text-white">
-                Trova rapidamente una richiesta
-              </h2>
-              <p className="mt-2 text-sm text-white/50">
-                Risultati visualizzati: {filteredLeads.length} su {totalLeads}
-              </p>
-            </div>
-
-            {activeFilters ? (
-              <Link
-                href="/admin/leads"
-                className="inline-flex items-center justify-center rounded-full border border-white/10 px-4 py-2.5 text-sm font-medium text-white/70 transition hover:border-white/25 hover:bg-white/10 hover:text-white"
-              >
-                Pulisci filtri
-              </Link>
-            ) : null}
-          </div>
-
-          <form
-            action="/admin/leads"
-            method="get"
-            className="mt-5 grid gap-3 lg:grid-cols-[220px_minmax(0,1fr)_auto]"
-          >
-            <select
-              name="status"
-              defaultValue={selectedStatus}
-              className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-white/30"
-            >
-              {filterStatusOptions.map((option) => (
-                <option key={option.value} value={option.value} className="bg-slate-950">
-                  {option.label}
-                </option>
-              ))}
-            </select>
-
-            <input
-              type="search"
-              name="q"
-              defaultValue={searchQuery}
-              placeholder="Cerca nome, email, telefono, messaggio o immobile..."
-              className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
-            />
-
-            <button
-              type="submit"
-              className="rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/85"
-            >
-              Cerca
-            </button>
-          </form>
-        </section>
+        <LeadsFilters
+          selectedStatus={selectedStatus}
+          searchQuery={searchQuery}
+          filteredCount={filteredLeads.length}
+          totalCount={totalLeads}
+        />
 
         {error ? (
           <div className="rounded-3xl border border-red-400/30 bg-red-500/10 p-6 text-sm text-red-100">
