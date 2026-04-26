@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import DeleteLeadButton from './DeleteLeadButton'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
@@ -103,6 +104,28 @@ async function updateLeadNote(formData: FormData) {
     .eq('id', id)
 
   revalidatePath('/admin/leads')
+}
+
+async function deleteLead(formData: FormData) {
+  'use server'
+
+  const id = String(formData.get('id') ?? '')
+
+  if (!id) {
+    return
+  }
+
+  const supabase = await createClient()
+
+  const { error } = await supabase.from('leads').delete().eq('id', id)
+
+  if (error) {
+    console.error('Errore eliminazione lead:', error)
+    return
+  }
+
+  revalidatePath('/admin/leads')
+  revalidatePath('/admin')
 }
 
 export default async function AdminLeadsPage() {
@@ -350,6 +373,8 @@ export default async function AdminLeadsPage() {
                       Salva nota
                     </button>
                   </form>
+
+                  <DeleteLeadButton leadId={lead.id} deleteAction={deleteLead} />
                 </div>
               </div>
             </article>
