@@ -72,16 +72,16 @@ export default function LeadsFilters({
   }, [status, query, pathname, router])
 
   return (
-    <section className="rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
+    <section className="rounded-[28px] border border-[var(--site-border)] bg-[var(--site-surface)] p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-white/35">
+          <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
             Ricerca e filtri
           </p>
-          <h2 className="mt-2 text-xl font-semibold text-white">
+          <h2 className="mt-2 text-xl font-semibold text-[var(--site-text)]">
             Trova rapidamente una richiesta
           </h2>
-          <p className="mt-2 text-sm text-white/50">
+          <p className="mt-2 text-sm text-[var(--site-text-muted)]">
             Risultati visualizzati: {filteredCount} su {totalCount}
             {isPending ? ' · aggiornamento...' : ''}
           </p>
@@ -90,7 +90,7 @@ export default function LeadsFilters({
         {activeFilters ? (
           <Link
             href="/admin/leads"
-            className="inline-flex items-center justify-center rounded-full border border-white/10 px-4 py-2.5 text-sm font-medium text-white/70 transition hover:border-white/25 hover:bg-white/10 hover:text-white"
+            className="inline-flex items-center justify-center rounded-full border border-[var(--site-border)] px-4 py-2.5 text-sm font-medium text-[var(--site-text-soft)] transition hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]"
           >
             Pulisci filtri
           </Link>
@@ -101,7 +101,7 @@ export default function LeadsFilters({
         <select
           value={status}
           onChange={(event) => setStatus(event.target.value as 'all' | LeadStatus)}
-          className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-white/30"
+          className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-sm text-[var(--site-text)] outline-none transition focus:border-[var(--site-border-strong)]"
         >
           {filterStatusOptions.map((option) => (
             <option key={option.value} value={option.value} className="bg-slate-950">
@@ -115,11 +115,11 @@ export default function LeadsFilters({
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Cerca nome, email, telefono, messaggio o immobile..."
-          className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
+          className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-sm text-[var(--site-text)] outline-none transition placeholder:text-[var(--site-text-faint)] focus:border-[var(--site-border-strong)]"
         />
       </div>
 
-      <p className="mt-3 text-xs text-white/35">
+      <p className="mt-3 text-xs text-[var(--site-text-faint)]">
         I filtri si applicano automaticamente dopo 1 secondo.
       </p>
     </section>

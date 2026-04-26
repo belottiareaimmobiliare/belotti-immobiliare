@@ -40,7 +40,7 @@ const statusStyle: Record<LeadStatus, string> = {
   new: 'border-amber-400/40 bg-amber-400/10 text-amber-200',
   contacted: 'border-sky-400/40 bg-sky-400/10 text-sky-200',
   closed: 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200',
-  archived: 'border-white/15 bg-white/5 text-white/60',
+  archived: 'border-[var(--site-border)] bg-[var(--site-surface)] text-[var(--site-text-muted)]',
 }
 
 const statusLabel: Record<LeadStatus, string> = {
@@ -217,15 +217,15 @@ export default async function AdminLeadsPage({
   return (
     <main className="min-h-screen bg-[var(--site-bg)] px-4 py-8 text-[var(--site-text)] sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-8">
-        <header className="flex flex-col gap-4 rounded-[28px] border border-white/10 bg-white/[0.03] p-6 shadow-2xl shadow-black/20 md:flex-row md:items-end md:justify-between">
+        <header className="flex flex-col gap-4 rounded-[28px] border border-[var(--site-border)] bg-[var(--site-surface)] p-6 shadow-2xl shadow-black/20 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-white/40">
+            <p className="text-sm uppercase tracking-[0.3em] text-[var(--site-text-faint)]">
               Area riservata
             </p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white md:text-4xl">
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[var(--site-text)] md:text-4xl">
               Lead ricevuti
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/60">
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--site-text-muted)]">
               Gestione delle richieste inviate dagli utenti tramite le schede immobile.
               Puoi segnare un lead come contattato, chiuso o archiviato e aggiungere note interne.
             </p>
@@ -233,16 +233,16 @@ export default async function AdminLeadsPage({
 
           <Link
             href="/admin"
-            className="inline-flex items-center justify-center rounded-full border border-white/10 px-5 py-3 text-sm font-medium text-white/80 transition hover:border-white/25 hover:bg-white/10 hover:text-white"
+            className="inline-flex items-center justify-center rounded-full border border-[var(--site-border)] px-5 py-3 text-sm font-medium text-[var(--site-text-soft)] transition hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]"
           >
             Torna alla dashboard
           </Link>
         </header>
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-            <p className="text-sm text-white/50">Totale lead</p>
-            <p className="mt-3 text-3xl font-semibold text-white">{totalLeads}</p>
+          <div className="rounded-3xl border border-[var(--site-border)] bg-[var(--site-surface)] p-5">
+            <p className="text-sm text-[var(--site-text-muted)]">Totale lead</p>
+            <p className="mt-3 text-3xl font-semibold text-[var(--site-text)]">{totalLeads}</p>
           </div>
 
           <div className="rounded-3xl border border-amber-400/20 bg-amber-400/10 p-5">
@@ -260,9 +260,9 @@ export default async function AdminLeadsPage({
             <p className="mt-3 text-3xl font-semibold text-emerald-100">{closedLeads}</p>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-            <p className="text-sm text-white/50">Archiviati</p>
-            <p className="mt-3 text-3xl font-semibold text-white/70">{archivedLeads}</p>
+          <div className="rounded-3xl border border-[var(--site-border)] bg-[var(--site-surface)] p-5">
+            <p className="text-sm text-[var(--site-text-muted)]">Archiviati</p>
+            <p className="mt-3 text-3xl font-semibold text-[var(--site-text-soft)]">{archivedLeads}</p>
           </div>
         </section>
 
@@ -280,25 +280,25 @@ export default async function AdminLeadsPage({
         ) : null}
 
         {!error && leads.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-10 text-center">
-            <h2 className="text-xl font-semibold text-white">Nessun lead ricevuto</h2>
-            <p className="mt-3 text-sm text-white/55">
+          <div className="rounded-3xl border border-[var(--site-border)] bg-[var(--site-surface)] p-10 text-center">
+            <h2 className="text-xl font-semibold text-[var(--site-text)]">Nessun lead ricevuto</h2>
+            <p className="mt-3 text-sm text-[var(--site-text-muted)]">
               Quando un utente invierà una richiesta da una scheda immobile, comparirà qui.
             </p>
           </div>
         ) : null}
 
         {!error && leads.length > 0 && filteredLeads.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-10 text-center">
-            <h2 className="text-xl font-semibold text-white">Nessun risultato</h2>
-            <p className="mt-3 text-sm text-white/55">
+          <div className="rounded-3xl border border-[var(--site-border)] bg-[var(--site-surface)] p-10 text-center">
+            <h2 className="text-xl font-semibold text-[var(--site-text)]">Nessun risultato</h2>
+            <p className="mt-3 text-sm text-[var(--site-text-muted)]">
               Nessun lead corrisponde ai filtri applicati.
             </p>
           </div>
         ) : null}
 
-        <section className="overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03] shadow-xl shadow-black/10">
-          <div className="hidden grid-cols-[160px_minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)_150px] gap-4 border-b border-white/10 px-5 py-3 text-xs uppercase tracking-[0.18em] text-white/35 xl:grid">
+        <section className="overflow-hidden rounded-[28px] border border-[var(--site-border)] bg-[var(--site-surface)] shadow-xl shadow-black/10">
+          <div className="hidden grid-cols-[160px_minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)_150px] gap-4 border-b border-[var(--site-border)] px-5 py-3 text-xs uppercase tracking-[0.18em] text-[var(--site-text-faint)] xl:grid">
             <span>Stato</span>
             <span>Contatto</span>
             <span>Immobile</span>
@@ -321,7 +321,7 @@ export default async function AdminLeadsPage({
                   key={lead.id}
                   className="group bg-transparent open:bg-white/[0.02]"
                 >
-                  <summary className="grid cursor-pointer list-none gap-3 px-5 py-5 transition hover:bg-white/[0.04] xl:grid-cols-[160px_minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)_150px] xl:items-center [&::-webkit-details-marker]:hidden">
+                  <summary className="grid cursor-pointer list-none gap-3 px-5 py-5 transition hover:bg-[var(--site-surface-strong)] xl:grid-cols-[160px_minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)_150px] xl:items-center [&::-webkit-details-marker]:hidden">
                     <div>
                       <span
                         className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${statusStyle[lead.status] ?? statusStyle.new}`}
@@ -331,62 +331,62 @@ export default async function AdminLeadsPage({
                     </div>
 
                     <div className="min-w-0">
-                      <p className="truncate text-base font-semibold text-white">
+                      <p className="truncate text-base font-semibold text-[var(--site-text)]">
                         {lead.full_name}
                       </p>
-                      <p className="mt-1 text-xs text-white/40 xl:hidden">
+                      <p className="mt-1 text-xs text-[var(--site-text-faint)] xl:hidden">
                         Ricevuto il {formatDate(lead.created_at)}
                       </p>
                     </div>
 
                     <div className="min-w-0">
-                      <p className="truncate text-sm text-white/75">
+                      <p className="truncate text-sm text-[var(--site-text-soft)]">
                         {lead.property_title || lead.property_slug || 'Immobile non specificato'}
                       </p>
                     </div>
 
                     <div className="min-w-0">
-                      <p className="truncate text-sm text-white/60">
+                      <p className="truncate text-sm text-[var(--site-text-muted)]">
                         {lead.email}
                       </p>
                       {lead.phone ? (
-                        <p className="mt-1 truncate text-xs text-white/40">
+                        <p className="mt-1 truncate text-xs text-[var(--site-text-faint)]">
                           {lead.phone}
                         </p>
                       ) : null}
                     </div>
 
                     <div className="flex items-center justify-between gap-3">
-                      <span className="hidden text-sm text-white/45 xl:inline">
+                      <span className="hidden text-sm text-[var(--site-text-faint)] xl:inline">
                         {formatDate(lead.created_at)}
                       </span>
-                      <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/50 transition group-open:bg-white group-open:text-black">
+                      <span className="rounded-full border border-[var(--site-border)] px-3 py-1 text-xs text-[var(--site-text-muted)] transition group-open:bg-white group-open:text-black">
                         <span className="group-open:hidden">Apri</span>
                         <span className="hidden group-open:inline">Chiudi</span>
                       </span>
                     </div>
                   </summary>
 
-                  <div className="border-t border-white/10 px-5 pb-6 pt-5">
+                  <div className="border-t border-[var(--site-border)] px-5 pb-6 pt-5">
                     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
                       <div className="min-w-0">
-                        <div className="grid gap-2 text-sm text-white/65 md:grid-cols-2">
+                        <div className="grid gap-2 text-sm text-[var(--site-text-muted)] md:grid-cols-2">
                           <p>
-                            <span className="text-white/40">Email:</span>{' '}
+                            <span className="text-[var(--site-text-faint)]">Email:</span>{' '}
                             <a
                               href={`mailto:${lead.email}`}
-                              className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white"
+                              className="text-[var(--site-text)] underline decoration-[var(--site-border-strong)] underline-offset-4 hover:decoration-[var(--site-text)]"
                             >
                               {lead.email}
                             </a>
                           </p>
 
                           <p>
-                            <span className="text-white/40">Telefono:</span>{' '}
+                            <span className="text-[var(--site-text-faint)]">Telefono:</span>{' '}
                             {lead.phone ? (
                               <a
                                 href={`tel:${lead.phone}`}
-                                className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white"
+                                className="text-[var(--site-text)] underline decoration-[var(--site-border-strong)] underline-offset-4 hover:decoration-[var(--site-text)]"
                               >
                                 {lead.phone}
                               </a>
@@ -396,22 +396,22 @@ export default async function AdminLeadsPage({
                           </p>
 
                           <p>
-                            <span className="text-white/40">Contattato:</span>{' '}
+                            <span className="text-[var(--site-text-faint)]">Contattato:</span>{' '}
                             {formatDate(lead.contacted_at)}
                           </p>
 
                           <p>
-                            <span className="text-white/40">Chiuso/archiviato:</span>{' '}
+                            <span className="text-[var(--site-text-faint)]">Chiuso/archiviato:</span>{' '}
                             {formatDate(lead.closed_at)}
                           </p>
                         </div>
 
-                        <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
-                          <p className="text-xs uppercase tracking-[0.22em] text-white/35">
+                        <div className="mt-5 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-4">
+                          <p className="text-xs uppercase tracking-[0.22em] text-[var(--site-text-faint)]">
                             Immobile collegato
                           </p>
 
-                          <p className="mt-2 font-medium text-white">
+                          <p className="mt-2 font-medium text-[var(--site-text)]">
                             {lead.property_title || lead.property_slug || 'Nessun immobile collegato'}
                           </p>
 
@@ -430,14 +430,14 @@ export default async function AdminLeadsPage({
                             {adminPropertyHref ? (
                               <Link
                                 href={adminPropertyHref}
-                                className="inline-flex items-center justify-center rounded-full border border-white/10 px-4 py-2.5 text-sm font-semibold text-white/75 transition hover:border-white/25 hover:bg-white/10 hover:text-white"
+                                className="inline-flex items-center justify-center rounded-full border border-[var(--site-border)] px-4 py-2.5 text-sm font-semibold text-[var(--site-text-soft)] transition hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]"
                               >
                                 Apri modifica immobile
                               </Link>
                             ) : null}
 
                             {!publicPropertyHref && !adminPropertyHref ? (
-                              <p className="text-sm text-white/45">
+                              <p className="text-sm text-[var(--site-text-faint)]">
                                 Link immobile non disponibile per questo lead.
                               </p>
                             ) : null}
@@ -445,11 +445,11 @@ export default async function AdminLeadsPage({
                         </div>
 
                         {lead.message ? (
-                          <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
-                            <p className="text-xs uppercase tracking-[0.22em] text-white/35">
+                          <div className="mt-5 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-4">
+                            <p className="text-xs uppercase tracking-[0.22em] text-[var(--site-text-faint)]">
                               Messaggio utente
                             </p>
-                            <p className="mt-2 whitespace-pre-line text-sm leading-6 text-white/70">
+                            <p className="mt-2 whitespace-pre-line text-sm leading-6 text-[var(--site-text-soft)]">
                               {lead.message}
                             </p>
                           </div>
@@ -457,8 +457,8 @@ export default async function AdminLeadsPage({
                       </div>
 
                       <div className="w-full shrink-0">
-                        <div className="rounded-3xl border border-white/10 bg-black/20 p-4">
-                          <p className="text-sm font-semibold text-white">
+                        <div className="rounded-3xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-4">
+                          <p className="text-sm font-semibold text-[var(--site-text)]">
                             Cambia stato
                           </p>
 
@@ -472,8 +472,8 @@ export default async function AdminLeadsPage({
                                   type="submit"
                                   className={`w-full rounded-full border px-3 py-2 text-xs font-semibold transition ${
                                     lead.status === option.value
-                                      ? 'border-white/30 bg-white/15 text-white'
-                                      : 'border-white/10 bg-white/[0.03] text-white/60 hover:border-white/25 hover:bg-white/10 hover:text-white'
+                                      ? 'border-[var(--site-border-strong)] bg-[var(--site-surface-2)] text-[var(--site-text)]'
+                                      : 'border-[var(--site-border)] bg-[var(--site-surface)] text-[var(--site-text-muted)] hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]'
                                   }`}
                                 >
                                   {option.label}
@@ -485,13 +485,13 @@ export default async function AdminLeadsPage({
 
                         <form
                           action={updateLeadNote}
-                          className="mt-4 rounded-3xl border border-white/10 bg-black/20 p-4"
+                          className="mt-4 rounded-3xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-4"
                         >
                           <input type="hidden" name="id" value={lead.id} />
 
                           <label
                             htmlFor={`internal_note_${lead.id}`}
-                            className="text-sm font-semibold text-white"
+                            className="text-sm font-semibold text-[var(--site-text)]"
                           >
                             Nota interna
                           </label>
@@ -502,7 +502,7 @@ export default async function AdminLeadsPage({
                             defaultValue={lead.internal_note ?? ''}
                             rows={4}
                             placeholder="Es. Richiamare domani mattina, interessato alla visita..."
-                            className="mt-3 w-full resize-none rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
+                            className="mt-3 w-full resize-none rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-sm text-[var(--site-text)] outline-none transition placeholder:text-[var(--site-text-faint)] focus:border-[var(--site-border-strong)]"
                           />
 
                           <button
