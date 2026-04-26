@@ -34,6 +34,7 @@ function formatPrice(price: number | null) {
 export default async function AdminExportsPage() {
   const profile = await requireAdminProfile()
   const supabase = await createClient()
+  const exportToken = process.env.EXPORT_TOKEN || ''
 
   if (profile.role !== 'owner' && !profile.can_manage_properties) {
     return (
@@ -113,7 +114,7 @@ export default async function AdminExportsPage() {
                   name="Immobiliare.it"
                   enabled={property.export_immobiliare_it}
                   status={property.export_immobiliare_it_status}
-                  href={`/api/admin/exports/immobiliare-it?id=${property.id}`}
+                  href={`/api/admin/exports/immobiliare-it?id=${property.id}&token=${encodeURIComponent(exportToken)}`}
                   downloadLabel="Download XML"
                 />
 
@@ -121,7 +122,7 @@ export default async function AdminExportsPage() {
                   name="Idealista"
                   enabled={property.export_idealista}
                   status={property.export_idealista_status}
-                  href={`/api/admin/exports/idealista?id=${property.id}`}
+                  href={`/api/admin/exports/idealista?id=${property.id}&token=${encodeURIComponent(exportToken)}`}
                   downloadLabel="Download JSON"
                 />
 
@@ -129,7 +130,7 @@ export default async function AdminExportsPage() {
                   name="Casa.it"
                   enabled={property.export_casa_it}
                   status={property.export_casa_it_status}
-                  href={`/api/admin/exports/casa-it?id=${property.id}`}
+                  href={`/api/admin/exports/casa-it?id=${property.id}&token=${encodeURIComponent(exportToken)}`}
                   downloadLabel="Download JSON"
                 />
               </div>
@@ -175,13 +176,13 @@ function PortalRow({
 
         <div className="flex flex-col gap-2 sm:flex-row">
           {active ? (
-            <Link
+            <a
               href={href}
-              target="_blank"
+              download
               className="theme-admin-button-primary inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold"
             >
               {downloadLabel}
-            </Link>
+            </a>
           ) : (
             <button
               type="button"
