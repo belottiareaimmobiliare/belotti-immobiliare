@@ -546,52 +546,162 @@ export default function GianfedericoBelottiContentEditor({
           ) : null}
         </section>
 
-        <section className="theme-panel h-fit rounded-[30px] border p-6 xl:sticky xl:top-24">
-          <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
-            Anteprima rapida
-          </p>
+        <section className="overflow-hidden rounded-[34px] border border-[var(--site-border)] bg-[var(--site-bg)] shadow-[0_24px_80px_rgba(0,0,0,0.18)] xl:sticky xl:top-24 xl:max-h-[calc(100vh-7rem)] xl:overflow-y-auto">
+          <div className="border-b border-[var(--site-border)] bg-[var(--site-bg-soft)] px-5 py-4">
+            <div className="flex items-center justify-between gap-4">
+              <img
+                src="/images/brand/areaimmobiliare.png"
+                alt="Area Immobiliare"
+                className="h-9 w-auto object-contain"
+              />
 
-          <h2 className="mt-3 text-3xl font-semibold leading-tight text-[var(--site-text)]">
-            {form.heroTitle}
-          </h2>
-
-          <div className="mt-5 space-y-4 text-sm leading-7 text-[var(--site-text-muted)]">
-            <p>{form.heroIntro1}</p>
-            <p>{form.heroIntro2}</p>
+              <div className="hidden items-center gap-5 text-xs text-[var(--site-text-muted)] lg:flex">
+                <span>Home</span>
+                <span>Immobili</span>
+                <span>Chi siamo</span>
+                <span className="font-semibold text-[var(--site-text)]">
+                  Gianfederico Belotti
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div className="mt-6 grid gap-3">
-            {form.highlights
-              .filter((item) => item.enabled)
-              .map((item, index) => (
+          <div className="relative overflow-hidden border-b border-[var(--site-border)] bg-[var(--site-bg-soft)]">
+            <div className="absolute inset-0 opacity-40">
+              <div className="absolute left-[-18%] top-[-20%] h-[260px] w-[260px] rounded-full bg-white/10 blur-3xl" />
+              <div className="absolute bottom-[-25%] right-[-18%] h-[320px] w-[320px] rounded-full bg-white/5 blur-3xl" />
+            </div>
+
+            <div className="relative z-10 grid gap-6 px-6 py-8 lg:grid-cols-[180px_minmax(0,1fr)] lg:items-center">
+              <div className="mx-auto w-full max-w-[180px] lg:mx-0">
+                <div className="relative aspect-[4/5] overflow-hidden rounded-[26px] border border-[var(--site-border-strong)] bg-[var(--site-surface)]">
+                  <img
+                    src="/images/gianfederico-belotti.jpg"
+                    alt="Gianfederico Belotti"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
+                  {form.heroOverline}
+                </p>
+
+                <h2 className="mt-3 text-3xl font-semibold leading-tight text-[var(--site-text)]">
+                  {form.heroTitle}
+                </h2>
+
+                <div className="mt-4 space-y-3 text-sm leading-7 text-[var(--site-text-muted)]">
+                  <p>{form.heroIntro1}</p>
+                  <p>{form.heroIntro2}</p>
+                </div>
+
+                <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+                  <span className="theme-button-primary liquid-button inline-flex items-center justify-center rounded-2xl px-4 py-2.5 text-xs font-semibold">
+                    {form.primaryCtaLabel}
+                  </span>
+
+                  <span className="theme-button-secondary liquid-button inline-flex items-center justify-center rounded-2xl px-4 py-2.5 text-xs font-semibold">
+                    {form.secondaryCtaLabel}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {form.highlights.filter((item) => item.enabled).length > 0 ? (
+            <div className="px-6 py-6">
+              <div className="grid gap-3 md:grid-cols-3">
+                {form.highlights
+                  .filter((item) => item.enabled)
+                  .map((item, index) => (
+                    <div
+                      key={`${item.label}-${index}`}
+                      className="theme-panel rounded-[22px] border p-4"
+                    >
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                        {item.label}
+                      </p>
+                      <p className="mt-2 text-xs leading-6 text-[var(--site-text-muted)]">
+                        {item.text}
+                      </p>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          ) : null}
+
+          <div className="grid gap-5 px-6 pb-6 lg:grid-cols-[minmax(0,1fr)_240px]">
+            <div className="space-y-5">
+              {visibleBoxes.slice(0, 4).map((item, index) => (
                 <div
-                  key={`${item.label}-${index}`}
-                  className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-4"
+                  key={`${item.title}-${index}`}
+                  className="theme-panel rounded-[24px] border p-5"
                 >
-                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-                    {item.label}
-                  </p>
-                  <p className="mt-2 text-xs leading-6 text-[var(--site-text-muted)]">
-                    {item.text}
-                  </p>
+                  <h3 className="text-lg font-semibold leading-tight text-[var(--site-text)]">
+                    {item.title}
+                  </h3>
+
+                  <div className="mt-3 space-y-3 text-xs leading-6 text-[var(--site-text-muted)]">
+                    <p>{item.paragraph1}</p>
+                    <p>{item.paragraph2}</p>
+                  </div>
                 </div>
               ))}
-          </div>
+            </div>
 
-          <div className="mt-6 space-y-4">
-            {visibleBoxes.slice(0, 3).map((item, index) => (
-              <div
-                key={`${item.title}-${index}`}
-                className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-4"
-              >
-                <h3 className="text-sm font-semibold text-[var(--site-text)]">
-                  {item.title}
-                </h3>
-                <p className="mt-2 line-clamp-4 text-xs leading-6 text-[var(--site-text-muted)]">
-                  {item.paragraph1}
+            <div className="space-y-5">
+              {form.methodCards.filter((item) => item.enabled).length > 0 ? (
+                <div className="theme-panel rounded-[24px] border p-5">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                    {form.methodTitle}
+                  </p>
+
+                  <div className="mt-4 space-y-3">
+                    {form.methodCards
+                      .filter((item) => item.enabled)
+                      .map((item, index) => (
+                        <div
+                          key={`${item.title}-${index}`}
+                          className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-3"
+                        >
+                          <h4 className="text-xs font-semibold text-[var(--site-text)]">
+                            {item.title}
+                          </h4>
+                          <p className="mt-2 text-[11px] leading-5 text-[var(--site-text-muted)]">
+                            {item.text}
+                          </p>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="theme-panel rounded-[24px] border p-5">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                  {form.sidebarOverline}
                 </p>
+
+                <h3 className="mt-2 text-lg font-semibold text-[var(--site-text)]">
+                  {form.sidebarTitle}
+                </h3>
+
+                <p className="mt-3 whitespace-pre-line text-xs leading-6 text-[var(--site-text-muted)]">
+                  {form.sidebarText}
+                </p>
+
+                <div className="mt-4 grid gap-2">
+                  <span className="theme-button-secondary liquid-button inline-flex items-center justify-center rounded-2xl px-4 py-2.5 text-xs font-semibold">
+                    Chiama {form.phoneLabel}
+                  </span>
+
+                  <span className="theme-button-primary liquid-button inline-flex items-center justify-center rounded-2xl px-4 py-2.5 text-xs font-semibold">
+                    {form.consultationCtaLabel}
+                  </span>
+                </div>
               </div>
-            ))}
+            </div>
           </div>
         </section>
       </div>
