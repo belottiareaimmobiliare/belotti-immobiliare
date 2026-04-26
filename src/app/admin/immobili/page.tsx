@@ -377,6 +377,12 @@ export default async function AdminPropertiesPage({
                   <p className="theme-admin-muted mt-1 text-sm">{property.address}</p>
                 )}
 
+                {property.reference_code && (
+                  <p className="theme-admin-faint mt-3 text-xs uppercase tracking-[0.18em]">
+                    Codice interno: {property.reference_code}
+                  </p>
+                )}
+
                 <h2 className="mt-2 text-2xl font-semibold">
                   {property.title || 'Immobile senza titolo'}
                 </h2>

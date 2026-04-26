@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { getCurrentAdminUserId } from '@/lib/admin-current-user-client'
+import { generatePropertyReferenceCode } from '@/lib/property-reference-code'
 import italyLocations from '@/data/italyLocations.json'
 
 type ProvinceItem = {
@@ -217,7 +218,7 @@ export default function NewPropertyPage() {
       .from('properties')
       .insert({
         title: form.title,
-        reference_code: form.reference_code || null,
+        reference_code: form.reference_code || generatePropertyReferenceCode(),
         condition: form.condition || null,
         availability: form.availability || null,
         year_built: form.year_built ? Number(form.year_built) : null,
