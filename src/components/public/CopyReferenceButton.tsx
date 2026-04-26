@@ -21,7 +21,7 @@ export default function CopyReferenceButton({ value }: { value: string }) {
       onClick={copy}
       title={copied ? 'Copiato' : 'Copia codice annuncio'}
       aria-label="Copia codice annuncio"
-      className="ml-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--site-border)] bg-[var(--site-surface)] text-[var(--site-text-muted)] transition hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]"
+      className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--site-border)] bg-transparent text-[var(--site-text-muted)] transition hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]"
     >
       {copied ? (
         <span className="text-xs">✓</span>

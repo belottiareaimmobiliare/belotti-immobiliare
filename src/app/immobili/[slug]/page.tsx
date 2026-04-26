@@ -332,8 +332,13 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               </h1>
 
               {currentProperty.reference_code && (
-                <div className="mt-4 inline-flex rounded-full border border-[var(--site-border)] bg-[var(--site-surface-2)] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--site-text-soft)]">
-                  <span>Codice annuncio {currentProperty.reference_code}</span>
+                <div className="mt-3 flex items-center gap-2 text-sm text-[var(--site-text-muted)]">
+                  <span>
+                    Codice annuncio{' '}
+                    <span className="font-semibold tracking-[0.12em] text-[var(--site-text-soft)]">
+                      {currentProperty.reference_code}
+                    </span>
+                  </span>
                   <CopyReferenceButton value={currentProperty.reference_code} />
                 </div>
               )}
