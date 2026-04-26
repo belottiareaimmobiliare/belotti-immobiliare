@@ -5,6 +5,9 @@ import { normalizeExportProperty } from '@/lib/exports/properties-export'
 
 export const dynamic = 'force-dynamic'
 
+const AGENCY_EMAIL = 'info@areaimmobiliare.com'
+const AGENCY_NAME = 'Area Immobiliare'
+
 function escapeXml(value: unknown) {
   return String(value ?? '')
     .replaceAll('&', '&amp;')
@@ -24,79 +27,82 @@ function boolTag(name: string, value: boolean | null | undefined) {
   return `<${name}>${value ? 'true' : 'false'}</${name}>`
 }
 
+function mapContractType(value: string | null) {
+  if (value === 'affitto') return 'rent'
+  return 'sale'
+}
+
 function propertyToXml(property: any) {
-  const imageXml = (property.images || [])
+  const pictures = (property.images || [])
     .map((image: any, index: number) => {
       return `
-        <image>
+        <picture>
           ${tag('url', image.url)}
           ${tag('caption', image.label)}
           ${tag('order', image.sort_order ?? index + 1)}
-          ${boolTag('cover', Boolean(image.is_cover))}
-        </image>`
-    })
-    .join('')
-
-  const planXml = (property.plans || [])
-    .map((plan: any, index: number) => {
-      return `
-        <plan>
-          ${tag('url', plan.url)}
-          ${tag('caption', plan.label)}
-          ${tag('order', plan.sort_order ?? index + 1)}
-        </plan>`
+        </picture>`
     })
     .join('')
 
   return `
-    <property>
+    <property operation="write">
       ${tag('unique-id', property.reference_code || property.id)}
-      ${tag('management-id', property.id)}
+      ${tag('reference-code', property.reference_code || property.id)}
+
+      <agent>
+        ${tag('office-name', AGENCY_NAME)}
+        ${tag('email', AGENCY_EMAIL)}
+      </agent>
+
+      <publish>
+        <portal id="immobiliare.it" status="true" />
+      </publish>
+
       ${tag('title', property.title)}
       ${tag('description', property.description)}
-      ${tag('contract-type', property.contract_type)}
-      ${tag('property-type', property.property_type)}
-      ${tag('condition', property.condition)}
-      ${tag('availability', property.availability)}
-      ${tag('price', property.price)}
-      ${tag('surface', property.surface)}
-      ${tag('rooms', property.rooms)}
-      ${tag('bedrooms', property.bedrooms)}
-      ${tag('bathrooms', property.bathrooms)}
-      ${tag('floor', property.floor)}
-      ${tag('total-floors', property.total_floors)}
-      ${tag('energy-class', property.energy_class)}
-      ${tag('energy-epgl', property.energy_epgl)}
-      ${tag('heating-type', property.heating_type)}
-      ${tag('heating-source', property.heating_source)}
-      ${tag('furnished-status', property.furnished_status)}
-      ${tag('condo-fees-amount', property.condo_fees_amount)}
-      ${tag('condo-fees-period', property.condo_fees_period)}
-      ${tag('condo-fees-note', property.condo_fees_note)}
 
       <location>
         ${tag('province', property.province)}
         ${tag('city', property.comune)}
-        ${tag('area', property.frazione)}
+        ${tag('locality', property.frazione)}
         ${tag('address', property.address)}
         ${tag('latitude', property.latitude)}
         ${tag('longitude', property.longitude)}
       </location>
 
+      <building>
+        ${tag('category', property.property_type)}
+        ${tag('typology', property.property_type)}
+        ${tag('condition', property.condition)}
+        ${tag('floor', property.floor)}
+        ${tag('floors', property.total_floors)}
+      </building>
+
       <features>
+        ${tag('surface', property.surface)}
+        ${tag('rooms', property.rooms)}
+        ${tag('bedrooms', property.bedrooms)}
+        ${tag('bathrooms', property.bathrooms)}
         ${boolTag('garage', property.has_garage)}
         ${boolTag('parking', property.has_parking)}
         ${boolTag('garden', property.has_garden)}
         ${boolTag('elevator', property.has_elevator)}
-        ${boolTag('auction', property.is_auction)}
+        ${tag('energy-class', property.energy_class)}
+        ${tag('ipe', property.energy_epgl)}
+        ${tag('heating', property.heating_type || property.heating_source)}
+        ${tag('furnished', property.furnished_status)}
       </features>
 
-      <media>
-        <images>${imageXml}
-        </images>
-        <plans>${planXml}
-        </plans>
-      </media>
+      <transactions>
+        <transaction>
+          ${tag('type', mapContractType(property.contract_type))}
+          <price currency="EUR" reserved="${property.price ? 'false' : 'true'}">${property.price || ''}</price>
+          ${tag('condominium-expenses', property.condo_fees_amount)}
+        </transaction>
+      </transactions>
+
+      <pictures>${pictures}
+      </pictures>
     </property>`
 }
 
@@ -130,8 +136,6 @@ export async function GET() {
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <feed>
-  <source>Belotti Immobiliare</source>
-  <generated-at>${new Date().toISOString()}</generated-at>
   <properties>
 ${properties.map(propertyToXml).join('\n')}
   </properties>
