@@ -2,12 +2,15 @@ import { createClient } from '@/lib/supabase/server'
 import {
   ABOUT_CONTENT_KEY,
   CONTACTS_CONTENT_KEY,
+  GIANFEDERICO_BELOTTI_CONTENT_KEY,
   HOME_CONTENT_KEY,
   defaultAboutContent,
   defaultContactsContent,
+  defaultGianfedericoBelottiContent,
   defaultHomeContent,
   type AboutContent,
   type ContactsContent,
+  type GianfedericoBelottiContent,
   type HomeContent,
 } from '@/lib/site-content'
 
@@ -40,4 +43,11 @@ export async function getAboutContent() {
 
 export async function getContactsContent() {
   return readContent<ContactsContent>(CONTACTS_CONTENT_KEY, defaultContactsContent)
+}
+
+export async function getGianfedericoBelottiContent() {
+  return readContent<GianfedericoBelottiContent>(
+    GIANFEDERICO_BELOTTI_CONTENT_KEY,
+    defaultGianfedericoBelottiContent
+  )
 }

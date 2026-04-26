@@ -1,6 +1,7 @@
 export const HOME_CONTENT_KEY = 'home_page'
 export const ABOUT_CONTENT_KEY = 'about_page'
 export const CONTACTS_CONTENT_KEY = 'contacts'
+export const GIANFEDERICO_BELOTTI_CONTENT_KEY = 'gianfederico_belotti_page'
 
 export type HomeContent = {
   overline: string
@@ -51,6 +52,44 @@ export type AboutContent = {
   box4Text: string
 }
 
+export type GianfedericoHighlight = {
+  enabled: boolean
+  label: string
+  text: string
+}
+
+export type GianfedericoMethodCard = {
+  enabled: boolean
+  title: string
+  text: string
+}
+
+export type GianfedericoContentBox = {
+  enabled: boolean
+  title: string
+  paragraph1: string
+  paragraph2: string
+}
+
+export type GianfedericoBelottiContent = {
+  heroOverline: string
+  heroTitle: string
+  heroIntro1: string
+  heroIntro2: string
+  primaryCtaLabel: string
+  secondaryCtaLabel: string
+  highlights: GianfedericoHighlight[]
+  boxes: GianfedericoContentBox[]
+  methodTitle: string
+  methodCards: GianfedericoMethodCard[]
+  sidebarOverline: string
+  sidebarTitle: string
+  sidebarText: string
+  phoneLabel: string
+  phoneHref: string
+  consultationCtaLabel: string
+}
+
 export const defaultContactsContent: ContactsContent = {
   phoneLabel: '035 221206',
   phoneHref: '035221206',
@@ -92,6 +131,119 @@ export const aboutLimits = {
   quadrantTitle: 42,
   quadrantText: 140,
   box4Text: 500,
+}
+
+export const gianfedericoBelottiLimits = {
+  heroOverline: 60,
+  heroTitle: 130,
+  heroIntro: 520,
+  ctaLabel: 50,
+  highlightLabel: 45,
+  highlightText: 180,
+  boxTitle: 120,
+  boxParagraph: 760,
+  methodTitle: 70,
+  methodCardTitle: 70,
+  methodCardText: 260,
+  sidebarOverline: 50,
+  sidebarTitle: 80,
+  sidebarText: 260,
+  phoneLabel: 30,
+  phoneHref: 30,
+}
+
+export const defaultGianfedericoBelottiContent: GianfedericoBelottiContent = {
+  heroOverline: 'Gianfederico Belotti',
+  heroTitle: 'L’agente che ha creato la Borsa del mattone',
+  heroIntro1:
+    'Il mercato immobiliare è un terreno vastissimo, ricco di opportunità ma anche di insidie. Per questo acquistare casa non dovrebbe mai diventare un salto nel buio: dovrebbe restare uno dei momenti più importanti, emozionanti e consapevoli della vita.',
+  heroIntro2:
+    'Da questa convinzione nasce il percorso di Gianfederico Belotti: leggere il mercato, interpretarne i valori, proteggere chi compra e dare all’immobile una valutazione corretta, non soltanto conveniente.',
+  primaryCtaLabel: 'Vedi immobili',
+  secondaryCtaLabel: 'Contatta Area Immobiliare',
+  highlights: [
+    {
+      enabled: true,
+      label: 'Dal 1980',
+      text: 'Area Immobiliare opera a Bergamo con sede in Via Locatelli 62.',
+    },
+    {
+      enabled: true,
+      label: 'Borsa del mattone',
+      text: 'Un metodo nato per leggere il mercato con maggiore trasparenza.',
+    },
+    {
+      enabled: true,
+      label: 'Bergamo e provincia',
+      text: 'Esperienza diretta su Città Alta, Città Bassa, Colli e hinterland.',
+    },
+  ],
+  boxes: [
+    {
+      enabled: true,
+      title: 'Acquistare casa è un sogno che non deve svanire',
+      paragraph1:
+        'Casa non è una parola qualunque. È il luogo in cui si progetta una vita, si custodiscono risparmi, si immagina il futuro. Proprio per questo l’acquisto di un immobile non può essere affrontato soltanto guardando una facciata, una metratura o una fotografia ben riuscita.',
+      paragraph2:
+        'Serve una guida capace di distinguere il valore reale dall’apparenza, l’occasione dalla trappola, il prezzo corretto da quello semplicemente desiderato. È questo il lavoro che Area Immobiliare svolge dal 1980: accompagnare chi compra e chi vende dentro una scelta importante, con metodo, prudenza e responsabilità.',
+    },
+    {
+      enabled: true,
+      title: 'La Borsa del mattone',
+      paragraph1:
+        'A Gianfederico Belotti si deve l’intuizione di portare anche nel mercato immobiliare bergamasco uno strumento di lettura più chiaro, più concreto e più utile: una vera Borsa del mattone, pensata per aiutare cittadini, proprietari e operatori a capire se il valore richiesto per una casa, un ufficio, un negozio o un terreno fosse davvero coerente con il mercato.',
+      paragraph2:
+        'Da quella impostazione sono nate pubblicazioni e strumenti di consultazione che negli anni hanno contribuito a rendere più trasparente il rapporto tra prezzo, zona, qualità dell’immobile e prospettive future. Perché il prezzo giusto non è soltanto quello che permette di comprare oggi: è anche quello che conserva equilibrio nel tempo, nel caso di una futura rivendita.',
+    },
+    {
+      enabled: true,
+      title: 'Dietro una buona compravendita ci sono controlli, non improvvisazione',
+      paragraph1:
+        'Ogni immobile racconta una storia. Ma prima di trasformare quella storia in un rogito, occorre leggerla con attenzione: provenienza, conformità allo stato di fatto, eventuali ipoteche, vincoli, documenti tecnici, situazione urbanistica e commerciale.',
+      paragraph2:
+        'Solo così l’acquisto torna a essere ciò che dovrebbe essere: non una corsa ansiosa verso una firma, ma un passaggio importante affrontato con le informazioni giuste. La consulenza immobiliare, quando è seria, non vende soltanto metri quadrati. Riduce i rischi, chiarisce i dubbi e protegge il valore dell’investimento.',
+    },
+    {
+      enabled: true,
+      title: 'Un metodo costruito sul territorio',
+      paragraph1:
+        'Bergamo non è un mercato uniforme. Città Alta, Città Bassa, i Colli, il centro, i quartieri residenziali e l’hinterland hanno dinamiche diverse, valori diversi, domande diverse. Conoscerli significa avere memoria delle compravendite, sensibilità sul territorio e capacità di interpretare ciò che i soli numeri non dicono.',
+      paragraph2:
+        'È in questa esperienza che si inserisce il lavoro di Area Immobiliare: selezionare immobili, valutarli con attenzione, presentarli con serietà e accompagnare il cliente fino alla scelta finale, senza perdere di vista ciò che conta davvero: acquistare bene, vendere correttamente, costruire fiducia.',
+    },
+    {
+      enabled: true,
+      title: 'Il meglio di consulenti, tecnici e professionisti',
+      paragraph1:
+        'Una compravendita immobiliare non si esaurisce nell’incontro tra chi vende e chi compra. Attorno a una casa si muovono banche, notai, tecnici, architetti, imprese, artigiani e professionisti chiamati a rendere sicuro e conveniente ogni passaggio.',
+      paragraph2:
+        'L’esperienza maturata nel tempo consente di orientare il cliente anche in queste scelte, indicando interlocutori affidabili e soluzioni adeguate. Perché quando si affronta uno degli investimenti più importanti della vita, la qualità delle persone coinvolte non è un dettaglio: è una garanzia.',
+    },
+  ],
+  methodTitle: 'Metodo Belotti',
+  methodCards: [
+    {
+      enabled: true,
+      title: 'Valutare prima di proporre',
+      text: 'Ogni immobile deve essere letto nel suo contesto: posizione, stato, commerciabilità, prospettive di rivendita e coerenza del prezzo richiesto.',
+    },
+    {
+      enabled: true,
+      title: 'Verificare prima di acquistare',
+      text: 'La bellezza di una casa non basta. Provenienze, conformità, vincoli, ipoteche e documentazione devono essere controllati con attenzione.',
+    },
+    {
+      enabled: true,
+      title: 'Accompagnare fino alla firma',
+      text: 'Comprare casa significa prendere una decisione importante. Il cliente deve essere guidato con chiarezza, senza pressioni e senza zone d’ombra.',
+    },
+  ],
+  sidebarOverline: 'Area Immobiliare',
+  sidebarTitle: 'Dal 1980 a Bergamo',
+  sidebarText: 'Via A. Locatelli 62\n24121 Bergamo',
+  phoneLabel: '035 221206',
+  phoneHref: '+39035221206',
+  consultationCtaLabel: 'Richiedi una consulenza',
 }
 
 export const defaultHomeContent: HomeContent = {

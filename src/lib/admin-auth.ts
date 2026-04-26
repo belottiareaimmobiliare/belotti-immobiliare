@@ -93,6 +93,7 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
       { href: '/admin/autori', label: 'Editors' },
       { href: '/admin/contenuti/home', label: 'Modifica Home' },
       { href: '/admin/contenuti/chi-siamo', label: 'Modifica Chi siamo' },
+      { href: '/admin/contenuti/gianfederico-belotti', label: 'Modifica Gianfederico' },
       { href: '/admin/contenuti/contatti', label: 'Modifica Contatti' },
       { href: '/admin/utenti', label: 'Active Directory' },
       { href: '/admin/exports', label: 'Export Portali' },

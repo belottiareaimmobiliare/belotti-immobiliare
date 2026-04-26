@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import {
   ABOUT_CONTENT_KEY,
   CONTACTS_CONTENT_KEY,
+  GIANFEDERICO_BELOTTI_CONTENT_KEY,
   HOME_CONTENT_KEY,
 } from '@/lib/site-content'
 
@@ -12,6 +13,7 @@ const allowedKeys = new Set([
   HOME_CONTENT_KEY,
   ABOUT_CONTENT_KEY,
   CONTACTS_CONTENT_KEY,
+  GIANFEDERICO_BELOTTI_CONTENT_KEY,
 ])
 
 export async function POST(request: Request) {
