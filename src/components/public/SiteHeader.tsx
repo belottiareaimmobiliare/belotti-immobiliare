@@ -11,6 +11,7 @@ const links = [
   { href: '/immobili', label: 'Immobili' },
   { href: '/news', label: 'News' },
   { href: '/chi-siamo', label: 'Chi siamo' },
+  { href: '/gianfederico-belotti', label: 'G. Belotti' },
   { href: '/contatti', label: 'Contatti' },
 ]
 

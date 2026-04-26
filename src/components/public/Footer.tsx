@@ -132,6 +132,12 @@ export default function Footer() {
             <Link href="/chi-siamo" className="transition hover:text-white">
               Chi siamo
             </Link>
+            <Link
+              href="/gianfederico-belotti"
+              className="transition hover:text-white"
+            >
+              Gianfederico Belotti
+            </Link>
             <Link href="/contatti" className="transition hover:text-white">
               Contatti
             </Link>
