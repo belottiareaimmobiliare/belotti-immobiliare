@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { requireAdminProfile } from '@/lib/admin-auth'
 import { createServiceClient } from '@/lib/supabase/service'
 import { normalizeExportProperty } from '@/lib/exports/properties-export'
 
@@ -128,13 +127,13 @@ function propertyToXml(property: any) {
 }
 
 export async function GET(request: Request) {
-  const profile = await requireAdminProfile()
+  const { searchParams } = new URL(request.url)
+  const token = searchParams.get('token')
 
-  if (profile.role !== 'owner' && !profile.can_manage_properties) {
-    return NextResponse.json({ error: 'Non autorizzato.' }, { status: 403 })
+  if (!process.env.EXPORT_TOKEN || token !== process.env.EXPORT_TOKEN) {
+    return NextResponse.json({ error: 'Token export non valido.' }, { status: 401 })
   }
 
-  const { searchParams } = new URL(request.url)
   const propertyId = searchParams.get('id')
 
   const service = createServiceClient()
