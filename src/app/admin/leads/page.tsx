@@ -168,10 +168,12 @@ export default async function AdminLeadsPage({
   searchParams,
 }: AdminLeadsPageProps) {
   const params = searchParams ? await searchParams : {}
+
   const rawStatus = String(params.status ?? '')
   const selectedStatus: 'all' | LeadStatus = isLeadStatus(rawStatus)
     ? rawStatus
     : 'all'
+
   const searchQuery = String(params.q ?? '').trim()
 
   const supabase = await createClient()
@@ -295,164 +297,230 @@ export default async function AdminLeadsPage({
           </div>
         ) : null}
 
-        <section className="grid gap-5">
-          {filteredLeads.map((lead) => (
-            <article
-              key={lead.id}
-              className="rounded-[28px] border border-white/10 bg-white/[0.03] p-5 shadow-xl shadow-black/10"
-            >
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span
-                      className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${statusStyle[lead.status] ?? statusStyle.new}`}
-                    >
-                      {statusLabel[lead.status] ?? 'Nuovo'}
-                    </span>
+        <section className="overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03] shadow-xl shadow-black/10">
+          <div className="hidden grid-cols-[160px_minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)_150px] gap-4 border-b border-white/10 px-5 py-3 text-xs uppercase tracking-[0.18em] text-white/35 xl:grid">
+            <span>Stato</span>
+            <span>Contatto</span>
+            <span>Immobile</span>
+            <span>Recapiti</span>
+            <span>Ricevuto</span>
+          </div>
 
-                    <span className="text-sm text-white/45">
-                      Ricevuto il {formatDate(lead.created_at)}
-                    </span>
-                  </div>
+          <div className="divide-y divide-white/10">
+            {filteredLeads.map((lead) => {
+              const publicPropertyHref = lead.property_slug
+                ? `/immobili/${lead.property_slug}`
+                : null
 
-                  <h2 className="mt-4 text-2xl font-semibold text-white">
-                    {lead.full_name}
-                  </h2>
+              const adminPropertyHref = lead.property_id
+                ? `/admin/immobili/${lead.property_id}`
+                : null
 
-                  <div className="mt-3 grid gap-2 text-sm text-white/65 md:grid-cols-2">
-                    <p>
-                      <span className="text-white/40">Email:</span>{' '}
-                      <a
-                        href={`mailto:${lead.email}`}
-                        className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white"
+              return (
+                <details
+                  key={lead.id}
+                  className="group bg-transparent open:bg-white/[0.02]"
+                >
+                  <summary className="grid cursor-pointer list-none gap-3 px-5 py-5 transition hover:bg-white/[0.04] xl:grid-cols-[160px_minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)_150px] xl:items-center [&::-webkit-details-marker]:hidden">
+                    <div>
+                      <span
+                        className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${statusStyle[lead.status] ?? statusStyle.new}`}
                       >
-                        {lead.email}
-                      </a>
-                    </p>
+                        {statusLabel[lead.status] ?? 'Nuovo'}
+                      </span>
+                    </div>
 
-                    <p>
-                      <span className="text-white/40">Telefono:</span>{' '}
-                      {lead.phone ? (
-                        <a
-                          href={`tel:${lead.phone}`}
-                          className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white"
-                        >
-                          {lead.phone}
-                        </a>
-                      ) : (
-                        '-'
-                      )}
-                    </p>
-
-                    <p>
-                      <span className="text-white/40">Contattato:</span>{' '}
-                      {formatDate(lead.contacted_at)}
-                    </p>
-
-                    <p>
-                      <span className="text-white/40">Chiuso/archiviato:</span>{' '}
-                      {formatDate(lead.closed_at)}
-                    </p>
-                  </div>
-
-                  {lead.property_title || lead.property_slug ? (
-                    <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
-                      <p className="text-xs uppercase tracking-[0.22em] text-white/35">
-                        Immobile collegato
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-semibold text-white">
+                        {lead.full_name}
                       </p>
+                      <p className="mt-1 text-xs text-white/40 xl:hidden">
+                        Ricevuto il {formatDate(lead.created_at)}
+                      </p>
+                    </div>
 
-                      <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                        <p className="font-medium text-white">
-                          {lead.property_title ?? 'Scheda immobile'}
+                    <div className="min-w-0">
+                      <p className="truncate text-sm text-white/75">
+                        {lead.property_title || lead.property_slug || 'Immobile non specificato'}
+                      </p>
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="truncate text-sm text-white/60">
+                        {lead.email}
+                      </p>
+                      {lead.phone ? (
+                        <p className="mt-1 truncate text-xs text-white/40">
+                          {lead.phone}
                         </p>
+                      ) : null}
+                    </div>
 
-                        {lead.property_slug ? (
-                          <Link
-                            href={`/immobili/${lead.property_slug}`}
-                            target="_blank"
-                            className="text-sm font-medium text-white/70 underline decoration-white/20 underline-offset-4 transition hover:text-white hover:decoration-white"
-                          >
-                            Apri scheda
-                          </Link>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="hidden text-sm text-white/45 xl:inline">
+                        {formatDate(lead.created_at)}
+                      </span>
+                      <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/50 transition group-open:bg-white group-open:text-black">
+                        <span className="group-open:hidden">Apri</span>
+                        <span className="hidden group-open:inline">Chiudi</span>
+                      </span>
+                    </div>
+                  </summary>
+
+                  <div className="border-t border-white/10 px-5 pb-6 pt-5">
+                    <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+                      <div className="min-w-0">
+                        <div className="grid gap-2 text-sm text-white/65 md:grid-cols-2">
+                          <p>
+                            <span className="text-white/40">Email:</span>{' '}
+                            <a
+                              href={`mailto:${lead.email}`}
+                              className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white"
+                            >
+                              {lead.email}
+                            </a>
+                          </p>
+
+                          <p>
+                            <span className="text-white/40">Telefono:</span>{' '}
+                            {lead.phone ? (
+                              <a
+                                href={`tel:${lead.phone}`}
+                                className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white"
+                              >
+                                {lead.phone}
+                              </a>
+                            ) : (
+                              '-'
+                            )}
+                          </p>
+
+                          <p>
+                            <span className="text-white/40">Contattato:</span>{' '}
+                            {formatDate(lead.contacted_at)}
+                          </p>
+
+                          <p>
+                            <span className="text-white/40">Chiuso/archiviato:</span>{' '}
+                            {formatDate(lead.closed_at)}
+                          </p>
+                        </div>
+
+                        <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
+                          <p className="text-xs uppercase tracking-[0.22em] text-white/35">
+                            Immobile collegato
+                          </p>
+
+                          <p className="mt-2 font-medium text-white">
+                            {lead.property_title || lead.property_slug || 'Nessun immobile collegato'}
+                          </p>
+
+                          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                            {publicPropertyHref ? (
+                              <Link
+                                href={publicPropertyHref}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-white/85"
+                              >
+                                Apri scheda pubblica
+                              </Link>
+                            ) : null}
+
+                            {adminPropertyHref ? (
+                              <Link
+                                href={adminPropertyHref}
+                                className="inline-flex items-center justify-center rounded-full border border-white/10 px-4 py-2.5 text-sm font-semibold text-white/75 transition hover:border-white/25 hover:bg-white/10 hover:text-white"
+                              >
+                                Apri modifica immobile
+                              </Link>
+                            ) : null}
+
+                            {!publicPropertyHref && !adminPropertyHref ? (
+                              <p className="text-sm text-white/45">
+                                Link immobile non disponibile per questo lead.
+                              </p>
+                            ) : null}
+                          </div>
+                        </div>
+
+                        {lead.message ? (
+                          <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
+                            <p className="text-xs uppercase tracking-[0.22em] text-white/35">
+                              Messaggio utente
+                            </p>
+                            <p className="mt-2 whitespace-pre-line text-sm leading-6 text-white/70">
+                              {lead.message}
+                            </p>
+                          </div>
                         ) : null}
                       </div>
-                    </div>
-                  ) : null}
 
-                  {lead.message ? (
-                    <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
-                      <p className="text-xs uppercase tracking-[0.22em] text-white/35">
-                        Messaggio utente
-                      </p>
-                      <p className="mt-2 whitespace-pre-line text-sm leading-6 text-white/70">
-                        {lead.message}
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
+                      <div className="w-full shrink-0">
+                        <div className="rounded-3xl border border-white/10 bg-black/20 p-4">
+                          <p className="text-sm font-semibold text-white">
+                            Cambia stato
+                          </p>
 
-                <div className="w-full shrink-0 lg:w-[320px]">
-                  <div className="rounded-3xl border border-white/10 bg-black/20 p-4">
-                    <p className="text-sm font-semibold text-white">
-                      Cambia stato
-                    </p>
+                          <div className="mt-4 grid grid-cols-2 gap-2">
+                            {statusOptions.map((option) => (
+                              <form key={option.value} action={updateLeadStatus}>
+                                <input type="hidden" name="id" value={lead.id} />
+                                <input type="hidden" name="status" value={option.value} />
 
-                    <div className="mt-4 grid grid-cols-2 gap-2">
-                      {statusOptions.map((option) => (
-                        <form key={option.value} action={updateLeadStatus}>
+                                <button
+                                  type="submit"
+                                  className={`w-full rounded-full border px-3 py-2 text-xs font-semibold transition ${
+                                    lead.status === option.value
+                                      ? 'border-white/30 bg-white/15 text-white'
+                                      : 'border-white/10 bg-white/[0.03] text-white/60 hover:border-white/25 hover:bg-white/10 hover:text-white'
+                                  }`}
+                                >
+                                  {option.label}
+                                </button>
+                              </form>
+                            ))}
+                          </div>
+                        </div>
+
+                        <form
+                          action={updateLeadNote}
+                          className="mt-4 rounded-3xl border border-white/10 bg-black/20 p-4"
+                        >
                           <input type="hidden" name="id" value={lead.id} />
-                          <input type="hidden" name="status" value={option.value} />
+
+                          <label
+                            htmlFor={`internal_note_${lead.id}`}
+                            className="text-sm font-semibold text-white"
+                          >
+                            Nota interna
+                          </label>
+
+                          <textarea
+                            id={`internal_note_${lead.id}`}
+                            name="internal_note"
+                            defaultValue={lead.internal_note ?? ''}
+                            rows={4}
+                            placeholder="Es. Richiamare domani mattina, interessato alla visita..."
+                            className="mt-3 w-full resize-none rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
+                          />
 
                           <button
                             type="submit"
-                            className={`w-full rounded-full border px-3 py-2 text-xs font-semibold transition ${
-                              lead.status === option.value
-                                ? 'border-white/30 bg-white/15 text-white'
-                                : 'border-white/10 bg-white/[0.03] text-white/60 hover:border-white/25 hover:bg-white/10 hover:text-white'
-                            }`}
+                            className="mt-3 w-full rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-white/85"
                           >
-                            {option.label}
+                            Salva nota
                           </button>
                         </form>
-                      ))}
+
+                        <DeleteLeadButton leadId={lead.id} deleteAction={deleteLead} />
+                      </div>
                     </div>
                   </div>
-
-                  <form
-                    action={updateLeadNote}
-                    className="mt-4 rounded-3xl border border-white/10 bg-black/20 p-4"
-                  >
-                    <input type="hidden" name="id" value={lead.id} />
-
-                    <label
-                      htmlFor={`internal_note_${lead.id}`}
-                      className="text-sm font-semibold text-white"
-                    >
-                      Nota interna
-                    </label>
-
-                    <textarea
-                      id={`internal_note_${lead.id}`}
-                      name="internal_note"
-                      defaultValue={lead.internal_note ?? ''}
-                      rows={4}
-                      placeholder="Es. Richiamare domani mattina, interessato alla visita..."
-                      className="mt-3 w-full resize-none rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
-                    />
-
-                    <button
-                      type="submit"
-                      className="mt-3 w-full rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-white/85"
-                    >
-                      Salva nota
-                    </button>
-                  </form>
-
-                  <DeleteLeadButton leadId={lead.id} deleteAction={deleteLead} />
-                </div>
-              </div>
-            </article>
-          ))}
+                </details>
+              )
+            })}
+          </div>
         </section>
       </div>
     </main>
