@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Sidebar from '@/components/admin/Sidebar'
+import ThemeToggle from '@/components/shared/ThemeToggle'
 
 type SidebarLink = {
   href: string
@@ -88,6 +89,8 @@ export default function AdminShell({
                 </p>
               </div>
 
+              <ThemeToggle />
+
 
               <form action="/logout" method="post">
                 <button
@@ -118,6 +121,10 @@ export default function AdminShell({
               >
                 {sidebarCollapsed ? 'Mostra menu' : 'Nascondi menu'}
               </button>
+
+              <ThemeToggle />
+
+              
 
             </div>
           </div>
