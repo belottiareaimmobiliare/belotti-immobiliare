@@ -38,6 +38,16 @@ export async function GET() {
 
   const properties = (data || []).map(normalizeExportProperty)
 
+  const immobiliareIt = properties.filter(
+    (property) => property.export_targets.immobiliare_it
+  )
+  const idealista = properties.filter(
+    (property) => property.export_targets.idealista
+  )
+  const casaIt = properties.filter(
+    (property) => property.export_targets.casa_it
+  )
+
   return NextResponse.json({
     generated_at: new Date().toISOString(),
     total: properties.length,
@@ -45,16 +55,24 @@ export async function GET() {
       immobiliare_it: {
         folder: '/exports/immobiliare-it',
         status: 'mapping da completare su specifiche ufficiali',
+        total: immobiliareIt.length,
       },
       idealista: {
         folder: '/exports/idealista',
         status: 'in attesa formato richiesto dal portale',
+        total: idealista.length,
       },
       casa_it: {
         folder: '/exports/casa-it',
         status: 'in attesa formato richiesto dal portale',
+        total: casaIt.length,
       },
     },
     properties,
+    by_partner: {
+      immobiliare_it: immobiliareIt,
+      idealista,
+      casa_it: casaIt,
+    },
   })
 }

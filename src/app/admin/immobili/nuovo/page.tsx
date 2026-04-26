@@ -106,6 +106,9 @@ export default function NewPropertyPage() {
     has_garden: false,
     has_elevator: false,
     is_auction: false,
+    export_immobiliare_it: false,
+    export_idealista: false,
+    export_casa_it: false,
     energy_class: '',
     condo_fees: '',
     heating_type: '',
@@ -157,7 +160,7 @@ export default function NewPropertyPage() {
   }
 
   const toggleBooleanField = (
-    name: 'has_garage' | 'has_parking' | 'has_garden' | 'has_elevator' | 'is_auction'
+    name: 'has_garage' | 'has_parking' | 'has_garden' | 'has_elevator' | 'is_auction' | 'export_immobiliare_it' | 'export_idealista' | 'export_casa_it'
   ) => {
     setForm((prev) => ({
       ...prev,
@@ -247,6 +250,9 @@ export default function NewPropertyPage() {
         has_garden: form.has_garden,
         has_elevator: form.has_elevator,
         is_auction: form.is_auction,
+        export_immobiliare_it: form.export_immobiliare_it,
+        export_idealista: form.export_idealista,
+        export_casa_it: form.export_casa_it,
         energy_class: form.energy_class || null,
         condo_fees: form.condo_fees || null,
         heating_type: form.heating_type || null,
@@ -821,6 +827,33 @@ export default function NewPropertyPage() {
             rows={6}
             className="theme-admin-input w-full rounded-xl px-4 py-3"
           />
+
+          <div className="theme-admin-card rounded-2xl p-4">
+            <p className="theme-admin-faint mb-2 text-xs uppercase tracking-[0.22em]">
+              Pubblicazione portali
+            </p>
+            <p className="theme-admin-muted mb-4 text-sm">
+              Seleziona su quali portali dovrà essere incluso questo immobile quando verrà generato l’export.
+            </p>
+
+            <div className="grid gap-3 md:grid-cols-3">
+              <FeatureToggle
+                label="Immobiliare.it"
+                checked={form.export_immobiliare_it}
+                onClick={() => toggleBooleanField('export_immobiliare_it')}
+              />
+              <FeatureToggle
+                label="Idealista"
+                checked={form.export_idealista}
+                onClick={() => toggleBooleanField('export_idealista')}
+              />
+              <FeatureToggle
+                label="Casa.it"
+                checked={form.export_casa_it}
+                onClick={() => toggleBooleanField('export_casa_it')}
+              />
+            </div>
+          </div>
 
           <div className="theme-admin-card rounded-2xl p-4">
             <p className="theme-admin-faint mb-4 text-xs uppercase tracking-[0.22em]">

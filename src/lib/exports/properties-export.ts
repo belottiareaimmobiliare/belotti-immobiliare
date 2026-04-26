@@ -63,6 +63,12 @@ export function normalizeExportProperty(property: any) {
 
     description: property.description,
 
+    export_targets: {
+      immobiliare_it: Boolean(property.export_immobiliare_it),
+      idealista: Boolean(property.export_idealista),
+      casa_it: Boolean(property.export_casa_it),
+    },
+
     images: images.map((item: any) => ({
       url: item.file_url,
       label: item.label,
