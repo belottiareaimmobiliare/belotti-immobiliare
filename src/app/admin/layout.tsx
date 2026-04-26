@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import AdminShell from '@/components/admin/AdminShell'
 import { getSidebarLinks, getCurrentAdminProfile } from '@/lib/admin-auth'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function AdminRootLayout({
   children,
@@ -13,7 +14,27 @@ export default async function AdminRootLayout({
     return <>{children}</>
   }
 
-  const links = getSidebarLinks(profile)
+  let links = getSidebarLinks(profile)
+
+  if (profile.can_manage_properties) {
+    const supabase = await createClient()
+
+    const { count } = await supabase
+      .from('leads')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'new')
+
+    const newLeadsCount = count ?? 0
+
+    links = links.map((link) => {
+      if (link.href !== '/admin/leads') return link
+
+      return {
+        ...link,
+        label: newLeadsCount > 0 ? `Leads (${newLeadsCount})` : 'Leads',
+      }
+    })
+  }
 
   return (
     <AdminShell
