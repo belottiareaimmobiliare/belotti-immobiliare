@@ -150,10 +150,17 @@ export default function PropertiesFiltersSidebar({
       return
     }
 
+    const queryString = buildQueryString()
+    const currentQueryString = searchParams.toString()
+
+    if (queryString === currentQueryString) {
+      setIsAutoApplying(false)
+      return
+    }
+
     setIsAutoApplying(true)
 
     const timeout = window.setTimeout(() => {
-      const queryString = buildQueryString()
       router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
         scroll: false,
       })

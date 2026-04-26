@@ -8,6 +8,7 @@ import SinglePropertyMapSection from '@/components/public/SinglePropertyMapSecti
 import PropertyContactForm from '@/components/public/PropertyContactForm'
 import PropertyGalleryClient from '@/components/public/PropertyGalleryClient'
 import CopyReferenceButton from '@/components/public/CopyReferenceButton'
+import SimilarPropertyAlertForm from '@/components/public/SimilarPropertyAlertForm'
 
 type PropertyMediaItem = {
   id: string
@@ -384,7 +385,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
         />
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 pb-8">
+      <section className="mx-auto max-w-7xl space-y-4 px-6 pb-8">
         <div className="theme-panel flex flex-col gap-4 rounded-[24px] border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-medium text-[var(--site-text)]">
@@ -418,6 +419,24 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             </Link>
           </div>
         </div>
+
+        <SimilarPropertyAlertForm
+          propertyId={currentProperty.id}
+          propertySlug={currentProperty.slug}
+          propertyTitle={currentProperty.title}
+          contractType={currentProperty.contract_type}
+          propertyType={currentProperty.property_type}
+          comune={currentProperty.comune}
+          province={currentProperty.province}
+          price={currentProperty.price}
+          surface={currentProperty.surface}
+          rooms={currentProperty.rooms}
+          bathrooms={currentProperty.bathrooms}
+          hasGarage={currentProperty.has_garage}
+          hasParking={currentProperty.has_parking}
+          hasGarden={currentProperty.has_garden}
+          hasElevator={currentProperty.has_elevator}
+        />
       </section>
 
       <section className="mx-auto max-w-7xl px-6 pb-20">
