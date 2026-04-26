@@ -14,10 +14,33 @@ type Property = {
   updated_at: string | null
 }
 
+type LeadStatus = 'new' | 'contacted' | 'closed' | 'archived'
+
 type LeadRow = {
   id: string
   property_id: string | null
+  property_slug: string | null
+  property_title: string | null
+  full_name: string
+  email: string
+  phone: string | null
+  message: string | null
+  status: LeadStatus
   created_at: string | null
+}
+
+const leadStatusLabel: Record<LeadStatus, string> = {
+  new: 'Nuovo',
+  contacted: 'Contattato',
+  closed: 'Chiuso',
+  archived: 'Archiviato',
+}
+
+const leadStatusStyle: Record<LeadStatus, string> = {
+  new: 'border-amber-400/30 bg-amber-500/10 text-amber-200',
+  contacted: 'border-sky-400/30 bg-sky-500/10 text-sky-200',
+  closed: 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200',
+  archived: 'border-white/10 bg-white/[0.04] text-white/55',
 }
 
 function daysOnline(dateString: string | null) {
@@ -38,6 +61,19 @@ function humanAge(days: number | null) {
 function formatPrice(price: number | null) {
   if (typeof price !== 'number') return 'Trattativa riservata'
   return `€ ${price.toLocaleString('it-IT')}`
+}
+
+function formatDate(value: string | null) {
+  if (!value) return '—'
+
+  try {
+    return new Intl.DateTimeFormat('it-IT', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(new Date(value))
+  } catch {
+    return value
+  }
 }
 
 function getAlertLevel(days: number | null) {
@@ -100,7 +136,9 @@ export default async function AdminPage() {
         ),
       supabase
         .from('leads')
-        .select('id, property_id, created_at')
+        .select(
+          'id, property_id, property_slug, property_title, full_name, email, phone, message, status, created_at'
+        )
         .order('created_at', { ascending: false }),
     ])
 
@@ -112,6 +150,10 @@ export default async function AdminPage() {
   const draft = properties.filter((p) => p.status === 'draft').length
   const saleCount = properties.filter((p) => p.contract_type === 'vendita').length
   const rentCount = properties.filter((p) => p.contract_type === 'affitto').length
+
+  const totalLeads = leads.length
+  const newLeads = leads.filter((lead) => lead.status === 'new').length
+  const latestLeads = leads.slice(0, 5)
 
   const publishedProperties = properties.filter((p) => p.status === 'published')
 
@@ -131,8 +173,6 @@ export default async function AdminPage() {
       (leadsCountByProperty.get(lead.property_id) || 0) + 1
     )
   }
-
-  const totalLeads = leads.length
 
   const topRequestedProperties = [...publishedProperties]
     .map((property) => ({
@@ -213,7 +253,7 @@ export default async function AdminPage() {
         </Link>
       </div>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-4">
+      <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <div className="theme-admin-card rounded-3xl p-6">
           <p className="theme-admin-muted text-sm">Totale immobili</p>
           <p className="mt-3 text-3xl font-semibold text-[var(--site-text)]">{total}</p>
@@ -230,9 +270,102 @@ export default async function AdminPage() {
         </div>
 
         <div className="theme-admin-card rounded-3xl p-6">
-          <p className="theme-admin-muted text-sm">Richieste dal sito</p>
+          <p className="theme-admin-muted text-sm">Richieste sito</p>
           <p className="mt-3 text-3xl font-semibold text-[var(--site-text)]">{totalLeads}</p>
         </div>
+
+        <Link
+          href="/admin/leads"
+          className="rounded-3xl border border-amber-400/20 bg-amber-500/10 p-6 transition hover:border-amber-300/40 hover:bg-amber-500/15"
+        >
+          <p className="text-sm text-amber-100/70">Lead nuovi</p>
+          <p className="mt-3 text-3xl font-semibold text-amber-100">{newLeads}</p>
+          <p className="mt-2 text-xs text-amber-100/55">Vai alla gestione lead</p>
+        </Link>
+      </div>
+
+      <div className="mt-8 theme-admin-card rounded-3xl p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="theme-admin-faint text-xs uppercase tracking-[0.2em]">
+              Ultime richieste
+            </p>
+            <h3 className="mt-2 text-xl font-semibold text-[var(--site-text)]">
+              Ultimi lead ricevuti
+            </h3>
+            <p className="mt-2 text-sm text-[var(--site-text-muted)]">
+              Riepilogo rapido delle richieste più recenti arrivate dalle schede immobile.
+            </p>
+          </div>
+
+          <Link
+            href="/admin/leads"
+            className="inline-flex items-center justify-center rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] px-4 py-3 text-sm font-semibold text-[var(--site-text)] transition hover:bg-[var(--site-surface)]"
+          >
+            Gestisci lead
+          </Link>
+        </div>
+
+        <div className="mt-5 space-y-3">
+          {latestLeads.length === 0 ? (
+            <div className="theme-admin-chip rounded-2xl px-4 py-4 text-sm">
+              Nessun lead ricevuto per ora.
+            </div>
+          ) : (
+            latestLeads.map((lead) => {
+              const status = lead.status || 'new'
+
+              return (
+                <div
+                  key={lead.id}
+                  className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-2)] px-4 py-4"
+                >
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`rounded-full border px-3 py-1 text-xs font-semibold ${leadStatusStyle[status]}`}
+                        >
+                          {leadStatusLabel[status]}
+                        </span>
+
+                        <span className="text-xs text-[var(--site-text-faint)]">
+                          {formatDate(lead.created_at)}
+                        </span>
+                      </div>
+
+                      <p className="mt-3 text-sm font-semibold text-[var(--site-text)]">
+                        {lead.full_name}
+                      </p>
+
+                      <p className="mt-1 text-xs text-[var(--site-text-muted)]">
+                        {lead.email}
+                        {lead.phone ? ` · ${lead.phone}` : ''}
+                      </p>
+
+                      <p className="mt-2 text-xs text-[var(--site-text-faint)]">
+                        Immobile: {lead.property_title || lead.property_slug || 'non specificato'}
+                      </p>
+                    </div>
+
+                    <Link
+                      href="/admin/leads"
+                      className="text-sm font-medium text-[var(--site-text-soft)] underline decoration-white/20 underline-offset-4 transition hover:text-[var(--site-text)] hover:decoration-white"
+                    >
+                      Apri gestione
+                    </Link>
+                  </div>
+                </div>
+              )
+            })
+          )}
+        </div>
+
+        {leadsError && (
+          <p className="mt-4 text-xs text-[var(--site-text-faint)]">
+            Nota: non sono riuscito a leggere la tabella leads.
+          </p>
+        )}
       </div>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-2">
