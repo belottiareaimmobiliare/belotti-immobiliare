@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 
 export default function AdminLoginForm() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
+  const [login, setLogin] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -20,7 +20,7 @@ export default function AdminLoginForm() {
       const supabase = createClient()
 
       const { error } = await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
+        email: login.trim().toLowerCase(),
         password,
       })
 
@@ -43,15 +43,15 @@ export default function AdminLoginForm() {
     <form onSubmit={handleLogin} className="space-y-4">
       <div>
         <label className="mb-2 block text-sm font-medium text-[var(--site-text)]">
-          Email
+          Username o email
         </label>
         <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Inserisci la mail di accesso"
+          type="text"
+          value={login}
+          onChange={(e) => setLogin(e.target.value)}
+          placeholder="Inserisci lo username o la mail d'accesso"
           className="w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm text-[var(--site-text)] outline-none"
-          autoComplete="email"
+          autoComplete="username"
           required
         />
       </div>

@@ -13,8 +13,6 @@ type Props = {
   initialContent: HomeContent
 }
 
-type ThemeMode = 'light' | 'dark'
-
 function getCounterClass(current: number, max: number) {
   if (current > max) return 'text-red-500'
   if (current > max * 0.85) return 'text-amber-500'
@@ -58,50 +56,31 @@ function TikTokIcon() {
   )
 }
 
-function applyTheme(nextTheme: ThemeMode) {
-  const root = document.documentElement
-
-  root.setAttribute('data-theme', nextTheme)
-  root.style.colorScheme = nextTheme
-  root.classList.toggle('dark', nextTheme === 'dark')
-  root.classList.toggle('light', nextTheme === 'light')
-
-  localStorage.setItem('site-theme', nextTheme)
-  localStorage.setItem('theme', nextTheme)
-}
-
-function getInitialTheme(): ThemeMode {
-  if (typeof window === 'undefined') return 'dark'
-
-  const root = document.documentElement
-  const attrTheme = root.getAttribute('data-theme')
-  const storedTheme =
-    localStorage.getItem('site-theme') || localStorage.getItem('theme')
-
-  if (
-    attrTheme === 'light' ||
-    storedTheme === 'light' ||
-    root.classList.contains('light')
-  ) {
-    return 'light'
-  }
-
-  return 'dark'
-}
 
 export default function HomeContentEditor({ initialContent }: Props) {
   const [form, setForm] = useState<HomeContent>(initialContent)
   const [saved, setSaved] = useState<HomeContent>(initialContent)
   const [message, setMessage] = useState('')
-  const [theme, setTheme] = useState<ThemeMode>('dark')
+  const [isDark, setIsDark] = useState(true)
   const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
-    const currentTheme = getInitialTheme()
-    setTheme(currentTheme)
+    const syncTheme = () => {
+      setIsDark(document.documentElement.getAttribute('data-theme') !== 'light')
+    }
+
+    syncTheme()
+
+    const observer = new MutationObserver(syncTheme)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    })
+
+    return () => observer.disconnect()
   }, [])
 
-  const isDark = theme === 'dark'
+
 
   const errors = useMemo(() => {
     return {
@@ -157,11 +136,6 @@ export default function HomeContentEditor({ initialContent }: Props) {
     setMessage('')
   }
 
-  function toggleTheme() {
-    const nextTheme: ThemeMode = theme === 'dark' ? 'light' : 'dark'
-    applyTheme(nextTheme)
-    setTheme(nextTheme)
-  }
 
   async function save() {
     if (hasErrors) return
@@ -204,18 +178,6 @@ export default function HomeContentEditor({ initialContent }: Props) {
           >
             ← Torna alla dashboard
           </Link>
-
-          <button
-            type="button"
-            onClick={toggleTheme}
-            aria-label={isDark ? 'Attiva tema chiaro' : 'Attiva tema scuro'}
-            title={isDark ? 'Attiva tema chiaro' : 'Attiva tema scuro'}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--site-border)] bg-[var(--site-surface)] text-[var(--site-text)] transition hover:bg-[var(--site-surface-2)]"
-          >
-            <span aria-hidden="true" className="text-base leading-none">
-              {isDark ? '☀' : '☾'}
-            </span>
-          </button>
         </div>
       </div>
 
@@ -464,7 +426,7 @@ export default function HomeContentEditor({ initialContent }: Props) {
                       : 'border-[#d9e2ec] bg-[#f8fafc] text-slate-700'
                   }`}
                 >
-                  {isDark ? '☾' : '☀'}
+                  
                 </div>
 
                 <div
