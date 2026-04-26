@@ -94,6 +94,7 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
       { href: '/admin/contenuti/chi-siamo', label: 'Modifica Chi siamo' },
       { href: '/admin/contenuti/contatti', label: 'Modifica Contatti' },
       { href: '/admin/utenti', label: 'Active Directory' },
+      { href: '/admin/exports', label: 'Export Portali' },
       { href: '/admin/logs', label: 'Logs' }
     )
   }
