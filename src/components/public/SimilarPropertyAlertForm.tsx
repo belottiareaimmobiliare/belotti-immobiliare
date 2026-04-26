@@ -68,11 +68,11 @@ export default function SimilarPropertyAlertForm(props: Props) {
 
   if (done) {
     return (
-      <div className="theme-panel rounded-[24px] border p-5">
-        <p className="text-sm font-semibold text-[var(--site-text)]">
+      <div className="rounded-[24px] border border-[#c8a24a] bg-[#dff3ff] p-5 text-black shadow-[0_18px_50px_rgba(15,59,102,0.12)]">
+        <p className="text-sm font-semibold text-black">
           Ricerca salvata
         </p>
-        <p className="mt-2 text-sm leading-7 text-[var(--site-text-muted)]">
+        <p className="mt-2 text-sm leading-7 text-black/70">
           Grazie, ti ricontatteremo se saranno disponibili immobili simili per zona,
           fascia di prezzo e caratteristiche principali.
         </p>
@@ -81,13 +81,13 @@ export default function SimilarPropertyAlertForm(props: Props) {
   }
 
   return (
-    <div className="theme-panel rounded-[24px] border p-5">
+    <div className="rounded-[24px] border border-[#c8a24a] bg-[#dff3ff] p-5 text-black shadow-[0_18px_50px_rgba(15,59,102,0.12)]">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-sm font-semibold text-[var(--site-text)]">
+          <p className="text-sm font-semibold text-black">
             Non è quello giusto?
           </p>
-          <p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--site-text-muted)]">
+          <p className="mt-2 max-w-2xl text-sm leading-7 text-black/70">
             Lascia i tuoi dati e ti avviseremo quando pubblicheremo immobili simili
             per zona, fascia di prezzo e caratteristiche principali.
           </p>
@@ -96,7 +96,7 @@ export default function SimilarPropertyAlertForm(props: Props) {
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}
-          className="theme-button-secondary liquid-button inline-flex shrink-0 items-center justify-center rounded-full px-4 py-2 text-xs font-semibold transition"
+          className="inline-flex shrink-0 items-center justify-center rounded-full border border-[#c8a24a] bg-black px-4 py-2 text-xs font-semibold text-white transition hover:bg-black/85"
         >
           <span>{open ? 'Chiudi' : 'Avvisami'}</span>
         </button>
@@ -109,7 +109,7 @@ export default function SimilarPropertyAlertForm(props: Props) {
             onChange={(event) => setFullName(event.target.value)}
             placeholder="Nome e cognome"
             required
-            className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-sm text-[var(--site-text)] outline-none placeholder:text-[var(--site-text-faint)] focus:border-[var(--site-border-strong)]"
+            className="rounded-2xl border border-[#c8a24a]/55 bg-white/80 px-4 py-3 text-sm text-black outline-none placeholder:text-black/45 focus:border-[#c8a24a]"
           />
 
           <input
@@ -118,14 +118,14 @@ export default function SimilarPropertyAlertForm(props: Props) {
             onChange={(event) => setEmail(event.target.value)}
             placeholder="Email"
             required
-            className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-sm text-[var(--site-text)] outline-none placeholder:text-[var(--site-text-faint)] focus:border-[var(--site-border-strong)]"
+            className="rounded-2xl border border-[#c8a24a]/55 bg-white/80 px-4 py-3 text-sm text-black outline-none placeholder:text-black/45 focus:border-[#c8a24a]"
           />
 
           <input
             value={phone}
             onChange={(event) => setPhone(event.target.value)}
             placeholder="Cellulare opzionale"
-            className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-sm text-[var(--site-text)] outline-none placeholder:text-[var(--site-text-faint)] focus:border-[var(--site-border-strong)]"
+            className="rounded-2xl border border-[#c8a24a]/55 bg-white/80 px-4 py-3 text-sm text-black outline-none placeholder:text-black/45 focus:border-[#c8a24a]"
           />
 
           {errorMessage ? (
@@ -137,7 +137,7 @@ export default function SimilarPropertyAlertForm(props: Props) {
           <button
             type="submit"
             disabled={loading}
-            className="theme-button-primary liquid-button rounded-2xl px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 md:col-span-3"
+            className="rounded-2xl border border-[#c8a24a] bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60 md:col-span-3"
           >
             <span>{loading ? 'Salvataggio...' : 'Salva ricerca'}</span>
           </button>

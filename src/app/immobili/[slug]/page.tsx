@@ -385,63 +385,61 @@ export default async function PropertyDetailPage({ params }: PageProps) {
         />
       </section>
 
-      <section className="mx-auto max-w-7xl space-y-4 px-6 pb-8">
-        <div className="theme-panel flex flex-col gap-4 rounded-[24px] border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-medium text-[var(--site-text)]">
-              Vuoi maggiori informazioni su questo immobile?
-            </p>
-            <p className="mt-1 text-xs text-[var(--site-text-muted)]">
-              Puoi richiedere una visita, chiamare l’agenzia o continuare la ricerca.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <a
-              href="#contatto"
-              className="theme-button-primary liquid-button inline-flex items-center justify-center rounded-full px-4 py-2 text-xs font-semibold transition"
-            >
-              <span>Richiedi visita</span>
-            </a>
-
-            <a
-              href="tel:+39035221206"
-              className="theme-button-secondary liquid-button inline-flex items-center justify-center rounded-full px-4 py-2 text-xs font-semibold transition"
-            >
-              <span>Chiama ora</span>
-            </a>
-
-            <Link
-              href="/immobili"
-              className="inline-flex items-center justify-center rounded-full border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-2 text-xs font-semibold text-[var(--site-text-soft)] transition hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]"
-            >
-              Altri immobili
-            </Link>
-          </div>
-        </div>
-
-        <SimilarPropertyAlertForm
-          propertyId={currentProperty.id}
-          propertySlug={currentProperty.slug}
-          propertyTitle={currentProperty.title}
-          contractType={currentProperty.contract_type}
-          propertyType={currentProperty.property_type}
-          comune={currentProperty.comune}
-          province={currentProperty.province}
-          price={currentProperty.price}
-          surface={currentProperty.surface}
-          rooms={currentProperty.rooms}
-          bathrooms={currentProperty.bathrooms}
-          hasGarage={currentProperty.has_garage}
-          hasParking={currentProperty.has_parking}
-          hasGarden={currentProperty.has_garden}
-          hasElevator={currentProperty.has_elevator}
-        />
-      </section>
-
       <section className="mx-auto max-w-7xl px-6 pb-20">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-8">
+
+            <div className="theme-panel rounded-[30px] border p-7">
+              <h2 className="text-2xl font-semibold text-[var(--site-text)]">
+                Descrizione
+              </h2>
+
+              <div className="mt-5 space-y-4 text-sm leading-8 text-[var(--site-text-muted)] md:text-base">
+                {currentProperty.description ? (
+                  currentProperty.description
+                    .split('\n')
+                    .filter((paragraph) => paragraph.trim().length > 0)
+                    .map((paragraph, index) => <p key={index}>{paragraph}</p>)
+                ) : (
+                  <p>Descrizione in aggiornamento.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="theme-panel flex flex-col gap-4 rounded-[24px] border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-medium text-[var(--site-text)]">
+                  Vuoi maggiori informazioni su questo immobile?
+                </p>
+                <p className="mt-1 text-xs text-[var(--site-text-muted)]">
+                  Puoi richiedere una visita, chiamare l’agenzia o continuare la ricerca.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <a
+                  href="#contatto"
+                  className="theme-button-primary liquid-button inline-flex items-center justify-center rounded-full px-4 py-2 text-xs font-semibold transition"
+                >
+                  <span>Richiedi visita</span>
+                </a>
+
+                <a
+                  href="tel:+39035221206"
+                  className="theme-button-secondary liquid-button inline-flex items-center justify-center rounded-full px-4 py-2 text-xs font-semibold transition"
+                >
+                  <span>Chiama ora</span>
+                </a>
+
+                <Link
+                  href="/immobili"
+                  className="inline-flex items-center justify-center rounded-full border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-2 text-xs font-semibold text-[var(--site-text-soft)] transition hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]"
+                >
+                  Altri immobili
+                </Link>
+              </div>
+            </div>
+
             <div className="theme-panel rounded-[30px] border p-7">
               <h2 className="text-2xl font-semibold text-[var(--site-text)]">
                 Dettagli principali
@@ -506,22 +504,24 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               </div>
             )}
 
-            <div className="theme-panel rounded-[30px] border p-7">
-              <h2 className="text-2xl font-semibold text-[var(--site-text)]">
-                Descrizione
-              </h2>
 
-              <div className="mt-5 space-y-4 text-sm leading-8 text-[var(--site-text-muted)] md:text-base">
-                {currentProperty.description ? (
-                  currentProperty.description
-                    .split('\n')
-                    .filter((paragraph) => paragraph.trim().length > 0)
-                    .map((paragraph, index) => <p key={index}>{paragraph}</p>)
-                ) : (
-                  <p>Descrizione in aggiornamento.</p>
-                )}
-              </div>
-            </div>
+            <SimilarPropertyAlertForm
+              propertyId={currentProperty.id}
+              propertySlug={currentProperty.slug}
+              propertyTitle={currentProperty.title}
+              contractType={currentProperty.contract_type}
+              propertyType={currentProperty.property_type}
+              comune={currentProperty.comune}
+              province={currentProperty.province}
+              price={currentProperty.price}
+              surface={currentProperty.surface}
+              rooms={currentProperty.rooms}
+              bathrooms={currentProperty.bathrooms}
+              hasGarage={currentProperty.has_garage}
+              hasParking={currentProperty.has_parking}
+              hasGarden={currentProperty.has_garden}
+              hasElevator={currentProperty.has_elevator}
+            />
 
             <div className="grid gap-8 xl:grid-cols-2">
               <div className="theme-panel rounded-[30px] border p-7">

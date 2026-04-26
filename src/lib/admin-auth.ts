@@ -76,7 +76,8 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
       { href: '/admin/immobili', label: 'Tutti gli immobili' },
       { href: '/admin/immobili?contractType=affitto', label: 'Affitti' },
       { href: '/admin/immobili?contractType=vendita', label: 'Vendite' },
-      { href: '/admin/leads', label: 'Leads' }
+      { href: '/admin/leads', label: 'Leads' },
+      { href: '/admin/ricerche-salvate', label: 'Ricerche salvate' }
     )
   }
 
