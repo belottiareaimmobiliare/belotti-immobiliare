@@ -440,7 +440,7 @@ export default function PropertyMediaManagerV2({
             Planimetrie e documenti grafici
           </p>
           <h3 className="mt-2 text-xl font-semibold text-[var(--site-text)]">
-            Plani multiple
+            Planimetrie
           </h3>
           <p className="theme-admin-muted mt-2 text-sm">
             Puoi caricare più PDF o immagini e scrivere etichette libere come “bagno”, “garage”, “cantina”, “cucina”, “piano box”.
