@@ -38,9 +38,9 @@ export default async function AdminExportsPage() {
 
         <ExportCard
           title="Immobiliare.it"
-          text="Cartella predisposta. Mapping XML/API da completare sulle specifiche finali."
-          href="/exports/immobiliare-it"
-          status="Da completare"
+          text="Cartella predisposta. XML base generato dagli immobili selezionati per Immobiliare.it."
+          href="/api/admin/exports/immobiliare-it"
+          status="XML attivo"
         />
 
         <ExportCard
