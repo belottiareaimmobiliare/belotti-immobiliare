@@ -95,13 +95,17 @@ function FeatureToggle({
       <span className="text-[var(--site-text-soft)]">{label}</span>
 
       <span
-        className={`relative inline-flex h-7 w-12 shrink-0 rounded-full transition ${
-          checked ? 'bg-[var(--site-gold)]' : 'bg-white/20'
+        className={`relative inline-flex h-7 w-12 shrink-0 rounded-full border transition ${
+          checked
+            ? 'border-[var(--site-gold)] bg-[var(--site-gold)]'
+            : 'border-[var(--site-border-strong)] bg-[var(--site-surface-2)]'
         }`}
       >
         <span
-          className={`absolute top-1 h-5 w-5 rounded-full shadow transition ${
-            checked ? 'left-6 bg-[#0b0f17]' : 'left-1 bg-white'
+          className={`absolute top-1 h-5 w-5 rounded-full border transition ${
+            checked
+              ? 'left-6 border-[#0b0f17] bg-[#0b0f17] shadow-[0_2px_8px_rgba(0,0,0,0.35)]'
+              : 'left-1 border-[var(--site-border-strong)] bg-[var(--site-bg)] shadow-[0_2px_8px_rgba(0,0,0,0.18)]'
           }`}
         />
       </span>
