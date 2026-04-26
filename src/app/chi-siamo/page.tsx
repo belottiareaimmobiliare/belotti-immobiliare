@@ -201,6 +201,13 @@ export default async function ChiSiamoPage() {
               >
                 <span>Contattaci</span>
               </Link>
+
+              <Link
+                href="/gianfederico-belotti"
+                className="theme-button-secondary liquid-button mt-3 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition"
+              >
+                <span>Scopri Gianfederico Belotti</span>
+              </Link>
             </div>
           </aside>
         </div>
