@@ -460,10 +460,12 @@ export async function sendSavedSearchDigestEmail({
   fullName,
   sourcePropertyTitle,
   matches,
+  unsubscribeUrl,
 }: {
   to: string
   fullName: string
   sourcePropertyTitle: string
+  unsubscribeUrl: string | null
   matches: Array<{
     title: string
     url: string
@@ -557,6 +559,8 @@ export async function sendSavedSearchDigestEmail({
 
             ${cards}
 
+            ${buildUnsubscribeBlock(unsubscribeUrl)}
+
             <div style="margin-top:28px;padding-top:20px;border-top:1px solid #e5e7eb;">
               <p style="margin:0;font-size:13px;line-height:1.7;color:#6b7280;">
                 Belotti Area Immobiliare<br />
@@ -575,11 +579,13 @@ export async function sendSavedSearchNoResultsAdviceEmail({
   fullName,
   sourcePropertyTitle,
   contactUrl,
+  unsubscribeUrl,
 }: {
   to: string
   fullName: string
   sourcePropertyTitle: string
   contactUrl: string
+  unsubscribeUrl: string | null
 }) {
   const transporter = createTransporter()
   const user = process.env.SMTP_USER as string
@@ -616,6 +622,8 @@ export async function sendSavedSearchNoResultsAdviceEmail({
 
             ${buildButton('Contatta Area Immobiliare', escapeHtml(contactUrl))}
 
+            ${buildUnsubscribeBlock(unsubscribeUrl)}
+
             <div style="margin-top:28px;padding-top:20px;border-top:1px solid #e5e7eb;">
               <p style="margin:0;font-size:13px;line-height:1.7;color:#6b7280;">
                 Belotti Area Immobiliare<br />
@@ -627,4 +635,20 @@ export async function sendSavedSearchNoResultsAdviceEmail({
       </div>
     `,
   })
+}
+
+
+function buildUnsubscribeBlock(unsubscribeUrl: string | null) {
+  if (!unsubscribeUrl) return ''
+
+  return `
+    <div style="margin-top:22px;padding-top:18px;border-top:1px solid #e5e7eb;">
+      <p style="margin:0 0 10px;font-size:13px;line-height:1.7;color:#6b7280;">
+        Non desideri più ricevere aggiornamenti per questa ricerca?
+      </p>
+      <a href="${escapeHtml(unsubscribeUrl)}" style="font-size:13px;color:#6b7280;text-decoration:underline;">
+        Disattiva questa ricerca salvata
+      </a>
+    </div>
+  `
 }

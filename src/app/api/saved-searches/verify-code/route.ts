@@ -148,6 +148,7 @@ export async function POST(request: Request) {
 
       features_preferred: verification.features_preferred || {},
       expires_at: calculateSubscriptionExpiresAt(verification.contract_type),
+      unsubscribe_token: crypto.randomUUID(),
     })
 
     if (insertError) {

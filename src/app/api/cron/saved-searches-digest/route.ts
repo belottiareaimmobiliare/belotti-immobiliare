@@ -17,6 +17,7 @@ type MacroCategory =
 
 type SavedSearch = {
   id: string
+  unsubscribe_token: string | null
   full_name: string
   email: string
   source_property_id: string | null
@@ -377,6 +378,9 @@ async function processSavedSearch({
   baseUrl: string
 }) {
   const now = new Date().toISOString()
+  const unsubscribeUrl = search.unsubscribe_token
+    ? `${baseUrl}/api/saved-searches/unsubscribe?token=${encodeURIComponent(search.unsubscribe_token)}`
+    : null
   const matches = await findSimilarProperties({ supabase, search })
 
   await supabase
@@ -389,6 +393,7 @@ async function processSavedSearch({
       to: search.email,
       fullName: search.full_name,
       sourcePropertyTitle: search.source_property_title || 'immobile selezionato',
+      unsubscribeUrl,
       matches: matches.map((property) => ({
         title: property.title || 'Immobile',
         url: `${baseUrl}/immobili/${property.slug}`,
@@ -434,6 +439,7 @@ async function processSavedSearch({
       fullName: search.full_name,
       sourcePropertyTitle: search.source_property_title || 'immobile selezionato',
       contactUrl: `${baseUrl}/contatti`,
+      unsubscribeUrl,
     })
 
     await supabase
@@ -464,6 +470,7 @@ export async function GET(request: Request) {
     .select(
       `
       id,
+      unsubscribe_token,
       full_name,
       email,
       source_property_id,
