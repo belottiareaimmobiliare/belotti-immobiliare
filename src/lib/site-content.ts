@@ -16,12 +16,24 @@ export type HomeContent = {
 }
 
 export type ContactsContent = {
+  heroOverline: string
+  heroTitle: string
+  heroSubtitle: string
   phoneLabel: string
   phoneHref: string
   whatsappNumber: string
+  ownerCtaOverline: string
   ownerCtaTitle: string
   ownerCtaText: string
+  ownerCtaButtonLabel: string
   ownerCtaPhoneText: string
+  directBoxTitle: string
+  directBoxText: string
+  mapBlockedOverline: string
+  mapBlockedTitle: string
+  mapBlockedText: string
+  mapManageCookiesLabel: string
+  mapOpenLabel: string
   whatsappDefaultMessage: string
   whatsappPropertyMessage: string
 }
@@ -91,12 +103,28 @@ export type GianfedericoBelottiContent = {
 }
 
 export const defaultContactsContent: ContactsContent = {
+  heroOverline: 'Contatti',
+  heroTitle: 'Siamo a disposizione per informazioni e appuntamenti',
+  heroSubtitle:
+    'Per richieste su immobili, valutazioni o approfondimenti, puoi contattare Area Immobiliare direttamente ai recapiti qui sotto.',
   phoneLabel: '035 221206',
   phoneHref: '035221206',
   whatsappNumber: '393938149279',
-  ownerCtaTitle: 'Sei proprietario di un immobile?',
-  ownerCtaText: 'Vuoi venderlo, affittarlo o farlo valutare?',
+  ownerCtaOverline: 'Proprietari',
+  ownerCtaTitle: 'Hai un immobile da vendere o affittare?',
+  ownerCtaText:
+    'Raccontaci cosa vuoi fare: vendita, affitto o semplice valutazione. Area Immobiliare può aiutarti a capire il valore reale dell’immobile e il percorso più adatto.',
+  ownerCtaButtonLabel: 'Parla con l’agenzia',
   ownerCtaPhoneText: 'Chiamaci al',
+  directBoxTitle: 'Un contatto diretto e professionale',
+  directBoxText:
+    'Ogni richiesta viene valutata con attenzione, compatibilmente con le attività in corso e con le priorità operative dell’agenzia.',
+  mapBlockedOverline: 'Contenuto esterno',
+  mapBlockedTitle: 'La mappa è disattivata finché non scegli i cookie facoltativi',
+  mapBlockedText:
+    'Per visualizzare la mappa incorporata di Google è necessario abilitare i cookie facoltativi per questo contenuto. In alternativa puoi aprire direttamente la posizione su Google Maps con il pulsante dedicato.',
+  mapManageCookiesLabel: 'Gestisci cookie per visualizzare la mappa',
+  mapOpenLabel: 'Apri su Google Maps',
   whatsappDefaultMessage:
     'Ciao, sono proprietario di un immobile e vorrei ricevere informazioni per venderlo, affittarlo o farlo valutare. Grazie.',
   whatsappPropertyMessage:
@@ -113,12 +141,24 @@ export const homeLimits = {
 }
 
 export const contactsLimits = {
+  heroOverline: 40,
+  heroTitle: 120,
+  heroSubtitle: 260,
   phoneLabel: 30,
   phoneHref: 30,
   whatsappNumber: 30,
-  ownerCtaTitle: 70,
-  ownerCtaText: 120,
+  ownerCtaOverline: 40,
+  ownerCtaTitle: 90,
+  ownerCtaText: 260,
+  ownerCtaButtonLabel: 50,
   ownerCtaPhoneText: 50,
+  directBoxTitle: 90,
+  directBoxText: 260,
+  mapBlockedOverline: 50,
+  mapBlockedTitle: 120,
+  mapBlockedText: 320,
+  mapManageCookiesLabel: 70,
+  mapOpenLabel: 50,
   whatsappDefaultMessage: 260,
   whatsappPropertyMessage: 300,
 }

@@ -82,82 +82,205 @@ export default function ContactsContentEditor({ initialContent }: Props) {
         </p>
 
         <h1 className="mt-3 text-3xl font-semibold md:text-4xl">
-          Contatti e WhatsApp
+          Contatti
         </h1>
 
         <p className="mt-4 max-w-3xl text-sm leading-7 text-[var(--site-text-muted)]">
-          Modifica telefono, numero WhatsApp, testo del palloncino e messaggi
-          precompilati usati nel sito pubblico.
+          Modifica hero, recapiti, palloncino proprietari, box informativo,
+          mappa/cookie e messaggi WhatsApp.
         </p>
 
-        <div className="mt-8 grid gap-5">
-          <Field
-            label="Telefono visualizzato"
-            value={form.phoneLabel}
-            limit={contactsLimits.phoneLabel}
-            onChange={(v) => updateField('phoneLabel', v)}
-            placeholder="035 221206"
-          />
+        <div className="mt-8 space-y-10">
+          <EditorSection title="Hero pagina contatti">
+            <Field
+              label="Sopratitolo hero"
+              value={form.heroOverline}
+              limit={contactsLimits.heroOverline}
+              onChange={(v) => updateField('heroOverline', v)}
+              placeholder="Contatti"
+            />
 
-          <Field
-            label="Telefono per link chiamata"
-            value={form.phoneHref}
-            limit={contactsLimits.phoneHref}
-            onChange={(v) => updateField('phoneHref', v.replace(/\s+/g, ''))}
-            placeholder="035221206"
-          />
+            <Field
+              label="Titolo hero"
+              value={form.heroTitle}
+              limit={contactsLimits.heroTitle}
+              onChange={(v) => updateField('heroTitle', v)}
+              placeholder="Siamo a disposizione..."
+            />
 
-          <Field
-            label="Numero WhatsApp"
-            value={form.whatsappNumber}
-            limit={contactsLimits.whatsappNumber}
-            onChange={(v) => updateField('whatsappNumber', v.replace(/[^\d]/g, ''))}
-            placeholder="393938149279"
-          />
+            <TextArea
+              label="Sottotitolo hero"
+              value={form.heroSubtitle}
+              limit={contactsLimits.heroSubtitle}
+              onChange={(v) => updateField('heroSubtitle', v)}
+              placeholder="Per richieste su immobili..."
+            />
+          </EditorSection>
 
-          <Field
-            label="Titolo palloncino"
-            value={form.ownerCtaTitle}
-            limit={contactsLimits.ownerCtaTitle}
-            onChange={(v) => updateField('ownerCtaTitle', v)}
-            placeholder="Sei proprietario di un immobile?"
-          />
+          <EditorSection title="Recapiti e WhatsApp">
+            <Field
+              label="Telefono visualizzato"
+              value={form.phoneLabel}
+              limit={contactsLimits.phoneLabel}
+              onChange={(v) => updateField('phoneLabel', v)}
+              placeholder="035 221206"
+            />
 
-          <TextArea
-            label="Testo palloncino"
-            value={form.ownerCtaText}
-            limit={contactsLimits.ownerCtaText}
-            onChange={(v) => updateField('ownerCtaText', v)}
-            placeholder="Vuoi venderlo, affittarlo o farlo valutare?"
-          />
+            <Field
+              label="Telefono per link chiamata"
+              value={form.phoneHref}
+              limit={contactsLimits.phoneHref}
+              onChange={(v) => updateField('phoneHref', v.replace(/\s+/g, ''))}
+              placeholder="035221206"
+            />
 
-          <Field
-            label="Frase prima del telefono"
-            value={form.ownerCtaPhoneText}
-            limit={contactsLimits.ownerCtaPhoneText}
-            onChange={(v) => updateField('ownerCtaPhoneText', v)}
-            placeholder="Chiamaci al"
-          />
+            <Field
+              label="Numero WhatsApp"
+              value={form.whatsappNumber}
+              limit={contactsLimits.whatsappNumber}
+              onChange={(v) => updateField('whatsappNumber', v.replace(/[^\d]/g, ''))}
+              placeholder="393938149279"
+            />
+          </EditorSection>
 
-          <TextArea
-            label="Messaggio WhatsApp generico"
-            value={form.whatsappDefaultMessage}
-            limit={contactsLimits.whatsappDefaultMessage}
-            onChange={(v) => updateField('whatsappDefaultMessage', v)}
-            placeholder="Ciao, sono proprietario..."
-          />
+          <EditorSection title="Palloncino proprietari">
+            <Field
+              label="Sopratitolo palloncino"
+              value={form.ownerCtaOverline}
+              limit={contactsLimits.ownerCtaOverline}
+              onChange={(v) => updateField('ownerCtaOverline', v)}
+              placeholder="Proprietari"
+            />
 
-          <TextArea
-            label="Messaggio WhatsApp da scheda immobile"
-            value={form.whatsappPropertyMessage}
-            limit={contactsLimits.whatsappPropertyMessage}
-            onChange={(v) => updateField('whatsappPropertyMessage', v)}
-            placeholder="Ciao, ho visto questo immobile: {url}"
-            hint="Usa {url} dove vuoi inserire il link dell’immobile."
-          />
+            <Field
+              label="Titolo palloncino"
+              value={form.ownerCtaTitle}
+              limit={contactsLimits.ownerCtaTitle}
+              onChange={(v) => updateField('ownerCtaTitle', v)}
+              placeholder="Hai un immobile da vendere o affittare?"
+            />
+
+            <TextArea
+              label="Testo palloncino"
+              value={form.ownerCtaText}
+              limit={contactsLimits.ownerCtaText}
+              onChange={(v) => updateField('ownerCtaText', v)}
+              placeholder="Raccontaci cosa vuoi fare..."
+            />
+
+            <Field
+              label="Testo pulsante palloncino"
+              value={form.ownerCtaButtonLabel}
+              limit={contactsLimits.ownerCtaButtonLabel}
+              onChange={(v) => updateField('ownerCtaButtonLabel', v)}
+              placeholder="Parla con l’agenzia"
+            />
+
+            <Field
+              label="Frase prima del telefono"
+              value={form.ownerCtaPhoneText}
+              limit={contactsLimits.ownerCtaPhoneText}
+              onChange={(v) => updateField('ownerCtaPhoneText', v)}
+              placeholder="Chiamaci al"
+            />
+          </EditorSection>
+
+          <EditorSection title="Box contatto diretto">
+            <Field
+              label="Titolo box"
+              value={form.directBoxTitle}
+              limit={contactsLimits.directBoxTitle}
+              onChange={(v) => updateField('directBoxTitle', v)}
+              placeholder="Un contatto diretto e professionale"
+            />
+
+            <TextArea
+              label="Testo box"
+              value={form.directBoxText}
+              limit={contactsLimits.directBoxText}
+              onChange={(v) => updateField('directBoxText', v)}
+              placeholder="Ogni richiesta viene valutata..."
+            />
+          </EditorSection>
+
+          <EditorSection title="Mappa e cookie">
+            <Field
+              label="Sopratitolo mappa bloccata"
+              value={form.mapBlockedOverline}
+              limit={contactsLimits.mapBlockedOverline}
+              onChange={(v) => updateField('mapBlockedOverline', v)}
+              placeholder="Contenuto esterno"
+            />
+
+            <Field
+              label="Titolo mappa bloccata"
+              value={form.mapBlockedTitle}
+              limit={contactsLimits.mapBlockedTitle}
+              onChange={(v) => updateField('mapBlockedTitle', v)}
+              placeholder="La mappa è disattivata..."
+            />
+
+            <TextArea
+              label="Testo mappa bloccata"
+              value={form.mapBlockedText}
+              limit={contactsLimits.mapBlockedText}
+              onChange={(v) => updateField('mapBlockedText', v)}
+              placeholder="Per visualizzare la mappa..."
+            />
+
+            <Field
+              label="Pulsante gestione cookie"
+              value={form.mapManageCookiesLabel}
+              limit={contactsLimits.mapManageCookiesLabel}
+              onChange={(v) => updateField('mapManageCookiesLabel', v)}
+              placeholder="Gestisci cookie per visualizzare la mappa"
+            />
+
+            <Field
+              label="Pulsante apertura mappa"
+              value={form.mapOpenLabel}
+              limit={contactsLimits.mapOpenLabel}
+              onChange={(v) => updateField('mapOpenLabel', v)}
+              placeholder="Apri su Google Maps"
+            />
+          </EditorSection>
+
+          <EditorSection title="Messaggi WhatsApp">
+            <TextArea
+              label="Messaggio WhatsApp generico"
+              value={form.whatsappDefaultMessage}
+              limit={contactsLimits.whatsappDefaultMessage}
+              onChange={(v) => updateField('whatsappDefaultMessage', v)}
+              placeholder="Ciao, sono proprietario..."
+            />
+
+            <TextArea
+              label="Messaggio WhatsApp da scheda immobile"
+              value={form.whatsappPropertyMessage}
+              limit={contactsLimits.whatsappPropertyMessage}
+              onChange={(v) => updateField('whatsappPropertyMessage', v)}
+              placeholder="Ciao, ho visto questo immobile: {url}"
+              hint="Usa {url} dove vuoi inserire il link dell’immobile."
+            />
+          </EditorSection>
         </div>
       </section>
     </div>
+  )
+}
+
+function EditorSection({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="rounded-[26px] border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-5">
+      <h2 className="text-xl font-semibold text-[var(--site-text)]">{title}</h2>
+      <div className="mt-5 grid gap-5">{children}</div>
+    </section>
   )
 }
 
@@ -182,7 +305,7 @@ function Field({
         maxLength={limit}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm outline-none"
+        className="w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm text-[var(--site-text)] outline-none placeholder:text-[var(--site-text-faint)]"
       />
       <span className="mt-1 block text-xs text-[var(--site-text-muted)]">
         {value.length}/{limit}
@@ -215,7 +338,7 @@ function TextArea({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={4}
-        className="w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm leading-7 outline-none"
+        className="w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm leading-7 text-[var(--site-text)] outline-none placeholder:text-[var(--site-text-faint)]"
       />
       <span className="mt-1 block text-xs text-[var(--site-text-muted)]">
         {hint ? `${hint} · ` : ''}
