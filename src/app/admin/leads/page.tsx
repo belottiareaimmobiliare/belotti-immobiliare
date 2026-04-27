@@ -20,6 +20,11 @@ type Lead = {
   contacted_at: string | null
   closed_at: string | null
   created_at: string
+  privacy_accepted: boolean | null
+  privacy_accepted_at: string | null
+  privacy_policy_version: string | null
+  privacy_ip: string | null
+  privacy_user_agent: string | null
 }
 
 type AdminLeadsPageProps = {
@@ -194,7 +199,12 @@ export default async function AdminLeadsPage({
       internal_note,
       contacted_at,
       closed_at,
-      created_at
+      created_at,
+      privacy_accepted,
+      privacy_accepted_at,
+      privacy_policy_version,
+      privacy_ip,
+      privacy_user_agent
     `,
     )
     .order('created_at', { ascending: false })
@@ -454,6 +464,42 @@ export default async function AdminLeadsPage({
                             </p>
                           </div>
                         ) : null}
+
+                        <div className="mt-5 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-4">
+                          <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">
+                            Privacy e consenso
+                          </p>
+
+                          <div className="mt-3 grid gap-2 text-sm md:grid-cols-2">
+                            <p className="text-[var(--site-text-muted)]">
+                              <span className="text-[var(--site-text-faint)]">Accettata:</span>{' '}
+                              <span className="font-semibold text-[var(--site-text)]">
+                                {lead.privacy_accepted ? 'Sì' : 'No / dato non presente'}
+                              </span>
+                            </p>
+
+                            <p className="text-[var(--site-text-muted)]">
+                              <span className="text-[var(--site-text-faint)]">Data consenso:</span>{' '}
+                              <span className="font-semibold text-[var(--site-text)]">
+                                {formatDate(lead.privacy_accepted_at)}
+                              </span>
+                            </p>
+
+                            <p className="text-[var(--site-text-muted)]">
+                              <span className="text-[var(--site-text-faint)]">Versione:</span>{' '}
+                              <span className="font-semibold text-[var(--site-text)]">
+                                {lead.privacy_policy_version || '-'}
+                              </span>
+                            </p>
+
+                            <p className="text-[var(--site-text-muted)]">
+                              <span className="text-[var(--site-text-faint)]">Prova tecnica:</span>{' '}
+                              <span className="font-semibold text-[var(--site-text)]">
+                                {lead.privacy_ip || lead.privacy_user_agent ? 'IP/User-Agent registrati' : '-'}
+                              </span>
+                            </p>
+                          </div>
+                        </div>
                       </div>
 
                       <div className="w-full shrink-0">

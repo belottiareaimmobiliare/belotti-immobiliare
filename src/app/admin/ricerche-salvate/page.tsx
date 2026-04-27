@@ -44,6 +44,11 @@ type SavedSearch = {
   expires_at: string | null
   last_digest_sent_at: string | null
   last_checked_at: string | null
+  privacy_accepted: boolean | null
+  privacy_accepted_at: string | null
+  privacy_policy_version: string | null
+  privacy_ip: string | null
+  privacy_user_agent: string | null
 }
 
 const statusOptions: Array<{ value: SavedSearchStatus; label: string }> = [
@@ -253,7 +258,12 @@ export default async function AdminSavedSearchesPage() {
       created_at,
       expires_at,
       last_digest_sent_at,
-      last_checked_at
+      last_checked_at,
+      privacy_accepted,
+      privacy_accepted_at,
+      privacy_policy_version,
+      privacy_ip,
+      privacy_user_agent
     `,
     )
     .order('created_at', { ascending: false })
@@ -600,6 +610,42 @@ export default async function AdminSavedSearchesPage() {
                                 Link immobile non disponibile.
                               </p>
                             ) : null}
+                          </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-4">
+                          <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">
+                            Privacy e consenso
+                          </p>
+
+                          <div className="mt-3 grid gap-2 text-sm md:grid-cols-2">
+                            <p className="text-[var(--site-text-muted)]">
+                              <span className="text-[var(--site-text-faint)]">Accettata:</span>{' '}
+                              <span className="font-semibold text-[var(--site-text)]">
+                                {savedSearch.privacy_accepted ? 'Sì' : 'No / dato non presente'}
+                              </span>
+                            </p>
+
+                            <p className="text-[var(--site-text-muted)]">
+                              <span className="text-[var(--site-text-faint)]">Data consenso:</span>{' '}
+                              <span className="font-semibold text-[var(--site-text)]">
+                                {formatDate(savedSearch.privacy_accepted_at)}
+                              </span>
+                            </p>
+
+                            <p className="text-[var(--site-text-muted)]">
+                              <span className="text-[var(--site-text-faint)]">Versione:</span>{' '}
+                              <span className="font-semibold text-[var(--site-text)]">
+                                {savedSearch.privacy_policy_version || '-'}
+                              </span>
+                            </p>
+
+                            <p className="text-[var(--site-text-muted)]">
+                              <span className="text-[var(--site-text-faint)]">Prova tecnica:</span>{' '}
+                              <span className="font-semibold text-[var(--site-text)]">
+                                {savedSearch.privacy_ip || savedSearch.privacy_user_agent ? 'IP/User-Agent registrati' : '-'}
+                              </span>
+                            </p>
                           </div>
                         </div>
                       </div>
