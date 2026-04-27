@@ -421,7 +421,7 @@ export default async function AdminLeadsPage({
                                 href={publicPropertyHref}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-white/85"
+                                className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-[#eef2f7]"
                               >
                                 Apri scheda pubblica
                               </Link>
@@ -507,7 +507,7 @@ export default async function AdminLeadsPage({
 
                           <button
                             type="submit"
-                            className="mt-3 w-full rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-white/85"
+                            className="mt-3 w-full rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-[#eef2f7]"
                           >
                             Salva nota
                           </button>
