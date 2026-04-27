@@ -119,6 +119,8 @@ export async function POST(request: Request) {
       )
     }
 
+    const unsubscribeToken = crypto.randomUUID()
+
     const { error: insertError } = await supabase.from('saved_searches').insert({
       full_name: verification.full_name,
       email: verification.email,
@@ -148,7 +150,7 @@ export async function POST(request: Request) {
 
       features_preferred: verification.features_preferred || {},
       expires_at: calculateSubscriptionExpiresAt(verification.contract_type),
-      unsubscribe_token: crypto.randomUUID(),
+      unsubscribe_token: unsubscribeToken,
     })
 
     if (insertError) {
@@ -192,6 +194,7 @@ export async function POST(request: Request) {
       to: verification.email,
       fullName: verification.full_name,
       sourcePropertyTitle: verification.source_property_title || 'Immobile',
+      unsubscribeUrl: `${baseUrl}/api/saved-searches/unsubscribe?token=${encodeURIComponent(unsubscribeToken)}`,
     })
 
     return NextResponse.json({ ok: true })

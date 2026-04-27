@@ -407,10 +407,12 @@ export async function sendCustomerSavedSearchConfirmation({
   to,
   fullName,
   sourcePropertyTitle,
+  unsubscribeUrl,
 }: {
   to: string
   fullName: string
   sourcePropertyTitle: string
+  unsubscribeUrl: string | null
 }) {
   const transporter = createTransporter()
   const user = process.env.SMTP_USER as string
@@ -441,6 +443,8 @@ export async function sendCustomerSavedSearchConfirmation({
             <p style="margin:0 0 14px;font-size:15px;line-height:1.8;color:#4b5563;">
               Quando saranno disponibili immobili coerenti per zona, fascia di prezzo e caratteristiche principali, potrà essere ricontattato dall’agenzia.
             </p>
+
+            ${buildUnsubscribeBlock(unsubscribeUrl)}
 
             <div style="margin-top:28px;padding-top:20px;border-top:1px solid #e5e7eb;">
               <p style="margin:0;font-size:13px;line-height:1.7;color:#6b7280;">

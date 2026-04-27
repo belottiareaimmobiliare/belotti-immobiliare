@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { revalidatePath } from 'next/cache'
 import { requirePermission } from '@/lib/admin-auth'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import DeleteSavedSearchButton from './DeleteSavedSearchButton'
 
 type SavedSearchStatus = 'new' | 'contacted' | 'closed' | 'archived'
@@ -142,6 +142,8 @@ function getPreferredFeatures(features: Record<string, boolean> | null) {
 async function updateSavedSearchStatus(formData: FormData) {
   'use server'
 
+  await requirePermission('can_manage_properties')
+
   const id = String(formData.get('id') ?? '')
   const status = String(formData.get('status') ?? '') as SavedSearchStatus
 
@@ -149,7 +151,7 @@ async function updateSavedSearchStatus(formData: FormData) {
     return
   }
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const payload: Record<string, string | null> = {
     status,
@@ -172,6 +174,8 @@ async function updateSavedSearchStatus(formData: FormData) {
 async function updateSavedSearchNote(formData: FormData) {
   'use server'
 
+  await requirePermission('can_manage_properties')
+
   const id = String(formData.get('id') ?? '')
   const internalNote = String(formData.get('internal_note') ?? '').trim()
 
@@ -179,7 +183,7 @@ async function updateSavedSearchNote(formData: FormData) {
     return
   }
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   await supabase
     .from('saved_searches')
@@ -194,13 +198,15 @@ async function updateSavedSearchNote(formData: FormData) {
 async function deleteSavedSearch(formData: FormData) {
   'use server'
 
+  await requirePermission('can_manage_properties')
+
   const id = String(formData.get('id') ?? '')
 
   if (!id) {
     return
   }
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   await supabase.from('saved_searches').delete().eq('id', id)
 
@@ -211,7 +217,7 @@ async function deleteSavedSearch(formData: FormData) {
 export default async function AdminSavedSearchesPage() {
   await requirePermission('can_manage_properties')
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data, error } = await supabase
     .from('saved_searches')

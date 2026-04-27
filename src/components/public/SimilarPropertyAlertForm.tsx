@@ -32,6 +32,7 @@ export default function SimilarPropertyAlertForm(props: Props) {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [privacyAccepted, setPrivacyAccepted] = useState(false)
 
   const [loading, setLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
@@ -46,6 +47,11 @@ export default function SimilarPropertyAlertForm(props: Props) {
 
     if (!cleanedName || !cleanedEmail) {
       setErrorMessage('Inserisci almeno nome ed email.')
+      return
+    }
+
+    if (!privacyAccepted) {
+      setErrorMessage('Per proseguire devi accettare l’informativa privacy.')
       return
     }
 
@@ -173,6 +179,22 @@ export default function SimilarPropertyAlertForm(props: Props) {
             placeholder="Cellulare opzionale"
             className="rounded-2xl border border-[#c8a24a]/55 bg-white/80 px-4 py-3 text-sm text-black outline-none placeholder:text-black/45 focus:border-[#c8a24a]"
           />
+
+          <label className="flex items-start gap-3 rounded-2xl border border-[#c8a24a]/55 bg-white/70 px-4 py-3 text-xs leading-5 text-black/70 md:col-span-3">
+            <input
+              type="checkbox"
+              checked={privacyAccepted}
+              onChange={(event) => setPrivacyAccepted(event.target.checked)}
+              className="mt-1"
+            />
+            <span>
+              Acconsento al trattamento dei dati per ricevere aggiornamenti su immobili simili e dichiaro di aver letto l{'’'}informativa privacy.
+              {' '}
+              <a href="/privacy" target="_blank" className="font-semibold text-black underline">
+                Privacy Policy
+              </a>
+            </span>
+          </label>
 
           {errorMessage ? (
             <div className="rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-700 md:col-span-3">
