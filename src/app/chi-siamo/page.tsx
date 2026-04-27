@@ -30,7 +30,7 @@ export default async function ChiSiamoPage() {
           <div className="flex flex-col items-center justify-center lg:items-start lg:justify-start">
             <div className="relative h-[270px] w-[270px] overflow-hidden rounded-full border-2 border-[var(--site-border-strong)] bg-[var(--site-surface)] shadow-[var(--site-card-shadow)]">
               <Image
-                src="/images/gianfederico-belotti.jpg"
+                src="/images/gianfederico.jpg"
                 alt="Gianfederico Belotti"
                 fill
                 className="object-cover"
