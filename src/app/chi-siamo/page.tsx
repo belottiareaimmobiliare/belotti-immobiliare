@@ -33,7 +33,7 @@ export default async function ChiSiamoPage() {
                 src="/images/gianfederico.jpg"
                 alt="Gianfederico Belotti"
                 fill
-                className="object-cover"
+                className="object-cover scale-[1.18]"
                 priority
               />
             </div>
