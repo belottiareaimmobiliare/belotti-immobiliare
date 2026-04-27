@@ -38,6 +38,9 @@ type SavedSearch = {
   contacted_at: string | null
   closed_at: string | null
   created_at: string
+  expires_at: string | null
+  last_digest_sent_at: string | null
+  last_checked_at: string | null
 }
 
 const statusOptions: Array<{ value: SavedSearchStatus; label: string }> = [
@@ -235,7 +238,10 @@ export default async function AdminSavedSearchesPage() {
       internal_note,
       contacted_at,
       closed_at,
-      created_at
+      created_at,
+      expires_at,
+      last_digest_sent_at,
+      last_checked_at
     `,
     )
     .order('created_at', { ascending: false })
@@ -243,6 +249,12 @@ export default async function AdminSavedSearchesPage() {
   const searches = (data ?? []) as SavedSearch[]
 
   const total = searches.length
+  const activeSearches = searches.filter((item) =>
+    ['new', 'contacted'].includes(item.status)
+  )
+  const activeSubscriberCount = new Set(
+    activeSearches.map((item) => item.email.trim().toLowerCase())
+  ).size
   const newCount = searches.filter((item) => item.status === 'new').length
   const contactedCount = searches.filter((item) => item.status === 'contacted').length
   const closedCount = searches.filter((item) => item.status === 'closed').length
@@ -273,10 +285,15 @@ export default async function AdminSavedSearchesPage() {
           </Link>
         </header>
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
           <div className="rounded-3xl border border-[var(--site-border)] bg-[var(--site-surface)] p-5">
             <p className="text-sm text-[var(--site-text-muted)]">Totale</p>
             <p className="mt-3 text-3xl font-semibold text-[var(--site-text)]">{total}</p>
+          </div>
+
+          <div className="rounded-3xl border border-blue-400/20 bg-blue-400/10 p-5">
+            <p className="text-sm text-[var(--site-text-muted)]">Utenti iscritti mail</p>
+            <p className="mt-3 text-3xl font-semibold text-[var(--site-text)]">{activeSubscriberCount}</p>
           </div>
 
           <div className="rounded-3xl border border-amber-400/20 bg-amber-400/10 p-5">
@@ -323,7 +340,7 @@ export default async function AdminSavedSearchesPage() {
             <span>Contatto</span>
             <span>Ricerca</span>
             <span>Riferimento</span>
-            <span>Ricevuta</span>
+            <span>Iscritta dal</span>
           </div>
 
           <div className="divide-y divide-[var(--site-border)]">
@@ -425,6 +442,26 @@ export default async function AdminSavedSearchesPage() {
                           <p>
                             <span className="text-[var(--site-text-faint)]">Chiusa/archiviata:</span>{' '}
                             {formatDate(savedSearch.closed_at)}
+                          </p>
+
+                          <p>
+                            <span className="text-[var(--site-text-faint)]">Iscritta dal:</span>{' '}
+                            {formatDate(savedSearch.created_at)}
+                          </p>
+
+                          <p>
+                            <span className="text-[var(--site-text-faint)]">Scadenza automatica:</span>{' '}
+                            {formatDate(savedSearch.expires_at)}
+                          </p>
+
+                          <p>
+                            <span className="text-[var(--site-text-faint)]">Ultimo controllo:</span>{' '}
+                            {formatDate(savedSearch.last_checked_at)}
+                          </p>
+
+                          <p>
+                            <span className="text-[var(--site-text-faint)]">Ultima mail con immobili:</span>{' '}
+                            {formatDate(savedSearch.last_digest_sent_at)}
                           </p>
                         </div>
 

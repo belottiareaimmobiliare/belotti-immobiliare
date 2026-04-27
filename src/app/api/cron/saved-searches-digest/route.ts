@@ -176,6 +176,39 @@ function getCoverUrl(property: Property) {
   return images[0]?.file_url || null
 }
 
+function calculateSubscriptionExpiresAt(contractType: string | null) {
+  const date = new Date()
+  const normalized = String(contractType || '').trim().toLowerCase()
+
+  if (normalized === 'affitto') {
+    date.setMonth(date.getMonth() + 3)
+    return date.toISOString()
+  }
+
+  date.setMonth(date.getMonth() + 8)
+  return date.toISOString()
+}
+
+async function purgeExpiredSavedSearches(
+  supabase: ReturnType<typeof createServiceClient>
+) {
+  const now = new Date().toISOString()
+
+  const { data, error } = await supabase
+    .from('saved_searches')
+    .delete()
+    .in('status', ['new', 'contacted'])
+    .lte('expires_at', now)
+    .select('id')
+
+  if (error) {
+    console.error('Errore purge ricerche scadute:', error)
+    return 0
+  }
+
+  return data?.length ?? 0
+}
+
 function daysBetween(fromDate: string, toDate = new Date()) {
   const from = new Date(fromDate).getTime()
   const to = toDate.getTime()
@@ -325,6 +358,7 @@ async function processSavedSearch({
       .update({
         last_digest_sent_at: now,
         last_no_results_notice_sent_at: null,
+        expires_at: calculateSubscriptionExpiresAt(search.contract_type),
       })
       .eq('id', search.id)
 
@@ -369,6 +403,7 @@ export async function GET(request: Request) {
 
   const supabase = createServiceClient()
   const baseUrl = getBaseUrl(request)
+  const purgedExpired = await purgeExpiredSavedSearches(supabase)
 
   const { data, error } = await supabase
     .from('saved_searches')
@@ -435,6 +470,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     ok: true,
     processed: results.length,
+    purgedExpired,
     sentDigests: results.filter((item) => 'sentDigest' in item && item.sentDigest).length,
     sentNoResultsNotices: results.filter(
       (item) => 'sentNoResultsNotice' in item && item.sentNoResultsNotice

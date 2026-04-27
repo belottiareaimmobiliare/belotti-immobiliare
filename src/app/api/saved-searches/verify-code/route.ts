@@ -30,6 +30,19 @@ function formatRange(min: number | null, max: number | null, suffix = '') {
   return '-'
 }
 
+function calculateSubscriptionExpiresAt(contractType: string | null) {
+  const date = new Date()
+  const normalized = String(contractType || '').trim().toLowerCase()
+
+  if (normalized === 'affitto') {
+    date.setMonth(date.getMonth() + 3)
+    return date.toISOString()
+  }
+
+  date.setMonth(date.getMonth() + 8)
+  return date.toISOString()
+}
+
 function formatOptionLabel(value: string | null | undefined) {
   const clean = String(value || '').trim()
   if (!clean) return '-'
@@ -131,6 +144,7 @@ export async function POST(request: Request) {
       bathrooms_min: verification.bathrooms_min,
 
       features_preferred: verification.features_preferred || {},
+      expires_at: calculateSubscriptionExpiresAt(verification.contract_type),
     })
 
     if (insertError) {
