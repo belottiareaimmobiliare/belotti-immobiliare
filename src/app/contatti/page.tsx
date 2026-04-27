@@ -246,18 +246,11 @@ export default function ContattiPage() {
               </a>
             </div>
 
-            <div className="theme-panel rounded-[30px] border p-7">
-              <h2 className="text-xl font-semibold text-[var(--site-text)]">
-                {content.directBoxTitle}
-              </h2>
-              <p className="mt-4 text-sm leading-7 text-[var(--site-text-muted)]">
-                {content.directBoxText}
-              </p>
-            </div>
           </aside>
 
-          <section className="theme-panel self-start rounded-[30px] border p-4 md:p-5">
-            <div className="overflow-hidden rounded-[24px] border border-[var(--site-border)]">
+          <div className="space-y-5">
+            <section className="theme-panel self-start rounded-[30px] border p-4 md:p-5">
+              <div className="overflow-hidden rounded-[24px] border border-[var(--site-border)]">
               {canLoadExternalMap ? (
                 <iframe
                   title="Mappa Area Immobiliare"
@@ -298,8 +291,18 @@ export default function ContattiPage() {
                   </div>
                 </div>
               )}
+              </div>
+            </section>
+
+            <div className="theme-panel rounded-[30px] border p-7">
+              <h2 className="text-xl font-semibold text-[var(--site-text)]">
+                {content.directBoxTitle}
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-[var(--site-text-muted)]">
+                {content.directBoxText}
+              </p>
             </div>
-          </section>
+          </div>
         </div>
       </section>
 
