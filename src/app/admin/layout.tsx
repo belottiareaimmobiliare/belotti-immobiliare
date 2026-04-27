@@ -19,20 +19,39 @@ export default async function AdminRootLayout({
   if (profile.can_manage_properties) {
     const supabase = await createClient()
 
-    const { count } = await supabase
-      .from('leads')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'new')
+    const [{ count: newLeadsCount }, { count: activeSavedSearchesCount }] =
+      await Promise.all([
+        supabase
+          .from('leads')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'new'),
 
-    const newLeadsCount = count ?? 0
+        supabase
+          .from('saved_searches')
+          .select('id', { count: 'exact', head: true })
+          .in('status', ['new', 'contacted']),
+      ])
 
     links = links.map((link) => {
-      if (link.href !== '/admin/leads') return link
+      if (link.href === '/admin/leads') {
+        const count = newLeadsCount ?? 0
 
-      return {
-        ...link,
-        label: newLeadsCount > 0 ? `Leads (${newLeadsCount})` : 'Leads',
+        return {
+          ...link,
+          label: count > 0 ? `Leads (${count})` : 'Leads',
+        }
       }
+
+      if (link.href === '/admin/ricerche-salvate') {
+        const count = activeSavedSearchesCount ?? 0
+
+        return {
+          ...link,
+          label: count > 0 ? `Ricerche salvate (${count})` : 'Ricerche salvate',
+        }
+      }
+
+      return link
     })
   }
 
