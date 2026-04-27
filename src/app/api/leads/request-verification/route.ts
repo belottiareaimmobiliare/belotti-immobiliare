@@ -3,12 +3,25 @@ import crypto from 'crypto'
 import { createServiceClient } from '@/lib/supabase/service'
 import { sendVerificationEmail } from '@/lib/mailer'
 
+const PRIVACY_POLICY_VERSION = 'privacy-2026-04'
+
 function hashCode(code: string) {
   return crypto.createHash('sha256').update(code).digest('hex')
 }
 
 function generateCode() {
   return Math.floor(1000 + Math.random() * 9000).toString()
+}
+
+function getClientIp(request: Request) {
+  const forwardedFor = request.headers.get('x-forwarded-for')
+  if (forwardedFor) return forwardedFor.split(',')[0]?.trim() || null
+
+  return (
+    request.headers.get('x-real-ip') ||
+    request.headers.get('cf-connecting-ip') ||
+    null
+  )
 }
 
 export async function POST(request: Request) {
@@ -22,10 +35,18 @@ export async function POST(request: Request) {
     const email = String(body.email || '').trim().toLowerCase()
     const phone = String(body.phone || '').trim()
     const message = String(body.message || '').trim()
+    const privacyAccepted = body.privacyAccepted === true
 
-    if (!propertyId || !fullName || !email) {
+    if (!propertyId || !fullName || !email || !phone) {
       return NextResponse.json(
         { error: 'Dati mancanti' },
+        { status: 400 }
+      )
+    }
+
+    if (!privacyAccepted) {
+      return NextResponse.json(
+        { error: 'È necessario accettare l’informativa privacy.' },
         { status: 400 }
       )
     }
@@ -34,6 +55,7 @@ export async function POST(request: Request) {
 
     const code = generateCode()
     const codeHash = hashCode(code)
+    const now = new Date().toISOString()
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
 
     await supabase
@@ -50,10 +72,15 @@ export async function POST(request: Request) {
         property_title: propertyTitle || null,
         full_name: fullName,
         email,
-        phone: phone || null,
+        phone,
         message: message || null,
         code_hash: codeHash,
         expires_at: expiresAt,
+        privacy_accepted: true,
+        privacy_accepted_at: now,
+        privacy_policy_version: PRIVACY_POLICY_VERSION,
+        privacy_ip: getClientIp(request),
+        privacy_user_agent: request.headers.get('user-agent') || null,
       })
 
     if (insertError) {

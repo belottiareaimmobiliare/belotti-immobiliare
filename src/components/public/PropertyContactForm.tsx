@@ -83,6 +83,7 @@ export default function PropertyContactForm({
           email: cleanedEmail,
           phone: cleanedPhone,
           message: cleanedMessage,
+          privacyAccepted,
         }),
       })
 

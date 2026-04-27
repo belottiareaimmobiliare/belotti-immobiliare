@@ -151,6 +151,12 @@ export async function POST(request: Request) {
       features_preferred: verification.features_preferred || {},
       expires_at: calculateSubscriptionExpiresAt(verification.contract_type),
       unsubscribe_token: unsubscribeToken,
+
+      privacy_accepted: verification.privacy_accepted === true,
+      privacy_accepted_at: verification.privacy_accepted_at || null,
+      privacy_policy_version: verification.privacy_policy_version || null,
+      privacy_ip: verification.privacy_ip || null,
+      privacy_user_agent: verification.privacy_user_agent || null,
     })
 
     if (insertError) {

@@ -83,6 +83,11 @@ export async function POST(request: Request) {
         email: verification.email,
         phone: verification.phone,
         message: verification.message,
+        privacy_accepted: verification.privacy_accepted === true,
+        privacy_accepted_at: verification.privacy_accepted_at || null,
+        privacy_policy_version: verification.privacy_policy_version || null,
+        privacy_ip: verification.privacy_ip || null,
+        privacy_user_agent: verification.privacy_user_agent || null,
       })
 
     if (leadError) {

@@ -67,6 +67,7 @@ export default function SimilarPropertyAlertForm(props: Props) {
         fullName: cleanedName,
         email: cleanedEmail,
         phone: cleanedPhone,
+        privacyAccepted,
       }),
     })
 
@@ -188,7 +189,7 @@ export default function SimilarPropertyAlertForm(props: Props) {
               className="mt-1"
             />
             <span>
-              Acconsento al trattamento dei dati per ricevere aggiornamenti su immobili simili e dichiaro di aver letto l{'’'}informativa privacy.
+              Acconsento al trattamento dei dati per ricevere aggiornamenti su immobili simili e dichiaro di aver letto l’informativa privacy.
               {' '}
               <a href="/privacy" target="_blank" className="font-semibold text-black underline">
                 Privacy Policy
@@ -204,7 +205,7 @@ export default function SimilarPropertyAlertForm(props: Props) {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !privacyAccepted}
             className="rounded-2xl border border-[#c8a24a] bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#1f2937] disabled:cursor-not-allowed disabled:opacity-60 md:col-span-3"
           >
             <span>{loading ? 'Invio codice...' : 'Ricevi codice di verifica'}</span>

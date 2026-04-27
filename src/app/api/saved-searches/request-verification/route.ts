@@ -3,6 +3,8 @@ import crypto from 'crypto'
 import { createServiceClient } from '@/lib/supabase/service'
 import { sendSavedSearchVerificationEmail } from '@/lib/mailer'
 
+const PRIVACY_POLICY_VERSION = 'privacy-2026-04'
+
 type MacroCategory =
   | 'residential_full'
   | 'room_or_portion'
@@ -35,6 +37,17 @@ function toNumberOrNull(value: unknown) {
 function toIntegerOrNull(value: unknown) {
   const numberValue = Number(value)
   return Number.isInteger(numberValue) ? numberValue : null
+}
+
+function getClientIp(request: Request) {
+  const forwardedFor = request.headers.get('x-forwarded-for')
+  if (forwardedFor) return forwardedFor.split(',')[0]?.trim() || null
+
+  return (
+    request.headers.get('x-real-ip') ||
+    request.headers.get('cf-connecting-ip') ||
+    null
+  )
 }
 
 function getMacroCategory(propertyType: string | null): MacroCategory {
@@ -95,10 +108,18 @@ export async function POST(request: Request) {
     const phone = cleanText(body.phone)
     const propertyType = cleanText(body.propertyType)
     const propertyTitle = cleanText(body.propertyTitle) || 'Immobile richiesto'
+    const privacyAccepted = body.privacyAccepted === true
 
     if (!fullName || !email) {
       return NextResponse.json(
         { error: 'Nome ed email sono obbligatori.' },
+        { status: 400 }
+      )
+    }
+
+    if (!privacyAccepted) {
+      return NextResponse.json(
+        { error: 'È necessario accettare l’informativa privacy.' },
         { status: 400 }
       )
     }
@@ -112,6 +133,7 @@ export async function POST(request: Request) {
 
     const code = generateCode()
     const codeHash = hashCode(code)
+    const now = new Date().toISOString()
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
 
     const supabase = createServiceClient()
@@ -160,6 +182,12 @@ export async function POST(request: Request) {
 
         code_hash: codeHash,
         expires_at: expiresAt,
+
+        privacy_accepted: true,
+        privacy_accepted_at: now,
+        privacy_policy_version: PRIVACY_POLICY_VERSION,
+        privacy_ip: getClientIp(request),
+        privacy_user_agent: request.headers.get('user-agent') || null,
       })
       .select('id')
       .single()
