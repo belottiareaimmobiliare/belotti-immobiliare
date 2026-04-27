@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 
 type PrivacyPageProps = {
   searchParams?: Promise<{
-    q?: string
+    email?: string
     done?: string
   }>
 }
@@ -78,60 +78,35 @@ function formatDate(value: string | null | undefined) {
   }
 }
 
-function normalizeIdentifier(value: unknown) {
-  return String(value ?? '').trim()
+function normalizeEmail(value: unknown) {
+  return String(value ?? '').trim().toLowerCase()
 }
 
-function normalizeEmail(value: string) {
-  return value.trim().toLowerCase()
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 }
 
-function hashIdentifier(value: string) {
+function hashEmail(value: string) {
   return crypto
     .createHash('sha256')
     .update(normalizeEmail(value))
     .digest('hex')
 }
 
-function safeSearchTerm(value: string) {
-  return value
-    .trim()
-    .replace(/[%,()]/g, '')
-    .slice(0, 120)
-}
-
-function buildOrFilter(identifier: string) {
-  const term = safeSearchTerm(identifier)
-
-  if (!term) return ''
-
-  return [
-    `email.ilike.%${term}%`,
-    `phone.ilike.%${term}%`,
-    `full_name.ilike.%${term}%`,
-  ].join(',')
-}
-
 async function anonymizeUserData(formData: FormData) {
   'use server'
 
   const profile = await requireOwner()
-  const identifier = normalizeIdentifier(formData.get('identifier'))
+  const email = normalizeEmail(formData.get('email'))
   const requestType = String(formData.get('request_type') || 'deletion')
   const message = String(formData.get('message') || '').trim()
 
-  if (!identifier) {
-    return
-  }
-
-  const filter = buildOrFilter(identifier)
-
-  if (!filter) {
+  if (!email || !isValidEmail(email)) {
     return
   }
 
   const supabase = createServiceClient()
-  const identifierHash = hashIdentifier(identifier)
+  const identifierHash = hashEmail(email)
   const anonymizedEmail = `deleted+${identifierHash.slice(0, 18)}@privacy.local`
   const now = new Date().toISOString()
 
@@ -141,19 +116,19 @@ async function anonymizeUserData(formData: FormData) {
     { count: savedSearchesCount },
     { count: savedSearchVerificationsCount },
   ] = await Promise.all([
-    supabase.from('leads').select('id', { count: 'exact', head: true }).or(filter),
+    supabase.from('leads').select('id', { count: 'exact', head: true }).eq('email', email),
     supabase
       .from('lead_email_verifications')
       .select('id', { count: 'exact', head: true })
-      .or(filter),
+      .eq('email', email),
     supabase
       .from('saved_searches')
       .select('id', { count: 'exact', head: true })
-      .or(filter),
+      .eq('email', email),
     supabase
       .from('saved_search_email_verifications')
       .select('id', { count: 'exact', head: true })
-      .or(filter),
+      .eq('email', email),
   ])
 
   await supabase
@@ -172,7 +147,7 @@ async function anonymizeUserData(formData: FormData) {
       privacy_ip: null,
       privacy_user_agent: null,
     })
-    .or(filter)
+    .eq('email', email)
 
   await supabase
     .from('saved_searches')
@@ -190,10 +165,10 @@ async function anonymizeUserData(formData: FormData) {
       privacy_ip: null,
       privacy_user_agent: null,
     })
-    .or(filter)
+    .eq('email', email)
 
-  await supabase.from('lead_email_verifications').delete().or(filter)
-  await supabase.from('saved_search_email_verifications').delete().or(filter)
+  await supabase.from('lead_email_verifications').delete().eq('email', email)
+  await supabase.from('saved_search_email_verifications').delete().eq('email', email)
 
   await supabase.from('privacy_requests').insert({
     full_name: null,
@@ -202,7 +177,7 @@ async function anonymizeUserData(formData: FormData) {
     message: message || null,
     status: 'closed',
     internal_note:
-      'Richiesta privacy gestita da admin. Dati operativi anonimizzati; verifiche temporanee eliminate.',
+      'Richiesta privacy gestita da admin. Ricerca effettuata solo su email esatta. Dati operativi anonimizzati; verifiche temporanee eliminate.',
     identifier_hash: identifierHash,
     handled_by_profile_id: profile.id,
     handled_by_email:
@@ -220,30 +195,26 @@ async function anonymizeUserData(formData: FormData) {
   revalidatePath('/admin/ricerche-salvate')
   revalidatePath('/admin')
 
-  redirect(`/admin/privacy?q=${encodeURIComponent(identifier)}&done=1`)
+  redirect(`/admin/privacy?email=${encodeURIComponent(email)}&done=1`)
 }
 
 async function deactivateSavedSearchEmails(formData: FormData) {
   'use server'
 
   const profile = await requireOwner()
-  const identifier = normalizeIdentifier(formData.get('identifier'))
+  const email = normalizeEmail(formData.get('email'))
 
-  if (!identifier) return
-
-  const filter = buildOrFilter(identifier)
-
-  if (!filter) return
+  if (!email || !isValidEmail(email)) return
 
   const supabase = createServiceClient()
-  const identifierHash = hashIdentifier(identifier)
+  const identifierHash = hashEmail(email)
   const anonymizedEmail = `privacy-request+${identifierHash.slice(0, 18)}@privacy.local`
   const now = new Date().toISOString()
 
   const { count } = await supabase
     .from('saved_searches')
     .select('id', { count: 'exact', head: true })
-    .or(filter)
+    .eq('email', email)
 
   await supabase
     .from('saved_searches')
@@ -254,13 +225,14 @@ async function deactivateSavedSearchEmails(formData: FormData) {
       internal_note:
         'Email immobili simili disattivate per richiesta privacy/utente.',
     })
-    .or(filter)
+    .eq('email', email)
 
   await supabase.from('privacy_requests').insert({
     email: anonymizedEmail,
     request_type: 'unsubscribe_saved_searches',
     status: 'closed',
-    internal_note: 'Disattivate le email per ricerche salvate associate all’identificativo indicato.',
+    internal_note:
+      'Disattivate le email per ricerche salvate associate all’email esatta indicata.',
     identifier_hash: identifierHash,
     handled_by_profile_id: profile.id,
     handled_by_email:
@@ -274,7 +246,7 @@ async function deactivateSavedSearchEmails(formData: FormData) {
   revalidatePath('/admin/ricerche-salvate')
   revalidatePath('/admin')
 
-  redirect(`/admin/privacy?q=${encodeURIComponent(identifier)}&done=1`)
+  redirect(`/admin/privacy?email=${encodeURIComponent(email)}&done=1`)
 }
 
 export default async function AdminPrivacyPage({
@@ -283,8 +255,9 @@ export default async function AdminPrivacyPage({
   await requireOwner()
 
   const params = searchParams ? await searchParams : {}
-  const query = normalizeIdentifier(params.q)
+  const email = normalizeEmail(params.email)
   const done = params.done === '1'
+  const canSearch = email && isValidEmail(email)
 
   const supabase = createServiceClient()
 
@@ -294,9 +267,9 @@ export default async function AdminPrivacyPage({
   let savedSearchVerifications: VerificationRow[] = []
   let privacyRequests: PrivacyRequestRow[] = []
 
-  const filter = buildOrFilter(query)
+  if (canSearch) {
+    const emailHash = hashEmail(email)
 
-  if (query && filter) {
     const [
       { data: leadsData },
       { data: savedSearchesData },
@@ -320,7 +293,7 @@ export default async function AdminPrivacyPage({
           privacy_policy_version
         `,
         )
-        .or(filter)
+        .eq('email', email)
         .order('created_at', { ascending: false })
         .limit(100),
 
@@ -341,7 +314,7 @@ export default async function AdminPrivacyPage({
           privacy_policy_version
         `,
         )
-        .or(filter)
+        .eq('email', email)
         .order('created_at', { ascending: false })
         .limit(100),
 
@@ -358,7 +331,7 @@ export default async function AdminPrivacyPage({
           verified_at
         `,
         )
-        .or(filter)
+        .eq('email', email)
         .order('created_at', { ascending: false })
         .limit(100),
 
@@ -375,7 +348,7 @@ export default async function AdminPrivacyPage({
           verified_at
         `,
         )
-        .or(filter)
+        .eq('email', email)
         .order('created_at', { ascending: false })
         .limit(100),
 
@@ -396,7 +369,7 @@ export default async function AdminPrivacyPage({
           closed_at
         `,
         )
-        .or(`email.ilike.%${safeSearchTerm(query)}%,identifier_hash.eq.${hashIdentifier(query)}`)
+        .or(`identifier_hash.eq.${emailHash},email.eq.${email}`)
         .order('created_at', { ascending: false })
         .limit(50),
     ])
@@ -429,9 +402,8 @@ export default async function AdminPrivacyPage({
             </h1>
 
             <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--site-text-muted)]">
-              Cerca i dati collegati a un utente e gestisci richieste di cancellazione,
-              disattivazione email o anonimizzazione dati. Le azioni lasciano un audit
-              minimo senza conservare i dati personali in chiaro.
+              Gestione richieste privacy tramite email esatta. Per evitare cancellazioni
+              errate, la ricerca non lavora su nome o telefono.
             </p>
           </div>
 
@@ -456,15 +428,16 @@ export default async function AdminPrivacyPage({
           </h2>
 
           <p className="mt-2 text-sm leading-7 text-[var(--site-text-muted)]">
-            Inserisci email, telefono o nome. Per le richieste privacy reali è preferibile
-            usare l’email esatta indicata dall’utente.
+            Inserisci solo l’email esatta comunicata dall’utente. Non è consentita
+            la ricerca per nome o telefono per evitare interventi su dati di persone omonime.
           </p>
 
           <form className="mt-5 flex flex-col gap-3 md:flex-row" action="/admin/privacy">
             <input
-              name="q"
-              defaultValue={query}
-              placeholder="email@dominio.it / telefono / nome"
+              name="email"
+              type="email"
+              defaultValue={email}
+              placeholder="email@dominio.it"
               className="min-w-0 flex-1 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-sm text-[var(--site-text)] outline-none placeholder:text-[var(--site-text-faint)] focus:border-[var(--site-border-strong)]"
             />
 
@@ -472,12 +445,18 @@ export default async function AdminPrivacyPage({
               type="submit"
               className="rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#eef2f7]"
             >
-              Cerca
+              Cerca per email
             </button>
           </form>
+
+          {email && !canSearch ? (
+            <p className="mt-4 rounded-2xl border border-red-400/35 bg-red-950/45 px-4 py-3 text-sm text-red-50">
+              Inserisci un indirizzo email valido.
+            </p>
+          ) : null}
         </section>
 
-        {query ? (
+        {canSearch ? (
           <section className="grid gap-4 md:grid-cols-5">
             <KpiCard title="Lead" value={leads.length} />
             <KpiCard title="Ricerche salvate" value={savedSearches.length} />
@@ -487,39 +466,37 @@ export default async function AdminPrivacyPage({
           </section>
         ) : null}
 
-        {query && totalFound === 0 ? (
+        {canSearch && totalFound === 0 ? (
           <div className="rounded-3xl border border-[var(--site-border)] bg-[var(--site-surface)] p-8 text-center">
             <h2 className="text-xl font-semibold text-[var(--site-text)]">
               Nessun dato operativo trovato
             </h2>
             <p className="mt-3 text-sm text-[var(--site-text-muted)]">
               Non risultano lead, ricerche salvate o verifiche temporanee associate
-              all’identificativo cercato.
+              a questa email.
             </p>
           </div>
         ) : null}
 
-        {query && totalFound > 0 ? (
+        {canSearch && totalFound > 0 ? (
           <section className="rounded-[30px] border border-red-400/35 bg-red-950/35 p-6 text-red-50">
             <p className="text-xs uppercase tracking-[0.24em] text-red-100/70">
               Zona protetta
             </p>
 
             <h2 className="mt-2 text-2xl font-semibold text-red-50">
-              Azioni privacy sull’utente cercato
+              Azioni privacy sull’email cercata
             </h2>
 
             <p className="mt-3 max-w-4xl text-sm leading-7 text-red-50/75">
-              Usa queste azioni solo dopo richiesta esplicita dell’interessato o
-              dopo verifica interna. L’anonimizzazione rimuove nome, email, telefono,
-              messaggi, IP/User-Agent e consensi dai record operativi, archivia le
-              ricerche salvate ed elimina le verifiche temporanee. Rimane solo un
-              audit minimo con hash.
+              Le azioni vengono applicate esclusivamente ai record con email esatta:
+              <strong> {email}</strong>. Non vengono toccati record con stesso nome,
+              telefono simile o dati parziali.
             </p>
 
             <div className="mt-5 grid gap-3 lg:grid-cols-2">
               <form action={deactivateSavedSearchEmails}>
-                <input type="hidden" name="identifier" value={query} />
+                <input type="hidden" name="email" value={email} />
 
                 <button
                   type="submit"
@@ -530,12 +507,12 @@ export default async function AdminPrivacyPage({
               </form>
 
               <form action={anonymizeUserData}>
-                <input type="hidden" name="identifier" value={query} />
+                <input type="hidden" name="email" value={email} />
                 <input type="hidden" name="request_type" value="deletion" />
                 <input
                   type="hidden"
                   name="message"
-                  value="Richiesta gestita da Privacy Center admin."
+                  value="Richiesta gestita da Privacy Center admin tramite email esatta."
                 />
 
                 <button
@@ -549,7 +526,7 @@ export default async function AdminPrivacyPage({
           </section>
         ) : null}
 
-        {query ? (
+        {canSearch ? (
           <>
             <DataSection title="Lead trovati">
               {leads.length > 0 ? (
