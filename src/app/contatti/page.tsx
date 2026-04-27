@@ -185,6 +185,30 @@ export default function ContattiPage() {
               </a>
             </div>
 
+
+            <div className="theme-panel rounded-[30px] border p-7">
+              <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
+                Proprietari
+              </p>
+
+              <h2 className="mt-3 text-xl font-semibold text-[var(--site-text)]">
+                Hai un immobile da vendere o affittare?
+              </h2>
+
+              <p className="mt-4 text-sm leading-7 text-[var(--site-text-muted)]">
+                Raccontaci cosa vuoi fare: vendita, affitto o semplice valutazione.
+                Area Immobiliare può aiutarti a capire il valore reale dell’immobile
+                e il percorso più adatto.
+              </p>
+
+              <a
+                href="tel:035221206"
+                className="theme-button-primary liquid-button mt-5 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition"
+              >
+                <span>Parla con l’agenzia</span>
+              </a>
+            </div>
+
             <div className="theme-panel rounded-[30px] border p-7">
               <h2 className="text-xl font-semibold text-[var(--site-text)]">
                 Un contatto diretto e professionale
