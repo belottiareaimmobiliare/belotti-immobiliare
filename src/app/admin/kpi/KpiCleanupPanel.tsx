@@ -5,9 +5,27 @@ import { FormEvent, useState } from 'react'
 type Props = {
   adminName: string
   adminEmail: string
+  lastResetAt: string | null
 }
 
-export default function KpiCleanupPanel({ adminName, adminEmail }: Props) {
+function formatDate(value: string | null) {
+  if (!value) return 'Mai eseguito'
+
+  try {
+    return new Intl.DateTimeFormat('it-IT', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(new Date(value))
+  } catch {
+    return value
+  }
+}
+
+export default function KpiCleanupPanel({
+  adminName,
+  adminEmail,
+  lastResetAt,
+}: Props) {
   const [step, setStep] = useState<'idle' | 'verify' | 'done'>('idle')
   const [verificationId, setVerificationId] = useState('')
   const [code, setCode] = useState('')
@@ -17,7 +35,7 @@ export default function KpiCleanupPanel({ adminName, adminEmail }: Props) {
 
   async function requestCode() {
     const confirmed = window.confirm(
-      'Vuoi richiedere il codice per pulire lo storico KPI? L’operazione andrà poi confermata con codice email.'
+      'Vuoi richiedere il codice per pulire i KPI? L’operazione azzererà la vista KPI da questo momento in avanti.'
     )
 
     if (!confirmed) return
@@ -54,7 +72,7 @@ export default function KpiCleanupPanel({ adminName, adminEmail }: Props) {
     }
 
     const confirmed = window.confirm(
-      'Confermi la pulizia dello storico KPI? Dopo la conferma lo storico attività verrà azzerato.'
+      'Confermi la pulizia KPI? Classifica utenti, log recenti e immobili aggiornati ripartiranno da zero da questo momento.'
     )
 
     if (!confirmed) return
@@ -78,7 +96,13 @@ export default function KpiCleanupPanel({ adminName, adminEmail }: Props) {
     }
 
     setStep('done')
-    setMessage(`Pulizia KPI completata. Record attività rimossi: ${data.cleanedCount ?? 0}.`)
+    setMessage(
+      `Pulizia KPI completata. Log nascosti: ${data.cleanedActivityLogCount ?? 0}. Immobili aggiornati nascosti dalla vista KPI: ${data.cleanedUpdatedPropertiesCount ?? 0}.`
+    )
+
+    window.setTimeout(() => {
+      window.location.reload()
+    }, 1400)
   }
 
   return (
@@ -94,13 +118,18 @@ export default function KpiCleanupPanel({ adminName, adminEmail }: Props) {
           </h2>
 
           <p className="mt-3 max-w-3xl text-sm leading-7 text-red-950/75">
-            Questa azione pulisce lo storico attività usato nei KPI. Non elimina immobili,
-            utenti, lead o ricerche salvate. Per confermare serve un codice a 4 cifre
-            inviato via email all’amministratore che sta eseguendo l’operazione.
+            Questa azione azzera la vista operativa dei KPI: classifica utenti,
+            immobili aggiornati e log recenti ripartono da zero. Non elimina immobili,
+            utenti, lead o ricerche salvate.
           </p>
 
           <p className="mt-3 text-xs text-red-950/65">
-            Utente: <strong>{adminName}</strong> · Email conferma: <strong>{adminEmail || '-'}</strong>
+            Ultima pulizia KPI: <strong>{formatDate(lastResetAt)}</strong>
+          </p>
+
+          <p className="mt-1 text-xs text-red-950/65">
+            Utente: <strong>{adminName}</strong> · Email conferma:{' '}
+            <strong>{adminEmail || '-'}</strong>
           </p>
         </div>
 

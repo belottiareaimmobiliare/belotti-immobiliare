@@ -43,6 +43,11 @@ type LogRow = {
   summary: string | null
 }
 
+type KpiResetState = {
+  reset_at: string
+  reset_by_email: string | null
+}
+
 function formatDate(value: string | null) {
   if (!value) return '-'
 
@@ -52,37 +57,69 @@ function formatDate(value: string | null) {
   }).format(new Date(value))
 }
 
+function isAfterReset(value: string | null, resetAt: string | null) {
+  if (!resetAt) return true
+  if (!value) return false
+
+  return new Date(value).getTime() >= new Date(resetAt).getTime()
+}
+
+function propertyTouchedAfterReset(property: Property, resetAt: string | null) {
+  return (
+    isAfterReset(property.created_at, resetAt) ||
+    isAfterReset(property.updated_at, resetAt) ||
+    isAfterReset(property.published_at, resetAt)
+  )
+}
+
 export default async function AdminKpiPage() {
   const currentProfile = await requirePermission('can_view_kpis')
 
   const service = createServiceClient()
 
-  const [{ data: profilesData }, { data: propertiesData }, { data: logsData }] =
-    await Promise.all([
-      service
-        .from('profiles')
-        .select('id, full_name, username, role, is_active')
-        .order('full_name', { ascending: true }),
+  const [
+    { data: profilesData },
+    { data: propertiesData },
+    { data: logsData },
+    { data: resetData },
+  ] = await Promise.all([
+    service
+      .from('profiles')
+      .select('id, full_name, username, role, is_active')
+      .order('full_name', { ascending: true }),
 
-      service
-        .from('properties')
-        .select(
-          'id, title, status, created_by, updated_by, assigned_agent_id, published_by, published_at, created_at, updated_at'
-        )
-        .order('updated_at', { ascending: false }),
+    service
+      .from('properties')
+      .select(
+        'id, title, status, created_by, updated_by, assigned_agent_id, published_by, published_at, created_at, updated_at'
+      )
+      .order('updated_at', { ascending: false }),
 
-      service
-        .from('activity_log')
-        .select(
-          'id, created_at, actor_user_id, actor_full_name, actor_username, entity_type, action, summary'
-        )
-        .order('created_at', { ascending: false })
-        .limit(100),
-    ])
+    service
+      .from('activity_log')
+      .select(
+        'id, created_at, actor_user_id, actor_full_name, actor_username, entity_type, action, summary'
+      )
+      .order('created_at', { ascending: false })
+      .limit(500),
+
+    service
+      .from('kpi_reset_state')
+      .select('reset_at, reset_by_email')
+      .eq('id', 'global')
+      .maybeSingle(),
+  ])
 
   const profiles = (profilesData ?? []) as Profile[]
   const properties = (propertiesData ?? []) as Property[]
-  const logs = (logsData ?? []) as LogRow[]
+  const allLogs = (logsData ?? []) as LogRow[]
+  const resetState = resetData as KpiResetState | null
+  const kpiResetAt = resetState?.reset_at ?? null
+
+  const logs = allLogs.filter((log) => isAfterReset(log.created_at, kpiResetAt))
+  const kpiUpdatedProperties = properties.filter((property) =>
+    propertyTouchedAfterReset(property, kpiResetAt)
+  )
 
   const activeUsers = profiles.filter((p) => p.is_active)
   const agents = activeUsers.filter((p) => p.role === 'agent')
@@ -94,10 +131,22 @@ export default async function AdminKpiPage() {
 
   const rows = activeUsers
     .map((user) => {
-      const created = properties.filter((p) => p.created_by === user.id)
-      const assigned = properties.filter((p) => p.assigned_agent_id === user.id)
-      const updated = properties.filter((p) => p.updated_by === user.id)
-      const publishedByUser = properties.filter((p) => p.published_by === user.id)
+      const created = properties.filter(
+        (p) => p.created_by === user.id && isAfterReset(p.created_at, kpiResetAt)
+      )
+      const assigned = properties.filter(
+        (p) =>
+          p.assigned_agent_id === user.id &&
+          propertyTouchedAfterReset(p, kpiResetAt)
+      )
+      const updated = properties.filter(
+        (p) => p.updated_by === user.id && isAfterReset(p.updated_at, kpiResetAt)
+      )
+      const publishedByUser = properties.filter(
+        (p) =>
+          p.published_by === user.id &&
+          isAfterReset(p.published_at, kpiResetAt)
+      )
       const userLogs = logs.filter((l) => l.actor_user_id === user.id)
 
       return {
@@ -142,7 +191,11 @@ export default async function AdminKpiPage() {
       {currentProfile.role === 'owner' ? (
         <KpiCleanupPanel
           adminName={currentProfile.full_name}
-          adminEmail={currentProfile.authorized_google_email || currentProfile.login_email}
+          adminEmail={
+            currentProfile.authorized_google_email ||
+            currentProfile.login_email
+          }
+          lastResetAt={kpiResetAt}
         />
       ) : null}
 
@@ -160,6 +213,13 @@ export default async function AdminKpiPage() {
           pubblicazioni e ultime attività registrate.
         </p>
 
+        {kpiResetAt ? (
+          <div className="mt-5 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm text-amber-950">
+            KPI puliti il <strong>{formatDate(kpiResetAt)}</strong>. Le statistiche operative
+            mostrano solo attività successive a questa data.
+          </div>
+        ) : null}
+
         <div className="mt-6 grid gap-4 md:grid-cols-4">
           <KpiCard title="Immobili totali" value={properties.length} />
           <KpiCard title="Pubblicati" value={published.length} />
@@ -167,10 +227,11 @@ export default async function AdminKpiPage() {
           <KpiCard title="Agenti attivi" value={agents.length} />
         </div>
 
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
+        <div className="mt-4 grid gap-4 md:grid-cols-4">
           <KpiCard title="Owner attivi" value={`${owners.length} / 3`} />
           <KpiCard title="Editor attivi" value={editors.length} />
-          <KpiCard title="Log recenti" value={logs.length} />
+          <KpiCard title="Log recenti KPI" value={logs.length} />
+          <KpiCard title="Immobili aggiornati KPI" value={kpiUpdatedProperties.length} />
         </div>
       </section>
 
@@ -180,7 +241,7 @@ export default async function AdminKpiPage() {
         </h2>
 
         <p className="mt-2 text-sm text-[var(--site-text-muted)]">
-          Dati basati sui collegamenti reali tra utenti e immobili.
+          Dati basati sulle attività successive all’ultima pulizia KPI.
         </p>
 
         <div className="mt-6 overflow-hidden rounded-2xl border border-[var(--site-border)]">
@@ -227,8 +288,8 @@ export default async function AdminKpiPage() {
 
       <section className="grid gap-6 xl:grid-cols-2">
         <PropertyList
-          title="Ultimi immobili aggiornati"
-          properties={properties.slice(0, 10)}
+          title="Ultimi immobili aggiornati KPI"
+          properties={kpiUpdatedProperties.slice(0, 10)}
         />
 
         <LogList logs={logs.slice(0, 10)} />
@@ -279,7 +340,7 @@ function PropertyList({
 
         {properties.length === 0 ? (
           <p className="text-sm text-[var(--site-text-muted)]">
-            Nessun immobile trovato.
+            Nessun immobile aggiornato dopo l’ultima pulizia KPI.
           </p>
         ) : null}
       </div>
@@ -291,7 +352,7 @@ function LogList({ logs }: { logs: LogRow[] }) {
   return (
     <div className="theme-panel rounded-[30px] border p-6">
       <h2 className="text-2xl font-semibold text-[var(--site-text)]">
-        Ultime attività
+        Ultime attività KPI
       </h2>
 
       <div className="mt-6 space-y-3">
@@ -312,7 +373,7 @@ function LogList({ logs }: { logs: LogRow[] }) {
 
         {logs.length === 0 ? (
           <p className="text-sm text-[var(--site-text-muted)]">
-            Nessuna attività registrata.
+            Nessuna attività registrata dopo l’ultima pulizia KPI.
           </p>
         ) : null}
       </div>

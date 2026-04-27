@@ -66,41 +66,43 @@ export async function POST(request: Request) {
       )
     }
 
-    const { count } = await supabase
-      .from('activity_log')
-      .select('id', { count: 'exact', head: true })
+    const resetAt = new Date().toISOString()
 
-    const cleanedCount = count ?? 0
+    const [{ count: activityLogCount }, { count: updatedPropertiesCount }] =
+      await Promise.all([
+        supabase.from('activity_log').select('id', { count: 'exact', head: true }),
+        supabase.from('properties').select('id', { count: 'exact', head: true }),
+      ])
 
-    const { error: deleteError } = await supabase
-      .from('activity_log')
-      .delete()
-      .neq('id', -1)
-
-    if (deleteError) {
-      console.error(deleteError)
-      return NextResponse.json(
-        { error: 'Errore durante la pulizia KPI.' },
-        { status: 500 }
-      )
-    }
+    await supabase.from('kpi_reset_state').upsert({
+      id: 'global',
+      reset_at: resetAt,
+      reset_by_profile_id: profile.id,
+      reset_by_email: verification.admin_email,
+      updated_at: resetAt,
+    })
 
     await supabase.from('kpi_cleanup_audit').insert({
       admin_profile_id: profile.id,
       admin_email: verification.admin_email,
-      cleaned_activity_log_count: cleanedCount,
+      cleaned_activity_log_count: activityLogCount ?? 0,
+      cleaned_updated_properties_count: updatedPropertiesCount ?? 0,
+      reset_at: resetAt,
     })
 
     await supabase
       .from('kpi_cleanup_email_verifications')
-      .update({ verified_at: new Date().toISOString() })
+      .update({ verified_at: resetAt })
       .eq('id', verification.id)
 
     revalidatePath('/admin/kpi')
+    revalidatePath('/admin')
 
     return NextResponse.json({
       ok: true,
-      cleanedCount,
+      cleanedActivityLogCount: activityLogCount ?? 0,
+      cleanedUpdatedPropertiesCount: updatedPropertiesCount ?? 0,
+      resetAt,
     })
   } catch (error) {
     console.error(error)
