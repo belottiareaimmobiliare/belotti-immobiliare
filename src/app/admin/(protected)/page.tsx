@@ -40,7 +40,7 @@ const leadStatusStyle: Record<LeadStatus, string> = {
   new: 'border-amber-400/30 bg-amber-500/10 text-[var(--site-text)]',
   contacted: 'border-sky-400/30 bg-sky-500/10 text-[var(--site-text)]',
   closed: 'border-emerald-400/30 bg-emerald-500/10 text-[var(--site-text)]',
-  archived: 'border-white/10 bg-white/[0.04] text-white/55',
+  archived: 'border-[var(--site-border)] bg-[var(--site-surface-2)] text-[var(--site-text-muted)]',
 }
 
 function daysOnline(dateString: string | null) {
@@ -80,7 +80,7 @@ function getAlertLevel(days: number | null) {
   if (days === null) {
     return {
       label: 'Nessun dato',
-      className: 'border-white/10 bg-white/[0.04] text-[var(--site-text-muted)]',
+      className: 'border-white/10 bg-[var(--site-surface-2)] text-[var(--site-text-muted)]',
       order: 0,
     }
   }

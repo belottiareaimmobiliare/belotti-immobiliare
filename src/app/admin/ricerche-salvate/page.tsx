@@ -64,7 +64,7 @@ const statusStyle: Record<SavedSearchStatus, string> = {
   new: 'border-amber-400/40 bg-amber-400/10 text-[var(--site-text)]',
   contacted: 'border-sky-400/40 bg-sky-400/10 text-[var(--site-text)]',
   closed: 'border-emerald-400/40 bg-emerald-400/10 text-[var(--site-text)]',
-  archived: 'border-[var(--site-border)] bg-[var(--site-surface)] text-[var(--site-text-muted)]',
+  archived: 'border-[var(--site-border)] bg-[var(--site-surface-2)] text-[var(--site-text)]',
 }
 
 const macroCategoryLabel: Record<string, string> = {
@@ -621,7 +621,7 @@ export default async function AdminSavedSearchesPage() {
                                   className={`w-full rounded-full border px-3 py-2 text-xs font-semibold transition ${
                                     savedSearch.status === option.value
                                       ? 'border-[var(--site-border-strong)] bg-[var(--site-surface-2)] text-[var(--site-text)]'
-                                      : 'border-[var(--site-border)] bg-[var(--site-surface)] text-[var(--site-text-muted)] hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]'
+                                      : 'border-[var(--site-border)] bg-[var(--site-surface-2)] text-[var(--site-text)] hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]'
                                   }`}
                                 >
                                   {option.label}
