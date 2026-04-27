@@ -225,22 +225,22 @@ export default function ContattiPage() {
               </a>
             </div>
 
-            <div className="theme-panel rounded-[30px] border p-7">
-              <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
+            <div className="rounded-[30px] border border-[#c8a24a] bg-[#dff3ff] p-7 text-black shadow-[0_18px_50px_rgba(15,59,102,0.10)]">
+              <p className="text-xs uppercase tracking-[0.24em] text-black/55">
                 {content.ownerCtaOverline}
               </p>
 
-              <h2 className="mt-3 text-xl font-semibold text-[var(--site-text)]">
+              <h2 className="mt-3 text-xl font-semibold text-black">
                 {content.ownerCtaTitle}
               </h2>
 
-              <p className="mt-4 text-sm leading-7 text-[var(--site-text-muted)]">
+              <p className="mt-4 text-sm leading-7 text-black/70">
                 {content.ownerCtaText}
               </p>
 
               <a
                 href={`tel:${content.phoneHref}`}
-                className="theme-button-primary liquid-button mt-5 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition"
+                className="mt-5 inline-flex w-full items-center justify-center rounded-2xl border border-[#c8a24a] bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#1f2937]"
               >
                 <span>{content.ownerCtaButtonLabel}</span>
               </a>
@@ -256,7 +256,7 @@ export default function ContattiPage() {
             </div>
           </aside>
 
-          <section className="theme-panel rounded-[30px] border p-4 md:p-5">
+          <section className="theme-panel self-start rounded-[30px] border p-4 md:p-5">
             <div className="overflow-hidden rounded-[24px] border border-[var(--site-border)]">
               {canLoadExternalMap ? (
                 <iframe
