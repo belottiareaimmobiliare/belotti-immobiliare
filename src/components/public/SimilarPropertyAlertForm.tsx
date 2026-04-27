@@ -22,14 +22,20 @@ type Props = {
 
 export default function SimilarPropertyAlertForm(props: Props) {
   const [open, setOpen] = useState(false)
+  const [step, setStep] = useState<'form' | 'verify' | 'done'>('form')
+
+  const [verificationId, setVerificationId] = useState('')
+  const [verificationCode, setVerificationCode] = useState('')
+
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+
   const [loading, setLoading] = useState(false)
-  const [done, setDone] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
 
-  async function handleSubmit(event: FormEvent) {
+  async function handleRequestCode(event: FormEvent) {
     event.preventDefault()
 
     const cleanedName = fullName.trim()
@@ -43,8 +49,9 @@ export default function SimilarPropertyAlertForm(props: Props) {
 
     setLoading(true)
     setErrorMessage('')
+    setSuccessMessage('')
 
-    const response = await fetch('/api/saved-searches', {
+    const response = await fetch('/api/saved-searches/request-verification', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -59,22 +66,59 @@ export default function SimilarPropertyAlertForm(props: Props) {
     setLoading(false)
 
     if (!response.ok) {
-      setErrorMessage(data.error || 'Salvataggio non riuscito.')
+      setErrorMessage(data.error || 'Invio codice non riuscito.')
       return
     }
 
-    setDone(true)
+    setVerificationId(data.verificationId || '')
+    setStep('verify')
+    setSuccessMessage('Ti abbiamo inviato un codice di verifica via mail.')
   }
 
-  if (done) {
+  async function handleVerifyCode(event: FormEvent) {
+    event.preventDefault()
+
+    const cleanCode = verificationCode.replace(/\D/g, '').slice(0, 4)
+
+    if (cleanCode.length !== 4) {
+      setErrorMessage('Inserisci il codice completo a 4 cifre.')
+      return
+    }
+
+    setLoading(true)
+    setErrorMessage('')
+    setSuccessMessage('')
+
+    const response = await fetch('/api/saved-searches/verify-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        verificationId,
+        email,
+        code: cleanCode,
+      }),
+    })
+
+    const data = await response.json()
+    setLoading(false)
+
+    if (!response.ok) {
+      setErrorMessage(data.error || 'Verifica non riuscita.')
+      return
+    }
+
+    setStep('done')
+    setSuccessMessage('Ricerca verificata e salvata correttamente.')
+  }
+
+  if (step === 'done') {
     return (
       <div className="rounded-[24px] border border-[#c8a24a] bg-[#dff3ff] p-5 text-black shadow-[0_18px_50px_rgba(15,59,102,0.12)]">
         <p className="text-sm font-semibold text-black">
           Ricerca salvata
         </p>
         <p className="mt-2 text-sm leading-7 text-black/70">
-          Grazie, ti ricontatteremo se saranno disponibili immobili simili per zona,
-          fascia di prezzo e caratteristiche principali.
+          {successMessage || 'Grazie, la tua ricerca è stata attivata correttamente.'}
         </p>
       </div>
     )
@@ -102,8 +146,8 @@ export default function SimilarPropertyAlertForm(props: Props) {
         </button>
       </div>
 
-      {open ? (
-        <form onSubmit={handleSubmit} className="mt-5 grid gap-3 md:grid-cols-3">
+      {open && step === 'form' ? (
+        <form onSubmit={handleRequestCode} className="mt-5 grid gap-3 md:grid-cols-3">
           <input
             value={fullName}
             onChange={(event) => setFullName(event.target.value)}
@@ -129,7 +173,7 @@ export default function SimilarPropertyAlertForm(props: Props) {
           />
 
           {errorMessage ? (
-            <div className="rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-700 md:col-span-3 dark:text-red-100">
+            <div className="rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-700 md:col-span-3">
               {errorMessage}
             </div>
           ) : null}
@@ -139,7 +183,61 @@ export default function SimilarPropertyAlertForm(props: Props) {
             disabled={loading}
             className="rounded-2xl border border-[#c8a24a] bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60 md:col-span-3"
           >
-            <span>{loading ? 'Salvataggio...' : 'Salva ricerca'}</span>
+            <span>{loading ? 'Invio codice...' : 'Ricevi codice di verifica'}</span>
+          </button>
+        </form>
+      ) : null}
+
+      {open && step === 'verify' ? (
+        <form onSubmit={handleVerifyCode} className="mt-5 space-y-4">
+          <div className="rounded-2xl border border-[#c8a24a]/55 bg-white/70 px-4 py-4 text-sm text-black/70">
+            Inserisci il codice di verifica che ti abbiamo inviato via mail.
+          </div>
+
+          <input
+            value={verificationCode}
+            onChange={(event) =>
+              setVerificationCode(event.target.value.replace(/\D/g, '').slice(0, 4))
+            }
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            maxLength={4}
+            placeholder="0000"
+            required
+            className="w-full rounded-2xl border border-[#c8a24a]/55 bg-white/80 px-4 py-4 text-center text-3xl tracking-[0.5em] text-black outline-none placeholder:text-black/35 focus:border-[#c8a24a]"
+          />
+
+          {successMessage ? (
+            <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-900">
+              {successMessage}
+            </div>
+          ) : null}
+
+          {errorMessage ? (
+            <div className="rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-700">
+              {errorMessage}
+            </div>
+          ) : null}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-2xl border border-[#c8a24a] bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <span>{loading ? 'Verifica in corso...' : 'Conferma codice e salva ricerca'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setStep('form')
+              setVerificationCode('')
+              setErrorMessage('')
+              setSuccessMessage('')
+            }}
+            className="w-full rounded-2xl border border-[#c8a24a]/55 bg-white/70 px-5 py-3 text-sm font-semibold text-black transition hover:bg-white"
+          >
+            Torna al form
           </button>
         </form>
       ) : null}

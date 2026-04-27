@@ -288,3 +288,169 @@ export async function sendCustomerLeadConfirmation({
     `,
   })
 }
+export async function sendSavedSearchVerificationEmail({
+  to,
+  code,
+  propertyTitle,
+}: {
+  to: string
+  code: string
+  propertyTitle: string
+}) {
+  const transporter = createTransporter()
+  const user = process.env.SMTP_USER as string
+
+  await transporter.sendMail({
+    from: `"Belotti Area Immobiliare" <${user}>`,
+    to,
+    subject: 'Codice verifica ricerca immobili simili',
+    html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.5;color:#111;">
+        <h2 style="margin-bottom:8px;">Verifica la tua ricerca</h2>
+        <p>Hai richiesto di essere avvisato per immobili simili a:</p>
+        <p><strong>${escapeHtml(propertyTitle)}</strong></p>
+        <p>Inserisci questo codice di verifica:</p>
+        <div style="font-size:32px;font-weight:700;letter-spacing:10px;margin:20px 0;">
+          ${escapeHtml(code)}
+        </div>
+        <p>Il codice scade tra 10 minuti.</p>
+      </div>
+    `,
+  })
+}
+
+export async function sendAgencySavedSearchNotification({
+  fullName,
+  email,
+  phone,
+  sourcePropertyTitle,
+  propertyUrl,
+  contractType,
+  macroCategory,
+  location,
+  priceRange,
+  surfaceRange,
+  roomsRange,
+}: {
+  fullName: string
+  email: string
+  phone: string | null
+  sourcePropertyTitle: string
+  propertyUrl: string | null
+  contractType: string
+  macroCategory: string
+  location: string
+  priceRange: string
+  surfaceRange: string
+  roomsRange: string
+}) {
+  const transporter = createTransporter()
+  const user = process.env.SMTP_USER as string
+
+  const safeName = escapeHtml(fullName)
+  const safeEmail = escapeHtml(email)
+  const safePhone = escapeHtml(phone || '-')
+  const safeTitle = escapeHtml(sourcePropertyTitle)
+  const safeUrl = propertyUrl ? escapeHtml(propertyUrl) : ''
+
+  await transporter.sendMail({
+    from: `"Belotti Area Immobiliare" <${user}>`,
+    to: user,
+    subject: `Nuova ricerca salvata: ${safeName}`,
+    html: `
+      <div style="margin:0;padding:24px;background:#f4f6fb;font-family:Arial,sans-serif;color:#111827;">
+        <div style="max-width:760px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:20px;overflow:hidden;">
+          <div style="background:#0a0f1a;padding:24px 28px;">
+            <div style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:0.08em;">BELOTTI</div>
+            <div style="margin-top:6px;font-size:13px;color:#9ca3af;">Area Immobiliare</div>
+          </div>
+
+          <div style="padding:28px;">
+            <h1 style="margin:0 0 10px;font-size:28px;line-height:1.2;color:#111827;">
+              Nuova ricerca salvata
+            </h1>
+
+            <p style="margin:0 0 24px;font-size:15px;color:#4b5563;">
+              Un utente vuole essere avvisato quando saranno disponibili immobili simili.
+            </p>
+
+            <div style="padding:20px;border:1px solid #e5e7eb;border-radius:16px;background:#fafafa;margin-bottom:20px;">
+              <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#6b7280;margin-bottom:8px;">Cliente</div>
+              <p style="margin:0 0 8px;font-size:15px;color:#111827;"><strong>${safeName}</strong></p>
+              <p style="margin:0 0 8px;font-size:15px;color:#111827;">Email: ${safeEmail}</p>
+              <p style="margin:0;font-size:15px;color:#111827;">Telefono: ${safePhone}</p>
+            </div>
+
+            <div style="padding:20px;border:1px solid #e5e7eb;border-radius:16px;background:#fafafa;margin-bottom:20px;">
+              <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#6b7280;margin-bottom:8px;">Immobile di partenza</div>
+              <p style="margin:0 0 12px;font-size:18px;color:#111827;"><strong>${safeTitle}</strong></p>
+              ${propertyUrl ? buildButton('Apri scheda immobile', safeUrl) : ''}
+            </div>
+
+            <div style="padding:20px;border:1px solid #e5e7eb;border-radius:16px;background:#fafafa;">
+              <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#6b7280;margin-bottom:12px;">Criteri indicativi</div>
+              <p style="margin:0 0 8px;font-size:15px;color:#111827;">Contratto: ${escapeHtml(contractType)}</p>
+              <p style="margin:0 0 8px;font-size:15px;color:#111827;">Categoria: ${escapeHtml(macroCategory)}</p>
+              <p style="margin:0 0 8px;font-size:15px;color:#111827;">Zona: ${escapeHtml(location)}</p>
+              <p style="margin:0 0 8px;font-size:15px;color:#111827;">Prezzo: ${escapeHtml(priceRange)}</p>
+              <p style="margin:0 0 8px;font-size:15px;color:#111827;">Superficie: ${escapeHtml(surfaceRange)}</p>
+              <p style="margin:0;font-size:15px;color:#111827;">Locali: ${escapeHtml(roomsRange)}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+  })
+}
+
+export async function sendCustomerSavedSearchConfirmation({
+  to,
+  fullName,
+  sourcePropertyTitle,
+}: {
+  to: string
+  fullName: string
+  sourcePropertyTitle: string
+}) {
+  const transporter = createTransporter()
+  const user = process.env.SMTP_USER as string
+
+  await transporter.sendMail({
+    from: `"Belotti Area Immobiliare" <${user}>`,
+    to,
+    subject: 'Ricerca immobili simili attivata',
+    html: `
+      <div style="margin:0;padding:24px;background:#f4f6fb;font-family:Arial,sans-serif;color:#111827;">
+        <div style="max-width:720px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:20px;overflow:hidden;">
+          <div style="background:#0a0f1a;padding:24px 28px;">
+            <div style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:0.08em;">BELOTTI</div>
+            <div style="margin-top:6px;font-size:13px;color:#9ca3af;">Area Immobiliare</div>
+          </div>
+
+          <div style="padding:28px;">
+            <h1 style="margin:0 0 14px;font-size:28px;line-height:1.2;color:#111827;">
+              Buongiorno ${escapeHtml(fullName)},
+            </h1>
+
+            <p style="margin:0 0 14px;font-size:15px;line-height:1.8;color:#4b5563;">
+              la sua ricerca per immobili simili a
+              <strong style="color:#111827;"> ${escapeHtml(sourcePropertyTitle)}</strong>
+              è stata attivata correttamente.
+            </p>
+
+            <p style="margin:0 0 14px;font-size:15px;line-height:1.8;color:#4b5563;">
+              Quando saranno disponibili immobili coerenti per zona, fascia di prezzo e caratteristiche principali, potrà essere ricontattato dall’agenzia.
+            </p>
+
+            <div style="margin-top:28px;padding-top:20px;border-top:1px solid #e5e7eb;">
+              <p style="margin:0;font-size:13px;line-height:1.7;color:#6b7280;">
+                Belotti Area Immobiliare<br />
+                Questa è una comunicazione automatica di conferma.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+  })
+}
