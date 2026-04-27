@@ -148,7 +148,7 @@ export default function SimilarPropertyAlertForm(props: Props) {
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}
-          className="inline-flex shrink-0 items-center justify-center rounded-full border border-[#c8a24a] bg-black px-4 py-2 text-xs font-semibold text-black transition hover:bg-black/85"
+          className="inline-flex shrink-0 items-center justify-center rounded-full border border-[#c8a24a] bg-black px-4 py-2 text-xs font-semibold text-white transition hover:bg-black/85"
         >
           <span>{open ? 'Chiudi' : 'Avvisami'}</span>
         </button>
@@ -205,7 +205,7 @@ export default function SimilarPropertyAlertForm(props: Props) {
           <button
             type="submit"
             disabled={loading}
-            className="rounded-2xl border border-[#c8a24a] bg-black px-5 py-3 text-sm font-semibold text-black transition hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60 md:col-span-3"
+            className="rounded-2xl border border-[#c8a24a] bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60 md:col-span-3"
           >
             <span>{loading ? 'Invio codice...' : 'Ricevi codice di verifica'}</span>
           </button>
@@ -246,7 +246,7 @@ export default function SimilarPropertyAlertForm(props: Props) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-2xl border border-[#c8a24a] bg-black px-5 py-3 text-sm font-semibold text-black transition hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-2xl border border-[#c8a24a] bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span>{loading ? 'Verifica in corso...' : 'Conferma codice e salva ricerca'}</span>
           </button>

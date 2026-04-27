@@ -35,7 +35,7 @@ export default function DeleteLeadButton({
 
       <button
         type="submit"
-        className="mt-3 w-full rounded-full border border-red-300/30 bg-red-500/20 px-4 py-2.5 text-sm font-semibold text-red-900 transition hover:bg-red-500/30"
+        className="mt-3 w-full rounded-full border border-red-300/30 bg-red-500/20 px-4 py-2.5 text-sm font-semibold text-red-950 transition hover:bg-red-500/30"
       >
         Elimina lead
       </button>
