@@ -656,3 +656,55 @@ function buildUnsubscribeBlock(unsubscribeUrl: string | null) {
     </div>
   `
 }
+
+export async function sendKpiCleanupVerificationEmail({
+  to,
+  code,
+  adminName,
+}: {
+  to: string
+  code: string
+  adminName: string
+}) {
+  const transporter = createTransporter()
+  const user = process.env.SMTP_USER as string
+
+  await transporter.sendMail({
+    from: `"Belotti Area Immobiliare" <${user}>`,
+    to,
+    subject: 'Codice conferma pulizia KPI',
+    html: `
+      <div style="margin:0;padding:24px;background:#f4f6fb;font-family:Arial,sans-serif;color:#111827;">
+        <div style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:20px;overflow:hidden;">
+          <div style="background:#0a0f1a;padding:24px 28px;">
+            <div style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:0.08em;">BELOTTI</div>
+            <div style="margin-top:6px;font-size:13px;color:#9ca3af;">Area Immobiliare</div>
+          </div>
+
+          <div style="padding:28px;">
+            <h1 style="margin:0 0 14px;font-size:28px;line-height:1.2;color:#111827;">
+              Conferma pulizia KPI
+            </h1>
+
+            <p style="margin:0 0 14px;font-size:15px;line-height:1.8;color:#4b5563;">
+              È stata richiesta una pulizia dello storico KPI dall’utente amministratore:
+              <strong style="color:#111827;"> ${escapeHtml(adminName)}</strong>.
+            </p>
+
+            <p style="margin:0 0 14px;font-size:15px;line-height:1.8;color:#4b5563;">
+              Per confermare l’operazione, inserisci questo codice nel pannello admin:
+            </p>
+
+            <div style="font-size:34px;font-weight:800;letter-spacing:10px;margin:22px 0;color:#111827;">
+              ${escapeHtml(code)}
+            </div>
+
+            <p style="margin:0;font-size:14px;line-height:1.7;color:#6b7280;">
+              Il codice scade tra 10 minuti. Se non hai richiesto tu questa operazione, ignora questa email.
+            </p>
+          </div>
+        </div>
+      </div>
+    `,
+  })
+}

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { JetBrains_Mono } from 'next/font/google'
 import { requirePermission } from '@/lib/admin-auth'
 import { createServiceClient } from '@/lib/supabase/service'
+import KpiCleanupPanel from './KpiCleanupPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,7 +53,7 @@ function formatDate(value: string | null) {
 }
 
 export default async function AdminKpiPage() {
-  await requirePermission('can_view_kpis')
+  const currentProfile = await requirePermission('can_view_kpis')
 
   const service = createServiceClient()
 
@@ -137,6 +138,13 @@ export default async function AdminKpiPage() {
           </div>
         </div>
       </section>
+
+      {currentProfile.role === 'owner' ? (
+        <KpiCleanupPanel
+          adminName={currentProfile.full_name}
+          adminEmail={currentProfile.authorized_google_email || currentProfile.login_email}
+        />
+      ) : null}
 
       <section className="theme-panel rounded-[34px] border p-6 md:p-8">
         <p className="text-sm uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
