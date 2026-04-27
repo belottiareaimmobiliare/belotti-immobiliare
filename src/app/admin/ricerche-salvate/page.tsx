@@ -15,6 +15,9 @@ type SavedSearch = {
   source_property_id: string | null
   source_property_slug: string | null
   source_property_title: string | null
+  source_latitude: number | null
+  source_longitude: number | null
+  radius_km: number | null
 
   contract_type: string | null
   source_property_type: string | null
@@ -221,6 +224,9 @@ export default async function AdminSavedSearchesPage() {
       source_property_id,
       source_property_slug,
       source_property_title,
+      source_latitude,
+      source_longitude,
+      radius_km,
       contract_type,
       source_property_type,
       search_macro_category,
@@ -496,6 +502,15 @@ export default async function AdminSavedSearchesPage() {
                               <p className="text-xs text-[var(--site-text-faint)]">Zona</p>
                               <p className="mt-1 text-sm text-[var(--site-text)]">
                                 {savedSearch.comune || '-'} {savedSearch.province ? `(${savedSearch.province})` : ''}
+                              </p>
+                            </div>
+
+                            <div>
+                              <p className="text-xs text-[var(--site-text-faint)]">Raggio zona</p>
+                              <p className="mt-1 text-sm text-[var(--site-text)]">
+                                {savedSearch.source_latitude && savedSearch.source_longitude
+                                  ? `${savedSearch.radius_km || 10} km dal punto dell’immobile`
+                                  : 'Comune / provincia'}
                               </p>
                             </div>
 
