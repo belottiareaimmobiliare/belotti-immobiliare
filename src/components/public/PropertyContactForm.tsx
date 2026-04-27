@@ -214,12 +214,6 @@ export default function PropertyContactForm({
           </p>
         </div>
 
-        {successMessage ? (
-          <div className="rounded-2xl border border-emerald-500/45 bg-emerald-950/55 px-4 py-4 text-sm leading-7 text-emerald-50">
-            {successMessage}
-          </div>
-        ) : null}
-
         {errorMessage ? (
           <div className="rounded-2xl border border-red-500/45 bg-red-950/55 px-4 py-4 text-sm leading-7 text-red-50">
             {errorMessage}
