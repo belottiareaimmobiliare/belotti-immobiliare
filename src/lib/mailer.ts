@@ -454,3 +454,177 @@ export async function sendCustomerSavedSearchConfirmation({
     `,
   })
 }
+
+export async function sendSavedSearchDigestEmail({
+  to,
+  fullName,
+  sourcePropertyTitle,
+  matches,
+}: {
+  to: string
+  fullName: string
+  sourcePropertyTitle: string
+  matches: Array<{
+    title: string
+    url: string
+    price: number | null
+    comune: string | null
+    province: string | null
+    surface: number | null
+    rooms: number | null
+    coverUrl: string | null
+  }>
+}) {
+  const transporter = createTransporter()
+  const user = process.env.SMTP_USER as string
+
+  const safeName = escapeHtml(fullName)
+  const safeSourceTitle = escapeHtml(sourcePropertyTitle)
+
+  const cards = matches
+    .map((item) => {
+      const safeTitle = escapeHtml(item.title)
+      const safeUrl = escapeHtml(item.url)
+      const safeComune = escapeHtml(item.comune || '-')
+      const safeProvince = escapeHtml(item.province || '-')
+      const price = formatPrice(item.price)
+      const details = [
+        item.surface ? `${item.surface} mq` : null,
+        item.rooms ? `${item.rooms} locali` : null,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+
+      return `
+        <div style="border:1px solid #e5e7eb;border-radius:18px;overflow:hidden;margin-bottom:18px;background:#ffffff;">
+          ${
+            item.coverUrl
+              ? `<img src="${escapeHtml(item.coverUrl)}" alt="${safeTitle}" style="display:block;width:100%;max-height:260px;object-fit:cover;background:#e5e7eb;" />`
+              : ''
+          }
+
+          <div style="padding:20px;">
+            <h2 style="margin:0 0 8px;font-size:22px;line-height:1.25;color:#111827;">
+              ${safeTitle}
+            </h2>
+
+            <p style="margin:0 0 8px;font-size:14px;color:#6b7280;">
+              ${safeComune} (${safeProvince})
+            </p>
+
+            <p style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">
+              ${escapeHtml(price)}
+            </p>
+
+            ${
+              details
+                ? `<p style="margin:0 0 16px;font-size:14px;color:#4b5563;">${escapeHtml(details)}</p>`
+                : ''
+            }
+
+            ${buildButton('Apri immobile', safeUrl)}
+          </div>
+        </div>
+      `
+    })
+    .join('')
+
+  await transporter.sendMail({
+    from: `"Belotti Area Immobiliare" <${user}>`,
+    to,
+    subject: 'Nuovi immobili simili alla tua ricerca',
+    html: `
+      <div style="margin:0;padding:24px;background:#f4f6fb;font-family:Arial,sans-serif;color:#111827;">
+        <div style="max-width:760px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:20px;overflow:hidden;">
+          <div style="background:#0a0f1a;padding:24px 28px;">
+            <div style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:0.08em;">BELOTTI</div>
+            <div style="margin-top:6px;font-size:13px;color:#9ca3af;">Area Immobiliare</div>
+          </div>
+
+          <div style="padding:28px;">
+            <h1 style="margin:0 0 14px;font-size:28px;line-height:1.2;color:#111827;">
+              Buongiorno ${safeName},
+            </h1>
+
+            <p style="margin:0 0 14px;font-size:15px;line-height:1.8;color:#4b5563;">
+              abbiamo trovato nuovi immobili che potrebbero essere coerenti con la ricerca salvata a partire da:
+              <strong style="color:#111827;"> ${safeSourceTitle}</strong>.
+            </p>
+
+            <p style="margin:0 0 24px;font-size:15px;line-height:1.8;color:#4b5563;">
+              Li trova qui sotto. Può aprire ogni scheda e richiedere maggiori informazioni direttamente all’agenzia.
+            </p>
+
+            ${cards}
+
+            <div style="margin-top:28px;padding-top:20px;border-top:1px solid #e5e7eb;">
+              <p style="margin:0;font-size:13px;line-height:1.7;color:#6b7280;">
+                Belotti Area Immobiliare<br />
+                Questa comunicazione viene inviata solo quando sono presenti nuovi immobili coerenti con la ricerca salvata.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+  })
+}
+
+export async function sendSavedSearchNoResultsAdviceEmail({
+  to,
+  fullName,
+  sourcePropertyTitle,
+  contactUrl,
+}: {
+  to: string
+  fullName: string
+  sourcePropertyTitle: string
+  contactUrl: string
+}) {
+  const transporter = createTransporter()
+  const user = process.env.SMTP_USER as string
+
+  await transporter.sendMail({
+    from: `"Belotti Area Immobiliare" <${user}>`,
+    to,
+    subject: 'La tua ricerca immobiliare: possiamo aiutarti a migliorarla',
+    html: `
+      <div style="margin:0;padding:24px;background:#f4f6fb;font-family:Arial,sans-serif;color:#111827;">
+        <div style="max-width:720px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:20px;overflow:hidden;">
+          <div style="background:#0a0f1a;padding:24px 28px;">
+            <div style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:0.08em;">BELOTTI</div>
+            <div style="margin-top:6px;font-size:13px;color:#9ca3af;">Area Immobiliare</div>
+          </div>
+
+          <div style="padding:28px;">
+            <h1 style="margin:0 0 14px;font-size:28px;line-height:1.2;color:#111827;">
+              Buongiorno ${escapeHtml(fullName)},
+            </h1>
+
+            <p style="margin:0 0 14px;font-size:15px;line-height:1.8;color:#4b5563;">
+              negli ultimi giorni non sono stati pubblicati nuovi immobili sufficientemente simili alla ricerca salvata a partire da
+              <strong style="color:#111827;"> ${escapeHtml(sourcePropertyTitle)}</strong>.
+            </p>
+
+            <p style="margin:0 0 14px;font-size:15px;line-height:1.8;color:#4b5563;">
+              Può essere utile ampliare leggermente i parametri di ricerca, valutare zone vicine oppure confrontarsi con l’agenzia per capire insieme quali soluzioni possano rispondere meglio alle sue esigenze.
+            </p>
+
+            <p style="margin:0 0 24px;font-size:15px;line-height:1.8;color:#4b5563;">
+              Se desidera, può contattarci per una consulenza gratuita e senza impegno.
+            </p>
+
+            ${buildButton('Contatta Area Immobiliare', escapeHtml(contactUrl))}
+
+            <div style="margin-top:28px;padding-top:20px;border-top:1px solid #e5e7eb;">
+              <p style="margin:0;font-size:13px;line-height:1.7;color:#6b7280;">
+                Belotti Area Immobiliare<br />
+                Questa comunicazione viene inviata solo quando per alcuni giorni non emergono nuovi immobili coerenti con la ricerca salvata.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+  })
+}

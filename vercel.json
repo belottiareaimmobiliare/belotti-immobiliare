@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/saved-searches-digest",
+      "schedule": "45 10 * * *"
+    }
+  ]
+}
