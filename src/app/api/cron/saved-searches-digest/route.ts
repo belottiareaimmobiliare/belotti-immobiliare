@@ -22,6 +22,9 @@ type SavedSearch = {
   source_property_id: string | null
   source_property_slug: string | null
   source_property_title: string | null
+  source_latitude: number | null
+  source_longitude: number | null
+  radius_km: number | null
   contract_type: string | null
   source_property_type: string | null
   search_macro_category: MacroCategory | null
@@ -60,6 +63,8 @@ type Property = {
   surface: number | null
   rooms: number | null
   bathrooms: number | null
+  latitude: number | null
+  longitude: number | null
   created_at: string | null
   property_media?: PropertyMedia[]
 }
@@ -101,6 +106,57 @@ function getMacroCategory(propertyType: string | null): MacroCategory {
   return 'other'
 }
 
+function toRadians(value: number) {
+  return (value * Math.PI) / 180
+}
+
+function distanceKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) {
+  const earthRadiusKm = 6371
+  const dLat = toRadians(lat2 - lat1)
+  const dLon = toRadians(lon2 - lon1)
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2)
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return earthRadiusKm * c
+}
+
+function isWithinSearchArea(search: SavedSearch, property: Property) {
+  if (
+    typeof search.source_latitude === 'number' &&
+    typeof search.source_longitude === 'number' &&
+    typeof property.latitude === 'number' &&
+    typeof property.longitude === 'number'
+  ) {
+    const radiusKm = search.radius_km || 10
+
+    return (
+      distanceKm(
+        search.source_latitude,
+        search.source_longitude,
+        property.latitude,
+        property.longitude
+      ) <= radiusKm
+    )
+  }
+
+  if (!isWithinSearchArea(search, property)) {
+    return false
+  }
+
+  return true
+}
+
 function isPropertySimilar(search: SavedSearch, property: Property) {
   if (property.status !== 'published') return false
 
@@ -119,11 +175,7 @@ function isPropertySimilar(search: SavedSearch, property: Property) {
     return false
   }
 
-  if (search.comune && property.comune !== search.comune) {
-    return false
-  }
-
-  if (!search.comune && search.province && property.province !== search.province) {
+  if (!isWithinSearchArea(search, property)) {
     return false
   }
 
@@ -253,6 +305,8 @@ async function findSimilarProperties({
       surface,
       rooms,
       bathrooms,
+      latitude,
+      longitude,
       created_at,
       property_media (
         file_url,
@@ -415,6 +469,9 @@ export async function GET(request: Request) {
       source_property_id,
       source_property_slug,
       source_property_title,
+      source_latitude,
+      source_longitude,
+      radius_km,
       contract_type,
       source_property_type,
       search_macro_category,

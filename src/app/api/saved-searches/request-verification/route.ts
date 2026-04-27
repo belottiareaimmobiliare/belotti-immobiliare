@@ -105,6 +105,8 @@ export async function POST(request: Request) {
 
     const price = toNumberOrNull(body.price)
     const surface = toNumberOrNull(body.surface)
+    const latitude = toNumberOrNull(body.latitude)
+    const longitude = toNumberOrNull(body.longitude)
     const rooms = toIntegerOrNull(body.rooms)
     const bathrooms = toIntegerOrNull(body.bathrooms)
 
@@ -130,6 +132,9 @@ export async function POST(request: Request) {
         source_property_id: cleanText(body.propertyId) || null,
         source_property_slug: cleanText(body.propertySlug) || null,
         source_property_title: propertyTitle,
+        source_latitude: latitude,
+        source_longitude: longitude,
+        radius_km: latitude && longitude ? 10 : 0,
 
         contract_type: cleanText(body.contractType) || null,
         source_property_type: propertyType || null,

@@ -14,6 +14,8 @@ type Props = {
   surface: number | null
   rooms: number | null
   bathrooms: number | null
+  latitude: number | null
+  longitude: number | null
   hasGarage: boolean | null
   hasParking: boolean | null
   hasGarden: boolean | null

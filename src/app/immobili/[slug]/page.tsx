@@ -517,6 +517,8 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               surface={currentProperty.surface}
               rooms={currentProperty.rooms}
               bathrooms={currentProperty.bathrooms}
+              latitude={currentProperty.latitude}
+              longitude={currentProperty.longitude}
               hasGarage={currentProperty.has_garage}
               hasParking={currentProperty.has_parking}
               hasGarden={currentProperty.has_garden}

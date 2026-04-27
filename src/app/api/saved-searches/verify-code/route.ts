@@ -127,6 +127,9 @@ export async function POST(request: Request) {
       source_property_id: verification.source_property_id,
       source_property_slug: verification.source_property_slug,
       source_property_title: verification.source_property_title,
+      source_latitude: verification.source_latitude,
+      source_longitude: verification.source_longitude,
+      radius_km: verification.radius_km || 10,
 
       contract_type: verification.contract_type,
       source_property_type: verification.source_property_type,
