@@ -274,7 +274,7 @@ export default async function AdminLeadsPage({
         />
 
         {error ? (
-          <div className="rounded-3xl border border-red-400/30 bg-red-500/10 p-6 text-sm text-red-100">
+          <div className="rounded-3xl border border-red-400/30 bg-red-500/10 p-6 text-sm text-red-900">
             Errore durante il caricamento dei lead: {error.message}
           </div>
         ) : null}

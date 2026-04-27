@@ -330,7 +330,7 @@ export default async function AdminSavedSearchesPage() {
         </section>
 
         {error ? (
-          <div className="rounded-3xl border border-red-400/30 bg-red-500/10 p-6 text-sm text-red-700 dark:text-red-100">
+          <div className="rounded-3xl border border-red-400/30 bg-red-500/10 p-6 text-sm text-red-700 dark:text-red-900">
             Errore durante il caricamento delle ricerche salvate: {error.message}
           </div>
         ) : null}

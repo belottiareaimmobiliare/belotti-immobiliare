@@ -109,7 +109,7 @@ export default function PropertyContactForm({
 
   if (step === 'done') {
     return (
-      <div className="mt-6 rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-4 text-sm text-emerald-700 dark:text-emerald-100">
+      <div className="mt-6 rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-4 text-sm text-emerald-700 dark:text-emerald-950">
         {successMessage || 'Richiesta inviata correttamente.'}
       </div>
     )
@@ -118,7 +118,7 @@ export default function PropertyContactForm({
   if (step === 'verify') {
     return (
       <form onSubmit={handleVerifyCode} className="mt-6 space-y-4">
-        <div className="rounded-2xl border border-sky-400/25 bg-sky-500/10 px-4 py-4 text-sm text-sky-700 dark:text-sky-100">
+        <div className="rounded-2xl border border-sky-400/25 bg-sky-500/10 px-4 py-4 text-sm text-sky-700 dark:text-sky-950">
           Inserisci il codice di verifica che ti abbiamo inviato via mail.
         </div>
 
@@ -146,13 +146,13 @@ export default function PropertyContactForm({
         </div>
 
         {successMessage ? (
-          <div className="rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-100">
+          <div className="rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-950">
             {successMessage}
           </div>
         ) : null}
 
         {errorMessage ? (
-          <div className="rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-100">
+          <div className="rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-900">
             {errorMessage}
           </div>
         ) : null}
@@ -244,13 +244,13 @@ export default function PropertyContactForm({
       </div>
 
       {successMessage ? (
-        <div className="rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-100">
+        <div className="rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-950">
           {successMessage}
         </div>
       ) : null}
 
       {errorMessage ? (
-        <div className="rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-100">
+        <div className="rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-900">
           {errorMessage}
         </div>
       ) : null}

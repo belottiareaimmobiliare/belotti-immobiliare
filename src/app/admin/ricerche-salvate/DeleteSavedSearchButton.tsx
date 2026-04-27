@@ -25,17 +25,17 @@ export default function DeleteSavedSearchButton({
     >
       <input type="hidden" name="id" value={savedSearchId} />
 
-      <p className="text-sm font-semibold text-red-700 dark:text-red-100">
+      <p className="text-sm font-semibold text-red-700 dark:text-red-900">
         Zona eliminazione
       </p>
 
-      <p className="mt-2 text-xs leading-5 text-red-700/70 dark:text-red-100/65">
+      <p className="mt-2 text-xs leading-5 text-red-700/70 dark:text-red-900/65">
         Usa questa azione solo per ricerche duplicate, test o richieste inserite per errore.
       </p>
 
       <button
         type="submit"
-        className="mt-3 w-full rounded-full border border-red-300/30 bg-red-500/20 px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-500/30 dark:text-red-100"
+        className="mt-3 w-full rounded-full border border-red-300/30 bg-red-500/20 px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-500/30 dark:text-red-900"
       >
         Elimina ricerca
       </button>
