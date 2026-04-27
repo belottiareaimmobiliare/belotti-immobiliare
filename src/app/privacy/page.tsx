@@ -54,15 +54,16 @@ export default function PrivacyPage() {
               La presente informativa riguarda i dati personali trattati tramite il sito
               web, l’area pubblica, le schede immobiliari, i moduli di richiesta informazioni,
               la funzione di avviso per immobili simili, l’area amministrativa, le comunicazioni
-              email automatiche e le attività connesse alla gestione degli immobili, dei clienti
-              e delle richieste commerciali.
+              email automatiche e le attività connesse alla gestione degli immobili, dei clienti,
+              delle richieste commerciali, degli incarichi e delle operazioni immobiliari.
             </p>
 
             <p className="mt-4 leading-8">
               L’informativa riguarda anche i trattamenti effettuati quando i dati vengono
-              comunicati o messi a disposizione di fornitori tecnici, portali immobiliari,
-              professionisti o partner necessari alla gestione dell’incarico, della richiesta
-              o dell’operazione immobiliare.
+              comunicati, sincronizzati, esportati, pubblicati o messi a disposizione di
+              fornitori tecnici, piattaforme cloud, portali immobiliari, professionisti,
+              collaboratori, partner commerciali o soggetti terzi necessari alla gestione
+              dell’incarico, della richiesta o dell’operazione immobiliare.
             </p>
           </section>
 
@@ -73,8 +74,9 @@ export default function PrivacyPage() {
 
             <p className="mt-4 leading-8">
               Il sito può trattare dati di navigazione, dati tecnici del dispositivo e del
-              browser, log tecnici, indirizzi IP, identificativi di sessione, preferenze cookie
-              e informazioni necessarie al funzionamento del servizio.
+              browser, log tecnici, indirizzi IP, identificativi di sessione, user agent,
+              preferenze cookie, consensi prestati, dati di errore, dati di sicurezza e
+              informazioni necessarie al funzionamento del servizio.
             </p>
 
             <p className="mt-4 leading-8">
@@ -99,8 +101,9 @@ export default function PrivacyPage() {
               il titolare può trattare ulteriori dati forniti direttamente dall’interessato
               o necessari alla gestione della pratica, quali dati anagrafici, recapiti,
               informazioni sull’immobile, documentazione tecnica, catastale, urbanistica,
-              amministrativa, contrattuale, fiscale, creditizia o notarile, nei limiti
-              strettamente necessari alla finalità perseguita.
+              amministrativa, condominiale, contrattuale, fiscale, creditizia, notarile,
+              fotografica o planimetrica, nei limiti strettamente necessari alla finalità
+              perseguita.
             </p>
           </section>
 
@@ -112,9 +115,9 @@ export default function PrivacyPage() {
             <p className="mt-4 leading-8">
               Per la pubblicazione, promozione e gestione degli annunci immobiliari possono
               essere trattati dati relativi all’immobile, immagini, planimetrie, descrizioni,
-              indirizzo o zona, prezzo, caratteristiche tecniche, stato dell’immobile, informazioni
-              energetiche, dati catastali o ulteriori elementi necessari alla corretta presentazione
-              dell’annuncio.
+              indirizzo o zona, coordinate, prezzo, tipologia, contratto, superficie,
+              caratteristiche tecniche, stato dell’immobile, informazioni energetiche, dati
+              catastali o ulteriori elementi necessari alla corretta presentazione dell’annuncio.
             </p>
 
             <p className="mt-4 leading-8">
@@ -142,15 +145,16 @@ export default function PrivacyPage() {
               I dati possono inoltre essere trattati per salvare e gestire ricerche immobiliari,
               inviare codici di verifica, confermare la ricezione delle richieste, inviare avvisi
               relativi a immobili simili, suggerire la revisione dei parametri di ricerca, disattivare
-              ricerche salvate e prevenire richieste duplicate, errate o non autorizzate.
+              ricerche salvate, prevenire richieste duplicate, errate o non autorizzate, gestire
+              lead, appuntamenti e ricontatti.
             </p>
 
             <p className="mt-4 leading-8">
               I dati possono essere trattati per finalità organizzative interne, quali gestione
               delle richieste nel pannello amministrativo, classificazione dello stato della richiesta,
               note interne, statistiche operative, controllo delle attività degli utenti autorizzati,
-              gestione degli immobili, esportazione verso portali immobiliari e produzione di
-              documentazione tecnica o commerciale.
+              gestione degli immobili, esportazione verso portali immobiliari, produzione di
+              documentazione tecnica o commerciale e manutenzione del gestionale.
             </p>
           </section>
 
@@ -163,14 +167,16 @@ export default function PrivacyPage() {
               Per promuovere gli immobili affidati all’agenzia, i dati relativi agli annunci
               possono essere pubblicati sul sito e trasmessi a portali immobiliari o piattaforme
               commerciali di settore, quali, a titolo esemplificativo, Immobiliare.it, Idealista,
-              Casa.it o altri canali analoghi utilizzati dall’agenzia.
+              Casa.it, BergamoNews o altri canali analoghi utilizzati dall’agenzia.
             </p>
 
             <p className="mt-4 leading-8">
-              La trasmissione ai portali può includere titolo dell’annuncio, descrizione, prezzo,
-              tipologia, contratto, superficie, località, immagini, planimetrie, classe energetica,
-              caratteristiche dell’immobile, riferimenti dell’agenzia e altri dati necessari alla
-              pubblicazione e gestione dell’annuncio.
+              La trasmissione ai portali può avvenire tramite caricamento manuale, file XML,
+              feed automatizzati, esportazioni tecniche, API, pannelli gestionali o altri strumenti
+              di sincronizzazione. Può includere titolo dell’annuncio, descrizione, prezzo, tipologia,
+              contratto, superficie, località, immagini, planimetrie, classe energetica, caratteristiche
+              dell’immobile, riferimenti dell’agenzia e altri dati necessari alla pubblicazione e gestione
+              dell’annuncio.
             </p>
 
             <p className="mt-4 leading-8">
@@ -191,7 +197,100 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-white">
-              7. Comunicazione a professionisti, partner e soggetti terzi
+              7. Fornitori tecnici, infrastruttura e piattaforme utilizzate
+            </h2>
+
+            <p className="mt-4 leading-8">
+              Per realizzare, pubblicare, proteggere, mantenere e gestire il sito e il relativo
+              gestionale, il titolare può avvalersi di fornitori tecnici e piattaforme cloud, anche
+              esterne alla propria organizzazione.
+            </p>
+
+            <p className="mt-4 leading-8">
+              Tra i fornitori e strumenti tecnici utilizzati o utilizzabili rientrano, a titolo
+              esemplificativo e non esaustivo: Vercel per hosting, deploy, funzioni serverless,
+              log tecnici e cron job; Supabase per database, autenticazione, storage e servizi
+              collegati; GitHub per repository, versionamento del codice, tracciamento tecnico
+              e collaborazione sullo sviluppo; Google, Google Cloud Platform, Google Workspace,
+              Gmail/SMTP, Google Maps e servizi collegati per autenticazione, posta elettronica,
+              mappe, recapiti, sicurezza, integrazioni o funzionalità tecniche.
+            </p>
+
+            <p className="mt-4 leading-8">
+              Possono inoltre essere utilizzati servizi di posta elettronica, provider DNS, sistemi
+              di backup, strumenti di monitoraggio, strumenti di sicurezza, sistemi di logging,
+              strumenti di analisi tecnica, piattaforme di deploy, servizi di geocodifica, sistemi
+              di gestione immagini, sistemi per generazione o gestione di export, API di terze parti
+              e servizi equivalenti necessari all’evoluzione tecnica del sito.
+            </p>
+
+            <p className="mt-4 leading-8">
+              Tali fornitori possono trattare dati personali, dati tecnici, dati di accesso, log,
+              metadati, contenuti caricati, email, allegati, immagini, file, identificativi, token
+              tecnici o altre informazioni necessarie all’erogazione del servizio. Il trattamento
+              avviene nei limiti delle rispettive funzioni tecniche, delle impostazioni configurate,
+              degli accordi applicabili e delle policy privacy dei fornitori.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white">
+              8. Repository codice, sviluppo e manutenzione
+            </h2>
+
+            <p className="mt-4 leading-8">
+              Il codice sorgente del sito e del gestionale può essere gestito tramite piattaforme
+              di versionamento come GitHub o strumenti equivalenti. Tali piattaforme possono
+              trattare dati tecnici, log, cronologia delle modifiche, riferimenti a funzionalità,
+              issue, commit, configurazioni, variabili non segrete, identificativi tecnici e dati
+              necessari allo sviluppo e manutenzione del progetto.
+            </p>
+
+            <p className="mt-4 leading-8">
+              Il titolare, i propri incaricati, collaboratori, sviluppatori, manutentori o fornitori
+              tecnici possono accedere ai sistemi, ai dati e agli ambienti tecnici esclusivamente
+              per finalità di sviluppo, manutenzione, sicurezza, correzione errori, aggiornamento,
+              migrazione, backup, recupero dati, assistenza, verifica funzionale o miglioramento
+              del servizio.
+            </p>
+
+            <p className="mt-4 leading-8">
+              Le credenziali, i token, le password e le variabili segrete devono essere gestite
+              con modalità riservate e non devono essere pubblicate intenzionalmente in repository
+              o aree accessibili a soggetti non autorizzati.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white">
+              9. Mappe, geocodifica e dati di localizzazione
+            </h2>
+
+            <p className="mt-4 leading-8">
+              Il sito può utilizzare mappe, strumenti di geocodifica, coordinate, localizzazioni
+              approssimative, dati del comune, provincia, zona o indirizzo dell’immobile per mostrare
+              la posizione degli immobili, consentire ricerche geografiche, disegnare aree su mappa,
+              individuare immobili simili entro un raggio prestabilito o migliorare la qualità della
+              navigazione.
+            </p>
+
+            <p className="mt-4 leading-8">
+              Tali funzionalità possono coinvolgere fornitori esterni come Google Maps, OpenStreetMap,
+              servizi di geocodifica, librerie cartografiche o piattaforme equivalenti. Le mappe
+              incorporate di terze parti possono essere caricate solo in base alle scelte cookie e
+              preferenze dell’utente, quando previsto.
+            </p>
+
+            <p className="mt-4 leading-8">
+              La posizione degli immobili può essere mostrata in modo puntuale o approssimativo
+              in base alle impostazioni dell’annuncio e alle esigenze di riservatezza del proprietario,
+              dell’incaricante o dell’agenzia.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white">
+              10. Comunicazione a professionisti, partner e soggetti terzi
             </h2>
 
             <p className="mt-4 leading-8">
@@ -199,7 +298,8 @@ export default function PrivacyPage() {
               un’operazione immobiliare, i dati possono essere comunicati a soggetti terzi
               coinvolti nella pratica, quali notai, tecnici, geometri, architetti, amministratori
               condominiali, consulenti, istituti bancari, società finanziarie, imprese, artigiani,
-              fornitori di servizi, portali immobiliari, consulenti informatici e fornitori cloud.
+              fornitori di servizi, portali immobiliari, consulenti informatici, sviluppatori,
+              manutentori, hosting provider, cloud provider e fornitori software.
             </p>
 
             <p className="mt-4 leading-8">
@@ -217,7 +317,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-white">
-              8. Form richiesta immobile
+              11. Form richiesta immobile
             </h2>
 
             <p className="mt-4 leading-8">
@@ -237,7 +337,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-white">
-              9. Funzione “Avvisami per immobili simili”
+              12. Funzione “Avvisami per immobili simili”
             </h2>
 
             <p className="mt-4 leading-8">
@@ -270,7 +370,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-white">
-              10. Comunicazioni automatiche e disattivazione
+              13. Comunicazioni automatiche e disattivazione
             </h2>
 
             <p className="mt-4 leading-8">
@@ -296,7 +396,53 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-white">
-              11. Base giuridica del trattamento
+              14. Area amministrativa, utenti interni, KPI e log
+            </h2>
+
+            <p className="mt-4 leading-8">
+              L’area amministrativa del sito può consentire la gestione di immobili, immagini,
+              planimetrie, news, contenuti del sito, lead, ricerche salvate, utenti interni, ruoli,
+              permessi, esportazioni e log attività.
+            </p>
+
+            <p className="mt-4 leading-8">
+              I dati degli utenti autorizzati al gestionale, inclusi nome, username, email,
+              ruolo, permessi, attività effettuate, accessi, azioni amministrative, operazioni su
+              immobili, KPI e log, possono essere trattati per finalità di sicurezza, organizzazione,
+              tracciabilità, controllo operativo e corretta gestione del sito.
+            </p>
+
+            <p className="mt-4 leading-8">
+              Alcune operazioni sensibili, come la pulizia dei KPI o altre azioni amministrative,
+              possono richiedere una conferma tramite codice email o altra verifica, al fine di
+              ridurre il rischio di cancellazioni o modifiche accidentali.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white">
+              15. Backup, sicurezza, log tecnici e conservazione tecnica
+            </h2>
+
+            <p className="mt-4 leading-8">
+              Per esigenze di sicurezza, continuità operativa, manutenzione, troubleshooting,
+              audit tecnico, prevenzione abusi e ripristino del servizio, dati personali e tecnici
+              possono essere temporaneamente presenti in backup, log server, log applicativi,
+              sistemi di monitoraggio, ambienti di deploy, strumenti di diagnostica, database,
+              storage, repository o sistemi di posta.
+            </p>
+
+            <p className="mt-4 leading-8">
+              La cancellazione o modifica di dati presenti nei sistemi principali può non comportare
+              la cancellazione immediata da tutti i backup tecnici, ove questi siano conservati per
+              finalità di sicurezza, continuità o obblighi tecnici. In tali casi, i dati verranno mantenuti
+              protetti e rimossi o sovrascritti secondo i cicli tecnici applicabili.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-white">
+              16. Base giuridica del trattamento
             </h2>
 
             <p className="mt-4 leading-8">
@@ -304,8 +450,8 @@ export default function PrivacyPage() {
               precontrattuali richieste dall’interessato, sull’esecuzione di un contratto o incarico,
               sull’adempimento di obblighi di legge, sul legittimo interesse del titolare alla
               sicurezza, alla gestione tecnica del sito, alla prevenzione di abusi, alla tutela dei
-              propri diritti, alla gestione amministrativa e commerciale delle richieste e alla
-              promozione degli immobili affidati.
+              propri diritti, alla gestione amministrativa e commerciale delle richieste, alla
+              manutenzione del sito e alla promozione degli immobili affidati.
             </p>
 
             <p className="mt-4 leading-8">
@@ -319,7 +465,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-white">
-              12. Modalità del trattamento e sicurezza
+              17. Modalità del trattamento e sicurezza
             </h2>
 
             <p className="mt-4 leading-8">
@@ -344,7 +490,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-white">
-              13. Conservazione dei dati
+              18. Conservazione dei dati
             </h2>
 
             <p className="mt-4 leading-8">
@@ -378,7 +524,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-white">
-              14. Destinatari dei dati
+              19. Destinatari dei dati
             </h2>
 
             <p className="mt-4 leading-8">
@@ -388,37 +534,44 @@ export default function PrivacyPage() {
             </p>
 
             <p className="mt-4 leading-8">
-              Tra i possibili destinatari rientrano fornitori di hosting e infrastruttura cloud, database,
-              servizi email, servizi di autenticazione, manutentori informatici, sviluppatori, gestori di
-              piattaforme web, portali immobiliari, sistemi di esportazione annunci, consulenti, tecnici,
-              notai, istituti bancari, amministratori condominiali, professionisti e autorità competenti,
-              ove necessario.
+              Tra i possibili destinatari rientrano fornitori di hosting e infrastruttura cloud, Vercel,
+              Supabase, GitHub, Google, Google Cloud Platform, Google Workspace, Gmail/SMTP,
+              Google Maps, provider DNS, servizi email, servizi di autenticazione, manutentori
+              informatici, sviluppatori, gestori di piattaforme web, portali immobiliari, sistemi di
+              esportazione annunci, consulenti, tecnici, notai, istituti bancari, amministratori
+              condominiali, professionisti, autorità competenti e fornitori equivalenti.
             </p>
 
             <p className="mt-4 leading-8">
               I dati non vengono venduti a terzi. La comunicazione a soggetti esterni avviene solo
               nei limiti della finalità perseguita, degli obblighi contrattuali o normativi e delle necessità
-              operative della pratica immobiliare.
+              operative della pratica immobiliare, del sito o del gestionale.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-white">
-              15. Trasferimento di dati fuori dallo Spazio Economico Europeo
+              20. Trasferimento di dati fuori dallo Spazio Economico Europeo
             </h2>
 
             <p className="mt-4 leading-8">
               Alcuni fornitori tecnici, piattaforme cloud, servizi email, strumenti di autenticazione,
-              mappe o portali terzi potrebbero trattare dati anche al di fuori dello Spazio Economico
-              Europeo. In tali casi, ove applicabile, il trasferimento avviene nel rispetto delle garanzie
-              previste dal GDPR, quali decisioni di adeguatezza, clausole contrattuali standard o altri
-              strumenti riconosciuti dalla normativa.
+              mappe, repository codice, sistemi di log, piattaforme di deploy o portali terzi potrebbero
+              trattare dati anche al di fuori dello Spazio Economico Europeo.
+            </p>
+
+            <p className="mt-4 leading-8">
+              In tali casi, ove applicabile, il trasferimento avviene nel rispetto delle garanzie previste
+              dal GDPR, quali decisioni di adeguatezza, clausole contrattuali standard, misure
+              supplementari o altri strumenti riconosciuti dalla normativa. L’utilizzo di servizi esterni
+              può inoltre essere regolato dalle rispettive condizioni contrattuali, informative privacy
+              e documentazione sul trattamento dei dati.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-white">
-              16. Contenuti di terze parti e Google Maps
+              21. Contenuti di terze parti e Google Maps
             </h2>
 
             <p className="mt-4 leading-8">
@@ -446,7 +599,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-white">
-              17. Natura del conferimento
+              22. Natura del conferimento
             </h2>
 
             <p className="mt-4 leading-8">
@@ -467,7 +620,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-white">
-              18. Diritti dell’interessato
+              23. Diritti dell’interessato
             </h2>
 
             <p className="mt-4 leading-8">
@@ -492,7 +645,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-white">
-              19. Cookie e preferenze
+              24. Cookie e preferenze
             </h2>
 
             <p className="mt-4 leading-8">
@@ -512,13 +665,19 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-white">
-              20. Aggiornamenti dell’informativa
+              25. Aggiornamenti dell’informativa
             </h2>
 
             <p className="mt-4 leading-8">
               La presente informativa può essere modificata o aggiornata nel tempo per esigenze
-              normative, tecniche, organizzative o funzionali del sito. La versione pubblicata su
-              questa pagina è quella attualmente in vigore.
+              normative, tecniche, organizzative, contrattuali o funzionali del sito. La versione
+              pubblicata su questa pagina è quella attualmente in vigore.
+            </p>
+
+            <p className="mt-4 leading-8">
+              Eventuali nuove funzionalità, nuovi fornitori, nuovi portali, nuove piattaforme tecniche
+              o nuove modalità operative potranno comportare l’aggiornamento della presente
+              informativa.
             </p>
 
             <p className="mt-4 leading-8 text-white/56">
