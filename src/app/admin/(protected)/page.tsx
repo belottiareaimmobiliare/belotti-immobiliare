@@ -37,9 +37,9 @@ const leadStatusLabel: Record<LeadStatus, string> = {
 }
 
 const leadStatusStyle: Record<LeadStatus, string> = {
-  new: 'border-amber-400/30 bg-amber-500/10 text-amber-200',
-  contacted: 'border-sky-400/30 bg-sky-500/10 text-sky-200',
-  closed: 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200',
+  new: 'border-amber-400/30 bg-amber-500/10 text-[var(--site-text)]',
+  contacted: 'border-sky-400/30 bg-sky-500/10 text-[var(--site-text)]',
+  closed: 'border-emerald-400/30 bg-emerald-500/10 text-[var(--site-text)]',
   archived: 'border-white/10 bg-white/[0.04] text-white/55',
 }
 
@@ -80,7 +80,7 @@ function getAlertLevel(days: number | null) {
   if (days === null) {
     return {
       label: 'Nessun dato',
-      className: 'border-white/10 bg-white/[0.04] text-white/70',
+      className: 'border-white/10 bg-white/[0.04] text-[var(--site-text-muted)]',
       order: 0,
     }
   }
@@ -88,7 +88,7 @@ function getAlertLevel(days: number | null) {
   if (days >= 180) {
     return {
       label: 'Oltre 6 mesi',
-      className: 'border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-200',
+      className: 'border-fuchsia-400/20 bg-fuchsia-500/10 text-[var(--site-text)]',
       order: 4,
     }
   }
@@ -96,7 +96,7 @@ function getAlertLevel(days: number | null) {
   if (days >= 90) {
     return {
       label: 'Oltre 3 mesi',
-      className: 'border-red-400/20 bg-red-500/10 text-red-200',
+      className: 'border-red-400/20 bg-red-500/10 text-[var(--site-text)]',
       order: 3,
     }
   }
@@ -104,7 +104,7 @@ function getAlertLevel(days: number | null) {
   if (days >= 60) {
     return {
       label: 'Oltre 2 mesi',
-      className: 'border-orange-400/20 bg-orange-500/10 text-orange-200',
+      className: 'border-orange-400/20 bg-orange-500/10 text-[var(--site-text)]',
       order: 2,
     }
   }
@@ -112,14 +112,14 @@ function getAlertLevel(days: number | null) {
   if (days >= 30) {
     return {
       label: 'Oltre 1 mese',
-      className: 'border-amber-400/20 bg-amber-500/10 text-amber-200',
+      className: 'border-amber-400/20 bg-amber-500/10 text-[var(--site-text)]',
       order: 1,
     }
   }
 
   return {
     label: 'Recente',
-    className: 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200',
+    className: 'border-emerald-400/20 bg-emerald-500/10 text-[var(--site-text)]',
     order: 0,
   }
 }
@@ -278,9 +278,9 @@ export default async function AdminPage() {
           href="/admin/leads"
           className="rounded-3xl border border-amber-400/20 bg-amber-500/10 p-6 transition hover:border-amber-300/40 hover:bg-amber-500/15"
         >
-          <p className="text-sm text-amber-100/70">Lead nuovi</p>
-          <p className="mt-3 text-3xl font-semibold text-amber-100">{newLeads}</p>
-          <p className="mt-2 text-xs text-amber-100/55">Vai alla gestione lead</p>
+          <p className="text-sm text-[var(--site-text-muted)]">Lead nuovi</p>
+          <p className="mt-3 text-3xl font-semibold text-[var(--site-text)]">{newLeads}</p>
+          <p className="mt-2 text-xs text-[var(--site-text)]/55">Vai alla gestione lead</p>
         </Link>
       </div>
 
@@ -445,7 +445,7 @@ export default async function AdminPage() {
                       </p>
                     </div>
 
-                    <span className="rounded-full border border-emerald-300/20 px-3 py-1 text-xs text-emerald-200">
+                    <span className="rounded-full border border-emerald-300/20 px-3 py-1 text-xs text-[var(--site-text)]">
                       {leadsCount} richieste
                     </span>
                   </div>
