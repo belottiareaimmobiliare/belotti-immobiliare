@@ -391,50 +391,59 @@ return (
               position={[property.latitude, property.longitude]}
               icon={propertyIcon}
             >
-              <Popup closeButton={false} className="property-preview-popup custom-popup">
-                <div className="w-[min(92vw,560px)] overflow-hidden rounded-[22px] bg-white text-slate-900 shadow-[0_18px_40px_rgba(2,6,23,0.16)]">
-                  <div className="grid min-h-[142px] grid-cols-1 bg-white md:grid-cols-[1.1fr_1fr]">
-                    <div className="order-2 flex min-w-0 flex-col px-5 py-4 md:order-1">
-                      <h3 className="line-clamp-2 text-[1.05rem] font-semibold leading-6 text-slate-800">
-                        {property.title || 'Immobile'}
-                      </h3>
+              <Popup closeButton={false} className="custom-popup">
+                <div className="absolute left-1/2 top-4 z-[500] w-[min(92%,560px)] -translate-x-1/2">
+                  <div className="overflow-hidden rounded-[22px] bg-white text-slate-900 shadow-[0_18px_40px_rgba(2,6,23,0.16)]">
+                    <div className="grid min-h-[170px] grid-cols-1 bg-white md:grid-cols-[1.1fr_1fr]">
+                      <div className="order-2 flex min-w-0 flex-col justify-between px-5 py-5 md:order-1">
+                        <div>
+                          <h3 className="line-clamp-2 text-[1.05rem] font-semibold leading-6 text-slate-800">
+                            {property.title || 'Immobile'}
+                          </h3>
 
-                      <p className="mt-2 text-[13px] text-slate-500">
-                        {property.comune || '—'} ({property.province || '—'})
-                      </p>
-
-                      <p className="mt-3 text-[1.65rem] font-semibold leading-none text-slate-900 md:text-[2rem]">
-                        {formatPrice(property.price)}
-                      </p>
-
-                      <div className="mt-3">
-                        {property.slug ? (
-                          <a
-                            href={`/immobili/${property.slug}`}
-                            className="inline-flex rounded-[12px] bg-[#08111f] px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
-                          >
-                            Apri scheda
-                          </a>
-                        ) : (
-                          <div className="h-[42px]" />
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="relative order-1 overflow-hidden md:order-2 md:rounded-l-[18px]">
-                      {property.coverImage ? (
-                        <div
-                          className="h-[160px] w-full bg-cover bg-center md:h-full md:min-h-[142px]"
-                          style={{ backgroundImage: `url('${property.coverImage}')` }}
-                        />
-                      ) : (
-                        <div className="flex h-[160px] w-full items-center justify-center bg-slate-200 text-[11px] text-slate-500 md:h-full md:min-h-[142px]">
-                          Nessuna immagine
+                          <p className="mt-3 text-[13px] text-slate-500">
+                            {property.comune || '—'} ({property.province || '—'})
+                          </p>
                         </div>
-                      )}
 
-                      <div className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-sm text-slate-600">
-                        ×
+                        <div className="mt-4">
+                          <p className="text-[1.65rem] font-semibold leading-none text-slate-900 md:text-[2rem]">
+                            {formatPrice(property.price)}
+                          </p>
+                        </div>
+
+                        <div className="mt-4">
+                          {property.slug ? (
+                            <a
+                              href={`/immobili/${property.slug}`}
+                              className="inline-flex rounded-[12px] bg-[#08111f] px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+                            >
+                              Apri scheda
+                            </a>
+                          ) : (
+                            <div className="h-[42px]" />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="relative order-1 overflow-hidden md:order-2 md:rounded-l-[18px]">
+                        {property.coverImage ? (
+                          <div
+                            className="h-[160px] w-full bg-cover bg-center md:h-full md:min-h-[170px]"
+                            style={{ backgroundImage: `url('${property.coverImage}')` }}
+                          />
+                        ) : (
+                          <div className="flex h-[160px] w-full items-center justify-center bg-slate-200 text-[11px] text-slate-500 md:h-full md:min-h-[170px]">
+                            Nessuna immagine
+                          </div>
+                        )}
+
+                        <button
+                          type="button"
+                          className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-sm text-slate-600"
+                        >
+                          ×
+                        </button>
                       </div>
                     </div>
                   </div>
