@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { getCurrentAdminUserId } from '@/lib/admin-current-user-client'
+import { updateProperty, updatePropertyGeocode } from '@/app/admin/immobili/actions'
 import italyLocations from '@/data/italyLocations.json'
 
 type ProvinceItem = {
@@ -243,18 +243,13 @@ export default function EditForm({ property }: EditFormProps) {
 
       const data = await response.json()
 
-      const { error } = await supabase
-        .from('properties')
-        .update({
-          latitude: data.latitude,
-          longitude: data.longitude,
-          location_mode: data.locationMode,
-          geocode_query: data.queryUsed || null,
-          geocode_status: data.geocodeStatus || null,
-        })
-        .eq('id', property.id)
-
-      if (error) throw error
+      await updatePropertyGeocode(property.id, {
+        latitude: data.latitude,
+        longitude: data.longitude,
+        locationMode: data.locationMode,
+        queryUsed: data.queryUsed || null,
+        geocodeStatus: data.geocodeStatus || null,
+      })
     } catch (error) {
       console.error('Errore geocodifica immobile:', error)
     }
@@ -265,35 +260,31 @@ export default function EditForm({ property }: EditFormProps) {
     setLoading(true)
 
     const slug = generateSlug(form.title)
-    const currentUserId = await getCurrentAdminUserId()
-
-    const { error } = await supabase
-      .from('properties')
-      .update({
+    try {
+      await updateProperty(property.id, {
         title: form.title,
         reference_code: form.reference_code || null,
         condition: form.condition || null,
         availability: form.availability || null,
-        year_built: form.year_built ? Number(form.year_built) : null,
+        year_built: form.year_built || null,
         floor: form.floor || null,
         total_floors: form.total_floors || null,
-        bedrooms: form.bedrooms ? Number(form.bedrooms) : null,
-        balconies: form.balconies ? Number(form.balconies) : null,
-        terraces: form.terraces ? Number(form.terraces) : null,
+        bedrooms: form.bedrooms || null,
+        balconies: form.balconies || null,
+        terraces: form.terraces || null,
         exposure: form.exposure || null,
         slug,
-        price: form.price ? Number(form.price) : null,
+        price: form.price || null,
         province: form.province || null,
         comune: form.comune || null,
         frazione: form.frazione || null,
         address: form.address || null,
-        rooms: form.rooms ? Number(form.rooms) : null,
-        bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
-        surface: form.surface ? Number(form.surface) : null,
+        rooms: form.rooms || null,
+        bathrooms: form.bathrooms || null,
+        surface: form.surface || null,
         contract_type: form.contract_type || null,
         property_type: form.property_type || null,
         description: form.description || null,
-        updated_by: currentUserId,
         has_garage: form.has_garage,
         has_parking: form.has_parking,
         has_garden: form.has_garden,
@@ -307,19 +298,17 @@ export default function EditForm({ property }: EditFormProps) {
         heating_type: form.heating_type || null,
         heating_source: form.heating_source || null,
         energy_epgl: form.energy_epgl || null,
-        condo_fees_amount: form.condo_fees_amount ? Number(form.condo_fees_amount) : null,
+        condo_fees_amount: form.condo_fees_amount || null,
         condo_fees_period: form.condo_fees_period || null,
         furnished_status: form.furnished_status || null,
         deposit_amount: normalizeOptionalField(form.deposit_amount),
         advance_amount: normalizeOptionalField(form.advance_amount),
         advance_deposit_amount: normalizeOptionalField(form.advance_deposit_amount),
       })
-      .eq('id', property.id)
-
-    if (error) {
+    } catch (error) {
       setLoading(false)
       console.error(error)
-      alert('Errore aggiornamento')
+      alert(error instanceof Error ? error.message : 'Errore aggiornamento immobile')
       return
     }
 
