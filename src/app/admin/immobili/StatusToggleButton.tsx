@@ -25,7 +25,11 @@ export default function StatusToggleButton({
         router.refresh()
       } catch (error) {
         console.error(error)
-        alert('Errore aggiornamento stato immobile')
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Errore aggiornamento stato immobile'
+        alert(message)
       }
     })
   }
