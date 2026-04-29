@@ -259,8 +259,27 @@ export default function AreaDrawMap({ properties }: Props) {
     point.lng,
   ])
 
-  return (
+  
+return (
     <div className="relative h-full w-full">
+      <style jsx global>{`
+        .custom-popup .leaflet-popup-content-wrapper {
+          background: transparent !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+        }
+
+        .custom-popup .leaflet-popup-content {
+          margin: 0 !important;
+        }
+
+        .custom-popup .leaflet-popup-tip {
+          background: #0f172a !important;
+          box-shadow: none !important;
+        }
+      `}</style>
+
+
       <div className="absolute left-6 top-24 z-[30] w-[min(420px,calc(100%-3rem))]">
         <div className="theme-map-floating overflow-hidden rounded-[30px] p-6">
           <div>
@@ -365,13 +384,14 @@ export default function AreaDrawMap({ properties }: Props) {
         {properties.map((property) => {
           if (!isValidMapProperty(property)) return null
 
-          return (
+          
+return (
             <Marker
               key={property.id}
               position={[property.latitude, property.longitude]}
               icon={propertyIcon}
             >
-              <Popup closeButton={false} className="property-preview-popup">
+              <Popup closeButton={false} className="property-preview-popup custom-popup">
                 <div className="w-[min(82vw,520px)] overflow-hidden rounded-[22px] bg-white text-slate-900 shadow-[0_18px_40px_rgba(2,6,23,0.16)]">
                   <div className="grid min-h-[170px] grid-cols-1 bg-white md:grid-cols-[1.1fr_1fr]">
                     <div className="order-2 flex min-w-0 flex-col justify-between px-5 py-5 md:order-1">
@@ -451,7 +471,8 @@ export default function AreaDrawMap({ properties }: Props) {
           const isFirst = index === 0
           const canClose = isFirst && polygonPoints.length >= 3 && !isClosed
 
-          return (
+          
+return (
             <Marker
               key={`${point.lat}-${point.lng}-${index}`}
               position={[point.lat, point.lng]}
