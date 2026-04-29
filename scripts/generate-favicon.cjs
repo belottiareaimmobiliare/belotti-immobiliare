@@ -7,35 +7,101 @@ const path = require('path')
 const input = path.join(process.cwd(), 'public/images/brand/areaimmobiliare.png')
 const outputDir = path.join(process.cwd(), 'public')
 
-async function makeWhitePng(size, filename) {
-  const alpha = await sharp(input)
+function dilateAlpha(alpha, width, height, radius) {
+  const out = Buffer.alloc(width * height)
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let found = 0
+
+      for (let dy = -radius; dy <= radius && !found; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          const nx = x + dx
+          const ny = y + dy
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue
+
+          if (alpha[ny * width + nx] > 0) {
+            found = 255
+            break
+          }
+        }
+      }
+
+      out[y * width + x] = found
+    }
+  }
+
+  return out
+}
+
+async function makeWhiteOutlinedPng(size, filename) {
+  const outlineWidth =
+    size <= 16 ? 2 :
+    size <= 32 ? 3 :
+    size <= 48 ? 4 :
+    size <= 180 ? 8 : 12
+
+  const threshold =
+    size <= 16 ? 20 :
+    size <= 32 ? 18 :
+    size <= 48 ? 14 : 10
+
+  const { data } = await sharp(input)
     .resize(size, size, {
       fit: 'contain',
       background: { r: 0, g: 0, b: 0, alpha: 0 },
     })
     .ensureAlpha()
-    .extractChannel('alpha')
-    .toBuffer()
+    .raw()
+    .toBuffer({ resolveWithObject: true })
 
-  await sharp({
-    create: {
+  const alpha = Buffer.alloc(size * size)
+
+  for (let i = 0; i < size * size; i++) {
+    const a = data[i * 4 + 3]
+    alpha[i] = a >= threshold ? 255 : 0
+  }
+
+  const outlineAlpha = dilateAlpha(alpha, size, size, outlineWidth)
+  const out = Buffer.alloc(size * size * 4)
+
+  for (let i = 0; i < size * size; i++) {
+    const p = i * 4
+
+    // prima bordo nero forte
+    if (outlineAlpha[i] > 0) {
+      out[p] = 0
+      out[p + 1] = 0
+      out[p + 2] = 0
+      out[p + 3] = 255
+    }
+
+    // poi bianco pieno sopra
+    if (alpha[i] > 0) {
+      out[p] = 255
+      out[p + 1] = 255
+      out[p + 2] = 255
+      out[p + 3] = 255
+    }
+  }
+
+  await sharp(out, {
+    raw: {
       width: size,
       height: size,
-      channels: 3,
-      background: { r: 255, g: 255, b: 255 },
+      channels: 4,
     },
   })
-    .joinChannel(alpha)
     .png()
     .toFile(path.join(outputDir, filename))
 }
 
 async function main() {
-  await makeWhitePng(16, 'favicon-16x16.png')
-  await makeWhitePng(32, 'favicon-32x32.png')
-  await makeWhitePng(48, 'favicon-48x48.png')
-  await makeWhitePng(180, 'apple-touch-icon.png')
-  await makeWhitePng(512, 'icon.png')
+  await makeWhiteOutlinedPng(16, 'favicon-16x16.png')
+  await makeWhiteOutlinedPng(32, 'favicon-32x32.png')
+  await makeWhiteOutlinedPng(48, 'favicon-48x48.png')
+  await makeWhiteOutlinedPng(180, 'apple-touch-icon.png')
+  await makeWhiteOutlinedPng(512, 'icon.png')
 
   const icoBuffer = await pngToIco([
     path.join(outputDir, 'favicon-16x16.png'),
@@ -45,7 +111,7 @@ async function main() {
 
   await fs.writeFile(path.join(outputDir, 'favicon.ico'), icoBuffer)
 
-  console.log('Favicon bianche generate correttamente in /public')
+  console.log('Favicon con bordo nero più spesso e netto generate correttamente.')
 }
 
 main().catch(err => {
