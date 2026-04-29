@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import DeleteLeadButton from './DeleteLeadButton'
 import LeadsFilters from './LeadsFilters'
 
@@ -105,7 +105,7 @@ async function updateLeadStatus(formData: FormData) {
     return
   }
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const payload: Record<string, string | null> = {
     status,
@@ -135,7 +135,7 @@ async function updateLeadNote(formData: FormData) {
     return
   }
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   await supabase
     .from('leads')
@@ -156,7 +156,7 @@ async function deleteLead(formData: FormData) {
     return
   }
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { error } = await supabase.from('leads').delete().eq('id', id)
 
@@ -181,7 +181,7 @@ export default async function AdminLeadsPage({
 
   const searchQuery = String(params.q ?? '').trim()
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data, error } = await supabase
     .from('leads')
