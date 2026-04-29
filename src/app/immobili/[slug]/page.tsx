@@ -156,17 +156,42 @@ function truncateMetadata(value: string, maxLength = 155) {
 
   if (clean.length <= maxLength) return clean
 
-  return `${clean.slice(0, maxLength - 1).trim()}…`
+  const sliced = clean.slice(0, maxLength).trim()
+  const lastSpace = sliced.lastIndexOf(' ')
+  const safe = lastSpace > 90 ? sliced.slice(0, lastSpace).trim() : sliced
+
+  return safe
 }
 
-function formatSeoPrice(value: number | null | undefined) {
+function capitalizeMetadata(value: string) {
+  if (!value) return value
+
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+function pluralizeSeo(
+  value: number | null | undefined,
+  singular: string,
+  plural: string
+) {
   if (!value) return null
 
-  return new Intl.NumberFormat('it-IT', {
+  return `${value} ${value === 1 ? singular : plural}`
+}
+
+function formatSeoPrice(
+  value: number | null | undefined,
+  contractType?: string | null
+) {
+  if (!value) return null
+
+  const price = new Intl.NumberFormat('it-IT', {
     style: 'currency',
     currency: 'EUR',
     maximumFractionDigits: 0,
   }).format(value)
+
+  return contractType === 'affitto' ? `${price}/mese` : price
 }
 
 function formatSeoContract(value: string | null | undefined) {
@@ -196,22 +221,24 @@ function getPropertyCoverImage(property: Property) {
 }
 
 function buildPropertySeoDescription(property: Property) {
-  const propertyType = formatOptionLabel(property.property_type, 'Immobile')
+  const propertyType = capitalizeMetadata(
+    formatOptionLabel(property.property_type, 'Immobile')
+  )
   const contract = formatSeoContract(property.contract_type)
   const location = getPropertyLocation(property)
-  const price = formatSeoPrice(property.price)
+  const price = formatSeoPrice(property.price, property.contract_type)
 
   const details = [
     property.surface ? `${property.surface} mq` : null,
-    property.rooms ? `${property.rooms} locali` : null,
-    property.bathrooms ? `${property.bathrooms} bagni` : null,
+    pluralizeSeo(property.rooms, 'locale', 'locali'),
+    pluralizeSeo(property.bathrooms, 'bagno', 'bagni'),
     price,
   ].filter(Boolean)
 
   const generated = [
     `${propertyType} ${contract}${location ? ` a ${location}` : ''}.`,
     details.length ? `${details.join(' · ')}.` : null,
-    'Scopri dettagli, foto e informazioni con Area Immobiliare di Gianfederico Belotti.',
+    'Foto, dettagli e informazioni con Area Immobiliare.',
   ]
     .filter(Boolean)
     .join(' ')
