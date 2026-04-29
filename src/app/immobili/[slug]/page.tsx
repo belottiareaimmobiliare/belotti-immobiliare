@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Footer from '@/components/public/Footer'
 import FooterReveal from '@/components/public/FooterReveal'
 import Link from 'next/link'
@@ -128,6 +129,163 @@ function shouldRenderOptionalField(value: string | null | undefined) {
   const clean = String(value || '').trim()
   return clean !== '' && clean !== '-'
 }
+
+
+const propertySiteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://belotti-immobiliare.vercel.app'
+
+function absoluteMetadataUrl(value: string | null | undefined) {
+  const clean = String(value || '').trim()
+
+  if (!clean) return '/icon.png'
+  if (clean.startsWith('http://') || clean.startsWith('https://')) return clean
+  if (clean.startsWith('/')) return `${propertySiteUrl}${clean}`
+
+  return clean
+}
+
+function stripHtmlForMetadata(value: string | null | undefined) {
+  return String(value || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function truncateMetadata(value: string, maxLength = 155) {
+  const clean = value.replace(/\s+/g, ' ').trim()
+
+  if (clean.length <= maxLength) return clean
+
+  return `${clean.slice(0, maxLength - 1).trim()}…`
+}
+
+function formatSeoPrice(value: number | null | undefined) {
+  if (!value) return null
+
+  return new Intl.NumberFormat('it-IT', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(value)
+}
+
+function formatSeoContract(value: string | null | undefined) {
+  if (value === 'vendita') return 'in vendita'
+  if (value === 'affitto') return 'in affitto'
+  return 'disponibile'
+}
+
+function getPropertyLocation(property: Property) {
+  return [property.frazione, property.comune, property.province]
+    .filter(Boolean)
+    .join(', ')
+}
+
+function getPropertyCoverImage(property: Property) {
+  const images = (property.property_media || [])
+    .filter((item) => item.media_type === 'image')
+    .sort((a, b) => {
+      if ((a.is_cover ? 1 : 0) !== (b.is_cover ? 1 : 0)) {
+        return a.is_cover ? -1 : 1
+      }
+
+      return (a.sort_order ?? 0) - (b.sort_order ?? 0)
+    })
+
+  return absoluteMetadataUrl(images[0]?.file_url)
+}
+
+function buildPropertySeoDescription(property: Property) {
+  const propertyType = formatOptionLabel(property.property_type, 'Immobile')
+  const contract = formatSeoContract(property.contract_type)
+  const location = getPropertyLocation(property)
+  const price = formatSeoPrice(property.price)
+
+  const details = [
+    property.surface ? `${property.surface} mq` : null,
+    property.rooms ? `${property.rooms} locali` : null,
+    property.bathrooms ? `${property.bathrooms} bagni` : null,
+    price,
+  ].filter(Boolean)
+
+  const generated = [
+    `${propertyType} ${contract}${location ? ` a ${location}` : ''}.`,
+    details.length ? `${details.join(' · ')}.` : null,
+    'Scopri dettagli, foto e informazioni con Area Immobiliare di Gianfederico Belotti.',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  const fallback = stripHtmlForMetadata(property.description)
+
+  return truncateMetadata(generated || fallback)
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params
+  const supabase = await createClient()
+
+  const { data: property } = await supabase
+    .from('properties')
+    .select(`
+      *,
+      property_media (*)
+    `)
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .maybeSingle()
+
+  if (!property) {
+    return {
+      title: 'Immobile non trovato',
+      robots: {
+        index: false,
+        follow: false,
+      },
+    }
+  }
+
+  const currentProperty = property as Property
+  const propertyType = formatOptionLabel(currentProperty.property_type, 'Immobile')
+  const contract = formatSeoContract(currentProperty.contract_type)
+  const comune = currentProperty.comune ? ` a ${currentProperty.comune}` : ''
+
+  const title = truncateMetadata(
+    currentProperty.title || `${propertyType} ${contract}${comune}`,
+    65
+  )
+
+  const description = buildPropertySeoDescription(currentProperty)
+  const imageUrl = getPropertyCoverImage(currentProperty)
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `/immobili/${slug}`,
+    },
+    openGraph: {
+      type: 'website',
+      url: `/immobili/${slug}`,
+      title,
+      description,
+      siteName: 'Area Immobiliare',
+      images: [
+        {
+          url: imageUrl,
+          alt: currentProperty.title || 'Immobile Area Immobiliare',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [imageUrl],
+    },
+  }
+}
+
 
 export default async function PropertyDetailPage({ params }: PageProps) {
   const { slug } = await params

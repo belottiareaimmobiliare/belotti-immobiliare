@@ -65,9 +65,10 @@ async function getNewsUrls(): Promise<SitemapEntry[]> {
   }
 
   const { data, error } = await supabase
-    .from('news')
-    .select('slug, updated_at, published_at, created_at')
+    .from('news_items')
+    .select('slug, published_at, created_at')
     .eq('status', 'published')
+    .eq('is_visible', true)
     .not('slug', 'is', null)
 
   if (error || !data) {
@@ -80,7 +81,7 @@ async function getNewsUrls(): Promise<SitemapEntry[]> {
     .map((article) => ({
       url: absoluteUrl(`/news/${article.slug}`),
       lastModified:
-        article.updated_at || article.published_at || article.created_at || new Date(),
+        article.published_at || article.created_at || new Date(),
       changeFrequency: 'weekly',
       priority: 0.7,
     }))

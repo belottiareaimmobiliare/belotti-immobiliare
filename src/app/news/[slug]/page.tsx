@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import SiteHeader from '@/components/public/SiteHeader'
 import Footer from '@/components/public/Footer'
@@ -28,6 +29,112 @@ function formatDate(value: string | null) {
     year: 'numeric',
   })
 }
+
+
+const newsSiteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://belotti-immobiliare.vercel.app'
+
+function absoluteNewsMetadataUrl(value: string | null | undefined) {
+  const clean = String(value || '').trim()
+
+  if (!clean) return '/icon.png'
+  if (clean.startsWith('http://') || clean.startsWith('https://')) return clean
+  if (clean.startsWith('/')) return `${newsSiteUrl}${clean}`
+
+  return clean
+}
+
+function stripNewsHtmlForMetadata(value: string | null | undefined) {
+  return String(value || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function truncateNewsMetadata(value: string, maxLength = 155) {
+  const clean = value.replace(/\s+/g, ' ').trim()
+
+  if (clean.length <= maxLength) return clean
+
+  return `${clean.slice(0, maxLength - 1).trim()}…`
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params
+  const supabase = createServiceClient()
+
+  const { data: item } = await supabase
+    .from('news_items')
+    .select(`
+      *,
+      news_media (*)
+    `)
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .eq('is_visible', true)
+    .maybeSingle()
+
+  if (!item) {
+    return {
+      title: 'News non trovata',
+      robots: {
+        index: false,
+        follow: false,
+      },
+    }
+  }
+
+  const media = ((item.news_media || []) as NewsMediaItem[]).slice().sort((a, b) => {
+    if ((a.is_cover ? 1 : 0) !== (b.is_cover ? 1 : 0)) {
+      return a.is_cover ? -1 : 1
+    }
+
+    return (a.sort_order ?? 0) - (b.sort_order ?? 0)
+  })
+
+  const cover = media.find((m) => m.is_cover) || media[0] || null
+  const imageUrl = absoluteNewsMetadataUrl(cover?.image_url || item.image_url)
+
+  const title = truncateNewsMetadata(item.title || 'News Area Immobiliare', 65)
+
+  const description = truncateNewsMetadata(
+    stripNewsHtmlForMetadata(
+      item.brief ||
+        item.content ||
+        'News, aggiornamenti e approfondimenti sul mercato immobiliare a Bergamo e provincia.'
+    )
+  )
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `/news/${slug}`,
+    },
+    openGraph: {
+      type: 'article',
+      url: `/news/${slug}`,
+      title,
+      description,
+      siteName: 'Area Immobiliare',
+      publishedTime: item.published_at || item.created_at || undefined,
+      authors: item.author_name ? [item.author_name] : ['Area Immobiliare'],
+      images: [
+        {
+          url: imageUrl,
+          alt: item.title || 'News Area Immobiliare',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [imageUrl],
+    },
+  }
+}
+
 
 export default async function NewsDetailPage({ params }: PageProps) {
   const { slug } = await params
