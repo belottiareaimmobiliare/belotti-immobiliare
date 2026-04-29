@@ -15,10 +15,55 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 })
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://belotti-immobiliare.vercel.app'
+
 export const metadata: Metadata = {
-  title: 'Area Immobiliare',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'Area Immobiliare | Immobili a Bergamo e provincia',
+    template: '%s | Area Immobiliare',
+  },
   description:
-    'Immobili in vendita e in affitto a Bergamo e provincia con Area Immobiliare.',
+    'Area Immobiliare di Gianfederico Belotti: immobili in vendita e in affitto a Bergamo e provincia, consulenza immobiliare e valutazioni professionali.',
+  applicationName: 'Area Immobiliare',
+  authors: [
+    { name: 'Area Immobiliare' },
+    { name: 'Gianfederico Belotti' },
+  ],
+  creator: 'Area Immobiliare',
+  publisher: 'Area Immobiliare',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'it_IT',
+    url: '/',
+    siteName: 'Area Immobiliare',
+    title: 'Area Immobiliare | Immobili a Bergamo e provincia',
+    description:
+      'Immobili in vendita e in affitto a Bergamo e provincia con Area Immobiliare di Gianfederico Belotti.',
+    images: [
+      {
+        url: '/icon.png',
+        width: 512,
+        height: 512,
+        alt: 'Area Immobiliare',
+      },
+    ],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
   icons: {
     icon: [
       { url: '/favicon.ico' },
