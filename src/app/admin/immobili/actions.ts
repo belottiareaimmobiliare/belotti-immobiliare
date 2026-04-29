@@ -104,3 +104,157 @@ export async function togglePropertyStatus(
   revalidatePath('/')
   revalidatePath('/immobili')
 }
+
+export type CreatePropertyInput = Record<string, string | boolean | number | null | undefined>
+
+function normalizeOptionalNumber(value: unknown) {
+  if (value === null || value === undefined || value === '') return null
+  const numberValue = Number(value)
+  return Number.isFinite(numberValue) ? numberValue : null
+}
+
+function normalizeOptionalString(value: unknown) {
+  if (value === null || value === undefined) return null
+  const stringValue = String(value).trim()
+  return stringValue || null
+}
+
+function normalizeBoolean(value: unknown) {
+  return value === true
+}
+
+export async function createProperty(input: CreatePropertyInput) {
+  const profile = await requireAdminProfile()
+  const service = createServiceClient()
+
+  const title = normalizeOptionalString(input.title)
+  const slug = normalizeOptionalString(input.slug)
+
+  if (!title || !slug) {
+    throw new Error('Titolo o slug mancante')
+  }
+
+  const status = normalizeOptionalString(input.status) || 'draft'
+  const now = new Date().toISOString()
+
+  const payload = {
+    title,
+    reference_code: normalizeOptionalString(input.reference_code),
+    condition: normalizeOptionalString(input.condition),
+    availability: normalizeOptionalString(input.availability),
+    year_built: normalizeOptionalNumber(input.year_built),
+    floor: normalizeOptionalString(input.floor),
+    total_floors: normalizeOptionalString(input.total_floors),
+    bedrooms: normalizeOptionalNumber(input.bedrooms),
+    balconies: normalizeOptionalNumber(input.balconies),
+    terraces: normalizeOptionalNumber(input.terraces),
+    exposure: normalizeOptionalString(input.exposure),
+    slug,
+    price: normalizeOptionalNumber(input.price),
+    province: normalizeOptionalString(input.province),
+    comune: normalizeOptionalString(input.comune),
+    frazione: normalizeOptionalString(input.frazione),
+    address: normalizeOptionalString(input.address),
+    rooms: normalizeOptionalNumber(input.rooms),
+    bathrooms: normalizeOptionalNumber(input.bathrooms),
+    surface: normalizeOptionalNumber(input.surface),
+    contract_type: normalizeOptionalString(input.contract_type),
+    property_type: normalizeOptionalString(input.property_type),
+    description: normalizeOptionalString(input.description),
+    status,
+    created_by: profile.id,
+    updated_by: profile.id,
+    assigned_agent_id: profile.id,
+    published_by: status === 'published' ? profile.id : null,
+    published_at: status === 'published' ? now : null,
+    has_garage: normalizeBoolean(input.has_garage),
+    has_parking: normalizeBoolean(input.has_parking),
+    has_garden: normalizeBoolean(input.has_garden),
+    has_elevator: normalizeBoolean(input.has_elevator),
+    is_auction: normalizeBoolean(input.is_auction),
+    export_immobiliare_it: normalizeBoolean(input.export_immobiliare_it),
+    export_idealista: normalizeBoolean(input.export_idealista),
+    export_casa_it: normalizeBoolean(input.export_casa_it),
+    energy_class: normalizeOptionalString(input.energy_class),
+    condo_fees: normalizeOptionalString(input.condo_fees),
+    heating_type: normalizeOptionalString(input.heating_type),
+    heating_source: normalizeOptionalString(input.heating_source),
+    energy_epgl: normalizeOptionalString(input.energy_epgl),
+    condo_fees_amount: normalizeOptionalNumber(input.condo_fees_amount),
+    condo_fees_period: normalizeOptionalString(input.condo_fees_period),
+    furnished_status: normalizeOptionalString(input.furnished_status),
+    deposit_amount: normalizeOptionalString(input.deposit_amount),
+    advance_amount: normalizeOptionalString(input.advance_amount),
+    advance_deposit_amount: normalizeOptionalString(input.advance_deposit_amount),
+    last_activity_at: now,
+  }
+
+  const { data, error } = await service
+    .from('properties')
+    .insert(payload)
+    .select('id')
+    .single()
+
+  if (error || !data) {
+    console.error('Errore creazione immobile:', error)
+    throw new Error('Errore creazione immobile')
+  }
+
+  await service.from('activity_log').insert({
+    actor_user_id: profile.id,
+    actor_username: profile.username,
+    actor_full_name: profile.full_name,
+    entity_type: 'property',
+    entity_id: data.id,
+    action: 'create',
+    summary: `Creato immobile: ${title}`,
+    after_data: {
+      id: data.id,
+      title,
+      slug,
+      status,
+    },
+  })
+
+  revalidatePath('/admin/immobili')
+  revalidatePath('/admin/kpi')
+  revalidatePath('/')
+  revalidatePath('/immobili')
+
+  return { id: data.id }
+}
+
+export async function updatePropertyGeocode(
+  propertyId: string,
+  input: {
+    latitude: number | null
+    longitude: number | null
+    locationMode?: string | null
+    queryUsed?: string | null
+    geocodeStatus?: string | null
+  }
+) {
+  const profile = await requireAdminProfile()
+  const service = createServiceClient()
+
+  const { error } = await service
+    .from('properties')
+    .update({
+      latitude: input.latitude,
+      longitude: input.longitude,
+      location_mode: input.locationMode || null,
+      geocode_query: input.queryUsed || null,
+      geocode_status: input.geocodeStatus || null,
+      updated_by: profile.id,
+      last_activity_at: new Date().toISOString(),
+    })
+    .eq('id', propertyId)
+
+  if (error) {
+    console.error('Errore aggiornamento geocodifica:', error)
+    throw new Error('Errore aggiornamento geocodifica')
+  }
+
+  revalidatePath('/admin/immobili')
+  revalidatePath('/immobili')
+}
