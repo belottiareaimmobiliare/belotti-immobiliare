@@ -722,3 +722,59 @@ html[data-theme='light'] select optgroup {
   background-color: #fffaf2;
   color: #191611;
 }
+
+/* Lead status buttons */
+.lead-status-btn {
+  border-radius: 9999px;
+  padding: 0.65rem 1.15rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #050505 !important;
+  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.lead-status-btn:hover {
+  transform: translateY(-1px);
+}
+
+.lead-status-btn-new {
+  background: rgba(254, 243, 199, 0.95) !important;
+  border: 1px solid rgba(245, 158, 11, 0.65) !important;
+}
+
+.lead-status-btn-new:hover {
+  background: rgba(253, 230, 138, 1) !important;
+  box-shadow: 0 10px 24px rgba(245, 158, 11, 0.18);
+}
+
+.lead-status-btn-contacted {
+  background: rgba(224, 242, 254, 0.95) !important;
+  border: 1px solid rgba(14, 165, 233, 0.65) !important;
+}
+
+.lead-status-btn-contacted:hover {
+  background: rgba(186, 230, 253, 1) !important;
+  box-shadow: 0 10px 24px rgba(14, 165, 233, 0.18);
+}
+
+.lead-status-btn-closed {
+  background: rgba(209, 250, 229, 0.95) !important;
+  border: 1px solid rgba(16, 185, 129, 0.65) !important;
+}
+
+.lead-status-btn-closed:hover {
+  background: rgba(167, 243, 208, 1) !important;
+  box-shadow: 0 10px 24px rgba(16, 185, 129, 0.18);
+}
+
+.lead-status-btn-archived {
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid transparent !important;
+  color: #ffffff !important;
+}
+
+.lead-status-btn-archived:hover {
+  background: rgba(0, 0, 0, 0.42) !important;
+  border-color: transparent !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
