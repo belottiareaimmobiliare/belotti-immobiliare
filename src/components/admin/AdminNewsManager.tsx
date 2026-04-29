@@ -4,6 +4,15 @@ import { ChangeEvent, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import RichTextEditor from '@/components/admin/RichTextEditor'
+import {
+  createNewsItem,
+  createNewsMediaRecord,
+  deleteNewsItem,
+  deleteNewsMedia,
+  reorderNewsItems,
+  setNewsMediaCover,
+  updateNewsItem,
+} from '@/lib/admin-news-actions'
 
 type NewsMediaItem = {
   id: string
@@ -194,28 +203,28 @@ export default function AdminNewsManager({ items, authors }: Props) {
     startTransition(async () => {
       const slug = slugify(createForm.title)
 
-      const { error } = await supabase.from('news_items').insert({
-        source_type: 'manual',
-        slug,
-        title: createForm.title.trim(),
-        brief: createForm.brief.trim() || null,
-        content: createForm.content.trim() || null,
-        author_name: createForm.author_name || null,
-        source_name: createForm.source_name.trim() || null,
-        source_url: createForm.source_url.trim() || null,
-        external_url: createForm.external_url.trim() || null,
-        image_url: null,
-        is_visible: true,
-        is_pinned: false,
-        pin_order: null,
-        sort_order: Number(createForm.sort_order || 0),
-        status: createForm.status === 'draft' ? 'draft' : 'published',
-        published_at:
-          createForm.status === 'published' ? new Date().toISOString() : null,
-      })
-
-      if (error) {
-        alert(error.message)
+      try {
+        await createNewsItem({
+          source_type: 'manual',
+          slug,
+          title: createForm.title.trim(),
+          brief: createForm.brief.trim() || null,
+          content: createForm.content.trim() || null,
+          author_name: createForm.author_name || null,
+          source_name: createForm.source_name.trim() || null,
+          source_url: createForm.source_url.trim() || null,
+          external_url: createForm.external_url.trim() || null,
+          image_url: null,
+          is_visible: true,
+          is_pinned: false,
+          pin_order: null,
+          sort_order: Number(createForm.sort_order || 0),
+          status: createForm.status === 'draft' ? 'draft' : 'published',
+          published_at:
+            createForm.status === 'published' ? new Date().toISOString() : null,
+        })
+      } catch (error) {
+        alert(error instanceof Error ? error.message : 'Errore creazione news')
         return
       }
 
@@ -246,13 +255,10 @@ export default function AdminNewsManager({ items, authors }: Props) {
         slug: nextSlug || item.slug,
       }
 
-      const { error } = await supabase
-        .from('news_items')
-        .update(payload)
-        .eq('id', item.id)
-
-      if (error) {
-        alert(error.message)
+      try {
+        await updateNewsItem(item.id, payload)
+      } catch (error) {
+        alert(error instanceof Error ? error.message : 'Errore aggiornamento news')
         return
       }
 
@@ -265,10 +271,10 @@ export default function AdminNewsManager({ items, authors }: Props) {
     if (!ok) return
 
     startTransition(async () => {
-      const { error } = await supabase.from('news_items').delete().eq('id', id)
-
-      if (error) {
-        alert(error.message)
+      try {
+        await deleteNewsItem(id)
+      } catch (error) {
+        alert(error instanceof Error ? error.message : 'Errore eliminazione news')
         return
       }
 
@@ -301,18 +307,15 @@ export default function AdminNewsManager({ items, authors }: Props) {
 
       if (changed.length === 0) return
 
-      const results = await Promise.all(
-        changed.map((item) =>
-          supabase
-            .from('news_items')
-            .update({ sort_order: item.sort_order })
-            .eq('id', item.id)
+      try {
+        await reorderNewsItems(
+          changed.map((item) => ({
+            id: item.id,
+            sort_order: item.sort_order,
+          }))
         )
-      )
-
-      const failed = results.find((r) => r.error)
-      if (failed?.error) {
-        alert(failed.error.message)
+      } catch (error) {
+        alert(error instanceof Error ? error.message : 'Errore riordino news')
         return
       }
 
@@ -915,17 +918,13 @@ function NewsRow({
       return
     }
 
-    const { error } = await supabase.from('news_media').insert({
-      news_item_id: item.id,
-      image_url: imageUrl,
+    await createNewsMediaRecord({
+      newsItemId: item.id,
+      imageUrl,
       caption: null,
-      sort_order: totalImages + 1,
-      is_cover: totalImages === 0,
+      sortOrder: totalImages + 1,
+      isCover: totalImages === 0,
     })
-
-    if (error) {
-      throw error
-    }
   }
 
   const handleUploadImage = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -967,16 +966,16 @@ function NewsRow({
     }
 
     startTransition(async () => {
-      const { error } = await supabase.from('news_media').insert({
-        news_item_id: item.id,
-        image_url: externalImageUrl.trim(),
-        caption: null,
-        sort_order: totalImages + 1,
-        is_cover: totalImages === 0,
-      })
-
-      if (error) {
-        alert(error.message)
+      try {
+        await createNewsMediaRecord({
+          newsItemId: item.id,
+          imageUrl: externalImageUrl.trim(),
+          caption: null,
+          sortOrder: totalImages + 1,
+          isCover: totalImages === 0,
+        })
+      } catch (error) {
+        alert(error instanceof Error ? error.message : 'Errore inserimento immagine news')
         return
       }
 
@@ -987,23 +986,10 @@ function NewsRow({
 
   const handleSetCover = (mediaId: string) => {
     startTransition(async () => {
-      const { error: clearError } = await supabase
-        .from('news_media')
-        .update({ is_cover: false })
-        .eq('news_item_id', item.id)
-
-      if (clearError) {
-        alert(clearError.message)
-        return
-      }
-
-      const { error } = await supabase
-        .from('news_media')
-        .update({ is_cover: true })
-        .eq('id', mediaId)
-
-      if (error) {
-        alert(error.message)
+      try {
+        await setNewsMediaCover(item.id, mediaId)
+      } catch (error) {
+        alert(error instanceof Error ? error.message : 'Errore impostazione copertina news')
         return
       }
 
@@ -1016,10 +1002,10 @@ function NewsRow({
     if (!ok) return
 
     startTransition(async () => {
-      const { error } = await supabase.from('news_media').delete().eq('id', mediaId)
-
-      if (error) {
-        alert(error.message)
+      try {
+        await deleteNewsMedia(mediaId)
+      } catch (error) {
+        alert(error instanceof Error ? error.message : 'Errore eliminazione immagine news')
         return
       }
 
