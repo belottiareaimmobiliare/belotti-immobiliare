@@ -822,3 +822,42 @@ html[data-theme='light'] select optgroup {
 .theme-button-primary:active {
   transform: translateY(0);
 }
+
+/* Social buttons hover */
+a[href*="facebook.com"][aria-label],
+a[href*="facebook.com"][title] {
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+a[href*="facebook.com"][aria-label]:hover,
+a[href*="facebook.com"][title]:hover {
+  background: #1877f2 !important;
+  border-color: #1877f2 !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) scale(1.04);
+  box-shadow: 0 12px 28px rgba(24, 119, 242, 0.28) !important;
+}
+
+a[href*="tiktok.com"][aria-label],
+a[href*="tiktok.com"][title] {
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+a[href*="tiktok.com"][aria-label]:hover,
+a[href*="tiktok.com"][title]:hover {
+  background: linear-gradient(135deg, #ff0050 0%, #8a2be2 55%, #00f2ea 100%) !important;
+  border-color: rgba(255, 0, 80, 0.75) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) scale(1.04);
+  box-shadow: 0 12px 28px rgba(255, 0, 80, 0.28) !important;
+}
