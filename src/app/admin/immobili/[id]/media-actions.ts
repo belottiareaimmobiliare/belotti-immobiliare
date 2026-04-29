@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 type MediaType = 'image' | 'plan'
 
@@ -15,7 +15,7 @@ export async function updatePropertyPhotoFlags(
     noPhotoAvailable: boolean
   }
 ) {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const photoComingSoon = Boolean(flags.photoComingSoon)
   const noPhotoAvailable = Boolean(flags.noPhotoAvailable)
@@ -47,7 +47,7 @@ export async function updatePropertyPhotoFlags(
 }
 
 export async function updatePropertyMediaLabel(mediaId: string, label: string) {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data: media, error: mediaFetchError } = await supabase
     .from('property_media')
@@ -76,7 +76,7 @@ export async function updatePropertyMediaLabel(mediaId: string, label: string) {
 }
 
 export async function setPropertyMediaAsCover(propertyId: string, mediaId: string) {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { error: resetError } = await supabase
     .from('property_media')
@@ -135,7 +135,7 @@ export async function deletePropertyMedia(
   mediaId: string,
   mediaType: MediaType
 ) {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data: media, error: fetchError } = await supabase
     .from('property_media')
@@ -196,6 +196,57 @@ export async function deletePropertyMedia(
       .from('properties')
       .update({ last_activity_at: new Date().toISOString() })
       .eq('id', propertyId)
+  }
+
+  revalidatePath(`/admin/immobili/${propertyId}`)
+  revalidatePath('/admin/immobili')
+  revalidatePath('/immobili')
+}
+
+export async function createPropertyMediaRecord(
+  propertyId: string,
+  input: {
+    mediaType: MediaType
+    fileUrl: string
+    sortOrder: number
+    isCover?: boolean
+  }
+) {
+  const supabase = createServiceClient()
+
+  const isCover = Boolean(input.isCover)
+
+  const { error } = await supabase.from('property_media').insert([
+    {
+      property_id: propertyId,
+      media_type: input.mediaType,
+      file_url: input.fileUrl,
+      label: null,
+      sort_order: input.sortOrder,
+      is_cover: isCover,
+    },
+  ])
+
+  if (error) {
+    console.error(error)
+    throw new Error('Errore inserimento media immobile')
+  }
+
+  if (input.mediaType === 'image' && isCover) {
+    const { error: propertyError } = await supabase
+      .from('properties')
+      .update({
+        main_image: input.fileUrl,
+        photo_coming_soon: false,
+        no_photo_available: false,
+        last_activity_at: new Date().toISOString(),
+      })
+      .eq('id', propertyId)
+
+    if (propertyError) {
+      console.error(propertyError)
+      throw new Error('Errore aggiornamento copertina immobile')
+    }
   }
 
   revalidatePath(`/admin/immobili/${propertyId}`)

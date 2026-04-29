@@ -4,6 +4,7 @@ import { ChangeEvent, DragEvent, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
+  createPropertyMediaRecord,
   deletePropertyMedia,
   setPropertyMediaAsCover,
   updatePropertyMediaLabel,
@@ -91,36 +92,12 @@ export default function PropertyMediaManagerV2({
     sortOrder: number,
     isCover = false
   ) => {
-    const { error } = await supabase.from('property_media').insert([
-      {
-        property_id: propertyId,
-        media_type: mediaType,
-        file_url: fileUrl,
-        label: null,
-        sort_order: sortOrder,
-        is_cover: isCover,
-      },
-    ])
-
-    if (error) {
-      throw error
-    }
-
-    if (mediaType === 'image' && isCover) {
-      const { error: propertyError } = await supabase
-        .from('properties')
-        .update({
-          main_image: fileUrl,
-          photo_coming_soon: false,
-          no_photo_available: false,
-          last_activity_at: new Date().toISOString(),
-        })
-        .eq('id', propertyId)
-
-      if (propertyError) {
-        throw propertyError
-      }
-    }
+    await createPropertyMediaRecord(propertyId, {
+      mediaType,
+      fileUrl,
+      sortOrder,
+      isCover,
+    })
   }
 
   const handleImageFiles = async (files: FileList | null) => {
