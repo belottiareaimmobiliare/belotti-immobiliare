@@ -65,7 +65,6 @@ const propertyIcon = L.divIcon({
   `,
   iconSize: [26, 26],
   iconAnchor: [13, 13],
-  popupAnchor: [0, -16],
 })
 
 const vertexIcon = L.divIcon({
@@ -184,6 +183,121 @@ function DrawingEvents({
   return null
 }
 
+function SelectedPropertyOverlay({
+  property,
+  onClose,
+}: {
+  property: ValidMapProperty
+  onClose: () => void
+}) {
+  const map = useMap()
+  const [position, setPosition] = useState({ left: 0, top: 0 })
+
+  useEffect(() => {
+    const updatePosition = () => {
+      const point = map.latLngToContainerPoint([property.latitude, property.longitude])
+      const mapSize = map.getSize()
+
+      const cardWidth = 560
+      const cardHeight = 170
+      const gap = 20
+      const margin = 14
+
+      let left = point.x + gap
+      let top = point.y - cardHeight - gap
+
+      if (left + cardWidth > mapSize.x - margin) {
+        left = point.x - cardWidth - gap
+      }
+
+      if (left < margin) {
+        left = margin
+      }
+
+      if (top < margin) {
+        top = point.y + gap
+      }
+
+      if (top + cardHeight > mapSize.y - margin) {
+        top = Math.max(margin, mapSize.y - cardHeight - margin)
+      }
+
+      setPosition({ left, top })
+    }
+
+    updatePosition()
+    map.on('move zoom resize', updatePosition)
+
+    return () => {
+      map.off('move zoom resize', updatePosition)
+    }
+  }, [map, property.latitude, property.longitude])
+
+  return (
+    <div
+      className="pointer-events-auto absolute z-[500] w-[min(92vw,560px)]"
+      style={{ left: position.left, top: position.top }}
+    >
+      <div className="overflow-hidden rounded-[22px] bg-white text-slate-900 shadow-[0_18px_40px_rgba(2,6,23,0.16)]">
+        <div className="grid min-h-[170px] grid-cols-1 bg-white md:grid-cols-[1.1fr_1fr]">
+          <div className="order-2 flex min-w-0 flex-col justify-between px-5 py-5 md:order-1">
+            <div>
+              <h3 className="line-clamp-2 text-[1.05rem] font-semibold leading-6 text-slate-800">
+                {property.title || 'Immobile'}
+              </h3>
+
+              <p className="mt-3 text-[13px] text-slate-500">
+                {property.comune || '—'} ({property.province || '—'})
+              </p>
+            </div>
+
+            <div className="mt-4">
+              <p className="text-[1.65rem] font-semibold leading-none text-slate-900 md:text-[2rem]">
+                {formatPrice(property.price)}
+              </p>
+            </div>
+
+            <div className="mt-4">
+              {property.slug ? (
+                <a
+                  href={`/immobili/${property.slug}`}
+                  className="inline-flex rounded-[12px] bg-[#08111f] px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+                >
+                  Apri scheda
+                </a>
+              ) : (
+                <div className="h-[42px]" />
+              )}
+            </div>
+          </div>
+
+          <div className="relative order-1 overflow-hidden md:order-2 md:rounded-l-[18px]">
+            {property.coverImage ? (
+              <div
+                className="h-[160px] w-full bg-cover bg-center md:h-full md:min-h-[170px]"
+                style={{ backgroundImage: `url('${property.coverImage}')` }}
+              />
+            ) : (
+              <div className="flex h-[160px] w-full items-center justify-center bg-slate-200 text-[11px] text-slate-500 md:h-full md:min-h-[170px]">
+                Nessuna immagine
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-sm text-slate-600 transition hover:bg-white"
+              aria-label="Chiudi scheda immobile"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function AreaDrawMap({ properties }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -195,19 +309,6 @@ export default function AreaDrawMap({ properties }: Props) {
 
   const polygonClosed = isClosed && polygonPoints.length >= 3
 
-  const matchingProperties = useMemo(() => {
-    if (!polygonClosed) return []
-
-    return properties.filter((property) => {
-      if (!isValidMapProperty(property)) return false
-
-      return pointInPolygon(
-        { lat: property.latitude, lng: property.longitude },
-        polygonPoints
-      )
-    })
-  }, [polygonClosed, polygonPoints, properties])
-
   const validProperties = useMemo(
     () => properties.filter(isValidMapProperty),
     [properties]
@@ -216,10 +317,22 @@ export default function AreaDrawMap({ properties }: Props) {
   const selectedProperty =
     validProperties.find((property) => property.id === selectedPropertyId) || null
 
+  const matchingProperties = useMemo(() => {
+    if (!polygonClosed) return []
+
+    return validProperties.filter((property) =>
+      pointInPolygon(
+        { lat: property.latitude, lng: property.longitude },
+        polygonPoints
+      )
+    )
+  }, [polygonClosed, polygonPoints, validProperties])
+
   function handleStartDrawing() {
     setDrawingEnabled(true)
     setPolygonPoints([])
     setIsClosed(false)
+    setSelectedPropertyId(null)
   }
 
   function handleAddPoint(point: Point) {
@@ -267,11 +380,8 @@ export default function AreaDrawMap({ properties }: Props) {
     point.lng,
   ])
 
-  
-return (
+  return (
     <div className="relative h-full w-full">
-
-
       <div className="absolute left-6 top-24 z-[30] w-[min(420px,calc(100%-3rem))]">
         <div className="theme-map-floating overflow-hidden rounded-[30px] p-6">
           <div>
@@ -373,22 +483,18 @@ return (
           onAddPoint={handleAddPoint}
         />
 
-        {properties.map((property) => {
-          if (!isValidMapProperty(property)) return null
-
-          return (
-            <Marker
-              key={property.id}
-              position={[property.latitude, property.longitude]}
-              icon={propertyIcon}
-              eventHandlers={{
-                click: () => {
-                  setSelectedPropertyId(property.id)
-                },
-              }}
-            />
-          )
-        })}
+        {validProperties.map((property) => (
+          <Marker
+            key={property.id}
+            position={[property.latitude, property.longitude]}
+            icon={propertyIcon}
+            eventHandlers={{
+              click: () => {
+                setSelectedPropertyId(property.id)
+              },
+            }}
+          />
+        ))}
 
         {polygonPoints.length > 0 && !isClosed && (
           <Polyline
@@ -417,8 +523,7 @@ return (
           const isFirst = index === 0
           const canClose = isFirst && polygonPoints.length >= 3 && !isClosed
 
-          
-return (
+          return (
             <Marker
               key={`${point.lat}-${point.lng}-${index}`}
               position={[point.lat, point.lng]}
@@ -439,68 +544,14 @@ return (
             </Marker>
           )
         })}
+
+        {selectedProperty && (
+          <SelectedPropertyOverlay
+            property={selectedProperty}
+            onClose={() => setSelectedPropertyId(null)}
+          />
+        )}
       </MapContainer>
-
-      {selectedProperty && (
-        <div className="absolute left-1/2 top-24 z-[500] w-[min(92%,560px)] -translate-x-1/2 md:top-20">
-          <div className="overflow-hidden rounded-[22px] bg-white text-slate-900 shadow-[0_18px_40px_rgba(2,6,23,0.16)]">
-            <div className="grid min-h-[170px] grid-cols-1 bg-white md:grid-cols-[1.1fr_1fr]">
-              <div className="order-2 flex min-w-0 flex-col justify-between px-5 py-5 md:order-1">
-                <div>
-                  <h3 className="line-clamp-2 text-[1.05rem] font-semibold leading-6 text-slate-800">
-                    {selectedProperty.title || 'Immobile'}
-                  </h3>
-
-                  <p className="mt-3 text-[13px] text-slate-500">
-                    {selectedProperty.comune || '—'} ({selectedProperty.province || '—'})
-                  </p>
-                </div>
-
-                <div className="mt-4">
-                  <p className="text-[1.65rem] font-semibold leading-none text-slate-900 md:text-[2rem]">
-                    {formatPrice(selectedProperty.price)}
-                  </p>
-                </div>
-
-                <div className="mt-4">
-                  {selectedProperty.slug ? (
-                    <a
-                      href={`/immobili/${selectedProperty.slug}`}
-                      className="inline-flex rounded-[12px] bg-[#08111f] px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
-                    >
-                      Apri scheda
-                    </a>
-                  ) : (
-                    <div className="h-[42px]" />
-                  )}
-                </div>
-              </div>
-
-              <div className="relative order-1 overflow-hidden md:order-2 md:rounded-l-[18px]">
-                {selectedProperty.coverImage ? (
-                  <div
-                    className="h-[160px] w-full bg-cover bg-center md:h-full md:min-h-[170px]"
-                    style={{ backgroundImage: `url('${selectedProperty.coverImage}')` }}
-                  />
-                ) : (
-                  <div className="flex h-[160px] w-full items-center justify-center bg-slate-200 text-[11px] text-slate-500 md:h-full md:min-h-[170px]">
-                    Nessuna immagine
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedPropertyId(null)}
-                  className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-sm text-slate-600 transition hover:bg-white"
-                  aria-label="Chiudi scheda immobile"
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
