@@ -794,3 +794,31 @@ html[data-theme='light'] select optgroup {
   border-color: transparent !important;
   color: #ffffff !important;
 }
+
+/* Gold hover sweep buttons */
+.theme-button-primary {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-image: linear-gradient(110deg, #fff7df 0%, #efd48a 38%, #d8ad45 100%) !important;
+  background-size: 220% 100% !important;
+  background-position: 100% 0 !important;
+  color: #111111 !important;
+  border-color: rgba(216, 173, 69, 0.45) !important;
+  transition:
+    background-position 420ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease !important;
+}
+
+.theme-button-primary:hover {
+  background-position: 0 0 !important;
+  transform: translateY(-1px);
+  border-color: rgba(216, 173, 69, 0.75) !important;
+  box-shadow: 0 14px 32px rgba(216, 173, 69, 0.22) !important;
+}
+
+.theme-button-primary:active {
+  transform: translateY(0);
+}
