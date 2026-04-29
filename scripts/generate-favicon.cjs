@@ -36,10 +36,10 @@ function dilateAlpha(alpha, width, height, radius) {
 
 async function makeWhiteOutlinedPng(size, filename) {
   const outlineWidth =
-    size <= 16 ? 2 :
-    size <= 32 ? 3 :
-    size <= 48 ? 4 :
-    size <= 180 ? 8 : 12
+    size <= 16 ? 1 :
+    size <= 32 ? 1 :
+    size <= 48 ? 1 :
+    size <= 180 ? 2 : 3
 
   const threshold =
     size <= 16 ? 20 :
@@ -68,7 +68,7 @@ async function makeWhiteOutlinedPng(size, filename) {
   for (let i = 0; i < size * size; i++) {
     const p = i * 4
 
-    // prima bordo nero forte
+    // bordo nero sottile
     if (outlineAlpha[i] > 0) {
       out[p] = 0
       out[p + 1] = 0
@@ -76,7 +76,7 @@ async function makeWhiteOutlinedPng(size, filename) {
       out[p + 3] = 255
     }
 
-    // poi bianco pieno sopra
+    // bianco pieno sopra
     if (alpha[i] > 0) {
       out[p] = 255
       out[p + 1] = 255
@@ -111,7 +111,7 @@ async function main() {
 
   await fs.writeFile(path.join(outputDir, 'favicon.ico'), icoBuffer)
 
-  console.log('Favicon con bordo nero più spesso e netto generate correttamente.')
+  console.log('Favicon con bordo nero sottile generate correttamente.')
 }
 
 main().catch(err => {
