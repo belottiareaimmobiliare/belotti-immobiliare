@@ -392,9 +392,9 @@ return (
               icon={propertyIcon}
             >
               <Popup closeButton={false} className="property-preview-popup custom-popup">
-                <div className="w-[min(82vw,460px)] overflow-hidden rounded-[22px] bg-white text-slate-900 shadow-[0_18px_40px_rgba(2,6,23,0.16)]">
-                  <div className="grid min-h-[142px] grid-cols-1 bg-white md:grid-cols-[1.08fr_0.92fr]">
-                    <div className="order-2 flex min-w-0 flex-col justify-between px-4 py-4 md:order-1">
+                <div className="w-[min(82vw,560px)] overflow-hidden rounded-[22px] bg-white text-slate-900 shadow-[0_18px_40px_rgba(2,6,23,0.16)]">
+                  <div className="grid min-h-[140px] grid-cols-1 bg-white md:grid-cols-[1.15fr_1fr]">
+                    <div className="order-2 flex min-w-0 flex-col justify-between px-5 py-3 md:order-1">
                       <div>
                         <h3 className="line-clamp-2 text-[0.98rem] font-semibold leading-5 text-slate-800">
                           {property.title || 'Immobile'}
@@ -428,11 +428,11 @@ return (
                     <div className="relative order-1 overflow-hidden md:order-2 md:rounded-l-[18px]">
                       {property.coverImage ? (
                         <div
-                          className="h-[135px] w-full bg-cover bg-center md:h-full md:min-h-[142px]"
+                          className="h-[130px] w-full bg-cover bg-center md:h-full md:min-h-[140px]"
                           style={{ backgroundImage: `url('${property.coverImage}')` }}
                         />
                       ) : (
-                        <div className="flex h-[135px] w-full items-center justify-center bg-slate-200 text-[11px] text-slate-500 md:h-full md:min-h-[142px]">
+                        <div className="flex h-[130px] w-full items-center justify-center bg-slate-200 text-[11px] text-slate-500 md:h-full md:min-h-[140px]">
                           Nessuna immagine
                         </div>
                       )}
