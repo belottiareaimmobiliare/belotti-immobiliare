@@ -33,18 +33,28 @@ type Props = {
 
 const defaultCenter: [number, number] = [45.6983, 9.6773]
 
-const propertyIcon = L.icon({
-  iconUrl:
-    'data:image/svg+xml;utf8,' +
-    encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="34" height="46" viewBox="0 0 34 46">
-        <path d="M17 0C7.6 0 0 7.6 0 17c0 12.1 17 29 17 29s17-16.9 17-29C34 7.6 26.4 0 17 0z" fill="#38bdf8"/>
-        <circle cx="17" cy="17" r="8" fill="white"/>
+const propertyIcon = L.divIcon({
+  className: '',
+  html: `
+    <div style="
+      width: 26px;
+      height: 26px;
+      border-radius: 9999px;
+      background: white;
+      border: 3px solid #38bdf8;
+      box-shadow: 0 8px 18px rgba(2,6,23,0.22), 0 0 0 5px rgba(56,189,248,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    ">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#0284c7">
+        <path d="M3 10.8 12 3l9 7.8-1.35 1.55L18.5 11.35V20h-5v-5.2h-3V20h-5v-8.65l-1.15 1-1.35-1.55Z"/>
       </svg>
-    `),
-  iconSize: [34, 46],
-  iconAnchor: [17, 46],
-  popupAnchor: [0, -38],
+    </div>
+  `,
+  iconSize: [26, 26],
+  iconAnchor: [13, 13],
+  popupAnchor: [0, -16],
 })
 
 function formatPrice(price: number | null) {

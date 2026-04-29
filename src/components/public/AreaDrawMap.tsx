@@ -26,6 +26,7 @@ type MapProperty = {
   latitude: number | null
   longitude: number | null
   location_mode?: string | null
+  coverImage?: string | null
 }
 
 type ValidMapProperty = MapProperty & {
@@ -48,16 +49,24 @@ const propertyIcon = L.divIcon({
   className: '',
   html: `
     <div style="
-      width: 14px;
-      height: 14px;
+      width: 26px;
+      height: 26px;
       border-radius: 9999px;
       background: white;
       border: 3px solid #38bdf8;
-      box-shadow: 0 0 0 4px rgba(56,189,248,0.18);
-    "></div>
+      box-shadow: 0 8px 18px rgba(2,6,23,0.22), 0 0 0 5px rgba(56,189,248,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    ">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#0284c7">
+        <path d="M3 10.8 12 3l9 7.8-1.35 1.55L18.5 11.35V20h-5v-5.2h-3V20h-5v-8.65l-1.15 1-1.35-1.55Z"/>
+      </svg>
+    </div>
   `,
-  iconSize: [14, 14],
-  iconAnchor: [7, 7],
+  iconSize: [26, 26],
+  iconAnchor: [13, 13],
+  popupAnchor: [0, -16],
 })
 
 const vertexIcon = L.divIcon({
@@ -362,25 +371,53 @@ export default function AreaDrawMap({ properties }: Props) {
               position={[property.latitude, property.longitude]}
               icon={propertyIcon}
             >
-              <Popup>
-                <div className="min-w-[220px]">
-                  <div className="text-sm font-semibold">
-                    {property.title || 'Immobile'}
+              <Popup closeButton={false} className="property-preview-popup">
+                <div className="w-[min(82vw,520px)] overflow-hidden rounded-[22px] bg-white text-slate-900 shadow-[0_18px_40px_rgba(2,6,23,0.16)]">
+                  <div className="grid min-h-[170px] grid-cols-1 bg-white md:grid-cols-[1.1fr_1fr]">
+                    <div className="order-2 flex min-w-0 flex-col justify-between px-5 py-5 md:order-1">
+                      <div>
+                        <h3 className="line-clamp-2 text-[1.05rem] font-semibold leading-6 text-slate-800">
+                          {property.title || 'Immobile'}
+                        </h3>
+
+                        <p className="mt-3 text-[13px] text-slate-500">
+                          {property.comune || '—'} ({property.province || '—'})
+                        </p>
+                      </div>
+
+                      <div className="mt-4">
+                        <p className="text-[1.65rem] font-semibold leading-none text-slate-900 md:text-[2rem]">
+                          {formatPrice(property.price)}
+                        </p>
+                      </div>
+
+                      <div className="mt-4">
+                        {property.slug ? (
+                          <a
+                            href={`/immobili/${property.slug}`}
+                            className="inline-flex rounded-[12px] bg-[#08111f] px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+                          >
+                            Apri scheda
+                          </a>
+                        ) : (
+                          <div className="h-[42px]" />
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="relative order-1 overflow-hidden md:order-2 md:rounded-l-[18px]">
+                      {property.coverImage ? (
+                        <div
+                          className="h-[160px] w-full bg-cover bg-center md:h-full md:min-h-[170px]"
+                          style={{ backgroundImage: `url('${property.coverImage}')` }}
+                        />
+                      ) : (
+                        <div className="flex h-[160px] w-full items-center justify-center bg-slate-200 text-[11px] text-slate-500 md:h-full md:min-h-[170px]">
+                          Nessuna immagine
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="mt-1 text-sm opacity-80">
-                    {[property.comune, property.province].filter(Boolean).join(' • ')}
-                  </div>
-                  <div className="mt-2 text-sm font-medium">
-                    {formatPrice(property.price)}
-                  </div>
-                  {property.slug && (
-                    <a
-                      href={`/immobili/${property.slug}`}
-                      className="mt-3 inline-block text-sm font-medium underline"
-                    >
-                      Vai al dettaglio
-                    </a>
-                  )}
                 </div>
               </Popup>
             </Marker>
