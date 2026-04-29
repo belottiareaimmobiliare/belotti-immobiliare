@@ -3,7 +3,7 @@ import SiteHeader from '@/components/public/SiteHeader'
 import Footer from '@/components/public/Footer'
 import FooterReveal from '@/components/public/FooterReveal'
 import NewsHeroDecoration from '@/components/public/NewsHeroDecoration'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 type NewsMediaItem = {
   id: string
@@ -136,7 +136,7 @@ function NewsCard({
 }
 
 export default async function NewsPage() {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data } = await supabase
     .from('news_items')

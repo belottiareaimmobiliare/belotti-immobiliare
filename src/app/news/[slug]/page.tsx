@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import SiteHeader from '@/components/public/SiteHeader'
 import Footer from '@/components/public/Footer'
 import FooterReveal from '@/components/public/FooterReveal'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 type NewsMediaItem = {
   id: string
@@ -31,7 +31,7 @@ function formatDate(value: string | null) {
 
 export default async function NewsDetailPage({ params }: PageProps) {
   const { slug } = await params
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data: item, error } = await supabase
     .from('news_items')
