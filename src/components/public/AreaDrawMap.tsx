@@ -393,21 +393,21 @@ return (
             >
               <Popup closeButton={false} className="property-preview-popup custom-popup">
                 <div className="w-[min(92vw,560px)] overflow-hidden rounded-[22px] bg-white text-slate-900 shadow-[0_18px_40px_rgba(2,6,23,0.16)]">
-                  <div className="grid min-h-[170px] grid-cols-1 bg-white md:grid-cols-[1.1fr_1fr]">
-                    <div className="order-2 flex min-w-0 flex-col px-5 py-5 md:order-1">
+                  <div className="grid min-h-[142px] grid-cols-1 bg-white md:grid-cols-[1.1fr_1fr]">
+                    <div className="order-2 flex min-w-0 flex-col px-5 py-4 md:order-1">
                       <h3 className="line-clamp-2 text-[1.05rem] font-semibold leading-6 text-slate-800">
                         {property.title || 'Immobile'}
                       </h3>
 
-                      <p className="mt-3 text-[13px] text-slate-500">
+                      <p className="mt-2 text-[13px] text-slate-500">
                         {property.comune || '—'} ({property.province || '—'})
                       </p>
 
-                      <p className="mt-6 text-[1.65rem] font-semibold leading-none text-slate-900 md:text-[2rem]">
+                      <p className="mt-3 text-[1.65rem] font-semibold leading-none text-slate-900 md:text-[2rem]">
                         {formatPrice(property.price)}
                       </p>
 
-                      <div className="mt-5">
+                      <div className="mt-3">
                         {property.slug ? (
                           <a
                             href={`/immobili/${property.slug}`}
@@ -424,11 +424,11 @@ return (
                     <div className="relative order-1 overflow-hidden md:order-2 md:rounded-l-[18px]">
                       {property.coverImage ? (
                         <div
-                          className="h-[160px] w-full bg-cover bg-center md:h-full md:min-h-[170px]"
+                          className="h-[160px] w-full bg-cover bg-center md:h-full md:min-h-[142px]"
                           style={{ backgroundImage: `url('${property.coverImage}')` }}
                         />
                       ) : (
-                        <div className="flex h-[160px] w-full items-center justify-center bg-slate-200 text-[11px] text-slate-500 md:h-full md:min-h-[170px]">
+                        <div className="flex h-[160px] w-full items-center justify-center bg-slate-200 text-[11px] text-slate-500 md:h-full md:min-h-[142px]">
                           Nessuna immagine
                         </div>
                       )}
