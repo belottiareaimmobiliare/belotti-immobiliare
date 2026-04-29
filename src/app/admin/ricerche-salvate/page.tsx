@@ -664,11 +664,15 @@ export default async function AdminSavedSearchesPage() {
 
                                 <button
                                   type="submit"
-                                  className={`w-full rounded-full border px-3 py-2 text-xs font-semibold transition ${
-                                    savedSearch.status === option.value
-                                      ? 'border-[var(--site-border-strong)] bg-[var(--site-surface-2)] text-[var(--site-text)]'
-                                      : 'border-[var(--site-border)] bg-[var(--site-surface-2)] text-[var(--site-text)] hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]'
-                                  }`}
+                                  className={`lead-status-btn w-full ${
+                                    option.value === 'new'
+                                      ? 'lead-status-btn-new'
+                                      : option.value === 'contacted'
+                                        ? 'lead-status-btn-contacted'
+                                        : option.value === 'closed'
+                                          ? 'lead-status-btn-closed'
+                                          : 'lead-status-btn-archived'
+                                  } ${savedSearch.status === option.value ? 'ring-2 ring-white/40' : ''}`}
                                 >
                                   {option.label}
                                 </button>

@@ -774,3 +774,23 @@ html[data-theme='light'] select optgroup {
   color: #ffffff !important;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
 }
+
+
+/* Fix archived button in light/dark */
+.lead-status-btn-archived {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.14) !important;
+  color: #050505 !important;
+}
+
+[data-theme='dark'] .lead-status-btn-archived {
+  background: rgba(0, 0, 0, 0.42) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.lead-status-btn-archived:hover {
+  background: rgba(0, 0, 0, 0.42) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}
