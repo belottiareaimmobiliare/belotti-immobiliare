@@ -320,6 +320,43 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
           />
 
           <div className="theme-admin-card rounded-2xl p-4">
+                      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                        <div>
+                          <p className="theme-admin-faint text-xs uppercase tracking-[0.22em]">
+                            Descrizione immobile
+                          </p>
+                          <p className="mt-2 text-sm text-[var(--admin-text-muted)]">
+                            Inserisci o incolla la descrizione. Puoi usare l’analisi automatica per precompilare i campi principali.
+                          </p>
+                        </div>
+          
+                        <button
+                          type="button"
+                          onClick={handleAnalyzeDescription}
+                          className="rounded-xl border border-sky-300 bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-950 transition hover:bg-sky-200"
+                        >
+                          Analizza descrizione
+                        </button>
+                      </div>
+          
+                      {aiSuggestedFields.length > 0 && (
+                        <div className="mt-4 rounded-xl border border-sky-300 bg-sky-100/80 px-4 py-3 text-sm text-sky-950">
+                          I campi evidenziati in azzurro sono stati suggeriti automaticamente: controllali prima di pubblicare.
+                        </div>
+                      )}
+          
+                      <textarea
+                        name="description"
+                        placeholder="Descrizione completa dell’immobile"
+                        rows={8}
+                        value={form.description}
+                        onChange={handleChange}
+                        className="theme-admin-input mt-4 w-full rounded-xl px-4 py-3"
+                      />
+                    </div>
+
+
+          <div className="theme-admin-card rounded-2xl p-4">
             <p className="theme-admin-faint mb-4 text-xs uppercase tracking-[0.22em]">
               Dati gestionali e stato immobile
             </p>
@@ -585,7 +622,7 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                 </label>
               <input
                 name="floor"
-                placeholder="Piano"
+                placeholder="Piano nello stabile"
                 value={form.floor}
                 onChange={handleChange}
                 className="theme-admin-input rounded-xl px-4 py-3"
@@ -598,7 +635,7 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                 </label>
               <input
                 name="total_floors"
-                placeholder="Totale piani"
+                placeholder="Piani / livelli immobile"
                 value={form.total_floors}
                 onChange={handleChange}
                 className="theme-admin-input rounded-xl px-4 py-3"
@@ -828,44 +865,7 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
           </div>
         </div>
 
-
-          <div className="theme-admin-card rounded-2xl p-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-              <div>
-                <p className="theme-admin-faint text-xs uppercase tracking-[0.22em]">
-                  Descrizione immobile
-                </p>
-                <p className="mt-2 text-sm text-[var(--admin-text-muted)]">
-                  Inserisci o incolla la descrizione. Puoi usare l’analisi automatica per precompilare i campi principali.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleAnalyzeDescription}
-                className="rounded-xl border border-sky-300 bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-950 transition hover:bg-sky-200"
-              >
-                Analizza descrizione
-              </button>
-            </div>
-
-            {aiSuggestedFields.length > 0 && (
-              <div className="mt-4 rounded-xl border border-sky-300 bg-sky-100/80 px-4 py-3 text-sm text-sky-950">
-                I campi evidenziati in azzurro sono stati suggeriti automaticamente: controllali prima di pubblicare.
-              </div>
-            )}
-
-            <textarea
-              name="description"
-              placeholder="Descrizione completa dell’immobile"
-              rows={8}
-              value={form.description}
-              onChange={handleChange}
-              className="theme-admin-input mt-4 w-full rounded-xl px-4 py-3"
-            />
-          </div>
-
-        <button
+<button
           type="submit"
           disabled={loading}
           className="theme-admin-button-primary mt-6 w-full rounded-2xl py-3 font-medium transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"

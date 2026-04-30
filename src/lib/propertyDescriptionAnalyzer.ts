@@ -95,6 +95,39 @@ function extractSurface(text: string) {
 }
 
 function extractFloor(text: string) {
+  const toFloorValue = (raw: string | undefined) => {
+    if (!raw) return null
+
+    const clean = normalize(raw)
+
+    if (clean === 'terra') return 'Piano terra'
+    if (clean === 'rialzato') return 'Rialzato'
+    if (clean === 'seminterrato') return 'Seminterrato'
+    if (clean === 'ultimo') return 'Ultimo piano'
+
+    const numeric = Number(clean)
+    if (Number.isFinite(numeric)) return String(numeric)
+
+    return FLOOR_WORDS[clean] || null
+  }
+
+  const explicitBuildingFloorPatterns = [
+    /(?:posto|sito|ubicato|collocato|situato|si trova)\s+(?:al|a|in)\s+(?:piano\s+)?(terra|rialzato|seminterrato|ultimo|\d{1,2}|primo|secondo|terzo|quarto|quinto|sesto)(?:\s*(?:°|o))?\s*(?:piano)?/,
+    /(?:appartamento|immobile|attico|ufficio|negozio)\s+(?:al|a|in)\s+(?:piano\s+)?(terra|rialzato|seminterrato|ultimo|\d{1,2}|primo|secondo|terzo|quarto|quinto|sesto)(?:\s*(?:°|o))?\s*(?:piano)?/,
+    /(?:al|a|in)\s+(?:piano\s+)?(terra|rialzato|seminterrato|ultimo|\d{1,2}|primo|secondo|terzo|quarto|quinto|sesto)(?:\s*(?:°|o))?\s*piano\s+(?:di|in)\s+(?:palazzina|stabile|condominio|edificio)/,
+  ]
+
+  for (const pattern of explicitBuildingFloorPatterns) {
+    const match = text.match(pattern)
+    const value = toFloorValue(match?.[1])
+    if (value) return value
+  }
+
+  // Se il testo parla di distribuzione interna su più livelli,
+  // frasi tipo "al primo piano..." descrivono i livelli dell'immobile,
+  // non il piano nello stabile.
+  if (extractTotalFloors(text)) return null
+
   if (matchAny(text, [/piano\s+terra/, /\bp\.?\s*t\.?\b/, /\bpt\b/])) return 'Piano terra'
   if (hasAny(text, ['piano rialzato', 'rialzato'])) return 'Rialzato'
   if (hasAny(text, ['seminterrato', 'piano seminterrato'])) return 'Seminterrato'
@@ -111,6 +144,7 @@ function extractFloor(text: string) {
 
   return null
 }
+
 
 function extractTotalFloors(text: string) {
   const explicitLevels = text.match(/(?:su|disposto su|sviluppato su|articolato su)\s*(\d+|uno|una|due|tre|quattro|cinque)\s*(livelli|piani)/)
