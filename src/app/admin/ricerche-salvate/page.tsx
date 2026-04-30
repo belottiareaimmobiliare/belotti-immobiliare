@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { requirePermission } from '@/lib/admin-auth'
 import { createServiceClient } from '@/lib/supabase/service'
 import DeleteSavedSearchButton from './DeleteSavedSearchButton'
+import { formatPropertyTypeLabel } from '@/lib/propertyOptions'
 
 type SavedSearchStatus = 'new' | 'contacted' | 'closed' | 'archived'
 
@@ -510,7 +511,7 @@ export default async function AdminSavedSearchesPage() {
                             <div>
                               <p className="text-xs text-[var(--site-text-faint)]">Tipologia origine</p>
                               <p className="mt-1 text-sm text-[var(--site-text)]">
-                                {formatOptionLabel(savedSearch.source_property_type)}
+                                {formatPropertyTypeLabel(savedSearch.source_property_type)}
                               </p>
                             </div>
 

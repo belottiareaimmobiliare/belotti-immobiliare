@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createServiceClient } from '@/lib/supabase/service'
 import { sendSavedSearchVerificationEmail } from '@/lib/mailer'
+import { getPropertyMacroCategory } from '@/lib/propertyOptions'
 
 const PRIVACY_POLICY_VERSION = 'privacy-2026-04'
 
@@ -51,32 +52,7 @@ function getClientIp(request: Request) {
 }
 
 function getMacroCategory(propertyType: string | null): MacroCategory {
-  const value = String(propertyType ?? '')
-    .trim()
-    .toLowerCase()
-    .replaceAll('_', ' ')
-
-  if (['stanza', 'camera', 'posto letto', 'porzione di casa', 'porzione', 'porzione in affitto'].some((item) => value.includes(item))) {
-    return 'room_or_portion'
-  }
-
-  if (['box', 'garage', 'posto auto', 'autorimessa'].some((item) => value.includes(item))) {
-    return 'garage_parking'
-  }
-
-  if (['ufficio', 'negozio', 'locale commerciale', 'capannone', 'magazzino', 'laboratorio'].some((item) => value.includes(item))) {
-    return 'commercial'
-  }
-
-  if (['terreno', 'terreno edificabile', 'terreno agricolo', 'area edificabile'].some((item) => value.includes(item))) {
-    return 'land'
-  }
-
-  if (['appartamento', 'attico', 'bilocale', 'trilocale', 'quadrilocale', 'monolocale', 'villa', 'villetta', 'casa indipendente', 'loft', 'mansarda'].some((item) => value.includes(item))) {
-    return 'residential_full'
-  }
-
-  return 'other'
+  return getPropertyMacroCategory(propertyType) as MacroCategory
 }
 
 function calculateMinPrice(price: number | null) {

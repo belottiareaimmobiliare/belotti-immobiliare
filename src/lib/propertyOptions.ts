@@ -5,6 +5,7 @@ export type PropertyTypeOption = {
     | 'residenziale'
     | 'commerciale'
     | 'terreno'
+    | 'stanza_porzione'
     | 'pertinenza'
     | 'altro'
 }
@@ -24,6 +25,9 @@ export const PROPERTY_TYPES: PropertyTypeOption[] = [
   { value: 'casa_indipendente', label: 'Casa indipendente', category: 'residenziale' },
   { value: 'rustico_casale', label: 'Rustico / Casale', category: 'residenziale' },
   { value: 'palazzo_stabile', label: 'Palazzo / Stabile', category: 'residenziale' },
+  { value: 'stanza_camera', label: 'Stanza / Camera', category: 'stanza_porzione' },
+  { value: 'porzione_casa', label: 'Porzione di casa', category: 'stanza_porzione' },
+  { value: 'posto_letto', label: 'Posto letto', category: 'stanza_porzione' },
 
   { value: 'terreno', label: 'Terreno', category: 'terreno' },
   { value: 'terreno_edificabile', label: 'Terreno edificabile', category: 'terreno' },
@@ -64,4 +68,56 @@ export function getPropertyTypeCategory(value: string | null | undefined) {
   const clean = String(value || '').trim()
 
   return PROPERTY_TYPES.find((item) => item.value === clean)?.category || 'altro'
+}
+
+
+export type PropertyMacroCategory =
+  | 'residential_full'
+  | 'room_or_portion'
+  | 'garage_parking'
+  | 'commercial'
+  | 'land'
+  | 'other'
+
+export function getPropertyMacroCategory(
+  value: string | null | undefined
+): PropertyMacroCategory {
+  const clean = String(value || '')
+    .trim()
+    .toLowerCase()
+    .replaceAll('_', ' ')
+
+  const category = getPropertyTypeCategory(value)
+
+  if (category === 'stanza_porzione') return 'room_or_portion'
+  if (category === 'pertinenza') return 'garage_parking'
+  if (category === 'commerciale') return 'commercial'
+  if (category === 'terreno') return 'land'
+  if (category === 'residenziale') return 'residential_full'
+
+  if (
+    ['stanza', 'camera', 'posto letto', 'porzione di casa', 'porzione'].some((item) =>
+      clean.includes(item)
+    )
+  ) {
+    return 'room_or_portion'
+  }
+
+  if (['box', 'garage', 'posto auto', 'autorimessa'].some((item) => clean.includes(item))) {
+    return 'garage_parking'
+  }
+
+  if (
+    ['ufficio', 'negozio', 'locale commerciale', 'open space', 'capannone', 'magazzino', 'laboratorio', 'studio professionale'].some((item) =>
+      clean.includes(item)
+    )
+  ) {
+    return 'commercial'
+  }
+
+  if (['terreno', 'area edificabile'].some((item) => clean.includes(item))) {
+    return 'land'
+  }
+
+  return 'other'
 }

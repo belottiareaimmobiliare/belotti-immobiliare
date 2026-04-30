@@ -4,6 +4,7 @@ import {
   sendSavedSearchDigestEmail,
   sendSavedSearchNoResultsAdviceEmail,
 } from '@/lib/mailer'
+import { getPropertyMacroCategory } from '@/lib/propertyOptions'
 
 export const dynamic = 'force-dynamic'
 
@@ -79,32 +80,7 @@ function getBaseUrl(request: Request) {
 }
 
 function getMacroCategory(propertyType: string | null): MacroCategory {
-  const value = String(propertyType ?? '')
-    .trim()
-    .toLowerCase()
-    .replaceAll('_', ' ')
-
-  if (['stanza', 'camera', 'posto letto', 'porzione di casa', 'porzione', 'porzione in affitto'].some((item) => value.includes(item))) {
-    return 'room_or_portion'
-  }
-
-  if (['box', 'garage', 'posto auto', 'autorimessa'].some((item) => value.includes(item))) {
-    return 'garage_parking'
-  }
-
-  if (['ufficio', 'negozio', 'locale commerciale', 'capannone', 'magazzino', 'laboratorio'].some((item) => value.includes(item))) {
-    return 'commercial'
-  }
-
-  if (['terreno', 'terreno edificabile', 'terreno agricolo', 'area edificabile'].some((item) => value.includes(item))) {
-    return 'land'
-  }
-
-  if (['appartamento', 'attico', 'bilocale', 'trilocale', 'quadrilocale', 'monolocale', 'villa', 'villetta', 'casa indipendente', 'loft', 'mansarda'].some((item) => value.includes(item))) {
-    return 'residential_full'
-  }
-
-  return 'other'
+  return getPropertyMacroCategory(propertyType) as MacroCategory
 }
 
 function toRadians(value: number) {
