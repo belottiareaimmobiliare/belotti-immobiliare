@@ -600,6 +600,10 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
             </p>
 
             <div className="grid gap-4 md:grid-cols-3">
+              <div>
+                <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                  Anno costruzione
+                </label>
               <input
                 name="year_built"
                 placeholder="Anno costruzione"
@@ -608,7 +612,12 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                 onChange={handleChange}
                 className="theme-admin-input rounded-xl px-4 py-3"
               />
+              </div>
 
+              <div>
+                <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                  Piano
+                </label>
               <input
                 name="floor"
                 placeholder="Piano"
@@ -616,7 +625,12 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                 onChange={handleChange}
                 className="theme-admin-input rounded-xl px-4 py-3"
               />
+              </div>
 
+              <div>
+                <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                  Totale piani
+                </label>
               <input
                 name="total_floors"
                 placeholder="Totale piani"
@@ -624,7 +638,12 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                 onChange={handleChange}
                 className="theme-admin-input rounded-xl px-4 py-3"
               />
+              </div>
 
+              <div>
+                <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                  Camere
+                </label>
               <input
                 name="bedrooms"
                 placeholder="Camere"
@@ -633,7 +652,12 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                 onChange={handleChange}
                 className="theme-admin-input rounded-xl px-4 py-3"
               />
+              </div>
 
+              <div>
+                <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                  Balconi
+                </label>
               <input
                 name="balconies"
                 placeholder="Balconi"
@@ -642,7 +666,12 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                 onChange={handleChange}
                 className="theme-admin-input rounded-xl px-4 py-3"
               />
+              </div>
 
+              <div>
+                <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                  Terrazzi
+                </label>
               <input
                 name="terraces"
                 placeholder="Terrazzi"
@@ -651,6 +680,7 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                 onChange={handleChange}
                 className="theme-admin-input rounded-xl px-4 py-3"
               />
+              </div>
 
               <select
                 name="exposure"

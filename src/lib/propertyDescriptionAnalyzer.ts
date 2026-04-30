@@ -222,20 +222,37 @@ function extractBathrooms(text: string) {
 
 function extractBedrooms(text: string) {
   const explicit = extractNumberNear(text, [
-    /(\d+|una|uno|due|tre|quattro|cinque)\s*(camere|camera da letto|camere da letto)/,
+    /(\d+|una|uno|due|tre|quattro|cinque)\s*(camere da letto|camere)/,
   ])
 
-  if (explicit) return explicit
+  const explicitNumber = explicit ? Number(explicit) : 0
 
-  let count = 0
+  const sentences = splitSentences(text)
+  let countedBedrooms = 0
 
-  if (hasAny(text, ['camera matrimoniale', 'matrimoniale'])) count += 1
-  if (hasAny(text, ['cameretta'])) count += 1
-  if (hasAny(text, ['camera singola', 'singola'])) count += 1
-  if (hasAny(text, ['seconda camera'])) count = Math.max(count, 2)
-  if (hasAny(text, ['terza camera'])) count = Math.max(count, 3)
+  sentences.forEach((sentence) => {
+    let sentenceCount = 0
 
-  if (count > 0) return String(count)
+    if (hasAny(sentence, ['camera matrimoniale', 'matrimoniale'])) sentenceCount += 1
+    if (hasAny(sentence, ['cameretta'])) sentenceCount += 1
+    if (hasAny(sentence, ['camera singola'])) sentenceCount += 1
+
+    const genericBedroom = sentence.match(/(?:una|un|1)\s+camera\b/)
+    if (genericBedroom && sentenceCount === 0) sentenceCount += 1
+
+    if (hasAny(sentence, ['seconda camera'])) sentenceCount = Math.max(sentenceCount, 1)
+    if (hasAny(sentence, ['terza camera'])) sentenceCount = Math.max(sentenceCount, 1)
+
+    countedBedrooms += sentenceCount
+  })
+
+  if (hasAny(text, ['due camere', '2 camere'])) countedBedrooms = Math.max(countedBedrooms, 2)
+  if (hasAny(text, ['tre camere', '3 camere'])) countedBedrooms = Math.max(countedBedrooms, 3)
+  if (hasAny(text, ['quattro camere', '4 camere'])) countedBedrooms = Math.max(countedBedrooms, 4)
+
+  const finalCount = Math.max(explicitNumber, countedBedrooms)
+
+  if (finalCount > 0) return String(finalCount)
 
   if (hasAny(text, ['camera'])) return '1'
 
