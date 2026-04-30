@@ -11,7 +11,12 @@ type SearchParams = Promise<{
   hasParking?: string
   hasGarden?: string
   hasElevator?: string
+  hasBalcony?: string
+  hasTerrace?: string
   isAuction?: string
+  condition?: string
+  availability?: string
+  furnishedStatus?: string
   minSurface?: string
   maxSurface?: string
   minBathrooms?: string
@@ -33,6 +38,8 @@ type PropertyWithMedia = {
   id: string
   slug: string | null
   title: string | null
+  condition: string | null
+  availability: string | null
   price: number | null
   province: string | null
   comune: string | null
@@ -44,6 +51,8 @@ type PropertyWithMedia = {
   rooms: number | null
   bathrooms: number | null
   surface: number | null
+  balconies: number | null
+  terraces: number | null
   description: string | null
   contract_type: string | null
   property_type: string | null
@@ -53,6 +62,7 @@ type PropertyWithMedia = {
   has_garden: boolean | null
   has_elevator: boolean | null
   is_auction: boolean | null
+  furnished_status: string | null
   property_media?: PropertyMediaItem[]
 }
 
@@ -72,11 +82,16 @@ export default async function AreaMapPage({
   const maxSurface = params.maxSurface?.trim() || ''
   const minBathrooms = params.minBathrooms?.trim() || ''
   const province = params.province?.trim() || ''
+  const conditionFilter = params.condition?.trim() || ''
+  const availabilityFilter = params.availability?.trim() || ''
+  const furnishedStatus = params.furnishedStatus?.trim() || ''
 
   const hasGarage = params.hasGarage === 'true'
   const hasParking = params.hasParking === 'true'
   const hasGarden = params.hasGarden === 'true'
   const hasElevator = params.hasElevator === 'true'
+  const hasBalcony = params.hasBalcony === 'true'
+  const hasTerrace = params.hasTerrace === 'true'
   const isAuction = params.isAuction === 'true'
 
   const comuni =
@@ -131,6 +146,18 @@ export default async function AreaMapPage({
     query = query.gte('bathrooms', minBathroomsNumber)
   }
 
+  if (conditionFilter) {
+    query = query.eq('condition', conditionFilter)
+  }
+
+  if (availabilityFilter) {
+    query = query.eq('availability', availabilityFilter)
+  }
+
+  if (furnishedStatus) {
+    query = query.eq('furnished_status', furnishedStatus)
+  }
+
   if (province) {
     query = query.eq('province', province)
   }
@@ -153,6 +180,14 @@ export default async function AreaMapPage({
 
   if (hasElevator) {
     query = query.eq('has_elevator', true)
+  }
+
+  if (hasBalcony) {
+    query = query.gt('balconies', 0)
+  }
+
+  if (hasTerrace) {
+    query = query.gt('terraces', 0)
   }
 
   if (isAuction) {

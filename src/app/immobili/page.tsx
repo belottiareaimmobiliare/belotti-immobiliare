@@ -18,7 +18,12 @@ type SearchParams = Promise<{
   hasParking?: string
   hasGarden?: string
   hasElevator?: string
+  hasBalcony?: string
+  hasTerrace?: string
   isAuction?: string
+  condition?: string
+  availability?: string
+  furnishedStatus?: string
   minSurface?: string
   maxSurface?: string
   minBathrooms?: string
@@ -48,6 +53,8 @@ type PropertyWithMedia = {
   condition: string | null
   availability: string | null
   bedrooms: number | null
+  balconies: number | null
+  terraces: number | null
   floor: string | null
   total_floors: string | null
   price: number | null
@@ -209,12 +216,17 @@ export default async function PropertiesPage({
   const maxSurface = params.maxSurface?.trim() || ''
   const minBathrooms = params.minBathrooms?.trim() || ''
   const province = params.province?.trim() || ''
+  const conditionFilter = params.condition?.trim() || ''
+  const availabilityFilter = params.availability?.trim() || ''
+  const furnishedStatus = params.furnishedStatus?.trim() || ''
   const polygon = parsePolygon(params.polygon)
 
   const hasGarage = params.hasGarage === 'true'
   const hasParking = params.hasParking === 'true'
   const hasGarden = params.hasGarden === 'true'
   const hasElevator = params.hasElevator === 'true'
+  const hasBalcony = params.hasBalcony === 'true'
+  const hasTerrace = params.hasTerrace === 'true'
   const isAuction = params.isAuction === 'true'
 
   const comuni =
@@ -273,6 +285,18 @@ export default async function PropertiesPage({
     query = query.gte('bathrooms', minBathroomsNumber)
   }
 
+  if (conditionFilter) {
+    query = query.eq('condition', conditionFilter)
+  }
+
+  if (availabilityFilter) {
+    query = query.eq('availability', availabilityFilter)
+  }
+
+  if (furnishedStatus) {
+    query = query.eq('furnished_status', furnishedStatus)
+  }
+
   if (province) {
     query = query.eq('province', province)
   }
@@ -295,6 +319,14 @@ export default async function PropertiesPage({
 
   if (hasElevator) {
     query = query.eq('has_elevator', true)
+  }
+
+  if (hasBalcony) {
+    query = query.gt('balconies', 0)
+  }
+
+  if (hasTerrace) {
+    query = query.gt('terraces', 0)
   }
 
   if (isAuction) {
@@ -373,7 +405,12 @@ export default async function PropertiesPage({
     hasParking: hasParking ? 'true' : undefined,
     hasGarden: hasGarden ? 'true' : undefined,
     hasElevator: hasElevator ? 'true' : undefined,
+    hasBalcony: hasBalcony ? 'true' : undefined,
+    hasTerrace: hasTerrace ? 'true' : undefined,
     isAuction: isAuction ? 'true' : undefined,
+    condition: conditionFilter || undefined,
+    availability: availabilityFilter || undefined,
+    furnishedStatus: furnishedStatus || undefined,
     minSurface: minSurface || undefined,
     maxSurface: maxSurface || undefined,
     minBathrooms: minBathrooms || undefined,
@@ -454,7 +491,12 @@ export default async function PropertiesPage({
                 initialHasParking={hasParking}
                 initialHasGarden={hasGarden}
                 initialHasElevator={hasElevator}
+                initialHasBalcony={hasBalcony}
+                initialHasTerrace={hasTerrace}
                 initialIsAuction={isAuction}
+                initialCondition={conditionFilter}
+                initialAvailability={availabilityFilter}
+                initialFurnishedStatus={furnishedStatus}
                 hideLocationFilters={Boolean(polygon)}
               />
             </aside>

@@ -42,7 +42,7 @@ export const PROPERTY_TYPES: PropertyTypeOption[] = [
   { value: 'magazzino', label: 'Magazzino', category: 'commerciale' },
   { value: 'laboratorio', label: 'Laboratorio', category: 'commerciale' },
 
-  { value: 'box_garage', label: 'Box / Garage', category: 'pertinenza' },
+  { value: 'box', label: 'Box / Garage', category: 'pertinenza' },
   { value: 'posto_auto', label: 'Posto auto', category: 'pertinenza' },
 
   { value: 'altro', label: 'Altro', category: 'altro' },

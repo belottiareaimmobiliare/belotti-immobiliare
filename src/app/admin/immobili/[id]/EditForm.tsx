@@ -426,8 +426,6 @@ export default function EditForm({ property }: EditFormProps) {
                   {type.label}
                 </option>
               ))}
-              <option value="box">Box / Garage</option>
-              <option value="negozio">Negozio</option>
             </select>
           </div>
 

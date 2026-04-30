@@ -1,5 +1,6 @@
 'use client'
 import { PROPERTY_TYPES } from '@/lib/propertyOptions'
+import { AVAILABILITY_OPTIONS, CONDITION_OPTIONS, FURNISHED_STATUS_OPTIONS } from '@/lib/propertyFilterOptions'
 
 import { FormEvent, useMemo, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -18,7 +19,12 @@ type Props = {
   initialHasParking?: boolean
   initialHasGarden?: boolean
   initialHasElevator?: boolean
+  initialHasBalcony?: boolean
+  initialHasTerrace?: boolean
   initialIsAuction?: boolean
+  initialCondition?: string
+  initialAvailability?: string
+  initialFurnishedStatus?: string
 }
 
 export default function PropertiesFiltersDrawMode({
@@ -34,7 +40,12 @@ export default function PropertiesFiltersDrawMode({
   initialHasParking = false,
   initialHasGarden = false,
   initialHasElevator = false,
+  initialHasBalcony = false,
+  initialHasTerrace = false,
   initialIsAuction = false,
+  initialCondition = '',
+  initialAvailability = '',
+  initialFurnishedStatus = '',
 }: Props) {
   const router = useRouter()
   const pathname = usePathname()
@@ -52,7 +63,12 @@ export default function PropertiesFiltersDrawMode({
   const [hasParking, setHasParking] = useState(initialHasParking)
   const [hasGarden, setHasGarden] = useState(initialHasGarden)
   const [hasElevator, setHasElevator] = useState(initialHasElevator)
+  const [hasBalcony, setHasBalcony] = useState(initialHasBalcony)
+  const [hasTerrace, setHasTerrace] = useState(initialHasTerrace)
   const [isAuction, setIsAuction] = useState(initialIsAuction)
+  const [condition, setCondition] = useState(initialCondition)
+  const [availability, setAvailability] = useState(initialAvailability)
+  const [furnishedStatus, setFurnishedStatus] = useState(initialFurnishedStatus)
 
   const activeContractLabel = useMemo(() => {
     if (contractType === 'vendita') return 'Vendita'
@@ -77,7 +93,12 @@ export default function PropertiesFiltersDrawMode({
     params.delete('hasParking')
     params.delete('hasGarden')
     params.delete('hasElevator')
+    params.delete('hasBalcony')
+    params.delete('hasTerrace')
     params.delete('isAuction')
+    params.delete('condition')
+    params.delete('availability')
+    params.delete('furnishedStatus')
     params.delete('province')
     params.delete('comune')
 
@@ -94,7 +115,12 @@ export default function PropertiesFiltersDrawMode({
     if (hasParking) params.set('hasParking', 'true')
     if (hasGarden) params.set('hasGarden', 'true')
     if (hasElevator) params.set('hasElevator', 'true')
+    if (hasBalcony) params.set('hasBalcony', 'true')
+    if (hasTerrace) params.set('hasTerrace', 'true')
     if (isAuction) params.set('isAuction', 'true')
+    if (condition) params.set('condition', condition)
+    if (availability) params.set('availability', availability)
+    if (furnishedStatus) params.set('furnishedStatus', furnishedStatus)
 
     params.set('mapMode', 'draw')
 
@@ -116,7 +142,12 @@ export default function PropertiesFiltersDrawMode({
     params.delete('hasParking')
     params.delete('hasGarden')
     params.delete('hasElevator')
+    params.delete('hasBalcony')
+    params.delete('hasTerrace')
     params.delete('isAuction')
+    params.delete('condition')
+    params.delete('availability')
+    params.delete('furnishedStatus')
     params.delete('province')
     params.delete('comune')
     params.delete('polygon')
@@ -203,8 +234,6 @@ export default function PropertiesFiltersDrawMode({
                   {type.label}
                 </option>
               ))}
-            <option value="box">Box / Garage</option>
-              <option value="negozio">Negozio</option>
           </select>
         </div>
 
@@ -272,6 +301,57 @@ export default function PropertiesFiltersDrawMode({
           />
         </div>
 
+        <div>
+          <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/35">
+            Stato immobile
+          </label>
+          <select
+            value={condition}
+            onChange={(e) => setCondition(e.target.value)}
+            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none"
+          >
+            {CONDITION_OPTIONS.map((option) => (
+              <option key={option.value || 'all-condition'} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/35">
+            Disponibilità
+          </label>
+          <select
+            value={availability}
+            onChange={(e) => setAvailability(e.target.value)}
+            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none"
+          >
+            {AVAILABILITY_OPTIONS.map((option) => (
+              <option key={option.value || 'all-availability'} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/35">
+            Arredamento
+          </label>
+          <select
+            value={furnishedStatus}
+            onChange={(e) => setFurnishedStatus(e.target.value)}
+            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none"
+          >
+            {FURNISHED_STATUS_OPTIONS.map((option) => (
+              <option key={option.value || 'all-furnished'} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
           <p className="mb-4 text-xs uppercase tracking-[0.22em] text-white/35">
             Filtri avanzati
@@ -281,6 +361,8 @@ export default function PropertiesFiltersDrawMode({
             <FilterSwitch checked={hasGarage} onChange={setHasGarage} label="Box / Garage" />
             <FilterSwitch checked={hasParking} onChange={setHasParking} label="Posto auto" />
             <FilterSwitch checked={hasGarden} onChange={setHasGarden} label="Giardino" />
+            <FilterSwitch checked={hasBalcony} onChange={setHasBalcony} label="Balcone" />
+            <FilterSwitch checked={hasTerrace} onChange={setHasTerrace} label="Terrazzo" />
             <FilterSwitch checked={hasElevator} onChange={setHasElevator} label="Ascensore" />
             <FilterSwitch checked={isAuction} onChange={setIsAuction} label="Aste" />
           </div>

@@ -102,7 +102,6 @@ export default function HomeSearchBoxMobile() {
                   {type.label}
                 </option>
               ))}
-          <option value="negozio">Negozio</option>
         </select>
 
         <select

@@ -167,7 +167,6 @@ export default function HomeSearchBoxDesktop() {
                   {type.label}
                 </option>
               ))}
-              <option value="negozio">Negozio</option>
           </select>
         </div>
 

@@ -1,5 +1,6 @@
 'use client'
 import { PROPERTY_TYPES } from '@/lib/propertyOptions'
+import { AVAILABILITY_OPTIONS, CONDITION_OPTIONS, FURNISHED_STATUS_OPTIONS } from '@/lib/propertyFilterOptions'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -28,7 +29,12 @@ type Props = {
   initialHasParking?: boolean
   initialHasGarden?: boolean
   initialHasElevator?: boolean
+  initialHasBalcony?: boolean
+  initialHasTerrace?: boolean
   initialIsAuction?: boolean
+  initialCondition?: string
+  initialAvailability?: string
+  initialFurnishedStatus?: string
   hideLocationFilters?: boolean
 }
 
@@ -57,7 +63,12 @@ export default function PropertiesFiltersSidebar({
   initialHasParking = false,
   initialHasGarden = false,
   initialHasElevator = false,
+  initialHasBalcony = false,
+  initialHasTerrace = false,
   initialIsAuction = false,
+  initialCondition = '',
+  initialAvailability = '',
+  initialFurnishedStatus = '',
   hideLocationFilters = false,
 }: Props) {
   const router = useRouter()
@@ -79,7 +90,12 @@ export default function PropertiesFiltersSidebar({
   const [hasParking, setHasParking] = useState(initialHasParking)
   const [hasGarden, setHasGarden] = useState(initialHasGarden)
   const [hasElevator, setHasElevator] = useState(initialHasElevator)
+  const [hasBalcony, setHasBalcony] = useState(initialHasBalcony)
+  const [hasTerrace, setHasTerrace] = useState(initialHasTerrace)
   const [isAuction, setIsAuction] = useState(initialIsAuction)
+  const [condition, setCondition] = useState(initialCondition)
+  const [availability, setAvailability] = useState(initialAvailability)
+  const [furnishedStatus, setFurnishedStatus] = useState(initialFurnishedStatus)
   const [isAutoApplying, setIsAutoApplying] = useState(false)
 
   const isFirstRender = useRef(true)
@@ -118,7 +134,12 @@ export default function PropertiesFiltersSidebar({
     params.delete('hasParking')
     params.delete('hasGarden')
     params.delete('hasElevator')
+    params.delete('hasBalcony')
+    params.delete('hasTerrace')
     params.delete('isAuction')
+    params.delete('condition')
+    params.delete('availability')
+    params.delete('furnishedStatus')
     params.delete('page')
 
     if (q.trim()) params.set('q', q.trim())
@@ -140,7 +161,12 @@ export default function PropertiesFiltersSidebar({
     if (hasParking) params.set('hasParking', 'true')
     if (hasGarden) params.set('hasGarden', 'true')
     if (hasElevator) params.set('hasElevator', 'true')
+    if (hasBalcony) params.set('hasBalcony', 'true')
+    if (hasTerrace) params.set('hasTerrace', 'true')
     if (isAuction) params.set('isAuction', 'true')
+    if (condition) params.set('condition', condition)
+    if (availability) params.set('availability', availability)
+    if (furnishedStatus) params.set('furnishedStatus', furnishedStatus)
 
     return params.toString()
   }
@@ -187,7 +213,12 @@ export default function PropertiesFiltersSidebar({
     hasParking,
     hasGarden,
     hasElevator,
+    hasBalcony,
+    hasTerrace,
     isAuction,
+    condition,
+    availability,
+    furnishedStatus,
     hideLocationFilters,
     pathname,
     router,
@@ -223,7 +254,12 @@ export default function PropertiesFiltersSidebar({
     params.delete('hasParking')
     params.delete('hasGarden')
     params.delete('hasElevator')
+    params.delete('hasBalcony')
+    params.delete('hasTerrace')
     params.delete('isAuction')
+    params.delete('condition')
+    params.delete('availability')
+    params.delete('furnishedStatus')
     params.delete('page')
 
     if (!hideLocationFilters) {
@@ -239,6 +275,11 @@ export default function PropertiesFiltersSidebar({
     setMinSurface('')
     setMaxSurface('')
     setMinBathrooms('')
+    setHasBalcony(false)
+    setHasTerrace(false)
+    setCondition('')
+    setAvailability('')
+    setFurnishedStatus('')
     setHasGarage(false)
     setHasParking(false)
     setHasGarden(false)
@@ -395,8 +436,6 @@ export default function PropertiesFiltersSidebar({
                   {type.label}
                 </option>
               ))}
-            <option value="box">Box / Garage</option>
-              <option value="negozio">Negozio</option>
           </select>
         </div>
 
@@ -571,6 +610,57 @@ export default function PropertiesFiltersSidebar({
           />
         </div>
 
+        <div>
+          <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+            Stato immobile
+          </label>
+          <select
+            value={condition}
+            onChange={(e) => setCondition(e.target.value)}
+            className="theme-input w-full rounded-2xl border px-4 py-3"
+          >
+            {CONDITION_OPTIONS.map((option) => (
+              <option key={option.value || 'all-condition'} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+            Disponibilità
+          </label>
+          <select
+            value={availability}
+            onChange={(e) => setAvailability(e.target.value)}
+            className="theme-input w-full rounded-2xl border px-4 py-3"
+          >
+            {AVAILABILITY_OPTIONS.map((option) => (
+              <option key={option.value || 'all-availability'} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+            Arredamento
+          </label>
+          <select
+            value={furnishedStatus}
+            onChange={(e) => setFurnishedStatus(e.target.value)}
+            className="theme-input w-full rounded-2xl border px-4 py-3"
+          >
+            {FURNISHED_STATUS_OPTIONS.map((option) => (
+              <option key={option.value || 'all-furnished'} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="rounded-[24px] border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-4">
           <p className="mb-4 text-xs uppercase tracking-[0.22em] text-[var(--site-text-faint)]">
             Filtri avanzati
@@ -591,6 +681,16 @@ export default function PropertiesFiltersSidebar({
               checked={hasGarden}
               onChange={setHasGarden}
               label="Giardino"
+            />
+            <FilterSwitch
+              checked={hasBalcony}
+              onChange={setHasBalcony}
+              label="Balcone"
+            />
+            <FilterSwitch
+              checked={hasTerrace}
+              onChange={setHasTerrace}
+              label="Terrazzo"
             />
             <FilterSwitch
               checked={hasElevator}

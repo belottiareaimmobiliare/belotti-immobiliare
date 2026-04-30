@@ -381,8 +381,6 @@ export default function NewPropertyPage() {
                   {type.label}
                 </option>
               ))}
-              <option value="box">Box / Garage</option>
-              <option value="negozio">Negozio</option>
             </select>
 
             <select
