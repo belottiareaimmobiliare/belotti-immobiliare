@@ -112,6 +112,55 @@ function extractFloor(text: string) {
   return null
 }
 
+function extractTotalFloors(text: string) {
+  const explicitLevels = text.match(/(?:su|disposto su|sviluppato su|articolato su)\s*(\d+|uno|una|due|tre|quattro|cinque)\s*(livelli|piani)/)
+  const explicitFloors = text.match(/(?:totale piani|piani totali|numero piani)\s*(\d+|uno|una|due|tre|quattro|cinque)/)
+
+  const levelNumber =
+    numberFromText(explicitLevels?.[1]) ??
+    numberFromText(explicitFloors?.[1])
+
+  if (levelNumber !== null) return String(levelNumber)
+
+  if (hasAny(text, [
+    'su due livelli',
+    'disposto su due livelli',
+    'sviluppato su due livelli',
+    'articolato su due livelli',
+    'su 2 livelli',
+    'su due piani',
+    'su 2 piani',
+  ])) {
+    return '2'
+  }
+
+  if (hasAny(text, [
+    'su tre livelli',
+    'disposto su tre livelli',
+    'sviluppato su tre livelli',
+    'articolato su tre livelli',
+    'su 3 livelli',
+    'su tre piani',
+    'su 3 piani',
+  ])) {
+    return '3'
+  }
+
+  if (hasAny(text, [
+    'su quattro livelli',
+    'disposto su quattro livelli',
+    'sviluppato su quattro livelli',
+    'articolato su quattro livelli',
+    'su 4 livelli',
+    'su quattro piani',
+    'su 4 piani',
+  ])) {
+    return '4'
+  }
+
+  return null
+}
+
 function splitSentences(text: string) {
   return text
     .split(/[.;:\n]+/)
@@ -412,6 +461,9 @@ export function analyzePropertyDescription(description: string): PropertySuggest
 
   const floor = extractFloor(text)
   if (floor) suggestions.floor = floor
+
+  const totalFloors = extractTotalFloors(text)
+  if (totalFloors) suggestions.total_floors = totalFloors
 
   return suggestions
 }
