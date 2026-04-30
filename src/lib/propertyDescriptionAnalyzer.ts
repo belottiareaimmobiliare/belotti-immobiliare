@@ -309,6 +309,25 @@ function extractRoomsAndType(text: string, suggestions: PropertySuggestion) {
   else if (hasAny(text, ['appartamento'])) suggestions.property_type = 'appartamento'
 }
 
+function inferRoomsFromLayout(text: string, suggestions: PropertySuggestion) {
+  if (suggestions.rooms) return
+
+  const bedrooms = Number(suggestions.bedrooms || 0)
+  if (!bedrooms || Number.isNaN(bedrooms)) return
+
+  const hasLivingRoom = hasAny(text, [
+    'soggiorno',
+    'salone',
+    'zona giorno',
+    'living',
+    'sala',
+  ])
+
+  if (hasLivingRoom) {
+    suggestions.rooms = String(bedrooms + 1)
+  }
+}
+
 function extractCondition(text: string, suggestions: PropertySuggestion) {
   if (hasAny(text, ['appena ristrutturato', 'completamente ristrutturato', 'ristrutturato'])) {
     suggestions.condition = 'ristrutturato'
@@ -472,6 +491,8 @@ export function analyzePropertyDescription(description: string): PropertySuggest
 
   const bedrooms = extractBedrooms(text)
   if (bedrooms) suggestions.bedrooms = bedrooms
+
+  inferRoomsFromLayout(text, suggestions)
 
   const bathrooms = extractBathrooms(text)
   if (bathrooms) suggestions.bathrooms = bathrooms
