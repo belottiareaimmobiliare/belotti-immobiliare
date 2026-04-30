@@ -365,7 +365,17 @@ function inferRoomsFromLayout(text: string, suggestions: PropertySuggestion) {
 function extractCondition(text: string, suggestions: PropertySuggestion) {
   if (hasAny(text, ['appena ristrutturato', 'completamente ristrutturato', 'ristrutturato'])) {
     suggestions.condition = 'ristrutturato'
-  } else if (hasAny(text, ['nuova costruzione', 'di nuova realizzazione', 'nuovo'])) {
+  } else if (hasAny(text, [
+    'nuova costruzione',
+    'di nuova costruzione',
+    'recente costruzione',
+    'di recente costruzione',
+    'costruzione recente',
+    'recente edificazione',
+    'di recente edificazione',
+    'di nuova realizzazione',
+    'nuovo',
+  ])) {
     suggestions.condition = 'nuovo'
   } else if (hasAny(text, ['ottimo stato', 'ottime condizioni', 'pari al nuovo'])) {
     suggestions.condition = 'ottimo'
