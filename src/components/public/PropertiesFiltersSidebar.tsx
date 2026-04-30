@@ -1,4 +1,5 @@
 'use client'
+import { PROPERTY_TYPES } from '@/lib/propertyOptions'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -389,14 +390,13 @@ export default function PropertiesFiltersSidebar({
             className="theme-input w-full rounded-2xl border px-4 py-3"
           >
             <option value="">Qualsiasi</option>
-            <option value="appartamento">Appartamento</option>
-            <option value="attico">Attico</option>
-            <option value="villa">Villa</option>
-            <option value="trilocale">Trilocale</option>
-            <option value="bilocale">Bilocale</option>
+            {PROPERTY_TYPES.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
             <option value="box">Box / Garage</option>
-            <option value="ufficio">Ufficio</option>
-            <option value="negozio">Negozio</option>
+              <option value="negozio">Negozio</option>
           </select>
         </div>
 

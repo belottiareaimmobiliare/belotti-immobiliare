@@ -1,4 +1,5 @@
 'use client'
+import { PROPERTY_TYPES } from '@/lib/propertyOptions'
 
 import { FormEvent, useMemo, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -197,14 +198,13 @@ export default function PropertiesFiltersDrawMode({
             className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white"
           >
             <option value="">Qualsiasi</option>
-            <option value="appartamento">Appartamento</option>
-            <option value="attico">Attico</option>
-            <option value="villa">Villa</option>
-            <option value="trilocale">Trilocale</option>
-            <option value="bilocale">Bilocale</option>
+            {PROPERTY_TYPES.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
             <option value="box">Box / Garage</option>
-            <option value="ufficio">Ufficio</option>
-            <option value="negozio">Negozio</option>
+              <option value="negozio">Negozio</option>
           </select>
         </div>
 

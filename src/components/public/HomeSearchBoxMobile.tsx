@@ -1,4 +1,5 @@
 'use client'
+import { PROPERTY_TYPES } from '@/lib/propertyOptions'
 
 import { useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -96,12 +97,11 @@ export default function HomeSearchBoxMobile() {
           className="theme-input w-full rounded-2xl border px-4 py-3"
         >
           <option value="">Qualsiasi tipologia</option>
-          <option value="appartamento">Appartamento</option>
-          <option value="bilocale">Bilocale</option>
-          <option value="trilocale">Trilocale</option>
-          <option value="attico">Attico</option>
-          <option value="villa">Villa</option>
-          <option value="ufficio">Ufficio</option>
+          {PROPERTY_TYPES.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
           <option value="negozio">Negozio</option>
         </select>
 

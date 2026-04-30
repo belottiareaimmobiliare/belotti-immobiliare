@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { formatPropertyTypeLabel } from '@/lib/propertyOptions'
 import Footer from '@/components/public/Footer'
 import FooterReveal from '@/components/public/FooterReveal'
 import Link from 'next/link'
@@ -222,7 +223,7 @@ function getPropertyCoverImage(property: Property) {
 
 function buildPropertySeoDescription(property: Property) {
   const propertyType = capitalizeMetadata(
-    formatOptionLabel(property.property_type, 'Immobile')
+    formatPropertyTypeLabel(property.property_type, 'Immobile')
   )
   const contract = formatSeoContract(property.contract_type)
   const location = getPropertyLocation(property)
@@ -273,7 +274,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const currentProperty = property as Property
-  const propertyType = formatOptionLabel(currentProperty.property_type, 'Immobile')
+  const propertyType = formatPropertyTypeLabel(currentProperty.property_type, 'Immobile')
   const contract = formatSeoContract(currentProperty.contract_type)
   const comune = currentProperty.comune ? ` a ${currentProperty.comune}` : ''
 
@@ -357,8 +358,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
         currentProperty.contract_type.slice(1)
       : null,
     currentProperty.property_type
-      ? currentProperty.property_type.charAt(0).toUpperCase() +
-        currentProperty.property_type.slice(1)
+      ? formatPropertyTypeLabel(currentProperty.property_type)
       : null,
   ].filter(Boolean) as string[]
 
@@ -502,7 +502,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
                 {currentProperty.property_type && (
                   <span className="theme-badge inline-flex rounded-full border px-3 py-1 text-xs uppercase tracking-[0.2em]">
-                    {currentProperty.property_type}
+                    {formatPropertyTypeLabel(currentProperty.property_type)}
                   </span>
                 )}
 

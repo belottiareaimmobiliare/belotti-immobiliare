@@ -1,4 +1,5 @@
 'use client'
+import { PROPERTY_TYPES } from '@/lib/propertyOptions'
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -375,13 +376,12 @@ export default function NewPropertyPage() {
               onChange={handleChange}
               className="theme-admin-select rounded-xl px-4 py-3"
             >
-              <option value="appartamento">Appartamento</option>
-              <option value="attico">Attico</option>
-              <option value="villa">Villa</option>
-              <option value="trilocale">Trilocale</option>
-              <option value="bilocale">Bilocale</option>
+              {PROPERTY_TYPES.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
               <option value="box">Box / Garage</option>
-              <option value="ufficio">Ufficio</option>
               <option value="negozio">Negozio</option>
             </select>
 

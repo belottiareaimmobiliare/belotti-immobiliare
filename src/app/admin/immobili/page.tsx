@@ -1,3 +1,4 @@
+import { formatPropertyTypeLabel } from '@/lib/propertyOptions'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import StatusToggleButton from './StatusToggleButton'
@@ -357,7 +358,7 @@ export default async function AdminPropertiesPage({
                   </span>
 
                   <span className="theme-admin-chip rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
-                    {property.property_type || 'tipologia da definire'}
+                    {formatPropertyTypeLabel(property.property_type)}
                   </span>
 
                   <span
