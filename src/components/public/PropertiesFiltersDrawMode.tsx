@@ -1,6 +1,6 @@
 'use client'
 import { PROPERTY_TYPES } from '@/lib/propertyOptions'
-import { AVAILABILITY_OPTIONS, CONDITION_OPTIONS, FURNISHED_STATUS_OPTIONS } from '@/lib/propertyFilterOptions'
+import { AVAILABILITY_OPTIONS, CONDITION_OPTIONS, FURNISHED_STATUS_OPTIONS, HEATING_SOURCE_OPTIONS, HEATING_TYPE_OPTIONS } from '@/lib/propertyFilterOptions'
 
 import { FormEvent, useMemo, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -25,6 +25,8 @@ type Props = {
   initialCondition?: string
   initialAvailability?: string
   initialFurnishedStatus?: string
+  initialHeatingType?: string
+  initialHeatingSource?: string
 }
 
 export default function PropertiesFiltersDrawMode({
@@ -46,6 +48,8 @@ export default function PropertiesFiltersDrawMode({
   initialCondition = '',
   initialAvailability = '',
   initialFurnishedStatus = '',
+  initialHeatingType = '',
+  initialHeatingSource = '',
 }: Props) {
   const router = useRouter()
   const pathname = usePathname()
@@ -69,6 +73,8 @@ export default function PropertiesFiltersDrawMode({
   const [condition, setCondition] = useState(initialCondition)
   const [availability, setAvailability] = useState(initialAvailability)
   const [furnishedStatus, setFurnishedStatus] = useState(initialFurnishedStatus)
+  const [heatingType, setHeatingType] = useState(initialHeatingType)
+  const [heatingSource, setHeatingSource] = useState(initialHeatingSource)
 
   const activeContractLabel = useMemo(() => {
     if (contractType === 'vendita') return 'Vendita'
@@ -99,6 +105,8 @@ export default function PropertiesFiltersDrawMode({
     params.delete('condition')
     params.delete('availability')
     params.delete('furnishedStatus')
+    params.delete('heatingType')
+    params.delete('heatingSource')
     params.delete('province')
     params.delete('comune')
 
@@ -121,6 +129,8 @@ export default function PropertiesFiltersDrawMode({
     if (condition) params.set('condition', condition)
     if (availability) params.set('availability', availability)
     if (furnishedStatus) params.set('furnishedStatus', furnishedStatus)
+    if (heatingType) params.set('heatingType', heatingType)
+    if (heatingSource) params.set('heatingSource', heatingSource)
 
     params.set('mapMode', 'draw')
 
@@ -148,6 +158,8 @@ export default function PropertiesFiltersDrawMode({
     params.delete('condition')
     params.delete('availability')
     params.delete('furnishedStatus')
+    params.delete('heatingType')
+    params.delete('heatingSource')
     params.delete('province')
     params.delete('comune')
     params.delete('polygon')
@@ -346,6 +358,40 @@ export default function PropertiesFiltersDrawMode({
           >
             {FURNISHED_STATUS_OPTIONS.map((option) => (
               <option key={option.value || 'all-furnished'} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/35">
+            Riscaldamento
+          </label>
+          <select
+            value={heatingType}
+            onChange={(e) => setHeatingType(e.target.value)}
+            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none"
+          >
+            {HEATING_TYPE_OPTIONS.map((option) => (
+              <option key={option.value || 'all-heating-type'} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-white/35">
+            Fonte / impianto
+          </label>
+          <select
+            value={heatingSource}
+            onChange={(e) => setHeatingSource(e.target.value)}
+            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none"
+          >
+            {HEATING_SOURCE_OPTIONS.map((option) => (
+              <option key={option.value || 'all-heating-source'} value={option.value}>
                 {option.label}
               </option>
             ))}

@@ -25,3 +25,31 @@ export const FURNISHED_STATUS_OPTIONS = [
   { value: 'no', label: 'No' },
   { value: 'parzialmente', label: 'Parzialmente' },
 ]
+
+
+export const HEATING_TYPE_OPTIONS = [
+  { value: '', label: 'Qualsiasi riscaldamento' },
+  { value: 'termoautonomo', label: 'Termoautonomo' },
+  { value: 'centralizzato', label: 'Centralizzato' },
+  { value: 'semi_autonomo', label: 'Semi-autonomo / contabilizzato' },
+  { value: 'assente', label: 'Assente' },
+  { value: 'altro', label: 'Altro' },
+]
+
+export const HEATING_SOURCE_OPTIONS = [
+  { value: '', label: 'Qualsiasi fonte / impianto' },
+  { value: 'metano', label: 'Metano' },
+  { value: 'gas', label: 'Gas' },
+  { value: 'gpl', label: 'GPL' },
+  { value: 'pompa_calore', label: 'Pompa di calore' },
+  { value: 'climatizzatore_caldo_freddo', label: 'Condizionatore caldo/freddo' },
+  { value: 'elettrico', label: 'Elettrico' },
+  { value: 'pavimento', label: 'Riscaldamento a pavimento' },
+  { value: 'radiatori', label: 'Radiatori' },
+  { value: 'stufa_pellet', label: 'Stufa a pellet' },
+  { value: 'stufa_legna', label: 'Stufa a legna' },
+  { value: 'teleriscaldamento', label: 'Teleriscaldamento' },
+  { value: 'gasolio', label: 'Gasolio' },
+  { value: 'fotovoltaico_elettrico', label: 'Fotovoltaico / elettrico' },
+  { value: 'altro', label: 'Altro' },
+]

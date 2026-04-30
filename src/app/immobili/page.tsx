@@ -24,6 +24,8 @@ type SearchParams = Promise<{
   condition?: string
   availability?: string
   furnishedStatus?: string
+  heatingType?: string
+  heatingSource?: string
   minSurface?: string
   maxSurface?: string
   minBathrooms?: string
@@ -219,6 +221,8 @@ export default async function PropertiesPage({
   const conditionFilter = params.condition?.trim() || ''
   const availabilityFilter = params.availability?.trim() || ''
   const furnishedStatus = params.furnishedStatus?.trim() || ''
+  const heatingType = params.heatingType?.trim() || ''
+  const heatingSource = params.heatingSource?.trim() || ''
   const polygon = parsePolygon(params.polygon)
 
   const hasGarage = params.hasGarage === 'true'
@@ -295,6 +299,14 @@ export default async function PropertiesPage({
 
   if (furnishedStatus) {
     query = query.eq('furnished_status', furnishedStatus)
+  }
+
+  if (heatingType) {
+    query = query.eq('heating_type', heatingType)
+  }
+
+  if (heatingSource) {
+    query = query.eq('heating_source', heatingSource)
   }
 
   if (province) {
@@ -411,6 +423,8 @@ export default async function PropertiesPage({
     condition: conditionFilter || undefined,
     availability: availabilityFilter || undefined,
     furnishedStatus: furnishedStatus || undefined,
+    heatingType: heatingType || undefined,
+    heatingSource: heatingSource || undefined,
     minSurface: minSurface || undefined,
     maxSurface: maxSurface || undefined,
     minBathrooms: minBathrooms || undefined,
@@ -497,6 +511,8 @@ export default async function PropertiesPage({
                 initialCondition={conditionFilter}
                 initialAvailability={availabilityFilter}
                 initialFurnishedStatus={furnishedStatus}
+                initialHeatingType={heatingType}
+                initialHeatingSource={heatingSource}
                 hideLocationFilters={Boolean(polygon)}
               />
             </aside>

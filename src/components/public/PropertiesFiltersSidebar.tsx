@@ -1,6 +1,6 @@
 'use client'
 import { PROPERTY_TYPES } from '@/lib/propertyOptions'
-import { AVAILABILITY_OPTIONS, CONDITION_OPTIONS, FURNISHED_STATUS_OPTIONS } from '@/lib/propertyFilterOptions'
+import { AVAILABILITY_OPTIONS, CONDITION_OPTIONS, FURNISHED_STATUS_OPTIONS, HEATING_SOURCE_OPTIONS, HEATING_TYPE_OPTIONS } from '@/lib/propertyFilterOptions'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -35,6 +35,8 @@ type Props = {
   initialCondition?: string
   initialAvailability?: string
   initialFurnishedStatus?: string
+  initialHeatingType?: string
+  initialHeatingSource?: string
   hideLocationFilters?: boolean
 }
 
@@ -69,6 +71,8 @@ export default function PropertiesFiltersSidebar({
   initialCondition = '',
   initialAvailability = '',
   initialFurnishedStatus = '',
+  initialHeatingType = '',
+  initialHeatingSource = '',
   hideLocationFilters = false,
 }: Props) {
   const router = useRouter()
@@ -96,6 +100,8 @@ export default function PropertiesFiltersSidebar({
   const [condition, setCondition] = useState(initialCondition)
   const [availability, setAvailability] = useState(initialAvailability)
   const [furnishedStatus, setFurnishedStatus] = useState(initialFurnishedStatus)
+  const [heatingType, setHeatingType] = useState(initialHeatingType)
+  const [heatingSource, setHeatingSource] = useState(initialHeatingSource)
   const [isAutoApplying, setIsAutoApplying] = useState(false)
 
   const isFirstRender = useRef(true)
@@ -140,6 +146,8 @@ export default function PropertiesFiltersSidebar({
     params.delete('condition')
     params.delete('availability')
     params.delete('furnishedStatus')
+    params.delete('heatingType')
+    params.delete('heatingSource')
     params.delete('page')
 
     if (q.trim()) params.set('q', q.trim())
@@ -167,6 +175,8 @@ export default function PropertiesFiltersSidebar({
     if (condition) params.set('condition', condition)
     if (availability) params.set('availability', availability)
     if (furnishedStatus) params.set('furnishedStatus', furnishedStatus)
+    if (heatingType) params.set('heatingType', heatingType)
+    if (heatingSource) params.set('heatingSource', heatingSource)
 
     return params.toString()
   }
@@ -219,6 +229,8 @@ export default function PropertiesFiltersSidebar({
     condition,
     availability,
     furnishedStatus,
+    heatingType,
+    heatingSource,
     hideLocationFilters,
     pathname,
     router,
@@ -260,6 +272,8 @@ export default function PropertiesFiltersSidebar({
     params.delete('condition')
     params.delete('availability')
     params.delete('furnishedStatus')
+    params.delete('heatingType')
+    params.delete('heatingSource')
     params.delete('page')
 
     if (!hideLocationFilters) {
@@ -280,6 +294,8 @@ export default function PropertiesFiltersSidebar({
     setCondition('')
     setAvailability('')
     setFurnishedStatus('')
+    setHeatingType('')
+    setHeatingSource('')
     setHasGarage(false)
     setHasParking(false)
     setHasGarden(false)
@@ -655,6 +671,40 @@ export default function PropertiesFiltersSidebar({
           >
             {FURNISHED_STATUS_OPTIONS.map((option) => (
               <option key={option.value || 'all-furnished'} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+            Riscaldamento
+          </label>
+          <select
+            value={heatingType}
+            onChange={(e) => setHeatingType(e.target.value)}
+            className="theme-input w-full rounded-2xl border px-4 py-3"
+          >
+            {HEATING_TYPE_OPTIONS.map((option) => (
+              <option key={option.value || 'all-heating-type'} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+            Fonte / impianto
+          </label>
+          <select
+            value={heatingSource}
+            onChange={(e) => setHeatingSource(e.target.value)}
+            className="theme-input w-full rounded-2xl border px-4 py-3"
+          >
+            {HEATING_SOURCE_OPTIONS.map((option) => (
+              <option key={option.value || 'all-heating-source'} value={option.value}>
                 {option.label}
               </option>
             ))}

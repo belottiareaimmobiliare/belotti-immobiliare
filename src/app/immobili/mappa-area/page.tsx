@@ -17,6 +17,8 @@ type SearchParams = Promise<{
   condition?: string
   availability?: string
   furnishedStatus?: string
+  heatingType?: string
+  heatingSource?: string
   minSurface?: string
   maxSurface?: string
   minBathrooms?: string
@@ -85,6 +87,8 @@ export default async function AreaMapPage({
   const conditionFilter = params.condition?.trim() || ''
   const availabilityFilter = params.availability?.trim() || ''
   const furnishedStatus = params.furnishedStatus?.trim() || ''
+  const heatingType = params.heatingType?.trim() || ''
+  const heatingSource = params.heatingSource?.trim() || ''
 
   const hasGarage = params.hasGarage === 'true'
   const hasParking = params.hasParking === 'true'
@@ -156,6 +160,14 @@ export default async function AreaMapPage({
 
   if (furnishedStatus) {
     query = query.eq('furnished_status', furnishedStatus)
+  }
+
+  if (heatingType) {
+    query = query.eq('heating_type', heatingType)
+  }
+
+  if (heatingSource) {
+    query = query.eq('heating_source', heatingSource)
   }
 
   if (province) {

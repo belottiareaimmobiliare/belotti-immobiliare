@@ -1,5 +1,6 @@
 'use client'
 import { PROPERTY_TYPES } from '@/lib/propertyOptions'
+import { HEATING_SOURCE_OPTIONS, HEATING_TYPE_OPTIONS } from '@/lib/propertyFilterOptions'
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -744,13 +745,18 @@ export default function EditForm({ property }: EditFormProps) {
               <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
                 Riscaldamento
               </label>
-              <input
+              <select
                 name="heating_type"
-                placeholder="Es. termoautonomo"
                 value={form.heating_type}
                 onChange={handleChange}
-                className="theme-admin-input w-full rounded-xl px-4 py-3"
-              />
+                className="theme-admin-select w-full rounded-xl px-4 py-3"
+              >
+                {HEATING_TYPE_OPTIONS.map((option) => (
+                  <option key={option.value || 'heating-type-empty'} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -763,14 +769,11 @@ export default function EditForm({ property }: EditFormProps) {
                 onChange={handleChange}
                 className="theme-admin-select w-full rounded-xl px-4 py-3"
               >
-                <option value="">Da definire</option>
-                <option value="gas">Gas</option>
-                <option value="metano">Metano</option>
-                <option value="pompa_calore">Pompa di calore</option>
-                <option value="elettrico">Elettrico</option>
-                <option value="gasolio">Gasolio</option>
-                <option value="teleriscaldamento">Teleriscaldamento</option>
-                <option value="altro">Altro</option>
+                {HEATING_SOURCE_OPTIONS.map((option) => (
+                  <option key={option.value || 'heating-source-empty'} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
 
