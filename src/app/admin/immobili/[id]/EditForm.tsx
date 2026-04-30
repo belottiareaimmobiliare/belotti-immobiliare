@@ -214,17 +214,6 @@ export default function EditForm({ property }: EditFormProps) { const supabase =
 
     return () => { document.querySelectorAll(`.${className}`).forEach((element) => { element.classList.remove(className) }) } }, [aiSuggestedFields])
 
-  useEffect(() => { const handleUserEdit = (event: Event) => { const target = event.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null
-
-      if (!target?.name) return
-
-      setAiSuggestedFields((prev) => prev.filter((fieldName) => fieldName !== target.name)) }
-
-    document.addEventListener('input', handleUserEdit, true)
-    document.addEventListener('change', handleUserEdit, true)
-
-    return () => { document.removeEventListener('input', handleUserEdit, true)
-      document.removeEventListener('change', handleUserEdit, true) } }, [])
 
   const handleAnalyzeDescription = () => { const suggestions = analyzePropertyDescription(form.description) as Partial<typeof form>
     const suggestedFields = Object.keys(suggestions)
