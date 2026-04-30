@@ -119,8 +119,58 @@ export function analyzePropertyDescription(description: string): PropertySuggest
   }
   if (hasAny(text, ['asta', 'all asta', "all'asta"])) suggestions.is_auction = true
 
-  if (hasAny(text, ['balcone', 'balconi'])) suggestions.balconies = '1'
-  if (hasAny(text, ['terrazzo', 'terrazza', 'terrazzi'])) suggestions.terraces = '1'
+  const balconies = extractNumberNear(text, [
+    /(\d+)\s*balconi/,
+    /(\d+)\s*balcone/,
+  ])
+  if (balconies) suggestions.balconies = balconies
+  else if (hasAny(text, ['balcone', 'balconi'])) suggestions.balconies = '1'
+
+  const terraces = extractNumberNear(text, [
+    /(\d+)\s*terrazzi/,
+    /(\d+)\s*terrazzo/,
+    /(\d+)\s*terrazze/,
+    /(\d+)\s*terrazza/,
+  ])
+  if (terraces) suggestions.terraces = terraces
+  else if (hasAny(text, ['terrazzo', 'terrazza', 'terrazzi'])) suggestions.terraces = '1'
+
+  // Spese condominiali
+  if (hasAny(text, [
+    'spese condominiali incluse',
+    'spese incluse',
+    'condominio incluso',
+    'condominio incluso nel prezzo',
+    'spese comprese',
+  ])) {
+    suggestions.condo_fees = 'Incluse'
+  }
+
+  if (hasAny(text, [
+    'senza spese condominiali',
+    'nessuna spesa condominiale',
+    'no spese condominiali',
+    'zero spese condominiali',
+  ])) {
+    suggestions.condo_fees = 'Nessuna spesa condominiale'
+    suggestions.condo_fees_amount = '0'
+  }
+
+  const condoFeesAmount = extractNumberNear(text, [
+    /spese condominiali[^0-9]{0,60}(\d{1,5})(?:\s*€|\s*euro)?/,
+    /spese[^0-9]{0,40}condominiali[^0-9]{0,60}(\d{1,5})(?:\s*€|\s*euro)?/,
+    /condominio[^0-9]{0,60}(\d{1,5})(?:\s*€|\s*euro)?/,
+  ])
+
+  if (condoFeesAmount) {
+    suggestions.condo_fees_amount = condoFeesAmount
+
+    if (hasAny(text, ['/mese', 'al mese', 'mensili', 'mensile'])) {
+      suggestions.condo_fees_period = 'mese'
+    } else if (hasAny(text, ['/anno', 'all anno', "all'anno", 'annuali', 'annue', 'annua'])) {
+      suggestions.condo_fees_period = 'anno'
+    }
+  }
 
   // Riscaldamento
   if (hasAny(text, ['termoautonomo', 'riscaldamento autonomo', 'autonomo'])) {
