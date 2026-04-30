@@ -861,3 +861,9 @@ a[href*="tiktok.com"][title]:hover {
   transform: translateY(-1px) scale(1.04);
   box-shadow: 0 12px 28px rgba(255, 0, 80, 0.28) !important;
 }
+
+.ai-suggested-field {
+  background-color: rgba(186, 230, 253, 0.7) !important;
+  border-color: rgb(56, 189, 248) !important;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+}

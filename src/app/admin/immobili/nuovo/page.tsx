@@ -2,91 +2,72 @@
 import { PROPERTY_TYPES } from '@/lib/propertyOptions'
 import { HEATING_SOURCE_OPTIONS, HEATING_TYPE_OPTIONS } from '@/lib/propertyFilterOptions'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { createProperty, updatePropertyGeocode } from '@/app/admin/immobili/actions'
 import { getCurrentAdminUserId } from '@/lib/admin-current-user-client'
 import { generatePropertyReferenceCode } from '@/lib/property-reference-code'
 import italyLocations from '@/data/italyLocations.json'
+import { analyzePropertyDescription } from '@/lib/propertyDescriptionAnalyzer'
 
-type ProvinceItem = {
-  name: string
+type ProvinceItem = { name: string
   code: string
   region: string
-  comuni: { name: string; code: string }[]
-}
+  comuni: { name: string; code: string }[] }
 
 const provinces = (italyLocations.provinces || []) as ProvinceItem[]
 
-function generateSlug(title: string) {
-  return title
+function generateSlug(title: string) { return title
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^\w\s-]/g, '')
     .trim()
-    .replace(/\s+/g, '-')
-}
+    .replace(/\s+/g, '-') }
 
-function normalizeOptionalField(value: string) {
-  const trimmed = value.trim()
+function normalizeOptionalField(value: string) { const trimmed = value.trim()
   if (!trimmed) return null
   if (trimmed === '-') return '-'
-  return trimmed
-}
+  return trimmed }
 
-type FeatureToggleProps = {
-  label: string
+type FeatureToggleProps = { label: string
   checked: boolean
   onClick: () => void
-  fullWidth?: boolean
-}
+  fullWidth?: boolean }
 
-function FeatureToggle({
-  label,
+function FeatureToggle({ label,
   checked,
   onClick,
-  fullWidth = false,
-}: FeatureToggleProps) {
-  return (
+  fullWidth = false, }: FeatureToggleProps) { return (
     <button
       type="button"
       onClick={onClick}
-      className={`theme-admin-input flex items-center justify-between gap-4 rounded-2xl px-4 py-3 text-left text-sm transition hover:opacity-95 ${
-        fullWidth ? 'md:col-span-2' : ''
-      }`}
+      className={`theme-admin-input flex items-center justify-between gap-4 rounded-2xl px-4 py-3 text-left text-sm transition hover:opacity-95 ${ fullWidth ? 'md:col-span-2' : '' }`}
     >
       <span className="text-[var(--site-text-soft)]">{label}</span>
 
       <span
-        className={`relative inline-flex h-7 w-12 shrink-0 rounded-full border transition ${
-          checked
+        className={`relative inline-flex h-7 w-12 shrink-0 rounded-full border transition ${ checked
             ? 'border-[var(--site-gold)] bg-[var(--site-gold)]'
-            : 'border-[var(--site-border-strong)] bg-[var(--site-surface-2)]'
-        }`}
+            : 'border-[var(--site-border-strong)] bg-[var(--site-surface-2)]' }`}
       >
         <span
-          className={`absolute top-1 h-5 w-5 rounded-full border transition ${
-            checked
+          className={`absolute top-1 h-5 w-5 rounded-full border transition ${ checked
               ? 'left-6 border-[#0b0f17] bg-[#0b0f17] shadow-[0_2px_8px_rgba(0,0,0,0.35)]'
-              : 'left-1 border-[var(--site-border-strong)] bg-[var(--site-bg)] shadow-[0_2px_8px_rgba(0,0,0,0.18)]'
-          }`}
+              : 'left-1 border-[var(--site-border-strong)] bg-[var(--site-bg)] shadow-[0_2px_8px_rgba(0,0,0,0.18)]' }`}
         />
       </span>
     </button>
-  )
-}
+  ) }
 
-export default function NewPropertyPage() {
-  const supabase = createClient()
+export default function NewPropertyPage() { const supabase = createClient()
   const router = useRouter()
 
   const [loading, setLoading] = useState(false)
   const [comuneSearch, setComuneSearch] = useState('')
 
-  const [form, setForm] = useState({
-    title: '',
+  const [form, setForm] = useState({ title: '',
     reference_code: '',
     condition: '',
     availability: '',
@@ -127,98 +108,98 @@ export default function NewPropertyPage() {
     furnished_status: '',
     deposit_amount: '',
     advance_amount: '',
-    advance_deposit_amount: '',
-  })
+    advance_deposit_amount: '', })
 
   const activeProvince = useMemo(
     () => provinces.find((province) => province.code === form.province) || null,
     [form.province]
   )
 
-  const filteredComuni = useMemo(() => {
-    if (!activeProvince) return []
+  const filteredComuni = useMemo(() => { if (!activeProvince) return []
 
     const search = comuneSearch.trim().toLowerCase()
     if (!search) return activeProvince.comuni
 
     return activeProvince.comuni.filter((comune) =>
       comune.name.toLowerCase().includes(search)
-    )
-  }, [activeProvince, comuneSearch])
+    ) }, [activeProvince, comuneSearch])
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target
+  ) => { const { name, value } = e.target
 
-    if (name === 'province') {
-      setForm((prev) => ({
-        ...prev,
+    if (name === 'province') { setForm((prev) => ({ ...prev,
         province: value,
-        comune: '',
-      }))
+        comune: '', }))
       setComuneSearch('')
-      return
-    }
+      return }
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
+    setForm((prev) => ({ ...prev,
+      [name]: value, })) }
 
   const toggleBooleanField = (
     name: 'has_garage' | 'has_parking' | 'has_garden' | 'has_elevator' | 'is_auction' | 'export_immobiliare_it' | 'export_idealista' | 'export_casa_it'
-  ) => {
-    setForm((prev) => ({
-      ...prev,
-      [name]: !prev[name],
-    }))
-  }
+  ) => { setForm((prev) => ({ ...prev,
+      [name]: !prev[name], })) }
 
-  const handleComuneSelect = (comuneName: string) => {
-    setForm((prev) => ({
-      ...prev,
-      comune: comuneName,
-    }))
-  }
+  const handleComuneSelect = (comuneName: string) => { setForm((prev) => ({ ...prev,
+      comune: comuneName, })) }
 
-  const geocodeProperty = async (propertyId: string) => {
-    try {
-      const response = await fetch('/api/geocode-property', {
-        method: 'POST',
+  const geocodeProperty = async (propertyId: string) => { try { const response = await fetch('/api/geocode-property', { method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          address: form.address,
+        body: JSON.stringify({ address: form.address,
           comune: form.comune,
-          province: form.province,
-        }),
-      })
+          province: form.province, }), })
 
       const data = await response.json()
 
-      await updatePropertyGeocode(propertyId, {
-        latitude: data.latitude,
+      await updatePropertyGeocode(propertyId, { latitude: data.latitude,
         longitude: data.longitude,
         locationMode: data.locationMode,
         queryUsed: data.queryUsed || null,
-        geocodeStatus: data.geocodeStatus || null,
-      })
-    } catch (error) {
-      console.error('Errore geocodifica nuovo immobile:', error)
-    }
-  }
+        geocodeStatus: data.geocodeStatus || null, }) } catch (error) { console.error('Errore geocodifica nuovo immobile:', error) } }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  
+  const [aiSuggestedFields, setAiSuggestedFields] = useState<string[]>([])
+
+  useEffect(() => { const className = 'ai-suggested-field'
+
+    document.querySelectorAll(`.${className}`).forEach((element) => { element.classList.remove(className) })
+
+    aiSuggestedFields.forEach((fieldName) => { document.querySelectorAll(`[name="${fieldName}"]`).forEach((element) => { element.classList.add(className) }) })
+
+    return () => { document.querySelectorAll(`.${className}`).forEach((element) => { element.classList.remove(className) }) } }, [aiSuggestedFields])
+
+  useEffect(() => { const handleUserEdit = (event: Event) => { const target = event.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null
+
+      if (!target?.name) return
+
+      setAiSuggestedFields((prev) => prev.filter((fieldName) => fieldName !== target.name)) }
+
+    document.addEventListener('input', handleUserEdit, true)
+    document.addEventListener('change', handleUserEdit, true)
+
+    return () => { document.removeEventListener('input', handleUserEdit, true)
+      document.removeEventListener('change', handleUserEdit, true) } }, [])
+
+  const handleAnalyzeDescription = () => { const suggestions = analyzePropertyDescription(form.description) as Partial<typeof form>
+    const suggestedFields = Object.keys(suggestions)
+
+    if (suggestedFields.length === 0) { alert('Non ho trovato elementi abbastanza chiari nella descrizione per compilare i campi.')
+      return }
+
+    setForm((prev) => ({ ...prev,
+      ...suggestions, }))
+
+    setAiSuggestedFields(suggestedFields) }
+
+const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
     setLoading(true)
 
     const slug = generateSlug(form.title)
     let data: { id: string } | null = null
 
-    try {
-      data = await createProperty({
-        title: form.title,
+    try { data = await createProperty({ title: form.title,
         reference_code: form.reference_code || generatePropertyReferenceCode(),
         condition: form.condition || null,
         availability: form.availability || null,
@@ -260,21 +241,16 @@ export default function NewPropertyPage() {
         furnished_status: form.furnished_status || null,
         deposit_amount: normalizeOptionalField(form.deposit_amount),
         advance_amount: normalizeOptionalField(form.advance_amount),
-        advance_deposit_amount: normalizeOptionalField(form.advance_deposit_amount),
-      })
-    } catch (error) {
-      setLoading(false)
+        advance_deposit_amount: normalizeOptionalField(form.advance_deposit_amount), }) } catch (error) { setLoading(false)
       console.error(error)
       alert('Errore creazione immobile')
-      return
-    }
+      return }
 
     await geocodeProperty(data.id)
 
     setLoading(false)
     router.push('/admin/immobili')
-    router.refresh()
-  }
+    router.refresh() }
 
   return (
     <section className="mx-auto w-full max-w-3xl px-4 text-[var(--site-text)]">
@@ -461,11 +437,8 @@ export default function NewPropertyPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        setForm((prev) => ({
-                          ...prev,
-                          comune: '',
-                        }))
-                      }
+                        setForm((prev) => ({ ...prev,
+                          comune: '', })) }
                       className="theme-admin-chip flex items-center gap-2 rounded-full px-3 py-1.5 text-xs transition hover:opacity-95"
                     >
                       <span>{form.comune}</span>
@@ -482,27 +455,23 @@ export default function NewPropertyPage() {
                       Nessun comune trovato.
                     </div>
                   ) : (
-                    filteredComuni.map((comune) => {
-                      const selected = form.comune === comune.name
+                    filteredComuni.map((comune) => { const selected = form.comune === comune.name
 
                       return (
                         <button
                           key={comune.code || comune.name}
                           type="button"
                           onClick={() => handleComuneSelect(comune.name)}
-                          className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition ${
-                            selected
+                          className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition ${ selected
                               ? 'theme-admin-chip-active'
-                              : 'theme-admin-chip hover:opacity-95'
-                          }`}
+                              : 'theme-admin-chip hover:opacity-95' }`}
                         >
                           <span>{comune.name}</span>
                           <span className="text-xs opacity-70">
                             {selected ? 'Selezionato' : 'Seleziona'}
                           </span>
                         </button>
-                      )
-                    })
+                      ) })
                   )}
                 </div>
               </div>
@@ -567,6 +536,42 @@ export default function NewPropertyPage() {
                 className="theme-admin-input w-full rounded-xl px-4 py-3"
               />
             </div>
+          </div>
+
+          <div className="theme-admin-card rounded-2xl p-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <p className="theme-admin-faint text-xs uppercase tracking-[0.22em]">
+                  Descrizione immobile
+                </p>
+                <p className="mt-2 text-sm text-[var(--admin-text-muted)]">
+                  Inserisci o incolla la descrizione. Puoi usare l’analisi automatica per precompilare i campi principali.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleAnalyzeDescription}
+                className="rounded-xl border border-sky-300 bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-950 transition hover:bg-sky-200"
+              >
+                Analizza descrizione
+              </button>
+            </div>
+
+            {aiSuggestedFields.length > 0 && (
+              <div className="mt-4 rounded-xl border border-sky-300 bg-sky-100/80 px-4 py-3 text-sm text-sky-950">
+                I campi evidenziati in azzurro sono stati suggeriti automaticamente: controllali prima di pubblicare.
+              </div>
+            )}
+
+            <textarea
+              name="description"
+              placeholder="Descrizione completa dell’immobile"
+              rows={8}
+              value={form.description}
+              onChange={handleChange}
+              className="theme-admin-input mt-4 w-full rounded-xl px-4 py-3"
+            />
           </div>
 
           <div className="theme-admin-card rounded-2xl p-4">
@@ -771,82 +776,6 @@ export default function NewPropertyPage() {
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            <div>
-              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
-                Cauzione
-              </label>
-              <input
-                name="deposit_amount"
-                placeholder="Es. 2 mensilità / da definire"
-                value={form.deposit_amount}
-                onChange={handleChange}
-                className="theme-admin-input w-full rounded-xl px-4 py-3"
-              />
-            </div>
-
-            <div>
-              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
-                Anticipo
-              </label>
-              <input
-                name="advance_amount"
-                placeholder="Es. 1 mensilità / da definire"
-                value={form.advance_amount}
-                onChange={handleChange}
-                className="theme-admin-input w-full rounded-xl px-4 py-3"
-              />
-            </div>
-
-            <div>
-              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
-                Anticipo + cauzione
-              </label>
-              <input
-                name="advance_deposit_amount"
-                placeholder="Es. 3 mensilità / da definire"
-                value={form.advance_deposit_amount}
-                onChange={handleChange}
-                className="theme-admin-input w-full rounded-xl px-4 py-3"
-              />
-            </div>
-          </div>
-
-          <textarea
-            name="description"
-            placeholder="Descrizione immobile"
-            value={form.description}
-            onChange={handleChange}
-            rows={6}
-            className="theme-admin-input w-full rounded-xl px-4 py-3"
-          />
-
-          <div className="theme-admin-card rounded-2xl p-4">
-            <p className="theme-admin-faint mb-2 text-xs uppercase tracking-[0.22em]">
-              Pubblicazione portali
-            </p>
-            <p className="theme-admin-muted mb-4 text-sm">
-              Seleziona su quali portali dovrà essere incluso questo immobile quando verrà generato l’export.
-            </p>
-
-            <div className="grid gap-3 md:grid-cols-3">
-              <FeatureToggle
-                label="Immobiliare.it"
-                checked={form.export_immobiliare_it}
-                onClick={() => toggleBooleanField('export_immobiliare_it')}
-              />
-              <FeatureToggle
-                label="Idealista"
-                checked={form.export_idealista}
-                onClick={() => toggleBooleanField('export_idealista')}
-              />
-              <FeatureToggle
-                label="Casa.it"
-                checked={form.export_casa_it}
-                onClick={() => toggleBooleanField('export_casa_it')}
-              />
-            </div>
-          </div>
 
           <div className="theme-admin-card rounded-2xl p-4">
             <p className="theme-admin-faint mb-4 text-xs uppercase tracking-[0.22em]">
@@ -893,5 +822,4 @@ export default function NewPropertyPage() {
         </button>
       </form>
     </section>
-  )
-}
+  ) }
