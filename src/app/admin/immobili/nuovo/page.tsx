@@ -269,7 +269,7 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
             placeholder="Titolo"
             value={form.title}
             onChange={handleChange}
-            className="theme-admin-input rounded-xl px-4 py-3"
+            className="theme-admin-input rounded-xl px-4 py-3 w-full"
             required
           />
           </div>
@@ -333,11 +333,11 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
             <div className="grid gap-4 md:grid-cols-3">
               <div>
                 <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
-                  Codice immobile / riferimento
+                  Codice Riferimento
                 </label>
               <input
                 name="reference_code"
-                placeholder="Codice immobile / riferimento"
+                placeholder="Codice Riferimento"
                 value={form.reference_code}
                 onChange={handleChange}
                 className="theme-admin-input rounded-xl px-4 py-3"
@@ -762,11 +762,11 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
 
             <div>
               <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
-                Importo spese condominiali
+                Spese Condominiali
               </label>
             <input
               name="condo_fees_amount"
-              placeholder="Importo spese condominiali €"
+              placeholder="Spese Condominiali €"
               type="number"
               value={form.condo_fees_amount}
               onChange={handleChange}
