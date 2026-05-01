@@ -1,9 +1,30 @@
-type PropertySuggestion = Record<string, string | boolean>
+export type PropertySuggestion = Partial<{
+  condition: string
+  availability: string
+  property_type: string
+  rooms: string
+  surface: string
+  bathrooms: string
+  bedrooms: string
+  floor: string
+  total_floors: string
+  balconies: string
+  terraces: string
+  has_garage: boolean
+  has_parking: boolean
+  has_garden: boolean
+  has_elevator: boolean
+  heating_type: string
+  heating_source: string
+  furnished_status: string
+  condo_fees: string
+  condo_fees_amount: string
+  condo_fees_period: string
+}>
 
-const NUMBER_WORDS: Record<string, number> = {
+const WORD_NUMBERS: Record<string, number> = {
   uno: 1,
   una: 1,
-  un: 1,
   due: 2,
   tre: 3,
   quattro: 4,
@@ -13,539 +34,391 @@ const NUMBER_WORDS: Record<string, number> = {
   otto: 8,
   nove: 9,
   dieci: 10,
+  primo: 1,
+  prima: 1,
+  secondo: 2,
+  seconda: 2,
+  terzo: 3,
+  terza: 3,
+  quarto: 4,
+  quarta: 4,
+  quinto: 5,
+  quinta: 5,
+  sesto: 6,
+  sesta: 6,
+  settimo: 7,
+  settima: 7,
+  ottavo: 8,
+  ottava: 8,
+  nono: 9,
+  nona: 9,
+  decimo: 10,
+  decima: 10,
 }
 
-const FLOOR_WORDS: Record<string, string> = {
-  primo: '1',
-  seconda: '2',
-  secondo: '2',
-  terza: '3',
-  terzo: '3',
-  quarta: '4',
-  quarto: '4',
-  quinta: '5',
-  quinto: '5',
-  sesta: '6',
-  sesto: '6',
-}
-
-function normalize(value: string) {
-  return value
+function normalizeText(value: string) {
+  return String(value || '')
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[’']/g, ' ')
+    .replace(/[’‘`]/g, "'")
+    .replace(/[“”]/g, '"')
     .replace(/\s+/g, ' ')
     .trim()
 }
 
-function hasAny(text: string, words: string[]) {
-  return words.some((word) => text.includes(normalize(word)))
+function hasAny(text: string, terms: string[]) {
+  return terms.some((term) => text.includes(normalizeText(term)))
 }
 
-function matchAny(text: string, patterns: RegExp[]) {
-  return patterns.some((pattern) => pattern.test(text))
-}
-
-function numberFromText(value: string | undefined) {
+function toNumber(value: string | undefined) {
   if (!value) return null
-
-  const clean = normalize(value)
-  const numeric = Number(clean)
-
-  if (Number.isFinite(numeric)) return numeric
-
-  return NUMBER_WORDS[clean] ?? null
+  const clean = value.toLowerCase().trim()
+  const asNumber = Number(clean.replace(',', '.'))
+  if (Number.isFinite(asNumber)) return asNumber
+  return WORD_NUMBERS[clean] || null
 }
 
-function extractNumberNear(text: string, patterns: RegExp[]) {
+function firstNumberFromPatterns(text: string, patterns: RegExp[]) {
   for (const pattern of patterns) {
     const match = text.match(pattern)
-    const raw = match?.[1]
-    const number = numberFromText(raw)
-
-    if (number !== null) return String(number)
+    const value = toNumber(match?.[1])
+    if (value && value > 0) return value
   }
 
   return null
-}
-
-function hasNegativeFeature(text: string, featurePatterns: string[]) {
-  return featurePatterns.some((feature) => {
-    const pattern = new RegExp(
-      `(senza|no|non presente|assente|privo di|priva di|mancanza di)\\s.{0,20}${feature}`,
-      'i'
-    )
-
-    return pattern.test(text)
-  })
-}
-
-function hasPositiveFeature(text: string, positiveWords: string[], negativeFeatures: string[]) {
-  if (hasNegativeFeature(text, negativeFeatures)) return false
-  return hasAny(text, positiveWords)
 }
 
 function extractSurface(text: string) {
-  return extractNumberNear(text, [
-    /(\d{2,4})\s*(mq|m2|metri quadrati)/,
-    /(mq|m2|metri quadrati)\s*(\d{2,4})/,
-    /superficie[^0-9]{0,30}(\d{2,4})/,
-  ])
-}
+  const matches = [...text.matchAll(/(\d{1,4}(?:[,.]\d+)?)\s*(?:mq|m²|metri quadri)\b/g)]
 
-function extractFloor(text: string) {
-  const toFloorValue = (raw: string | undefined) => {
-    if (!raw) return null
+  for (const match of matches) {
+    const value = toNumber(match[1])
+    if (!value) continue
 
-    const clean = normalize(raw)
+    const start = Math.max(0, (match.index || 0) - 30)
+    const end = Math.min(text.length, (match.index || 0) + 60)
+    const context = text.slice(start, end)
 
-    if (clean === 'terra') return 'Piano terra'
-    if (clean === 'rialzato') return 'Rialzato'
-    if (clean === 'seminterrato') return 'Seminterrato'
-    if (clean === 'ultimo') return 'Ultimo piano'
+    if (context.includes('mq/euro') || context.includes('mq / euro')) continue
+    if (value < 8 || value > 2000) continue
 
-    const numeric = Number(clean)
-    if (Number.isFinite(numeric)) return String(numeric)
-
-    return FLOOR_WORDS[clean] || null
-  }
-
-  const explicitBuildingFloorPatterns = [
-    /(?:posto|sito|ubicato|collocato|situato|si trova)\s+(?:al|a|in)\s+(?:piano\s+)?(terra|rialzato|seminterrato|ultimo|\d{1,2}|primo|secondo|terzo|quarto|quinto|sesto)(?:\s*(?:°|o))?\s*(?:piano)?/,
-    /(?:appartamento|immobile|attico|ufficio|negozio)\s+(?:al|a|in)\s+(?:piano\s+)?(terra|rialzato|seminterrato|ultimo|\d{1,2}|primo|secondo|terzo|quarto|quinto|sesto)(?:\s*(?:°|o))?\s*(?:piano)?/,
-    /(?:al|a|in)\s+(?:piano\s+)?(terra|rialzato|seminterrato|ultimo|\d{1,2}|primo|secondo|terzo|quarto|quinto|sesto)(?:\s*(?:°|o))?\s*piano\s+(?:di|in)\s+(?:palazzina|stabile|condominio|edificio)/,
-  ]
-
-  for (const pattern of explicitBuildingFloorPatterns) {
-    const match = text.match(pattern)
-    const value = toFloorValue(match?.[1])
-    if (value) return value
-  }
-
-  // Se il testo parla di distribuzione interna su più livelli,
-  // frasi tipo "al primo piano..." descrivono i livelli dell'immobile,
-  // non il piano nello stabile.
-  if (extractTotalFloors(text)) return null
-
-  if (matchAny(text, [/piano\s+terra/, /\bp\.?\s*t\.?\b/, /\bpt\b/])) return 'Piano terra'
-  if (hasAny(text, ['piano rialzato', 'rialzato'])) return 'Rialzato'
-  if (hasAny(text, ['seminterrato', 'piano seminterrato'])) return 'Seminterrato'
-  if (hasAny(text, ['ultimo piano'])) return 'Ultimo piano'
-
-  const numericFloor = text.match(/(?:al|a|piano|posto al|sito al)\s*(\d{1,2})\s*(?:°|o)?\s*piano/)
-  if (numericFloor?.[1]) return numericFloor[1]
-
-  for (const [word, value] of Object.entries(FLOOR_WORDS)) {
-    if (text.includes(`${word} piano`) || text.includes(`al ${word}`)) {
-      return value
-    }
+    return String(Math.round(value))
   }
 
   return null
 }
 
+function extractPropertyType(text: string) {
+  if (hasAny(text, ['bilocale'])) return 'bilocale'
+  if (hasAny(text, ['trilocale'])) return 'trilocale'
+  if (hasAny(text, ['quadrilocale'])) return 'quadrilocale'
+  if (hasAny(text, ['monolocale'])) return 'monolocale'
+  if (hasAny(text, ['attico', 'super attico'])) return 'attico'
+  if (hasAny(text, ['mansarda'])) return 'mansarda'
+  if (hasAny(text, ['villa', 'villetta'])) return 'villa'
+  if (hasAny(text, ['rustico', 'rudere'])) return 'rustico'
 
-function extractTotalFloors(text: string) {
-  const explicitLevels = text.match(/(?:su|disposto su|sviluppato su|articolato su)\s*(\d+|uno|una|due|tre|quattro|cinque)\s*(livelli|piani)/)
-  const explicitFloors = text.match(/(?:totale piani|piani totali|numero piani)\s*(\d+|uno|una|due|tre|quattro|cinque)/)
-
-  const levelNumber =
-    numberFromText(explicitLevels?.[1]) ??
-    numberFromText(explicitFloors?.[1])
-
-  if (levelNumber !== null) return String(levelNumber)
-
-  if (hasAny(text, [
-    'su due livelli',
-    'disposto su due livelli',
-    'sviluppato su due livelli',
-    'articolato su due livelli',
-    'su 2 livelli',
-    'su due piani',
-    'su 2 piani',
-  ])) {
-    return '2'
+  if (hasAny(text, ['ufficio', 'uffici', 'centro direzionale', 'reception', 'sala riunione'])) {
+    return 'ufficio'
   }
 
-  if (hasAny(text, [
-    'su tre livelli',
-    'disposto su tre livelli',
-    'sviluppato su tre livelli',
-    'articolato su tre livelli',
-    'su 3 livelli',
-    'su tre piani',
-    'su 3 piani',
-  ])) {
-    return '3'
+  if (hasAny(text, ['negozio', 'vetrine', 'bottega', 'fronte strada'])) {
+    return 'negozio'
   }
-
-  if (hasAny(text, [
-    'su quattro livelli',
-    'disposto su quattro livelli',
-    'sviluppato su quattro livelli',
-    'articolato su quattro livelli',
-    'su 4 livelli',
-    'su quattro piani',
-    'su 4 piani',
-  ])) {
-    return '4'
-  }
-
-  return null
-}
-
-function splitSentences(text: string) {
-  return text
-    .split(/[.;:\n]+/)
-    .map((item) => item.trim())
-    .filter(Boolean)
-}
-
-function extractBathrooms(text: string) {
-  if (hasAny(text, ['doppi servizi', 'doppio servizio'])) return '2'
-
-  const explicit = extractNumberNear(text, [
-    /(\d+|uno|una|due|tre|quattro|cinque)\s*(bagni|bagno|servizi|servizio)/,
-    /(bagni|bagno|servizi|servizio)\s*(\d+)/,
-  ])
-
-  if (explicit) return explicit
 
   if (
-    hasAny(text, [
-      'secondo bagno',
-      'altro bagno',
-      'ulteriore bagno',
-      'bagno padronale e bagno di servizio',
-      'bagno di servizio e bagno padronale',
-    ])
+    hasAny(text, ['box varie metrature', 'box singolo', 'box doppio', 'autorimessa']) ||
+    /\bbox\s+(?:di\s+)?\d{1,4}\s*mq\b/.test(text)
   ) {
-    return '2'
+    return 'box'
   }
 
-  const sentences = splitSentences(text)
-  const bathroomSentences = sentences.filter((sentence) =>
-    /\bbagno\b|\bbagni\b|\bservizio\b|\bservizi\b/.test(sentence)
-  )
-
-  const floorBathroomMarkers = new Set<string>()
-
-  bathroomSentences.forEach((sentence) => {
-    const floor = extractFloor(sentence)
-    if (floor) floorBathroomMarkers.add(floor)
-  })
-
-  if (floorBathroomMarkers.size >= 2) return String(floorBathroomMarkers.size)
-
-  const bathroomOccurrences = (text.match(/\bbagno\b|\bbagni\b|\bservizio\b|\bservizi\b/g) || []).length
-
-  if (bathroomOccurrences >= 2 && matchAny(text, [
-    /bagno[^.]{0,80}bagno/,
-    /servizio[^.]{0,80}servizio/,
-    /bagno[^.]{0,80}servizio/,
-    /servizio[^.]{0,80}bagno/,
-  ])) {
-    return '2'
-  }
-
-  if (bathroomOccurrences >= 1) return '1'
+  if (hasAny(text, ['appartamento'])) return 'appartamento'
 
   return null
+}
+
+function extractRooms(text: string) {
+  if (hasAny(text, ['monolocale'])) return '1'
+  if (hasAny(text, ['bilocale'])) return '2'
+  if (hasAny(text, ['trilocale'])) return '3'
+  if (hasAny(text, ['quadrilocale'])) return '4'
+  if (hasAny(text, ['oltre 5 locali'])) return '6'
+
+  const explicit = firstNumberFromPatterns(text, [
+    /\b(\d+)\s+locali\b/,
+    /\b(\d+)\s+vani\b/,
+    /\b(uno|una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci)\s+locali\b/,
+    /\b(uno|una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci)\s+vani\b/,
+  ])
+
+  return explicit ? String(explicit) : null
 }
 
 function extractBedrooms(text: string) {
-  const explicit = extractNumberNear(text, [
-    /(\d+|una|uno|due|tre|quattro|cinque)\s*(camere da letto|camere)/,
+  const explicit = firstNumberFromPatterns(text, [
+    /\b(\d+)\s+camere?\b/,
+    /\b(uno|una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci)\s+camere?\b/,
   ])
 
-  const explicitNumber = explicit ? Number(explicit) : 0
+  if (explicit) return String(explicit)
 
-  const sentences = splitSentences(text)
-  let countedBedrooms = 0
+  let count = 0
 
-  sentences.forEach((sentence) => {
-    let sentenceCount = 0
+  if (hasAny(text, ['camera matrimoniale'])) count += 1
+  if (hasAny(text, ['camera singola'])) count += 1
+  if (hasAny(text, ['cameretta'])) count += 1
+  if (hasAny(text, ['camera da letto'])) count += 1
 
-    if (hasAny(sentence, ['camera matrimoniale', 'matrimoniale'])) sentenceCount += 1
-    if (hasAny(sentence, ['cameretta'])) sentenceCount += 1
-    if (hasAny(sentence, ['camera singola'])) sentenceCount += 1
+  const unaCameraMatches = [...text.matchAll(/\buna camera\b/g)].length
+  count += unaCameraMatches
 
-    const genericBedroom = sentence.match(/(?:una|un|1)\s+camera\b/)
-    if (genericBedroom && sentenceCount === 0) sentenceCount += 1
+  if (count > 0) return String(count)
 
-    if (hasAny(sentence, ['seconda camera'])) sentenceCount = Math.max(sentenceCount, 1)
-    if (hasAny(sentence, ['terza camera'])) sentenceCount = Math.max(sentenceCount, 1)
-
-    countedBedrooms += sentenceCount
-  })
-
-  if (hasAny(text, ['due camere', '2 camere'])) countedBedrooms = Math.max(countedBedrooms, 2)
-  if (hasAny(text, ['tre camere', '3 camere'])) countedBedrooms = Math.max(countedBedrooms, 3)
-  if (hasAny(text, ['quattro camere', '4 camere'])) countedBedrooms = Math.max(countedBedrooms, 4)
-
-  const finalCount = Math.max(explicitNumber, countedBedrooms)
-
-  if (finalCount > 0) return String(finalCount)
-
-  if (hasAny(text, ['camera'])) return '1'
+  if (/\bcamera\b/.test(text)) return '1'
 
   return null
 }
 
-function extractRoomsAndType(text: string, suggestions: PropertySuggestion) {
-  const explicitRooms = extractNumberNear(text, [
-    /(\d+|uno|una|due|tre|quattro|cinque|sei)\s*(locali|locale|vani|vano)/,
+function extractBathrooms(text: string) {
+  const explicit = firstNumberFromPatterns(text, [
+    /\b(\d+)\s+bagni?\b/,
+    /\b(\d+)\s+servizi\b/,
+    /\b(uno|una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci)\s+bagni?\b/,
+    /\b(uno|una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci)\s+servizi\b/,
   ])
 
-  if (explicitRooms) suggestions.rooms = explicitRooms
+  if (explicit) return String(explicit)
 
-  if (hasAny(text, ['monolocale'])) {
-    suggestions.property_type = 'monolocale'
-    suggestions.rooms = '1'
-    suggestions.bedrooms = suggestions.bedrooms || '0'
-    return
-  }
+  if (hasAny(text, ['doppi servizi', 'doppio servizio'])) return '2'
 
-  if (hasAny(text, ['bilocale', 'bilo locale'])) {
-    suggestions.property_type = 'bilocale'
-    suggestions.rooms = '2'
-    suggestions.bedrooms = suggestions.bedrooms || '1'
-    return
-  }
+  const bathroomMentions = [...text.matchAll(/\bbagno\b/g)].length
+  if (bathroomMentions > 0) return String(bathroomMentions)
 
-  if (hasAny(text, ['trilocale', 'tri locale'])) {
-    suggestions.property_type = 'trilocale'
-    suggestions.rooms = '3'
-    return
-  }
-
-  if (hasAny(text, ['quadrilocale', 'quadri locale'])) {
-    suggestions.property_type = 'quadrilocale'
-    suggestions.rooms = '4'
-    return
-  }
-
-  if (hasAny(text, ['attico'])) suggestions.property_type = 'attico'
-  else if (hasAny(text, ['villa singola', 'villa'])) suggestions.property_type = 'villa'
-  else if (hasAny(text, ['villetta'])) suggestions.property_type = 'villetta'
-  else if (hasAny(text, ['casa indipendente', 'indipendente'])) suggestions.property_type = 'casa_indipendente'
-  else if (hasAny(text, ['loft', 'open space', 'openspace'])) suggestions.property_type = 'loft_open_space'
-  else if (hasAny(text, ['mansarda'])) suggestions.property_type = 'mansarda'
-  else if (hasAny(text, ['ufficio'])) suggestions.property_type = 'ufficio'
-  else if (hasAny(text, ['negozio'])) suggestions.property_type = 'negozio'
-  else if (hasAny(text, ['capannone'])) suggestions.property_type = 'capannone'
-  else if (hasAny(text, ['magazzino'])) suggestions.property_type = 'magazzino'
-  else if (hasAny(text, ['laboratorio'])) suggestions.property_type = 'laboratorio'
-  else if (hasAny(text, ['terreno edificabile'])) suggestions.property_type = 'terreno_edificabile'
-  else if (hasAny(text, ['terreno agricolo'])) suggestions.property_type = 'terreno_agricolo'
-  else if (hasAny(text, ['terreno'])) suggestions.property_type = 'terreno'
-  else if (hasAny(text, ['appartamento'])) suggestions.property_type = 'appartamento'
+  return null
 }
 
-function inferRoomsFromLayout(text: string, suggestions: PropertySuggestion) {
-  if (suggestions.rooms) return
+function extractInternalLevels(text: string) {
+  if (hasAny(text, ['su due livelli', 'su due piani', 'disposto su due livelli'])) return '2'
+  if (hasAny(text, ['su tre livelli', 'su 3 livelli', 'su tre piani', 'su 3 piani'])) return '3'
+  if (hasAny(text, ['su quattro livelli', 'su 4 livelli', 'su quattro piani', 'su 4 piani'])) return '4'
 
-  const bedrooms = Number(suggestions.bedrooms || 0)
-  if (!bedrooms || Number.isNaN(bedrooms)) return
-
-  const hasLivingRoom = hasAny(text, [
-    'soggiorno',
-    'salone',
-    'zona giorno',
-    'living',
-    'sala',
+  const explicit = firstNumberFromPatterns(text, [
+    /\bsu\s+(\d+)\s+livelli\b/,
+    /\bsu\s+(\d+)\s+piani\b/,
+    /\bsu\s+(due|tre|quattro|cinque)\s+livelli\b/,
+    /\bsu\s+(due|tre|quattro|cinque)\s+piani\b/,
   ])
 
-  if (hasLivingRoom) {
-    suggestions.rooms = String(bedrooms + 1)
-  }
+  return explicit ? String(explicit) : null
 }
 
-function extractCondition(text: string, suggestions: PropertySuggestion) {
-  if (hasAny(text, ['appena ristrutturato', 'completamente ristrutturato', 'ristrutturato'])) {
-    suggestions.condition = 'ristrutturato'
-  } else if (hasAny(text, [
-    'nuova costruzione',
-    'di nuova costruzione',
-    'recente costruzione',
-    'di recente costruzione',
-    'costruzione recente',
-    'recente edificazione',
-    'di recente edificazione',
-    'di nuova realizzazione',
-    'nuovo',
-  ])) {
-    suggestions.condition = 'nuovo'
-  } else if (hasAny(text, ['ottimo stato', 'ottime condizioni', 'pari al nuovo'])) {
-    suggestions.condition = 'ottimo'
-  } else if (hasAny(text, ['buono stato', 'buone condizioni', 'ben tenuto'])) {
-    suggestions.condition = 'buono'
-  } else if (hasAny(text, ['da ristrutturare', 'da sistemare', 'da rivedere'])) {
-    suggestions.condition = 'da_ristrutturare'
-  } else if (hasAny(text, ['rustico', 'rudere'])) {
-    suggestions.condition = 'rustico'
-  } else if (hasAny(text, ['abitabile'])) {
-    suggestions.condition = 'abitabile'
-  }
-}
+function extractFloor(text: string, totalFloors: string | null) {
+  const hasInternalDistribution =
+    Boolean(totalFloors) &&
+    (
+      /piano terra.+piano primo/.test(text) ||
+      /primo piano.+secondo piano/.test(text) ||
+      /al primo piano.+al secondo piano/.test(text) ||
+      /piano terra.+primo piano/.test(text)
+    )
 
-function extractAvailability(text: string, suggestions: PropertySuggestion) {
-  if (hasAny(text, ['libero subito', 'disponibile subito', 'immediatamente disponibile'])) {
-    suggestions.availability = 'libero_subito'
-  } else if (hasAny(text, ['libero al rogito', 'disponibile al rogito'])) {
-    suggestions.availability = 'al_rogito'
-  } else if (hasAny(text, ['da concordare', 'disponibilita da concordare'])) {
-    suggestions.availability = 'da_concordare'
-  } else if (hasAny(text, ['occupato'])) {
-    suggestions.availability = 'occupato'
-  } else if (hasAny(text, ['locato', 'a reddito', 'gia affittato'])) {
-    suggestions.availability = 'locato'
-  } else if (hasAny(text, ['libero', 'disponibile'])) {
-    suggestions.availability = 'libero'
-  }
-}
+  if (hasInternalDistribution) return null
 
-function extractFurnished(text: string, suggestions: PropertySuggestion) {
-  if (hasAny(text, ['parzialmente arredato', 'semi arredato', 'semiarredato'])) {
-    suggestions.furnished_status = 'parzialmente'
-  } else if (hasAny(text, ['non arredato', 'senza arredo', 'vuoto da arredi'])) {
-    suggestions.furnished_status = 'no'
-  } else if (hasAny(text, ['ben arredato', 'completamente arredato', 'arredato'])) {
-    suggestions.furnished_status = 'si'
-  }
-}
+  if (hasAny(text, ['piano rialzato'])) return 'rialzato'
+  if (hasAny(text, ['piano terra'])) return 'terra'
 
-function extractFeatures(text: string, suggestions: PropertySuggestion) {
-  if (hasPositiveFeature(text, ['box', 'garage', 'autorimessa'], ['box', 'garage', 'autorimessa'])) {
-    suggestions.has_garage = true
-  }
-
-  if (hasPositiveFeature(text, ['posto auto', 'posto macchina', 'parcheggio privato'], ['posto auto', 'posto macchina', 'parcheggio'])) {
-    suggestions.has_parking = true
-  }
-
-  if (hasPositiveFeature(text, ['giardino', 'area verde privata'], ['giardino'])) {
-    suggestions.has_garden = true
-  }
-
-  if (hasPositiveFeature(text, ['ascensore', 'servito da ascensore'], ['ascensore'])) {
-    suggestions.has_elevator = true
-  }
-
-  if (hasAny(text, ['asta', 'all asta', 'allasta'])) {
-    suggestions.is_auction = true
-  }
-
-  const balconies = extractNumberNear(text, [
-    /(\d+|uno|una|due|tre|quattro|cinque)\s*(balconi|balcone)/,
+  const numberFloor = firstNumberFromPatterns(text, [
+    /\b(?:posto|situato)?\s*(?:al|a)?\s*(\d+)[°º]?\s*(?:e|ed)?\s*(?:ultimo\s*)?piano\b/,
+    /\b(\d+)\s*(?:e|ed)\s*ultimo piano\b/,
   ])
 
-  if (balconies) suggestions.balconies = balconies
-  else if (hasAny(text, ['balcone', 'balconi'])) suggestions.balconies = '1'
+  if (numberFloor) return String(numberFloor)
 
-  const terraces = extractNumberNear(text, [
-    /(\d+|uno|una|due|tre|quattro|cinque)\s*(terrazzi|terrazzo|terrazze|terrazza)/,
+  const wordFloor = firstNumberFromPatterns(text, [
+    /\bpiano\s+(primo|secondo|terzo|quarto|quinto|sesto|settimo|ottavo|nono|decimo)\b/,
+    /\bal\s+(primo|secondo|terzo|quarto|quinto|sesto|settimo|ottavo|nono|decimo)\s+piano\b/,
   ])
 
-  if (terraces) suggestions.terraces = terraces
-  else if (hasAny(text, ['terrazzo', 'terrazza', 'terrazzi', 'terrazze'])) suggestions.terraces = '1'
+  if (wordFloor) return String(wordFloor)
+
+  if (hasAny(text, ['ultimo piano'])) return 'ultimo'
+
+  return null
 }
 
-function extractHeating(text: string, suggestions: PropertySuggestion) {
-  if (hasAny(text, ['termoautonomo', 'riscaldamento autonomo', 'autonomo'])) {
-    suggestions.heating_type = 'termoautonomo'
-  } else if (hasAny(text, ['centralizzato', 'riscaldamento centralizzato'])) {
-    suggestions.heating_type = 'centralizzato'
-  } else if (hasAny(text, ['contabilizzato', 'semi autonomo', 'semi-autonomo', 'termovalvole'])) {
-    suggestions.heating_type = 'semi_autonomo'
-  } else if (hasAny(text, ['senza riscaldamento', 'riscaldamento assente'])) {
-    suggestions.heating_type = 'assente'
-  }
+function extractBalconies(text: string) {
+  const explicit = firstNumberFromPatterns(text, [
+    /\b(\d+)\s+balconi\b/,
+    /\b(\d+)\s+balcone\b/,
+    /\b(uno|una|due|tre|quattro|cinque|sei)\s+balconi\b/,
+  ])
 
-  if (hasAny(text, ['metano'])) suggestions.heating_source = 'metano'
-  else if (hasAny(text, ['gpl'])) suggestions.heating_source = 'gpl'
-  else if (hasAny(text, ['pompa di calore'])) suggestions.heating_source = 'pompa_calore'
-  else if (hasAny(text, ['condizionatore', 'climatizzatore', 'split caldo freddo', 'caldo freddo'])) suggestions.heating_source = 'climatizzatore_caldo_freddo'
-  else if (hasAny(text, ['a pavimento', 'pavimento radiante'])) suggestions.heating_source = 'pavimento'
-  else if (hasAny(text, ['radiatori', 'termosifoni'])) suggestions.heating_source = 'radiatori'
-  else if (hasAny(text, ['pellet'])) suggestions.heating_source = 'stufa_pellet'
-  else if (hasAny(text, ['legna'])) suggestions.heating_source = 'stufa_legna'
-  else if (hasAny(text, ['teleriscaldamento'])) suggestions.heating_source = 'teleriscaldamento'
-  else if (hasAny(text, ['gasolio'])) suggestions.heating_source = 'gasolio'
-  else if (hasAny(text, ['fotovoltaico'])) suggestions.heating_source = 'fotovoltaico_elettrico'
-  else if (hasAny(text, ['gas'])) suggestions.heating_source = 'gas'
-  else if (hasAny(text, ['elettrico'])) suggestions.heating_source = 'elettrico'
+  if (explicit) return String(explicit)
+  if (hasAny(text, ['balcone', 'balconi'])) return '1'
+
+  return null
+}
+
+function extractTerraces(text: string) {
+  const explicit = firstNumberFromPatterns(text, [
+    /\b(\d+)\s+terrazzi\b/,
+    /\b(\d+)\s+terrazze\b/,
+    /\b(\d+)\s+terrazzo\b/,
+    /\b(\d+)\s+terrazza\b/,
+    /\b(uno|una|due|tre|quattro|cinque|sei)\s+terrazzi\b/,
+    /\b(uno|una|due|tre|quattro|cinque|sei)\s+terrazze\b/,
+  ])
+
+  if (explicit) return String(explicit)
+  if (hasAny(text, ['terrazzo', 'terrazza', 'terrazzi', 'terrazze'])) return '1'
+
+  return null
 }
 
 function extractCondoFees(text: string, suggestions: PropertySuggestion) {
-  if (hasAny(text, [
-    'spese condominiali incluse',
-    'spese incluse',
-    'spese comprese',
-    'condominio incluso',
-    'condominio incluso nel prezzo',
-  ])) {
+  if (!text.includes('spese condominiali') && !text.includes('basse spese')) return
+
+  if (hasAny(text, ['spese condominiali incluse', 'spese incluse', 'spese comprese'])) {
     suggestions.condo_fees = 'Incluse'
+  } else if (hasAny(text, ['basse spese condominiali', 'spese condominiali basse', 'bassissime spese'])) {
+    suggestions.condo_fees = 'Basse'
+  } else {
+    suggestions.condo_fees = 'Presenti'
   }
 
-  if (hasAny(text, [
-    'senza spese condominiali',
-    'nessuna spesa condominiale',
-    'no spese condominiali',
-    'zero spese condominiali',
-  ])) {
-    suggestions.condo_fees = 'Nessuna spesa condominiale'
-    suggestions.condo_fees_amount = '0'
-  }
-
-  const amount = extractNumberNear(text, [
-    /spese condominiali[^0-9]{0,80}(\d{1,5})(?:\s*€|\s*euro)?/,
-    /spese[^0-9]{0,40}condominiali[^0-9]{0,80}(\d{1,5})(?:\s*€|\s*euro)?/,
-    /condominio[^0-9]{0,80}(\d{1,5})(?:\s*€|\s*euro)?/,
-  ])
+  const amountMatch = text.match(/spese(?:\s+condominiali)?[^0-9]{0,80}(\d{1,4})(?:[,.]\d{1,2})?\s*(?:€|euro)?\s*(?:\/\s*)?(mese|mensili|mensile|anno|annue|annuali)?/)
+  const amount = toNumber(amountMatch?.[1])
 
   if (amount) {
-    suggestions.condo_fees_amount = amount
+    suggestions.condo_fees_amount = String(Math.round(amount))
+  }
 
-    if (hasAny(text, ['/mese', 'al mese', 'mensili', 'mensile', 'mese'])) {
-      suggestions.condo_fees_period = 'mese'
-    } else if (hasAny(text, ['/anno', 'all anno', 'annuali', 'annue', 'annua', 'anno'])) {
-      suggestions.condo_fees_period = 'anno'
-    }
+  const period = amountMatch?.[2]
+  if (period) {
+    suggestions.condo_fees_period = period.includes('ann') || period.includes('anno') ? 'anno' : 'mese'
   }
 }
 
 export function analyzePropertyDescription(description: string): PropertySuggestion {
-  const text = normalize(description)
+  const text = normalizeText(description)
   const suggestions: PropertySuggestion = {}
 
   if (!text) return suggestions
 
-  extractRoomsAndType(text, suggestions)
-  extractCondition(text, suggestions)
-  extractAvailability(text, suggestions)
-  extractFurnished(text, suggestions)
-  extractFeatures(text, suggestions)
-  extractHeating(text, suggestions)
-  extractCondoFees(text, suggestions)
-
+  const propertyType = extractPropertyType(text)
+  const rooms = extractRooms(text)
   const surface = extractSurface(text)
-  if (surface) suggestions.surface = surface
-
   const bedrooms = extractBedrooms(text)
-  if (bedrooms) suggestions.bedrooms = bedrooms
-
-  inferRoomsFromLayout(text, suggestions)
-
   const bathrooms = extractBathrooms(text)
+  const totalFloors = extractInternalLevels(text)
+  const floor = extractFloor(text, totalFloors)
+  const balconies = extractBalconies(text)
+  const terraces = extractTerraces(text)
+
+  if (propertyType) suggestions.property_type = propertyType
+  if (rooms) suggestions.rooms = rooms
+  if (surface) suggestions.surface = surface
+  if (bedrooms) suggestions.bedrooms = bedrooms
   if (bathrooms) suggestions.bathrooms = bathrooms
-
-  const floor = extractFloor(text)
-  if (floor) suggestions.floor = floor
-
-  const totalFloors = extractTotalFloors(text)
   if (totalFloors) suggestions.total_floors = totalFloors
+  if (floor) suggestions.floor = floor
+  if (balconies) suggestions.balconies = balconies
+  if (terraces) suggestions.terraces = terraces
+
+  if (hasAny(text, ['da ristrutturare', 'da restaurare', 'necessita di restauro', 'tetto ammalorato'])) {
+    suggestions.condition = 'da_ristrutturare'
+  } else if (hasAny(text, ['ristrutturato', 'completamente ristrutturato', 'totalmente ristrutturato'])) {
+    suggestions.condition = 'ristrutturato'
+  } else if (hasAny(text, [
+    'nuova costruzione',
+    'di nuova costruzione',
+    'nuova realizzazione',
+    'di nuova realizzazione',
+    'nuovo mai abitato',
+    'mai abitato',
+    'in costruzione',
+    'recentissimo edificio',
+    'recente costruzione',
+    'di recente costruzione',
+    'costruzione recente',
+  ])) {
+    suggestions.condition = 'nuovo'
+  } else if (hasAny(text, ['ottimo stato', 'ottime condizioni', 'ottime condizioni manutentive'])) {
+    suggestions.condition = 'ottimo'
+  } else if (hasAny(text, ['buono stato', 'buone condizioni'])) {
+    suggestions.condition = 'buono'
+  } else if (hasAny(text, ['abitabile', 'pronto per essere abitato'])) {
+    suggestions.condition = 'abitabile'
+  }
+
+  if (hasAny(text, ['libero subito', 'subito disponibile'])) {
+    suggestions.availability = 'libero_subito'
+  } else if (hasAny(text, ['libero al rogito'])) {
+    suggestions.availability = 'al_rogito'
+  } else if (hasAny(text, ['locato', 'gia a reddito', 'a reddito'])) {
+    suggestions.availability = 'locato'
+  } else if (hasAny(text, ['occupato'])) {
+    suggestions.availability = 'occupato'
+  }
+
+  const hasZeroGarage = /\b0\s+garage\b/.test(text)
+
+  if (
+    !hasZeroGarage &&
+    hasAny(text, ['box', 'box auto', 'box singolo', 'box doppio', 'autorimessa', 'garage'])
+  ) {
+    suggestions.has_garage = true
+  }
+
+  if (hasAny(text, ['posto auto', 'posti auto', 'parcheggio', 'posti auto coperti'])) {
+    suggestions.has_parking = true
+  }
+
+  if (hasAny(text, ['giardino', 'giardinetto', 'giardino privato', 'parco privato'])) {
+    suggestions.has_garden = true
+  }
+
+  if (hasAny(text, ['ascensore']) && !hasAny(text, ['senza ascensore', 'no ascensore'])) {
+    suggestions.has_elevator = true
+  }
+
+  if (hasAny(text, ['riscaldamento autonomo', 'termoautonomo', 'autonomo'])) {
+    suggestions.heating_type = 'termoautonomo'
+  } else if (hasAny(text, ['riscaldamento centralizzato', 'centralizzato'])) {
+    suggestions.heating_type = 'centralizzato'
+  } else if (hasAny(text, ['riscaldamento a pavimento'])) {
+    suggestions.heating_type = 'a_pavimento'
+  }
+
+  if (hasAny(text, ['pompa di calore', 'caldo/freddo', 'aria cond. con pompa di calore'])) {
+    suggestions.heating_source = 'pompa_calore'
+  } else if (hasAny(text, ['metano'])) {
+    suggestions.heating_source = 'metano'
+  } else if (hasAny(text, ['gasolio'])) {
+    suggestions.heating_source = 'gasolio'
+  } else if (hasAny(text, ['teleriscaldamento'])) {
+    suggestions.heating_source = 'teleriscaldamento'
+  } else if (hasAny(text, ['stufa a pellet', 'pellet'])) {
+    suggestions.heating_source = 'stufa_pellet'
+  } else if (hasAny(text, ['elettrico', 'elettrica'])) {
+    suggestions.heating_source = 'elettrico'
+  } else if (hasAny(text, ['a pavimento', 'pavimento'])) {
+    suggestions.heating_source = 'pavimento'
+  } else if (hasAny(text, ['gas'])) {
+    suggestions.heating_source = 'gas'
+  }
+
+  if (hasAny(text, ['non arredato', 'non ammobiliato'])) {
+    suggestions.furnished_status = 'no'
+  } else if (hasAny(text, ['parzialmente arredato', 'parzialmente ammobiliato'])) {
+    suggestions.furnished_status = 'parzialmente'
+  } else if (hasAny(text, ['ben arredato', 'arredato', 'ammobiliato', 'ammobiliata', 'completamente ammobiliata'])) {
+    suggestions.furnished_status = 'si'
+  }
+
+  extractCondoFees(text, suggestions)
 
   return suggestions
 }
