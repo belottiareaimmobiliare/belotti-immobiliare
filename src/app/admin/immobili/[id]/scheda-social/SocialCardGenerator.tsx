@@ -255,7 +255,7 @@ export default function SocialCardGenerator({ property, media }: Props) {
 
             <div className="flex h-full min-w-0 flex-col justify-center py-8 text-center">
               <div>
-                <div className="mb-7 flex flex-wrap justify-center gap-3">
+                <div className="mb-5 flex flex-wrap justify-center gap-3">
                   {chips.slice(0, 5).map((chip) => (
                     <span
                       key={chip}
@@ -270,27 +270,27 @@ export default function SocialCardGenerator({ property, media }: Props) {
                   Area Immobiliare
                 </p>
 
-                <h2 className="mx-auto max-w-[650px] text-[56px] font-black uppercase leading-[0.92] tracking-[-0.055em] text-white">
+                <h2 className="mx-auto max-w-[650px] text-[52px] font-black uppercase leading-[0.92] tracking-[-0.055em] text-white">
                   {title}
                 </h2>
 
                 {(location || address) && (
-                  <p className="mx-auto mt-6 max-w-[650px] text-[24px] font-semibold leading-snug text-white/78">
+                  <p className="mx-auto mt-5 max-w-[650px] text-[23px] font-semibold leading-snug text-white/78">
                     {[location, address].filter(Boolean).join(' · ')}
                   </p>
                 )}
 
-                <p className="mt-6 text-[42px] font-black tracking-[-0.03em] text-[#f6d27b]">
+                <p className="mt-5 text-[40px] font-black tracking-[-0.03em] text-[#f6d27b]">
                   {formatPrice(property.price)}
                 </p>
 
-                                <p className="mx-auto mt-8 max-w-[680px] text-[27px] font-medium leading-[1.34] text-white/76">
-                  {truncateText(property.description, 260)}
+                                <p className="mx-auto mt-6 max-w-[660px] text-[24px] font-medium leading-[1.32] text-white/76">
+                  {truncateText(property.description, 220)}
                 </p>
               </div>
 
-              <div className="mx-auto mt-9 grid w-full max-w-[660px] grid-cols-[190px_1fr] items-center gap-6 border-t border-white/10 pt-6 text-left">
-                <div className="rounded-3xl border border-white/10 bg-white px-5 py-4">
+              <div className="mx-auto mt-6 grid w-full max-w-[620px] grid-cols-[155px_1fr] items-center gap-5 border-t border-white/10 pt-5 text-left">
+                <div className="rounded-2xl border border-white/10 bg-white px-4 py-3">
                   <img
                     src="/images/brand/areaimmobiliare.png"
                     alt="Area Immobiliare"
@@ -300,14 +300,14 @@ export default function SocialCardGenerator({ property, media }: Props) {
                 </div>
 
                 <div className="text-white/90">
-                  <p className="text-[21px] font-bold">Area Immobiliare</p>
-                  <p className="mt-1 text-[19px] font-medium text-white/65">
+                  <p className="text-[19px] font-bold">Area Immobiliare</p>
+                  <p className="mt-1 text-[17px] font-medium text-white/65">
                     Bergamo · Via Locatelli, 62
                   </p>
-                  <p className="mt-2 text-[25px] font-black text-[#f6d27b]">
+                  <p className="mt-1 text-[22px] font-black text-[#f6d27b]">
                     035 237979 · 035 221206
                   </p>
-                  <p className="text-[19px] font-medium text-white/70">
+                  <p className="text-[17px] font-medium text-white/70">
                     info@areaimmobiliare.com
                   </p>
                 </div>
