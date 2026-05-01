@@ -121,8 +121,8 @@ function PhotoBox({
 }) {
   const sizeClass =
     size === 'large'
-      ? 'h-[610px] w-[390px]'
-      : 'h-[350px] w-[350px]'
+      ? 'h-[440px] w-[440px]'
+      : 'h-[305px] w-[305px]'
 
   if (!src) {
     return (
@@ -241,8 +241,8 @@ export default function SocialCardGenerator({ property, media }: Props) {
           <div className="absolute inset-10 rounded-[46px] border border-white/10" />
           <div className="absolute left-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-[#c8a45d]/35 to-transparent" />
 
-          <div className="relative z-10 grid h-full grid-cols-[400px_1fr_400px] items-center gap-10 px-10 py-9">
-            <div className={hasFourImages ? 'grid gap-8' : 'flex items-center justify-center'}>
+          <div className="relative z-10 grid h-full grid-cols-[360px_1fr_360px] items-center gap-12 px-12 py-10">
+            <div className={hasFourImages ? 'grid place-content-center gap-7' : 'flex items-center justify-center'}>
               {hasFourImages ? (
                 <>
                   <PhotoBox src={images[0]?.file_url} alt={`${title} foto 1`} />
@@ -253,7 +253,7 @@ export default function SocialCardGenerator({ property, media }: Props) {
               )}
             </div>
 
-            <div className="flex h-full min-w-0 flex-col justify-between py-8 text-center">
+            <div className="flex h-full min-w-0 flex-col justify-center py-8 text-center">
               <div>
                 <div className="mb-7 flex flex-wrap justify-center gap-3">
                   {chips.slice(0, 5).map((chip) => (
@@ -270,7 +270,7 @@ export default function SocialCardGenerator({ property, media }: Props) {
                   Area Immobiliare
                 </p>
 
-                <h2 className="mx-auto max-w-[650px] text-[62px] font-black uppercase leading-[0.92] tracking-[-0.055em] text-white">
+                <h2 className="mx-auto max-w-[650px] text-[56px] font-black uppercase leading-[0.92] tracking-[-0.055em] text-white">
                   {title}
                 </h2>
 
@@ -280,7 +280,7 @@ export default function SocialCardGenerator({ property, media }: Props) {
                   </p>
                 )}
 
-                <p className="mt-7 text-[42px] font-black tracking-[-0.03em] text-[#f6d27b]">
+                <p className="mt-6 text-[42px] font-black tracking-[-0.03em] text-[#f6d27b]">
                   {formatPrice(property.price)}
                 </p>
 
@@ -297,12 +297,12 @@ export default function SocialCardGenerator({ property, media }: Props) {
                   </div>
                 )}
 
-                <p className="mx-auto mt-7 max-w-[680px] text-[24px] font-medium leading-[1.35] text-white/78">
-                  {truncateText(property.description, 310)}
+                <p className="mx-auto mt-7 max-w-[660px] text-[25px] font-medium leading-[1.32] text-white/76">
+                  {truncateText(property.description, 230)}
                 </p>
               </div>
 
-              <div className="mx-auto mt-8 grid w-full max-w-[700px] grid-cols-[210px_1fr] items-center gap-6 border-t border-white/10 pt-7 text-left">
+              <div className="mx-auto mt-9 grid w-full max-w-[660px] grid-cols-[190px_1fr] items-center gap-6 border-t border-white/10 pt-6 text-left">
                 <div className="rounded-3xl border border-white/10 bg-white px-5 py-4">
                   <img
                     src="/images/brand/areaimmobiliare.png"
@@ -313,11 +313,11 @@ export default function SocialCardGenerator({ property, media }: Props) {
                 </div>
 
                 <div className="text-white/90">
-                  <p className="text-[23px] font-bold">Area Immobiliare</p>
+                  <p className="text-[21px] font-bold">Area Immobiliare</p>
                   <p className="mt-1 text-[19px] font-medium text-white/65">
                     Bergamo · Via Locatelli, 62
                   </p>
-                  <p className="mt-2 text-[28px] font-black text-[#f6d27b]">
+                  <p className="mt-2 text-[25px] font-black text-[#f6d27b]">
                     035 237979 · 035 221206
                   </p>
                   <p className="text-[19px] font-medium text-white/70">
@@ -327,7 +327,7 @@ export default function SocialCardGenerator({ property, media }: Props) {
               </div>
             </div>
 
-            <div className={hasFourImages ? 'grid gap-8' : 'flex items-center justify-center'}>
+            <div className={hasFourImages ? 'grid place-content-center gap-7' : 'flex items-center justify-center'}>
               {hasFourImages ? (
                 <>
                   <PhotoBox src={images[2]?.file_url} alt={`${title} foto 3`} />
