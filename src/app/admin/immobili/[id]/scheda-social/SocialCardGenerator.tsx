@@ -67,8 +67,11 @@ function formatLabel(value: string | null | undefined, fallback = '') {
     bilocale: 'Bilocale',
     trilocale: 'Trilocale',
     quadrilocale: 'Quadrilocale',
+    monolocale: 'Monolocale',
     attico: 'Attico',
+    mansarda: 'Mansarda',
     villa: 'Villa',
+    rustico: 'Rustico',
     ufficio: 'Ufficio',
     negozio: 'Negozio',
     box: 'Box',
@@ -76,6 +79,7 @@ function formatLabel(value: string | null | undefined, fallback = '') {
     nuovo: 'Nuovo',
     ottimo: 'Ottimo stato',
     buono: 'Buono stato',
+    abitabile: 'Abitabile',
     libero_subito: 'Libero subito',
     libero: 'Libero',
     locato: 'Locato',
@@ -109,27 +113,40 @@ function slugify(value: string) {
 function PhotoBox({
   src,
   alt,
-  className = '',
+  size = 'small',
 }: {
   src?: string
   alt: string
-  className?: string
+  size?: 'small' | 'large'
 }) {
+  const sizeClass =
+    size === 'large'
+      ? 'h-[610px] w-[390px]'
+      : 'h-[350px] w-[350px]'
+
   if (!src) {
     return (
-      <div className={`flex items-center justify-center bg-[#18202d] text-white/50 ${className}`}>
-        Foto immobile
+      <div
+        className={`${sizeClass} overflow-hidden rounded-[34px] border border-white/10 bg-white/[0.04] shadow-[0_28px_80px_rgba(0,0,0,0.55)]`}
+      >
+        <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-white/35">
+          Foto immobile
+        </div>
       </div>
     )
   }
 
   return (
-    <img
-      src={src}
-      alt={alt}
-      crossOrigin="anonymous"
-      className={`h-full w-full object-cover ${className}`}
-    />
+    <div
+      className={`${sizeClass} overflow-hidden rounded-[34px] border border-white/12 bg-white/[0.04] shadow-[0_28px_80px_rgba(0,0,0,0.55)]`}
+    >
+      <img
+        src={src}
+        alt={alt}
+        crossOrigin="anonymous"
+        className="h-full w-full object-cover"
+      />
+    </div>
   )
 }
 
@@ -149,13 +166,11 @@ export default function SocialCardGenerator({ property, media }: Props) {
       })
   }, [media])
 
-  const mainImage = images[0]?.file_url
-  const sideImageOne = images[1]?.file_url || images[0]?.file_url
-  const sideImageTwo = images[2]?.file_url || images[1]?.file_url || images[0]?.file_url
-
   const title = property.title || 'Immobile selezionato'
   const location = [property.comune, property.province].filter(Boolean).join(' · ')
   const address = [property.address, property.frazione].filter(Boolean).join(' · ')
+
+  const hasFourImages = images.length >= 4
 
   const stats = [
     property.surface ? `${property.surface} mq` : null,
@@ -188,7 +203,7 @@ export default function SocialCardGenerator({ property, media }: Props) {
       const dataUrl = await toPng(cardRef.current, {
         cacheBust: true,
         pixelRatio: 2,
-        backgroundColor: '#f4efe3',
+        backgroundColor: '#05070b',
       })
 
       const link = document.createElement('a')
@@ -204,7 +219,7 @@ export default function SocialCardGenerator({ property, media }: Props) {
     <div className="grid gap-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="theme-admin-note rounded-2xl px-4 py-3 text-sm">
-          Formato iniziale: <strong>1600 × 900 px</strong>, ideale per Facebook, WhatsApp e vetrina web.
+          Formato: <strong>1600 × 900 px</strong>. Stile premium scuro, pensato per social, WhatsApp e vetrina.
         </div>
 
         <button
@@ -220,48 +235,61 @@ export default function SocialCardGenerator({ property, media }: Props) {
       <div className="overflow-auto rounded-3xl border border-[var(--site-border)] bg-[var(--site-bg-soft)] p-4">
         <div
           ref={cardRef}
-          className="relative h-[900px] w-[1600px] overflow-hidden bg-[#f4efe3] text-[#111827]"
+          className="relative h-[900px] w-[1600px] overflow-hidden bg-[#05070b] text-white"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_55%_20%,rgba(255,255,255,0.95),rgba(244,239,227,0.8)_42%,rgba(226,216,195,0.7)_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(212,178,108,0.16),rgba(5,7,11,0.88)_38%,rgba(0,0,0,1)_100%)]" />
+          <div className="absolute inset-10 rounded-[46px] border border-white/10" />
+          <div className="absolute left-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-[#c8a45d]/35 to-transparent" />
 
-          <div className="relative z-10 grid h-full grid-cols-[600px_1fr_360px] gap-8 p-10">
-            <div className="overflow-hidden rounded-[38px] border-[10px] border-white bg-white shadow-2xl">
-              <PhotoBox src={mainImage} alt={title} />
+          <div className="relative z-10 grid h-full grid-cols-[400px_1fr_400px] items-center gap-10 px-10 py-9">
+            <div className={hasFourImages ? 'grid gap-8' : 'flex items-center justify-center'}>
+              {hasFourImages ? (
+                <>
+                  <PhotoBox src={images[0]?.file_url} alt={`${title} foto 1`} />
+                  <PhotoBox src={images[1]?.file_url} alt={`${title} foto 2`} />
+                </>
+              ) : (
+                <PhotoBox src={images[0]?.file_url} alt={`${title} foto 1`} size="large" />
+              )}
             </div>
 
-            <div className="flex min-w-0 flex-col justify-between py-4">
+            <div className="flex h-full min-w-0 flex-col justify-between py-8 text-center">
               <div>
-                <div className="mb-6 flex flex-wrap gap-3">
+                <div className="mb-7 flex flex-wrap justify-center gap-3">
                   {chips.slice(0, 5).map((chip) => (
                     <span
                       key={chip}
-                      className="rounded-full bg-[#10233f] px-5 py-2 text-xl font-semibold text-white"
+                      className="rounded-full border border-[#c8a45d]/45 bg-white/[0.06] px-5 py-2 text-xl font-semibold text-[#f6e4b6]"
                     >
                       {chip}
                     </span>
                   ))}
                 </div>
 
-                <h2 className="text-[70px] font-black uppercase leading-[0.95] tracking-[-0.045em] text-[#e3192c]">
+                <p className="mb-5 text-sm uppercase tracking-[0.45em] text-[#c8a45d]">
+                  Area Immobiliare
+                </p>
+
+                <h2 className="mx-auto max-w-[650px] text-[62px] font-black uppercase leading-[0.92] tracking-[-0.055em] text-white">
                   {title}
                 </h2>
 
                 {(location || address) && (
-                  <p className="mt-6 text-2xl font-semibold text-[#1f2937]">
+                  <p className="mx-auto mt-6 max-w-[650px] text-[24px] font-semibold leading-snug text-white/78">
                     {[location, address].filter(Boolean).join(' · ')}
                   </p>
                 )}
 
-                <p className="mt-6 text-[30px] font-black text-[#111827]">
+                <p className="mt-7 text-[42px] font-black tracking-[-0.03em] text-[#f6d27b]">
                   {formatPrice(property.price)}
                 </p>
 
                 {stats.length > 0 && (
-                  <div className="mt-6 grid grid-cols-2 gap-3">
+                  <div className="mx-auto mt-7 grid max-w-[620px] grid-cols-2 gap-4">
                     {stats.map((stat) => (
                       <div
                         key={stat}
-                        className="rounded-2xl border border-[#d7cbb4] bg-white/80 px-5 py-4 text-2xl font-bold"
+                        className="rounded-2xl border border-white/10 bg-white/[0.07] px-5 py-4 text-2xl font-bold text-white"
                       >
                         {stat}
                       </div>
@@ -269,13 +297,13 @@ export default function SocialCardGenerator({ property, media }: Props) {
                   </div>
                 )}
 
-                <p className="mt-7 text-[25px] font-medium leading-[1.35] text-[#222]">
-                  {truncateText(property.description, 360)}
+                <p className="mx-auto mt-7 max-w-[680px] text-[24px] font-medium leading-[1.35] text-white/78">
+                  {truncateText(property.description, 310)}
                 </p>
               </div>
 
-              <div className="mt-8 grid grid-cols-[220px_1fr] items-end gap-7 border-t-2 border-[#d0c3aa] pt-8">
-                <div className="rounded-3xl bg-white/80 p-5">
+              <div className="mx-auto mt-8 grid w-full max-w-[700px] grid-cols-[210px_1fr] items-center gap-6 border-t border-white/10 pt-7 text-left">
+                <div className="rounded-3xl border border-white/10 bg-white px-5 py-4">
                   <img
                     src="/images/brand/areaimmobiliare.png"
                     alt="Area Immobiliare"
@@ -284,27 +312,36 @@ export default function SocialCardGenerator({ property, media }: Props) {
                   />
                 </div>
 
-                <div className="text-[25px] font-bold leading-tight text-[#111827]">
-                  <p>Area Immobiliare</p>
-                  <p className="mt-2 text-[22px] font-semibold">Bergamo · Via Locatelli, 62</p>
-                  <p className="mt-3 text-[34px] font-black">035 237979 · 035 221206</p>
-                  <p className="text-[22px] font-semibold">info@areaimmobiliare.com</p>
+                <div className="text-white/90">
+                  <p className="text-[23px] font-bold">Area Immobiliare</p>
+                  <p className="mt-1 text-[19px] font-medium text-white/65">
+                    Bergamo · Via Locatelli, 62
+                  </p>
+                  <p className="mt-2 text-[28px] font-black text-[#f6d27b]">
+                    035 237979 · 035 221206
+                  </p>
+                  <p className="text-[19px] font-medium text-white/70">
+                    info@areaimmobiliare.com
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="grid h-full grid-rows-2 gap-8">
-              <div className="overflow-hidden rounded-[32px] border-[8px] border-white bg-white shadow-xl">
-                <PhotoBox src={sideImageOne} alt={`${title} foto 2`} />
-              </div>
-
-              <div className="overflow-hidden rounded-[32px] border-[8px] border-white bg-white shadow-xl">
-                <PhotoBox src={sideImageTwo} alt={`${title} foto 3`} />
-              </div>
+            <div className={hasFourImages ? 'grid gap-8' : 'flex items-center justify-center'}>
+              {hasFourImages ? (
+                <>
+                  <PhotoBox src={images[2]?.file_url} alt={`${title} foto 3`} />
+                  <PhotoBox src={images[3]?.file_url} alt={`${title} foto 4`} />
+                </>
+              ) : (
+                <PhotoBox
+                  src={images[1]?.file_url || images[0]?.file_url}
+                  alt={`${title} foto 2`}
+                  size="large"
+                />
+              )}
             </div>
           </div>
-
-          <div className="absolute bottom-0 left-0 right-0 h-4 bg-[#e3192c]" />
         </div>
       </div>
     </div>
