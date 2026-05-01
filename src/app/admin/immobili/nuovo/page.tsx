@@ -260,6 +260,10 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
         className="theme-admin-card mt-8 rounded-3xl p-5 md:p-6"
       >
         <div className="grid gap-4">
+          <div>
+            <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+              Titolo
+            </label>
           <input
             name="title"
             placeholder="Titolo"
@@ -268,7 +272,12 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
             className="theme-admin-input rounded-xl px-4 py-3"
             required
           />
+          </div>
 
+          <div>
+            <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+              Prezzo
+            </label>
           <input
             name="price"
             placeholder="Prezzo"
@@ -277,6 +286,7 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
             onChange={handleChange}
             className="theme-admin-input rounded-xl px-4 py-3"
           />
+          </div>
 
           <div className="theme-admin-card rounded-2xl p-4">
                       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -321,6 +331,10 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
             </p>
 
             <div className="grid gap-4 md:grid-cols-3">
+              <div>
+                <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                  Codice immobile / riferimento
+                </label>
               <input
                 name="reference_code"
                 placeholder="Codice immobile / riferimento"
@@ -328,14 +342,19 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                 onChange={handleChange}
                 className="theme-admin-input rounded-xl px-4 py-3"
               />
+              </div>
 
+              <div>
+                <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                  Stato immobile
+                </label>
               <select
                 name="condition"
                 value={form.condition}
                 onChange={handleChange}
                 className="theme-admin-select rounded-xl px-4 py-3"
               >
-                <option value="">Stato immobile</option>
+                <option value="">Seleziona stato immobile</option>
                 <option value="nuovo">Nuovo</option>
                 <option value="ottimo">Ottimo</option>
                 <option value="buono">Buono</option>
@@ -344,14 +363,19 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                 <option value="ristrutturato">Ristrutturato</option>
                 <option value="rustico">Rustico / rudere</option>
               </select>
+              </div>
 
+              <div>
+                <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                  Disponibilità
+                </label>
               <select
                 name="availability"
                 value={form.availability}
                 onChange={handleChange}
                 className="theme-admin-select rounded-xl px-4 py-3"
               >
-                <option value="">Disponibilità</option>
+                <option value="">Seleziona disponibilità</option>
                 <option value="libero">Libero</option>
                 <option value="libero_subito">Libero subito</option>
                 <option value="occupato">Occupato</option>
@@ -359,10 +383,15 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                 <option value="al_rogito">Al rogito</option>
                 <option value="da_concordare">Da concordare</option>
               </select>
+              </div>
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
+            <div>
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                Contratto
+              </label>
             <select
               name="contract_type"
               value={form.contract_type}
@@ -372,7 +401,12 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
               <option value="vendita">Vendita</option>
               <option value="affitto">Affitto</option>
             </select>
+            </div>
 
+            <div>
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                Tipologia
+              </label>
             <select
               name="property_type"
               value={form.property_type}
@@ -385,7 +419,12 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                 </option>
               ))}
             </select>
+            </div>
 
+            <div>
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                Stato pubblicazione
+              </label>
             <select
               name="status"
               value={form.status}
@@ -395,6 +434,7 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
               <option value="draft">Bozza</option>
               <option value="published">Pubblicato</option>
             </select>
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -600,7 +640,7 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
 
               <div>
                 <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
-                  Livelli interni immobile
+                  Livelli immobile
                 </label>
               <input
                 name="total_floors"
@@ -653,13 +693,17 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
               />
               </div>
 
+              <div>
+                <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                  Esposizione
+                </label>
               <select
                 name="exposure"
                 value={form.exposure}
                 onChange={handleChange}
                 className="theme-admin-select rounded-xl px-4 py-3 md:col-span-3"
               >
-                <option value="">Esposizione</option>
+                <option value="">Seleziona esposizione</option>
                 <option value="nord">Nord</option>
                 <option value="sud">Sud</option>
                 <option value="est">Est</option>
@@ -670,6 +714,7 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                 <option value="tripla">Tripla esposizione</option>
                 <option value="quadrupla">Quadrupla esposizione</option>
               </select>
+              </div>
             </div>
           </div>
 
@@ -702,6 +747,10 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
+            <div>
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                EPgl
+              </label>
             <input
               name="energy_epgl"
               placeholder="EPgl / indice prestazione energetica"
@@ -709,7 +758,12 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
               onChange={handleChange}
               className="theme-admin-input rounded-xl px-4 py-3"
             />
+            </div>
 
+            <div>
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                Importo spese condominiali
+              </label>
             <input
               name="condo_fees_amount"
               placeholder="Importo spese condominiali €"
@@ -718,17 +772,23 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
               onChange={handleChange}
               className="theme-admin-input rounded-xl px-4 py-3"
             />
+            </div>
 
+            <div>
+              <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
+                Periodo spese
+              </label>
             <select
               name="condo_fees_period"
               value={form.condo_fees_period}
               onChange={handleChange}
               className="theme-admin-select rounded-xl px-4 py-3"
             >
-              <option value="">Periodo spese</option>
+              <option value="">Seleziona periodo</option>
               <option value="mese">Mensili</option>
               <option value="anno">Annuali</option>
             </select>
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -778,7 +838,7 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                 onChange={handleChange}
                 className="theme-admin-select w-full rounded-xl px-4 py-3"
               >
-                <option value="">Da definire</option>
+                <option value="">Seleziona stato arredamento</option>
                 <option value="si">Sì</option>
                 <option value="no">No</option>
                 <option value="parzialmente">Parzialmente</option>
