@@ -121,8 +121,8 @@ function PhotoBox({
 }) {
   const sizeClass =
     size === 'large'
-      ? 'h-[440px] w-[440px]'
-      : 'h-[305px] w-[305px]'
+      ? 'h-[430px] w-[430px]'
+      : 'h-[285px] w-[285px]'
 
   if (!src) {
     return (
@@ -241,8 +241,8 @@ export default function SocialCardGenerator({ property, media }: Props) {
           <div className="absolute inset-10 rounded-[46px] border border-white/10" />
           <div className="absolute left-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-[#c8a45d]/35 to-transparent" />
 
-          <div className="relative z-10 grid h-full grid-cols-[360px_1fr_360px] items-center gap-12 px-12 py-10">
-            <div className={hasFourImages ? 'grid place-content-center gap-7' : 'flex items-center justify-center'}>
+          <div className="relative z-10 grid h-full grid-cols-[330px_1fr_330px] items-center gap-12 px-16 py-10">
+            <div className={hasFourImages ? 'grid h-full place-content-center gap-8' : 'flex h-full items-center justify-center'}>
               {hasFourImages ? (
                 <>
                   <PhotoBox src={images[0]?.file_url} alt={`${title} foto 1`} />
@@ -284,21 +284,8 @@ export default function SocialCardGenerator({ property, media }: Props) {
                   {formatPrice(property.price)}
                 </p>
 
-                {stats.length > 0 && (
-                  <div className="mx-auto mt-7 grid max-w-[620px] grid-cols-2 gap-4">
-                    {stats.map((stat) => (
-                      <div
-                        key={stat}
-                        className="rounded-2xl border border-white/10 bg-white/[0.07] px-5 py-4 text-2xl font-bold text-white"
-                      >
-                        {stat}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <p className="mx-auto mt-7 max-w-[660px] text-[25px] font-medium leading-[1.32] text-white/76">
-                  {truncateText(property.description, 230)}
+                                <p className="mx-auto mt-8 max-w-[680px] text-[27px] font-medium leading-[1.34] text-white/76">
+                  {truncateText(property.description, 260)}
                 </p>
               </div>
 
@@ -327,7 +314,7 @@ export default function SocialCardGenerator({ property, media }: Props) {
               </div>
             </div>
 
-            <div className={hasFourImages ? 'grid place-content-center gap-7' : 'flex items-center justify-center'}>
+            <div className={hasFourImages ? 'grid h-full place-content-center gap-8' : 'flex h-full items-center justify-center'}>
               {hasFourImages ? (
                 <>
                   <PhotoBox src={images[2]?.file_url} alt={`${title} foto 3`} />
