@@ -600,11 +600,11 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
 
               <div>
                 <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
-                  Totale piani
+                  Livelli interni immobile
                 </label>
               <input
                 name="total_floors"
-                placeholder="Piani / livelli immobile"
+                placeholder="Livelli interni immobile"
                 value={form.total_floors}
                 onChange={handleChange}
                 className="theme-admin-input rounded-xl px-4 py-3"
