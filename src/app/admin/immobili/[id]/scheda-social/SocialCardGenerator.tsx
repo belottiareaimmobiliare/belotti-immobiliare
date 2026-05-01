@@ -5,6 +5,7 @@ import { toPng } from 'html-to-image'
 
 type Property = {
   id: string
+  slug?: string | null
   title: string | null
   reference_code?: string | null
   price: number | string | null
@@ -35,6 +36,13 @@ type MediaItem = {
   sort_order: number | null
   is_cover: boolean | null
 }
+
+const SOCIAL_HASHTAGS = [
+  '#Belotti_Immobiliare',
+  '#gianfedericobelotti',
+  '#bergamoimmobiliare',
+]
+
 
 type Props = {
   property: Property
@@ -100,6 +108,36 @@ function truncateText(value: string | null | undefined, maxLength: number) {
   return `${clean.slice(0, maxLength).trim()}…`
 }
 
+
+function getPublicPropertyUrl(slug: string | null | undefined) {
+  if (!slug) return ''
+
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') ||
+    'https://belotti-immobiliare.vercel.app'
+
+  return `${siteUrl}/immobili/${slug}`
+}
+
+function buildFacebookDescription(description: string | null | undefined, slug: string | null | undefined) {
+  const cleanDescription = truncateText(description, 1200)
+  const link = getPublicPropertyUrl(slug)
+  const hashtags = SOCIAL_HASHTAGS.join(' ')
+
+  if (!link) {
+    return `${cleanDescription}
+
+${hashtags}`
+  }
+
+  return `${cleanDescription}
+
+Link immobile:
+${link}
+
+${hashtags}`
+}
+
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -146,6 +184,65 @@ function PhotoBox({
         crossOrigin="anonymous"
         className="h-full w-full object-cover"
       />
+    </div>
+  )
+}
+
+
+function CopyTextBox({
+  label,
+  value,
+  multiline = false,
+  className = '',
+}: {
+  label: string
+  value: string
+  multiline?: boolean
+  className?: string
+}) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopied(true)
+
+      window.setTimeout(() => {
+        setCopied(false)
+      }, 1400)
+    } catch {
+      alert('Non sono riuscito a copiare il testo. Puoi selezionarlo manualmente.')
+    }
+  }
+
+  return (
+    <div className={`rounded-2xl border border-[var(--site-border)] bg-[var(--site-bg-soft)] p-4 ${className}`}>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="theme-admin-faint text-xs uppercase tracking-[0.22em]">
+          {label}
+        </p>
+
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="rounded-xl border border-[var(--site-border)] px-3 py-1.5 text-xs font-semibold text-[var(--site-text)] transition hover:bg-[var(--site-surface-2)]"
+        >
+          {copied ? 'Copiato' : 'Copia'}
+        </button>
+      </div>
+
+      {multiline ? (
+        <textarea
+          readOnly
+          value={value}
+          rows={6}
+          className="theme-admin-input w-full resize-none rounded-xl px-4 py-3 text-sm leading-relaxed"
+        />
+      ) : (
+        <div className="theme-admin-input min-h-[48px] rounded-xl px-4 py-3 text-sm font-medium">
+          {value}
+        </div>
+      )}
     </div>
   )
 }
@@ -331,6 +428,29 @@ export default function SocialCardGenerator({ property, media }: Props) {
           </div>
         </div>
       </div>
+
+      <div className="rounded-3xl border border-[var(--site-border)] bg-[var(--site-bg-soft)] p-5">
+        <div className="mb-5">
+          <p className="theme-admin-faint text-xs uppercase tracking-[0.22em]">
+            Testi per post Facebook
+          </p>
+          <p className="theme-admin-muted mt-2 text-sm">
+            Scarica il PNG sopra, poi copia titolo, prezzo e descrizione per preparare il post social.
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-[1fr_260px]">
+          <CopyTextBox label="Titolo" value={title} />
+          <CopyTextBox label="Prezzo" value={formatPrice(property.price)} />
+          <CopyTextBox
+            label="Descrizione immobile"
+            value={buildFacebookDescription(property.description, property.slug)}
+            multiline
+            className="md:col-span-2"
+          />
+        </div>
+      </div>
+
     </div>
   )
 }
