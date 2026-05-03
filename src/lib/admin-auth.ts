@@ -25,8 +25,9 @@ export type AdminProfile = {
 }
 
 export type SidebarLink = {
-  href: string
+  href?: string
   label: string
+  children?: SidebarLink[]
 }
 
 export type AdminPermission =
@@ -65,45 +66,63 @@ export function isOwner(profile: AdminProfile | null) {
 }
 
 export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
-  const links: SidebarLink[] = [{ href: '/admin', label: 'Dashboard' }]
-
   if (!profile || !profile.is_active) {
-    return links
+    return []
   }
 
-  if (profile.can_manage_properties) {
-    links.push(
-      { href: '/admin/immobili', label: 'Tutti gli immobili' },
-      { href: '/admin/immobili?contractType=affitto', label: 'Affitti' },
-      { href: '/admin/immobili?contractType=vendita', label: 'Vendite' },
+  if (profile.role === 'editor') {
+    return [{ href: '/admin/news', label: 'News' }]
+  }
+
+  if (profile.role === 'agent') {
+    return [
+      {
+        label: 'Tutti gli immobili',
+        href: '/admin/immobili',
+        children: [
+          { href: '/admin/immobili?contractType=affitto', label: 'Affitti' },
+          { href: '/admin/immobili?contractType=vendita', label: 'Vendite' },
+        ],
+      },
       { href: '/admin/leads', label: 'Leads' },
-      { href: '/admin/ricerche-salvate', label: 'Ricerche salvate' }
-    )
-  }
-
-  if (profile.can_manage_news) {
-    links.push({ href: '/admin/news', label: 'News' })
-  }
-
-  if (profile.can_view_kpis) {
-    links.push({ href: '/admin/kpi', label: 'KPI agenti' })
-  }
-
-  if (profile.role === 'owner') {
-    links.push(
-      { href: '/admin/autori', label: 'Editors' },
-      { href: '/admin/contenuti/home', label: 'Modifica Home' },
-      { href: '/admin/contenuti/chi-siamo', label: 'Modifica Chi siamo' },
-      { href: '/admin/contenuti/gianfederico-belotti', label: 'Modifica Gianfederico' },
-      { href: '/admin/contenuti/contatti', label: 'Modifica Contatti' },
-      { href: '/admin/utenti', label: 'Active Directory' },
       { href: '/admin/exports', label: 'Export Portali' },
-      { href: '/admin/privacy', label: 'Privacy Center' },
-      { href: '/admin/logs', label: 'Logs' }
-    )
+    ]
   }
 
-  return links
+  return [
+    { href: '/admin', label: 'Dashboard' },
+    {
+      label: 'Tutti gli immobili',
+      href: '/admin/immobili',
+      children: [
+        { href: '/admin/immobili?contractType=affitto', label: 'Affitti' },
+        { href: '/admin/immobili?contractType=vendita', label: 'Vendite' },
+      ],
+    },
+    { href: '/admin/leads', label: 'Leads' },
+    { href: '/admin/ricerche-salvate', label: 'Ricerche salvate' },
+    { href: '/admin/news', label: 'News' },
+    { href: '/admin/exports', label: 'Export Portali' },
+    { href: '/admin/privacy', label: 'Privacy Center' },
+    { href: '/admin/logs', label: 'Logs' },
+    {
+      label: 'Modifica Pagine Sito',
+      children: [
+        { href: '/admin/contenuti/home', label: 'Modifica Home' },
+        { href: '/admin/contenuti/chi-siamo', label: 'Modifica Chi siamo' },
+        { href: '/admin/contenuti/gianfederico-belotti', label: 'Modifica Gianfederico' },
+        { href: '/admin/contenuti/contatti', label: 'Modifica Contatti' },
+      ],
+    },
+    {
+      label: 'Amministrazione',
+      children: [
+        { href: '/admin/utenti', label: 'Active Directory' },
+        { href: '/admin/autori', label: 'Editors' },
+        { href: '/admin/kpi', label: 'KPI agenti' },
+      ],
+    },
+  ]
 }
 
 export async function getAdminProfileById(id: string): Promise<AdminProfile | null> {

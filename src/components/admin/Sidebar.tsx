@@ -4,8 +4,9 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 
 type SidebarLink = {
-  href: string
+  href?: string
   label: string
+  children?: SidebarLink[]
 }
 
 type SidebarProfile = {
@@ -31,6 +32,101 @@ function isLinkActive(href: string, pathname: string, currentSearch: string) {
   if (!queryString) return true
 
   return currentSearch === queryString
+}
+
+function isSidebarItemActive(
+  link: SidebarLink,
+  pathname: string,
+  currentSearch: string
+): boolean {
+  if (link.href && isLinkActive(link.href, pathname, currentSearch)) {
+    return true
+  }
+
+  return Boolean(
+    link.children?.some((child) =>
+      isSidebarItemActive(child, pathname, currentSearch)
+    )
+  )
+}
+
+function SidebarNavItem({
+  link,
+  pathname,
+  currentSearch,
+  mobile,
+  onClose,
+  child = false,
+}: {
+  link: SidebarLink
+  pathname: string
+  currentSearch: string
+  mobile?: boolean
+  onClose?: () => void
+  child?: boolean
+}) {
+  const active = isSidebarItemActive(link, pathname, currentSearch)
+
+  if (link.children?.length) {
+    return (
+      <details
+        open={active || undefined}
+        className={[
+          'group rounded-2xl',
+          active ? 'bg-[var(--site-surface-2)]' : '',
+        ].join(' ')}
+      >
+        <summary
+          className={[
+            'flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm transition [&::-webkit-details-marker]:hidden',
+            active
+              ? 'text-[var(--site-text)]'
+              : 'text-[var(--site-text-soft)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]',
+          ].join(' ')}
+        >
+          <span>{link.label}</span>
+          <span className="text-xs text-[var(--site-text-faint)] transition group-open:rotate-180">
+            ▾
+          </span>
+        </summary>
+
+        <div className="mt-1 space-y-1 pb-2 pl-3 pr-2">
+          {link.children.map((childLink) => (
+            <SidebarNavItem
+              key={childLink.href || childLink.label}
+              link={childLink}
+              pathname={pathname}
+              currentSearch={currentSearch}
+              mobile={mobile}
+              onClose={onClose}
+              child
+            />
+          ))}
+        </div>
+      </details>
+    )
+  }
+
+  if (!link.href) return null
+
+  return (
+    <Link
+      key={link.href}
+      href={link.href}
+      onClick={() => {
+        if (mobile && onClose) onClose()
+      }}
+      className={[
+        'block rounded-2xl text-sm transition',
+        child ? 'px-4 py-2.5 text-xs' : 'px-4 py-3',
+        active
+          ? 'bg-[var(--site-surface-2)] text-[var(--site-text)]'
+          : 'text-[var(--site-text-soft)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]',
+      ].join(' ')}
+    >
+      {link.label}
+    </Link>
+  )
 }
 
 function SidebarContent({
@@ -66,8 +162,8 @@ function SidebarContent({
     profile.role === 'owner'
       ? 'Gestione completa di contenuti, utenti, logs e controllo generale del sito.'
       : profile.role === 'editor'
-        ? 'Accesso abilitato alle sezioni editoriali e ai contenuti consentiti.'
-        : 'Accesso abilitato alle sezioni immobiliari assegnate dai permessi.'
+        ? 'Accesso abilitato alla gestione delle news.'
+        : 'Accesso abilitato alla gestione immobili, richieste e export portali.'
 
   return (
     <div className="flex h-full flex-col px-6 py-8">
@@ -106,27 +202,16 @@ function SidebarContent({
       </div>
 
       <nav className="space-y-2">
-        {links.map((link) => {
-          const active = isLinkActive(link.href, pathname, currentSearch)
-
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => {
-                if (mobile && onClose) onClose()
-              }}
-              className={[
-                'block rounded-2xl px-4 py-3 text-sm transition',
-                active
-                  ? 'bg-[var(--site-surface-2)] text-[var(--site-text)]'
-                  : 'text-[var(--site-text-soft)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]',
-              ].join(' ')}
-            >
-              {link.label}
-            </Link>
-          )
-        })}
+        {links.map((link) => (
+          <SidebarNavItem
+            key={link.href || link.label}
+            link={link}
+            pathname={pathname}
+            currentSearch={currentSearch}
+            mobile={mobile}
+            onClose={onClose}
+          />
+        ))}
       </nav>
 
       <div className="mt-5">

@@ -5,8 +5,9 @@ import Sidebar from '@/components/admin/Sidebar'
 import ThemeToggle from '@/components/shared/ThemeToggle'
 
 type SidebarLink = {
-  href: string
+  href?: string
   label: string
+  children?: SidebarLink[]
 }
 
 type ShellProfile = {

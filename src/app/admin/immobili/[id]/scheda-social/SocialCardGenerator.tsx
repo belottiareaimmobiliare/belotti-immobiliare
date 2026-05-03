@@ -316,7 +316,7 @@ export default function SocialCardGenerator({ property, media }: Props) {
     <div className="grid gap-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="theme-admin-note rounded-2xl px-4 py-3 text-sm">
-          Formato: <strong>1600 × 900 px</strong>. Stile premium scuro, pensato per social, WhatsApp e vetrina.
+          Formato: <strong>1600 × 900 px</strong>. Stile premium scuro, pensato per i social come Facebook e vetrina.
         </div>
 
         <button
