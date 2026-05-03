@@ -104,7 +104,6 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
     { href: '/admin/news', label: 'News' },
     { href: '/admin/exports', label: 'Export Portali' },
     { href: '/admin/privacy', label: 'Privacy Center' },
-    { href: '/admin/logs', label: 'Logs' },
     {
       label: 'Modifica Pagine Sito',
       children: [
@@ -120,6 +119,7 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
         { href: '/admin/utenti', label: 'Active Directory' },
         { href: '/admin/autori', label: 'Editors' },
         { href: '/admin/kpi', label: 'KPI agenti' },
+        { href: '/admin/logs', label: 'Logs' },
       ],
     },
   ]
