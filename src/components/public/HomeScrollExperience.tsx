@@ -95,15 +95,15 @@ export default function HomeScrollExperience() {
   }, [isMobile])
 
   const searchHold = segment(progress, 0.0, 0.54)
-  const searchFade = segment(progress, 0.54, 0.76)
+  const searchFade = segment(progress, 0.48, 0.70)
 
-  const panelCompact = segment(progress, 0.53, 0.69)
-  const panelRise = segment(progress, 0.56, 0.81)
-  const panelReadableHold = segment(progress, 0.79, 0.90)
-  const panelFade = segment(progress, 0.90, 0.965)
+  const panelCompact = segment(progress, 0.47, 0.63)
+  const panelRise = segment(progress, 0.50, 0.75)
+  const panelReadableHold = segment(progress, 0.74, 0.87)
+  const panelFade = segment(progress, 0.88, 0.955)
 
-  const footerShellRise = segment(progress, 0.945, 0.985)
-  const footerIn = segment(progress, 0.97, 1)
+  const footerShellRise = segment(progress, 0.93, 0.98)
+  const footerIn = segment(progress, 0.96, 1)
 
   const searchOpacity = 1 - searchFade
   const searchTranslateY = -(searchFade * 72)
