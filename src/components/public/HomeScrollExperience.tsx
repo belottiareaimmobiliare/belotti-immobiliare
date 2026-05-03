@@ -95,21 +95,20 @@ export default function HomeScrollExperience() {
   }, [isMobile])
 
   const searchHold = segment(progress, 0.0, 0.54)
-  const searchFade = segment(progress, 0.48, 0.70)
+  const searchFade = segment(progress, 0.44, 0.64)
 
-  const panelCompact = segment(progress, 0.47, 0.63)
-  const panelRise = segment(progress, 0.50, 0.75)
-  const panelReadableHold = segment(progress, 0.74, 0.87)
-  const panelFade = segment(progress, 0.88, 0.955)
+  const panelCompact = segment(progress, 0.43, 0.59)
+  const panelRise = segment(progress, 0.45, 0.68)
+    const panelFade = segment(progress, 0.86, 0.945)
 
-  const footerShellRise = segment(progress, 0.93, 0.98)
-  const footerIn = segment(progress, 0.96, 1)
+  const footerShellRise = segment(progress, 0.935, 0.985)
+  const footerIn = segment(progress, 0.965, 1)
 
   const searchOpacity = 1 - searchFade
   const searchTranslateY = -(searchFade * 72)
 
   const panelsOpacity = 1 - panelFade
-  const panelsTranslateY = -(panelRise * 160 + panelReadableHold * 130)
+  const panelsTranslateY = -(panelRise * 270 + panelFade * 18)
 
   const brickGap = 34 - panelCompact * 14
 
@@ -121,9 +120,8 @@ export default function HomeScrollExperience() {
       const x = panel.initialX * (1 - panelCompact)
       const y =
         panel.initialY * (1 - panelCompact) -
-        panelRise * 100 -
-        panelReadableHold * 16 -
-        panelFade * 24
+        panelRise * 116 -
+        panelFade * 18
 
       const scale = 0.97 + panelCompact * 0.03
 
@@ -131,7 +129,7 @@ export default function HomeScrollExperience() {
         transform: `translate3d(${x}px, ${y}px, 0) scale(${scale})`,
       }
     })
-  }, [panelCompact, panelRise, panelReadableHold, panelFade])
+  }, [panelCompact, panelRise, panelFade])
 
   if (isMobile) {
     return (
@@ -179,7 +177,7 @@ export default function HomeScrollExperience() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-[430vh] transition-colors duration-300"
+      className="relative h-[405vh] transition-colors duration-300"
       style={{
         background:
           'linear-gradient(180deg,var(--site-bg-soft) 0%, var(--site-bg) 26%, var(--site-bg) 58%, color-mix(in srgb, var(--site-bg) 78%, #010409 22%) 82%, #010409 100%)',
