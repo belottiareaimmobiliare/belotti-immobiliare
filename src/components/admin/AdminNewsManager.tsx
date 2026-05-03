@@ -1,5 +1,6 @@
 'use client'
 
+import { LayoutGrid, List } from 'lucide-react'
 import { ChangeEvent, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -542,25 +543,29 @@ export default function AdminNewsManager({ items, authors }: Props) {
               <button
                 type="button"
                 onClick={() => setViewMode('cards')}
-                className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${
+                aria-label="Vista card"
+                title="Vista card"
+                className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-medium transition ${
                   viewMode === 'cards'
                     ? 'theme-admin-chip-active'
                     : 'theme-admin-button-secondary'
                 }`}
               >
-                Vista card
+                <LayoutGrid className="h-5 w-5" aria-hidden="true" />
               </button>
 
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
-                className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${
+                aria-label="Vista lista"
+                title="Vista lista"
+                className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-medium transition ${
                   viewMode === 'list'
                     ? 'theme-admin-chip-active'
                     : 'theme-admin-button-secondary'
                 }`}
               >
-                Vista lista
+                <List className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
 
