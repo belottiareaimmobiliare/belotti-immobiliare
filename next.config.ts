@@ -9,6 +9,8 @@ const securityHeaders = [
       "object-src 'none'",
       "frame-ancestors 'self'",
       "form-action 'self'",
+      "frame-src 'self' https://www.google.com https://maps.google.com",
+      "child-src 'self' https://www.google.com https://maps.google.com",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
       "style-src 'self' 'unsafe-inline' https:",
       "img-src 'self' data: blob: https:",
