@@ -3,7 +3,6 @@
 import { LayoutGrid, List } from 'lucide-react'
 import { ChangeEvent, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import RichTextEditor from '@/components/admin/RichTextEditor'
 import AiNewsButton from '@/components/admin/AiNewsButton'
 import {
@@ -150,7 +149,6 @@ function matchesSearch(item: NewsItem, search: string) {
 }
 
 export default function AdminNewsManager({ items, authors }: Props) {
-  const supabase = createClient()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
@@ -866,7 +864,6 @@ function NewsRow({
   onUpdate: (item: NewsItem, updates: Partial<NewsItem>) => void
   onDelete: (id: string) => void
 }) {
-  const supabase = createClient()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
@@ -899,31 +896,30 @@ function NewsRow({
   const [isUploadingImage, setIsUploadingImage] = useState(false)
 
   const uploadNewsImage = async (file: File) => {
-    const ext = file.name.split('.').pop() || 'jpg'
-    const fileName = `news-${Date.now()}-${Math.random()
-      .toString(36)
-      .slice(2)}.${ext}`
-    const filePath = `news/${item.id}/${fileName}`
+    const formData = new FormData()
+    formData.append('newsItemId', item.id)
+    formData.append('file', file)
 
-    const { error: uploadError } = await supabase.storage
-      .from('property-media')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false,
-        contentType: file.type,
-      })
+    const response = await fetch('/api/admin/news/upload-image', {
+      method: 'POST',
+      body: formData,
+      credentials: 'same-origin',
+    })
 
-    if (uploadError) {
+    const data = await response.json().catch(() => null)
+
+    if (!response.ok) {
       throw new Error(
-        `Errore Supabase Storage: ${uploadError.message || 'upload non riuscito'}`
+        data?.error ||
+          `Errore upload immagine news. HTTP ${response.status}`
       )
     }
 
-    const { data } = supabase.storage
-      .from('property-media')
-      .getPublicUrl(filePath)
+    if (!data?.imageUrl) {
+      throw new Error('Upload completato ma URL immagine non ricevuto.')
+    }
 
-    return data.publicUrl
+    return data.imageUrl as string
   }
 
   const addMediaRecord = async (imageUrl: string) => {
