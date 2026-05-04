@@ -5,6 +5,7 @@ import { ChangeEvent, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import RichTextEditor from '@/components/admin/RichTextEditor'
 import AiNewsButton from '@/components/admin/AiNewsButton'
+import NewsDropZone from '@/components/admin/NewsDropZone'
 import {
   createNewsItem,
   createNewsMediaRecord,
@@ -156,6 +157,8 @@ export default function AdminNewsManager({ items, authors }: Props) {
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [draggedId, setDraggedId] = useState<string | null>(null)
+  const [aiPdfFile, setAiPdfFile] = useState<File | null>(null)
+  const [aiCoverFile, setAiCoverFile] = useState<File | null>(null)
 
   const defaultAuthorName =
     authors.find((author) => author.full_name === 'Area Immobiliare')?.full_name ||
@@ -194,6 +197,29 @@ export default function AdminNewsManager({ items, authors }: Props) {
     [items]
   )
 
+  const uploadAiCoverImage = async (newsItemId: string) => {
+    if (!aiCoverFile) return
+
+    const formData = new FormData()
+    formData.append('newsItemId', newsItemId)
+    formData.append('file', aiCoverFile)
+
+    const response = await fetch('/api/admin/news/upload-image', {
+      method: 'POST',
+      body: formData,
+      credentials: 'same-origin',
+    })
+
+    const data = await response.json().catch(() => null)
+
+    if (!response.ok) {
+      throw new Error(
+        data?.error ||
+          `Errore upload copertina news. HTTP ${response.status}`
+      )
+    }
+  }
+
   const handleCreate = () => {
     if (!createForm.title.trim()) {
       alert('Inserisci il titolo della news.')
@@ -204,7 +230,7 @@ export default function AdminNewsManager({ items, authors }: Props) {
       const slug = slugify(createForm.title)
 
       try {
-        await createNewsItem({
+        const created = await createNewsItem({
           source_type: 'manual',
           slug,
           title: createForm.title.trim(),
@@ -223,6 +249,10 @@ export default function AdminNewsManager({ items, authors }: Props) {
           published_at:
             createForm.status === 'published' ? new Date().toISOString() : null,
         })
+
+        if (aiCoverFile && created?.id) {
+          await uploadAiCoverImage(created.id)
+        }
       } catch (error) {
         alert(error instanceof Error ? error.message : 'Errore creazione news')
         return
@@ -239,6 +269,9 @@ export default function AdminNewsManager({ items, authors }: Props) {
         status: 'published',
         sort_order: '0',
       })
+
+      setAiPdfFile(null)
+      setAiCoverFile(null)
 
       router.refresh()
     })
@@ -537,11 +570,80 @@ export default function AdminNewsManager({ items, authors }: Props) {
                 </p>
               </div>
             </div>
+            <div className="mt-5 rounded-[30px] border border-[var(--site-border)] bg-[var(--site-bg-soft)] px-6 py-6 shadow-[var(--site-card-shadow)]">
+              <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                <div className="max-w-[760px]">
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.28em] text-[var(--site-text-faint)]">
+                    Assistente editoriale
+                  </p>
 
+                  <h3 className="mt-3 text-[2rem] font-semibold leading-tight text-[var(--site-text)]">
+                    Genera una bozza news da PDF
+                  </h3>
+                </div>
 
-            <div className="mt-5">
-              <AiNewsButton />
+                <div className="hidden xl:block xl:pt-3">
+                  <AiNewsButton
+                    pdfFile={aiPdfFile}
+                    onGenerated={(payload) => {
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        title: payload.title || prev.title,
+                        brief: payload.brief || prev.brief,
+                        content: payload.content || prev.content,
+                        source_name: payload.sourceName || prev.source_name,
+                        source_url: payload.sourceUrl || prev.source_url,
+                        external_url: payload.externalUrl || prev.external_url,
+                      }))
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-[1fr_1fr_auto] xl:items-stretch">
+                <NewsDropZone
+                  title="Carica PDF"
+                  subtitle="Importa il PDF della notizia"
+                  accept="application/pdf,.pdf"
+                  variant="pdf"
+                  file={aiPdfFile}
+                  onFileChange={setAiPdfFile}
+                />
+
+                <NewsDropZone
+                  title="Carica immagine"
+                  subtitle="Importa la copertina della news"
+                  accept="image/*"
+                  variant="image"
+                  file={aiCoverFile}
+                  onFileChange={setAiCoverFile}
+                />
+
+                <div className="flex items-center justify-start xl:hidden">
+                  <AiNewsButton
+                    pdfFile={aiPdfFile}
+                    onGenerated={(payload) => {
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        title: payload.title || prev.title,
+                        brief: payload.brief || prev.brief,
+                        content: payload.content || prev.content,
+                        source_name: payload.sourceName || prev.source_name,
+                        source_url: payload.sourceUrl || prev.source_url,
+                        external_url: payload.externalUrl || prev.external_url,
+                      }))
+                    }}
+                  />
+                </div>
+              </div>
+
+              <p className="mt-5 max-w-[860px] text-sm leading-7 text-[var(--site-text-muted)]">
+                Carica un PDF e, se vuoi, anche l’immagine di copertina. Il sistema legge il contenuto,
+                prepara la bozza news, rinomina il PDF e lo rende disponibile come fonte completa.
+                La pubblicazione resta sempre manuale.
+              </p>
             </div>
+
 
             <div className="mt-5 flex flex-wrap gap-3">
               <button
