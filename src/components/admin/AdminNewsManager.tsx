@@ -218,6 +218,18 @@ export default function AdminNewsManager({ items, authors }: Props) {
           `Errore upload copertina news. HTTP ${response.status}`
       )
     }
+
+    if (!data?.imageUrl) {
+      throw new Error('Upload copertina riuscito, ma URL immagine non ricevuto.')
+    }
+
+    await createNewsMediaRecord({
+      newsItemId,
+      imageUrl: data.imageUrl,
+      caption: null,
+      sortOrder: 1,
+      isCover: true,
+    })
   }
 
   const handleCreate = () => {

@@ -47,12 +47,13 @@ function normalizeBrokenWords(text: string) {
     .replace(/([a-zàèéìòù])\s+-\s+([a-zàèéìòù])/gi, '$1$2')
     .replace(/\s+’\s+/g, '’')
     .replace(/\s+'\s+/g, "'")
+    .replace(/\s+/g, ' ')
 }
 
 function compactLines(rawText: string) {
-  const sourceLines = normalizeBrokenWords(normalizeText(rawText))
+  const sourceLines = normalizeText(rawText)
     .split('\n')
-    .map((line) => line.trim())
+    .map((line) => normalizeBrokenWords(line.trim()))
     .filter(Boolean)
 
   const lines: string[] = []
@@ -102,15 +103,23 @@ function uppercaseRatio(line: string) {
 function isHeadlineLine(line: string) {
   const clean = line.trim()
 
-  if (clean.length < 12 || clean.length > 135) return false
+  if (clean.length < 12 || clean.length > 145) return false
   if (/[a-zàèéìòù]{3,}/.test(clean)) return false
 
   const ratio = uppercaseRatio(clean)
 
-  return ratio >= 0.72 && /[A-ZÀÈÉÌÒÙ]{4,}/.test(clean)
+  return ratio >= 0.68 && /[A-ZÀÈÉÌÒÙ]{4,}/.test(clean)
 }
 
-function titleCaseFromHeadline(value: string) {
+function smartTitleCase(value: string) {
+  const acronyms = new Map([
+    ['ue', 'UE'],
+    ['dpp', 'DPP'],
+    ['cin', 'CIN'],
+    ['sca', 'SCA'],
+    ['spm', 'SPM'],
+  ])
+
   const lowerWords = new Set([
     'di',
     'a',
@@ -140,13 +149,23 @@ function titleCaseFromHeadline(value: string) {
     'delle',
     'del',
     'della',
+    'all',
+    'alla',
+    'alle',
+    'dall',
+    'dalla',
+    'dalle',
   ])
 
   return value
     .toLowerCase()
     .split(/\s+/)
     .map((word, index) => {
-      const clean = word.replace(/[^\p{L}]/gu, '').toLowerCase()
+      const clean = word.replace(/[^\p{L}0-9]/gu, '').toLowerCase()
+
+      if (acronyms.has(clean)) {
+        return word.replace(new RegExp(clean, 'i'), acronyms.get(clean) || clean)
+      }
 
       if (index > 0 && lowerWords.has(clean)) return word
 
@@ -154,6 +173,7 @@ function titleCaseFromHeadline(value: string) {
     })
     .join(' ')
     .replace(/\s+([,.;:!?])/g, '$1')
+    .replace(/\s+’/g, '’')
 }
 
 function extractHeadline(lines: string[]) {
@@ -192,15 +212,21 @@ function extractHeadline(lines: string[]) {
 
   if (!bestBlock) return null
 
-  const titleLines = bestBlock.lines.slice(0, 2)
-  const subtitleLines = bestBlock.lines.slice(2, 6)
+  const linesForTitle = bestBlock.lines.slice(0, 2)
+  const linesForSubtitle = bestBlock.lines.slice(2, 6)
 
   return {
-    title: titleCaseFromHeadline(titleLines.join(' ')),
-    subtitle: subtitleLines.length
-      ? titleCaseFromHeadline(subtitleLines.join(' '))
+    rawTitle: linesForTitle.join(' '),
+    title: smartTitleCase(linesForTitle.join(' ')),
+    subtitle: linesForSubtitle.length
+      ? smartTitleCase(linesForSubtitle.join(' '))
       : '',
+    allLines: bestBlock.lines,
   }
+}
+
+function removeHeadlineLines(lines: string[]) {
+  return lines.filter((line) => !isHeadlineLine(line))
 }
 
 function splitSentences(text: string) {
@@ -236,18 +262,18 @@ function clampText(text: string, max: number) {
   return cut.trim().replace(/[\s,;:\-–—.]+$/, '') + '…'
 }
 
-function removeHeadlineLines(lines: string[]) {
-  return lines.filter((line) => !isHeadlineLine(line))
-}
-
 function makeBodyText(lines: string[]) {
   const bodyLines = removeHeadlineLines(lines)
 
   const startPriority = [
+    /il\s+\d{1,2}\s+\w+\s+\d{4}/i,
     /negli ultimi anni/i,
     /a livello europeo/i,
     /il modello/i,
     /le associazioni/i,
+    /la commissione europea/i,
+    /la commissione ue/i,
+    /per la prima volta/i,
   ]
 
   let cutStartIndex = -1
@@ -261,9 +287,8 @@ function makeBodyText(lines: string[]) {
     cutStartIndex >= 0 ? bodyLines.slice(cutStartIndex) : bodyLines
 
   return selectedLines
-    .join('\n')
-    .replace(/\n(?=[a-zàèéìòù])/g, ' ')
-    .replace(/[ ]{2,}/g, ' ')
+    .join(' ')
+    .replace(/\s+/g, ' ')
     .replace(
       /Per valutare correttamente un immobile o approfondire il tema, Area Immobiliare può offrire un confronto diretto e mirato\./gi,
       ''
@@ -276,6 +301,28 @@ function fallbackTitle(bodyText: string) {
   if (!sentence) return 'Aggiornamento dal mercato immobiliare'
 
   return clampText(sentence.replace(/[.]+$/, ''), 82)
+}
+
+function refineTitle(title: string, bodyText: string) {
+  const clean = title.trim()
+
+  if (
+    /^per l[’']abitare accessibile/i.test(clean) &&
+    /commissione europea|piano europeo|edilizia abitativa|prezzi accessibili/i.test(
+      bodyText
+    )
+  ) {
+    return 'Piano UE per l’abitare accessibile'
+  }
+
+  if (
+    /abitare accessibile/i.test(clean) &&
+    /cantieri|ristrutturazioni|edilizia sociale/i.test(clean)
+  ) {
+    return 'Piano UE per l’abitare accessibile'
+  }
+
+  return clean.replace(/,$/, '')
 }
 
 function buildBrief(headlineSubtitle: string, bodyText: string) {
@@ -306,119 +353,234 @@ function findSentence(bodyText: string, patterns: RegExp[]) {
   )
 }
 
+function uniquePush(list: string[], value: string) {
+  const clean = clampText(value, 270)
+
+  if (!clean) return
+
+  if (
+    !list.some(
+      (item) =>
+        item.toLowerCase() === clean.toLowerCase() ||
+        item.toLowerCase().includes(clean.toLowerCase().slice(0, 80)) ||
+        clean.toLowerCase().includes(item.toLowerCase().slice(0, 80))
+    )
+  ) {
+    list.push(clean)
+  }
+}
+
 function buildKeyPoints(bodyText: string) {
   const points: string[] = []
 
-  const euPoint = findSentence(bodyText, [
-    /regolamento.*2024\/1028/i,
+  const policyPoint = findSentence(bodyText, [
+    /piano europeo/i,
+    /commissione europea/i,
+    /regolamento/i,
+    /normativa/i,
     /20 maggio 2026/i,
-    /trasparenza.*dati/i,
+    /2024\/1028/i,
   ])
 
-  if (euPoint) {
-    points.push(clampText(euPoint, 260))
-  }
+  if (policyPoint) uniquePush(points, policyPoint)
 
-  const bergamoPoint = findSentence(bodyText, [
-    /comune di bergamo/i,
-    /borghi storici/i,
-    /requisiti qualitativi/i,
+  const operationalPoint = findSentence(bodyText, [
+    /cantieri/i,
+    /ristrutturazioni/i,
+    /titoli edilizi/i,
+    /urbanistica/i,
+    /passaporto digitale/i,
+    /\bDPP\b/i,
     /agibilità/i,
+    /impianti/i,
   ])
 
-  if (bergamoPoint) {
-    points.push(clampText(bergamoPoint, 260))
-  }
+  if (operationalPoint) uniquePush(points, operationalPoint)
 
-  const associazioniPoint = findSentence(bodyText, [
-    /confedilizia/i,
-    /fiaip/i,
-    /confabitare/i,
-    /associazioni/i,
-    /operatori del settore/i,
+  const marketPoint = findSentence(bodyText, [
+    /mercato/i,
+    /investimenti/i,
+    /edilizia sociale/i,
+    /offerta abitativa/i,
+    /abitazioni/i,
+    /proprietari/i,
+    /operatori/i,
   ])
 
-  if (associazioniPoint) {
-    points.push(clampText(associazioniPoint, 260))
-  }
+  if (marketPoint) uniquePush(points, marketPoint)
 
   const fallback = splitSentences(bodyText)
-    .filter((sentence) => sentence.length <= 260)
-    .slice(0, 3)
+    .filter((sentence) => sentence.length <= 270)
+    .slice(0, 4)
 
   for (const sentence of fallback) {
     if (points.length >= 3) break
-
-    const clean = clampText(sentence, 260)
-    if (!points.some((point) => point.toLowerCase() === clean.toLowerCase())) {
-      points.push(clean)
-    }
+    uniquePush(points, sentence)
   }
 
   return points.slice(0, 3)
 }
 
-function buildSection(bodyText: string, title: string, patterns: RegExp[]) {
+function takeSentencesAround(bodyText: string, patterns: RegExp[], maxSentences = 3) {
   const sentences = splitSentences(bodyText)
   const startIndex = sentences.findIndex((sentence) =>
     patterns.some((pattern) => pattern.test(sentence))
   )
 
-  if (startIndex < 0) return null
+  if (startIndex < 0) return ''
 
-  const sectionSentences = sentences.slice(startIndex, startIndex + 3)
-  const paragraph = sectionSentences.join(' ').trim()
+  return sentences.slice(startIndex, startIndex + maxSentences).join(' ')
+}
 
-  if (!paragraph) return null
+function isStrongBergamo(bodyText: string) {
+  return /comune di bergamo|borghi storici|città alta|orio|palafrizzoni/i.test(
+    bodyText
+  )
+}
 
-  return {
-    title,
-    paragraph: clampText(paragraph, 920),
+function detectTopic(bodyText: string) {
+  if (/affitti brevi|locazioni brevi|affitto turistico|case vacanze/i.test(bodyText)) {
+    return 'short-rentals'
   }
+
+  if (
+    /edilizia abitativa|abitare accessibile|prezzi accessibili|piano europeo|commissione europea|edilizia sociale/i.test(
+      bodyText
+    )
+  ) {
+    return 'housing-plan'
+  }
+
+  return 'generic'
 }
 
 function buildSections(bodyText: string) {
+  const topic = detectTopic(bodyText)
   const sections: { title: string; paragraph: string }[] = []
+  const sentences = splitSentences(bodyText)
 
-  const introSentences = splitSentences(bodyText).slice(0, 3)
-  if (introSentences.length > 0) {
+  const intro = sentences.slice(0, 3).join(' ')
+  if (intro) {
     sections.push({
-      title: 'Il contesto',
-      paragraph: clampText(introSentences.join(' '), 920),
+      title: 'Sintesi',
+      paragraph: clampText(intro, 920),
     })
   }
 
-  const european = buildSection(bodyText, 'Il quadro europeo', [
-    /a livello europeo/i,
-    /regolamento.*2024\/1028/i,
-    /20 maggio 2026/i,
-  ])
+  if (topic === 'short-rentals') {
+    const europe = takeSentencesAround(bodyText, [
+      /a livello europeo/i,
+      /regolamento.*2024\/1028/i,
+      /20 maggio 2026/i,
+      /trasparenza/i,
+    ])
 
-  if (european) sections.push(european)
+    if (europe) {
+      sections.push({
+        title: 'Il quadro europeo',
+        paragraph: clampText(europe, 920),
+      })
+    }
 
-  const bergamo = buildSection(bodyText, 'Il caso Bergamo', [
-    /bergamo/i,
-    /orio/i,
-    /borghi storici/i,
-    /comune di bergamo/i,
-  ])
+    if (isStrongBergamo(bodyText)) {
+      const bergamo = takeSentencesAround(bodyText, [
+        /comune di bergamo/i,
+        /borghi storici/i,
+        /orio/i,
+        /palafrizzoni/i,
+      ])
 
-  if (bergamo) sections.push(bergamo)
+      if (bergamo) {
+        sections.push({
+          title: 'Il caso Bergamo',
+          paragraph: clampText(bergamo, 920),
+        })
+      }
+    }
 
-  const operators = buildSection(bodyText, 'Le posizioni degli operatori', [
-    /confedilizia/i,
-    /fiaip/i,
-    /confabitare/i,
-    /associazioni/i,
-    /operatori del settore/i,
-  ])
+    const operators = takeSentencesAround(bodyText, [
+      /confedilizia/i,
+      /fiaip/i,
+      /confabitare/i,
+      /operatori del settore/i,
+      /associazioni/i,
+    ])
 
-  if (operators) sections.push(operators)
+    if (operators) {
+      sections.push({
+        title: 'Le posizioni degli operatori',
+        paragraph: clampText(operators, 920),
+      })
+    }
+  } else if (topic === 'housing-plan') {
+    const plan = takeSentencesAround(bodyText, [
+      /commissione europea/i,
+      /piano europeo/i,
+      /edilizia abitativa/i,
+      /prezzi accessibili/i,
+      /svolta storica/i,
+    ])
+
+    if (plan) {
+      sections.push({
+        title: 'Il piano europeo',
+        paragraph: clampText(plan, 920),
+      })
+    }
+
+    const innovation = takeSentencesAround(bodyText, [
+      /cantieri/i,
+      /ristrutturazioni/i,
+      /passaporto digitale/i,
+      /\bDPP\b/i,
+      /titoli edilizi/i,
+      /urbanistica/i,
+      /burocrazia/i,
+    ])
+
+    if (innovation) {
+      sections.push({
+        title: 'Cantieri, ristrutturazioni e innovazione',
+        paragraph: clampText(innovation, 920),
+      })
+    }
+
+    const market = takeSentencesAround(bodyText, [
+      /mercato/i,
+      /investimenti/i,
+      /edilizia sociale/i,
+      /offerta abitativa/i,
+      /abitazioni/i,
+    ])
+
+    if (market) {
+      sections.push({
+        title: 'Effetti sul mercato',
+        paragraph: clampText(market, 920),
+      })
+    }
+  } else {
+    const context = takeSentencesAround(bodyText, [
+      /normativa/i,
+      /mercato/i,
+      /proprietari/i,
+      /abitazioni/i,
+      /immobiliare/i,
+    ])
+
+    if (context) {
+      sections.push({
+        title: 'Il contesto',
+        paragraph: clampText(context, 920),
+      })
+    }
+  }
 
   const uniqueSections: { title: string; paragraph: string }[] = []
 
   for (const section of sections) {
     if (
+      section.paragraph &&
       !uniqueSections.some(
         (existing) =>
           existing.title === section.title ||
@@ -433,10 +595,7 @@ function buildSections(bodyText: string) {
 }
 
 function normalizePdfUrl(value?: string) {
-  const clean = value?.trim()
-  if (!clean) return ''
-
-  return clean
+  return value?.trim() || ''
 }
 
 export function generateNewsFromPdfText(
@@ -447,7 +606,7 @@ export function generateNewsFromPdfText(
   const headline = extractHeadline(lines)
   const bodyText = makeBodyText(lines)
 
-  const title = headline?.title || fallbackTitle(bodyText)
+  const title = refineTitle(headline?.title || fallbackTitle(bodyText), bodyText)
   const brief = buildBrief(headline?.subtitle || '', bodyText)
   const keyPoints = buildKeyPoints(bodyText)
   const sections = buildSections(bodyText)
