@@ -4,6 +4,7 @@ import SiteHeader from '@/components/public/SiteHeader'
 import Footer from '@/components/public/Footer'
 import FooterReveal from '@/components/public/FooterReveal'
 import { createServiceClient } from '@/lib/supabase/service'
+import { cleanPublicNewsHtml } from '@/lib/news-content-cleanup'
 
 type NewsMediaItem = {
   id: string
@@ -237,7 +238,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
           <div
             className="news-content prose prose-invert max-w-none text-[var(--site-text-muted)]"
             dangerouslySetInnerHTML={{
-              __html: item.content || '<p>Contenuto non disponibile.</p>',
+              __html: cleanPublicNewsHtml(item.content),
             }}
           />
 
