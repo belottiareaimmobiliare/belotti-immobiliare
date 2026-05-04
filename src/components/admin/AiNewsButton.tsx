@@ -11,6 +11,32 @@ type GeneratedNews = {
   keyPoints: string[]
 }
 
+type ApiResponse = Partial<GeneratedNews> & {
+  ok?: boolean
+  error?: string
+}
+
+async function readApiResponse(response: Response): Promise<ApiResponse> {
+  const contentType = response.headers.get('content-type') || ''
+
+  if (contentType.includes('application/json')) {
+    return response.json()
+  }
+
+  const text = await response.text()
+  const clean = text
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 220)
+
+  return {
+    error:
+      clean ||
+      `Risposta non JSON dal server. HTTP ${response.status} ${response.statusText}`,
+  }
+}
+
 function CopyButton({
   value,
   label = 'Copia',
@@ -69,12 +95,16 @@ export default function AiNewsButton() {
       const response = await fetch('/api/admin/news/ai-from-pdf', {
         method: 'POST',
         body: formData,
+        credentials: 'same-origin',
       })
 
-      const data = await response.json()
+      const data = await readApiResponse(response)
 
       if (!response.ok) {
-        throw new Error(data?.error || 'Errore durante l’analisi del PDF.')
+        throw new Error(
+          data?.error ||
+            `Errore server AI News. HTTP ${response.status} ${response.statusText}`
+        )
       }
 
       setGenerated({

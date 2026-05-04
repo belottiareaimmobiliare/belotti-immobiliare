@@ -17,6 +17,13 @@ async function extractPdfText(buffer: Buffer) {
   }
 }
 
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    service: 'AI News PDF assistant',
+  })
+}
+
 export async function POST(request: Request) {
   try {
     const profile = await getCurrentAdminProfile()
