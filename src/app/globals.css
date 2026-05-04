@@ -994,3 +994,35 @@ a[href*="tiktok.com"][title]:hover {
 .ai-premium-button:focus-visible .ai-premium-button__meta {
   color: #eef5ff;
 }
+
+/* === ADMIN GOLD BUTTONS === */
+.theme-admin-button-gold {
+  border: 1px solid rgba(214, 168, 63, 0.55);
+  background: linear-gradient(135deg, #f2d37a 0%, #d7a735 48%, #b9821f 100%);
+  color: #111827;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    0 10px 24px rgba(120, 82, 20, 0.16);
+  transition:
+    transform 180ms ease,
+    filter 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.theme-admin-button-gold:hover,
+.theme-admin-button-gold:focus-visible {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  border-color: rgba(242, 211, 122, 0.86);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    0 14px 30px rgba(120, 82, 20, 0.22);
+}
+
+.theme-admin-button-gold:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+  transform: none;
+  filter: grayscale(0.15);
+}

@@ -504,7 +504,7 @@ export default function AdminNewsManager({ items, authors }: Props) {
                 type="button"
                 disabled={isPending}
                 onClick={handleCreate}
-                className="theme-admin-button-primary w-full rounded-2xl px-5 py-3 font-medium transition hover:opacity-95 disabled:opacity-60"
+                className="theme-admin-button-gold rounded-2xl px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Crea news
               </button>
@@ -1306,7 +1306,7 @@ function NewsRow({
                   sort_order: Number(form.sort_order || 0),
                 })
               }
-              className="theme-admin-button-primary rounded-2xl px-5 py-3 text-sm font-medium transition hover:opacity-95"
+              className="theme-admin-button-gold rounded-2xl px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
             >
               Salva modifiche
             </button>
