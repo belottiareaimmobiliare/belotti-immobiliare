@@ -274,7 +274,7 @@ function makeStrongTitle(rawTitle: string | null, bodyText: string) {
   const title = rawTitle ? fixPdfText(rawTitle).replace(/,$/, '') : ''
 
   if (/chi cerca casa|ultima uscita|sospensione|fine lavori/.test(body)) {
-    return 'Chi cerca casa: fine lavori, per ora'
+    return 'Chi cerca casa: arrivederci, per ora'
   }
 
   if (/piano europeo|piano casa ue|edilizia abitativa|abitare accessibile/.test(body)) {
@@ -297,7 +297,7 @@ function makeBrief(bodyText: string) {
   const topic = detectTopic(bodyText)
 
   if (topic === 'closing-editorial') {
-    return 'L’editoriale «Chi cerca casa» si ferma per ragioni tecniche, dopo un percorso settimanale dedicato al tema della casa.'
+    return 'L’editoriale «Chi cerca casa» si ferma temporaneamente dopo un percorso settimanale dedicato al mondo della casa e del mercato immobiliare.'
   }
 
   if (topic === 'housing-plan') {
@@ -314,48 +314,19 @@ function makeBrief(bodyText: string) {
 function buildClosingEditorialSummary(bodyText: string) {
   const paragraphs: string[] = []
 
-  const opening = findSentences(bodyText, [
-    /ultima uscita/i,
-    /sospensione/i,
-    /gennaio 2024/i,
-    /120 redazionali/i,
-  ], 3)
+  paragraphs.push(
+    'L’appuntamento editoriale «Chi cerca casa» si sospende per ragioni tecniche, dopo un percorso iniziato a gennaio 2024 e sviluppato attraverso circa 120 redazionali. Settimana dopo settimana, la rubrica ha raccontato il tema della casa nelle sue molte sfaccettature, unendo aspetti pratici, emotivi, tecnici e culturali.'
+  )
 
-  if (opening.length > 0) {
-    paragraphs.push(
-      clampText(opening.join(' '), 720)
-    )
-  }
+  paragraphs.push(
+    'Il filo conduttore del progetto è stato il valore della casa come luogo di vita, memoria e progettualità. Non solo un immobile, quindi, ma uno spazio capace di accogliere storie, relazioni, sogni e scelte importanti.'
+  )
 
-  const meaning = findSentences(bodyText, [
-    /luogo perfetto/i,
-    /emozioni/i,
-    /ricordi/i,
-    /battere il cuore/i,
-    /anima unica/i,
-  ], 3)
+  paragraphs.push(
+    'Nel corso dei mesi, l’editoriale ha coinvolto professionisti, agenti immobiliari, tecnici, associazioni di settore e istituzioni, offrendo ai lettori strumenti utili per orientarsi tra compravendita, locazione, aspetti legali, fiscali e urbanistici. La sospensione viene presentata come un arrivederci, con l’obiettivo di tornare in una veste rinnovata.'
+  )
 
-  if (meaning.length > 0) {
-    paragraphs.push(
-      clampText(meaning.join(' '), 720)
-    )
-  }
-
-  const thanks = findSentences(bodyText, [
-    /ringraziare/i,
-    /collaborazione/i,
-    /ordini professionali/i,
-    /associazioni di settore/i,
-    /costruttori/i,
-  ], 2)
-
-  if (thanks.length > 0) {
-    paragraphs.push(
-      clampText(thanks.join(' '), 620)
-    )
-  }
-
-  return paragraphs
+  return paragraphs.map((paragraph) => fixPdfText(paragraph))
 }
 
 function buildHousingPlanSummary(bodyText: string) {
