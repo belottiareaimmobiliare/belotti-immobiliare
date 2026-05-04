@@ -1,38 +1,20 @@
 import { NextResponse } from 'next/server'
+import { PDFParse } from 'pdf-parse'
 import { getCurrentAdminProfile } from '@/lib/admin-auth'
 import { generateNewsFromPdfText } from '@/lib/news-ai-free'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-type PdfParseDynamicModule = {
-  PDFParse?: new (options: { data: Buffer }) => {
-    getText: () => Promise<{ text?: string }>
-    destroy?: () => Promise<void> | void
-  }
-  default?: (dataBuffer: Buffer) => Promise<{ text?: string }>
-}
-
 async function extractPdfText(buffer: Buffer) {
-  const pdfModule = (await import('pdf-parse')) as unknown as PdfParseDynamicModule
+  const parser = new PDFParse({ data: buffer })
 
-  if (pdfModule.PDFParse) {
-    const parser = new pdfModule.PDFParse({ data: buffer })
-
-    try {
-      const result = await parser.getText()
-      return result.text || ''
-    } finally {
-      await parser.destroy?.()
-    }
-  }
-
-  if (typeof pdfModule.default === 'function') {
-    const result = await pdfModule.default(buffer)
+  try {
+    const result = await parser.getText()
     return result.text || ''
+  } finally {
+    await parser.destroy?.()
   }
-
-  throw new Error('Modulo pdf-parse non compatibile.')
 }
 
 export async function POST(request: Request) {
@@ -101,8 +83,15 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Errore AI News da PDF:', error)
 
+    const detail =
+      error instanceof Error
+        ? error.message
+        : 'Errore sconosciuto durante l’analisi del PDF.'
+
     return NextResponse.json(
-      { error: 'Errore durante l’analisi del PDF.' },
+      {
+        error: `Errore durante l’analisi del PDF: ${detail}`,
+      },
       { status: 500 }
     )
   }
