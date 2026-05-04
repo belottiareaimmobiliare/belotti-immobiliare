@@ -28,32 +28,37 @@ const NOISE_PATTERNS = [
   /^marco tacchini$/i,
   /^chicercacasa$/i,
   /^spm pubblicità$/i,
+  /^il caso bergamo$/i,
+  /^punti principali$/i,
   /^\d+$/,
 ]
 
-function normalizeText(input: string) {
-  return input
-    .replace(/\r/g, '\n')
-    .replace(/\t/g, ' ')
-    .replace(/[\u00ad\uFFFD\uFFFE]/g, '')
-    .replace(/[ ]{2,}/g, ' ')
-    .replace(/\n{3,}/g, '\n\n')
+function fixPdfHyphenation(value: string) {
+  return value
+    .replace(/[\u2010-\u2015\u2212]/g, '-')
+    .replace(/([A-Za-zÀ-ÖØ-öø-ÿ])-\s+([A-Za-zÀ-ÖØ-öø-ÿ])/g, '$1$2')
+    .replace(/([A-Za-zÀ-ÖØ-öø-ÿ])-\s*\n\s*([A-Za-zÀ-ÖØ-öø-ÿ])/g, '$1$2')
+    .replace(/\b([dDlLsScC])\s+[’']\s*/g, '$1’')
+    .replace(/\s+([,.;:!?])/g, '$1')
+    .replace(/\s{2,}/g, ' ')
     .trim()
 }
 
-function normalizeBrokenWords(text: string) {
-  return text
-    .replace(/([a-zàèéìòù])-\s+([a-zàèéìòù])/gi, '$1$2')
-    .replace(/([a-zàèéìòù])\s+-\s+([a-zàèéìòù])/gi, '$1$2')
-    .replace(/\s+’\s+/g, '’')
-    .replace(/\s+'\s+/g, "'")
-    .replace(/\s+/g, ' ')
+function normalizeText(input: string) {
+  return fixPdfHyphenation(
+    input
+      .replace(/\r/g, '\n')
+      .replace(/\t/g, ' ')
+      .replace(/[\u00ad\uFFFD\uFFFE]/g, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
+  )
 }
 
 function compactLines(rawText: string) {
   const sourceLines = normalizeText(rawText)
     .split('\n')
-    .map((line) => normalizeBrokenWords(line.trim()))
+    .map((line) => fixPdfHyphenation(line.trim()))
     .filter(Boolean)
 
   const lines: string[] = []
@@ -66,7 +71,7 @@ function compactLines(rawText: string) {
       sourceLines[i + 1] &&
       /^[a-zàèéìòù]/.test(sourceLines[i + 1])
     ) {
-      lines.push(line + sourceLines[i + 1])
+      lines.push(fixPdfHyphenation(line + sourceLines[i + 1]))
       i += 1
       continue
     }
@@ -78,7 +83,7 @@ function compactLines(rawText: string) {
 }
 
 function isNoiseLine(line: string) {
-  const clean = line.trim()
+  const clean = fixPdfHyphenation(line.trim())
   if (!clean) return true
   if (clean.length <= 2) return true
   if (/^[\W_]+$/.test(clean)) return true
@@ -88,7 +93,7 @@ function isNoiseLine(line: string) {
 
 function cleanLines(rawText: string) {
   return compactLines(rawText)
-    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .map((line) => fixPdfHyphenation(line.replace(/\s+/g, ' ').trim()))
     .filter((line) => !isNoiseLine(line))
 }
 
@@ -101,7 +106,7 @@ function uppercaseRatio(line: string) {
 }
 
 function isHeadlineLine(line: string) {
-  const clean = line.trim()
+  const clean = fixPdfHyphenation(line.trim())
 
   if (clean.length < 12 || clean.length > 145) return false
   if (/[a-zàèéìòù]{3,}/.test(clean)) return false
@@ -157,7 +162,7 @@ function smartTitleCase(value: string) {
     'dalle',
   ])
 
-  return value
+  return fixPdfHyphenation(value)
     .toLowerCase()
     .split(/\s+/)
     .map((word, index) => {
@@ -230,22 +235,22 @@ function removeHeadlineLines(lines: string[]) {
 }
 
 function splitSentences(text: string) {
-  return text
+  return fixPdfHyphenation(text)
     .replace(/\n/g, ' ')
     .split(/(?<=[.!?])\s+/)
-    .map((sentence) => sentence.trim())
+    .map((sentence) => fixPdfHyphenation(sentence.trim()))
     .filter((sentence) => sentence.length >= 50)
 }
 
 function escapeHtml(value: string) {
-  return value
+  return fixPdfHyphenation(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
 }
 
 function clampText(text: string, max: number) {
-  const clean = text.trim()
+  const clean = fixPdfHyphenation(text)
   if (clean.length <= max) return clean
 
   const cut = clean.slice(0, max)
@@ -256,10 +261,10 @@ function clampText(text: string, max: number) {
   )
 
   if (lastStop > max * 0.55) {
-    return cut.slice(0, lastStop + 1).trim()
+    return fixPdfHyphenation(cut.slice(0, lastStop + 1).trim())
   }
 
-  return cut.trim().replace(/[\s,;:\-–—.]+$/, '') + '…'
+  return fixPdfHyphenation(cut.trim().replace(/[\s,;:\-–—.]+$/, '') + '…')
 }
 
 function makeBodyText(lines: string[]) {
@@ -286,14 +291,16 @@ function makeBodyText(lines: string[]) {
   const selectedLines =
     cutStartIndex >= 0 ? bodyLines.slice(cutStartIndex) : bodyLines
 
-  return selectedLines
-    .join(' ')
-    .replace(/\s+/g, ' ')
-    .replace(
-      /Per valutare correttamente un immobile o approfondire il tema, Area Immobiliare può offrire un confronto diretto e mirato\./gi,
-      ''
-    )
-    .trim()
+  return fixPdfHyphenation(
+    selectedLines
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .replace(
+        /Per valutare correttamente un immobile o approfondire il tema, Area Immobiliare può offrire un confronto diretto e mirato\./gi,
+        ''
+      )
+      .trim()
+  )
 }
 
 function fallbackTitle(bodyText: string) {
@@ -304,7 +311,7 @@ function fallbackTitle(bodyText: string) {
 }
 
 function refineTitle(title: string, bodyText: string) {
-  const clean = title.trim()
+  const clean = fixPdfHyphenation(title.trim())
 
   if (
     /^per l[’']abitare accessibile/i.test(clean) &&
@@ -405,6 +412,8 @@ function buildKeyPoints(bodyText: string) {
     /abitazioni/i,
     /proprietari/i,
     /operatori/i,
+    /imprese edili/i,
+    /professionisti tecnici/i,
   ])
 
   if (marketPoint) uniquePush(points, marketPoint)
@@ -429,7 +438,7 @@ function takeSentencesAround(bodyText: string, patterns: RegExp[], maxSentences 
 
   if (startIndex < 0) return ''
 
-  return sentences.slice(startIndex, startIndex + maxSentences).join(' ')
+  return fixPdfHyphenation(sentences.slice(startIndex, startIndex + maxSentences).join(' '))
 }
 
 function isStrongBergamo(bodyText: string) {
@@ -551,6 +560,8 @@ function buildSections(bodyText: string) {
       /edilizia sociale/i,
       /offerta abitativa/i,
       /abitazioni/i,
+      /imprese edili/i,
+      /professionisti tecnici/i,
     ])
 
     if (market) {
@@ -587,7 +598,10 @@ function buildSections(bodyText: string) {
           existing.paragraph.toLowerCase() === section.paragraph.toLowerCase()
       )
     ) {
-      uniqueSections.push(section)
+      uniqueSections.push({
+        title: section.title,
+        paragraph: fixPdfHyphenation(section.paragraph),
+      })
     }
   }
 
@@ -624,7 +638,7 @@ export function generateNewsFromPdfText(
 
   if (keyPoints.length > 0) {
     plainParts.push(
-      `Punti principali\n${keyPoints.map((point) => `- ${point}`).join('\n')}`
+      `Punti principali\n${keyPoints.map((point) => `• ${point}`).join('\n')}`
     )
   }
 
@@ -632,7 +646,7 @@ export function generateNewsFromPdfText(
     plainParts.push(`Fonte PDF completa\n${sourcePdfUrl}`)
   }
 
-  const plainContent = plainParts.join('\n\n')
+  const plainContent = fixPdfHyphenation(plainParts.join('\n\n'))
 
   const htmlParts: string[] = []
 
@@ -646,11 +660,9 @@ export function generateNewsFromPdfText(
 
   if (keyPoints.length > 0) {
     htmlParts.push('<h3>Punti principali</h3>')
-    htmlParts.push(
-      `<ul>${keyPoints
-        .map((point) => `<li>${escapeHtml(point)}</li>`)
-        .join('')}</ul>`
-    )
+    keyPoints.forEach((point) => {
+      htmlParts.push(`<p>• ${escapeHtml(point)}</p>`)
+    })
   }
 
   if (sourcePdfUrl) {
@@ -662,11 +674,11 @@ export function generateNewsFromPdfText(
   }
 
   return {
-    title,
-    brief,
+    title: fixPdfHyphenation(title),
+    brief: fixPdfHyphenation(brief),
     content: htmlParts.join('\n'),
     plainContent,
-    keyPoints,
+    keyPoints: keyPoints.map((point) => fixPdfHyphenation(point)),
     sourcePdfUrl: sourcePdfUrl || undefined,
   }
 }
