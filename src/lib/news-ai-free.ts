@@ -18,6 +18,12 @@ const NOISE_PATTERNS = [
   /^l’eco di bergamo$/i,
   /^l'eco di bergamo$/i,
   /^sabato\s+\d+/i,
+  /^venerdì\s+\d+/i,
+  /^giovedì\s+\d+/i,
+  /^mercoledì\s+\d+/i,
+  /^martedì\s+\d+/i,
+  /^lunedì\s+\d+/i,
+  /^domenica\s+\d+/i,
   /^a cura di/i,
   /^www\./i,
   /^di gianfederico belotti/i,
@@ -41,6 +47,14 @@ function fixPdfText(value: string) {
     .replace(/([A-Za-zÀ-ÖØ-öø-ÿ])-\s*\n\s*([A-Za-zÀ-ÖØ-öø-ÿ])/g, '$1$2')
     .replace(/\b([dDlLsScC])\s+[’']\s*/g, '$1’')
     .replace(/\b([dDlLsScC])-\s+[’']\s*/g, '$1’')
+    // rimuove date editoriali/testata tipo: Venerdì 1 Maggio 2026
+    .replace(
+      /\b(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\s+\d{1,2}\s+[a-zàèéìòù]+\s+\d{4}\s+/gi,
+      ''
+    )
+    // correzione frequente quando la C iniziale viene persa dal parser PDF
+    .replace(/^ari lettori/i, 'Cari lettori')
+    .replace(/\bari lettori\b/gi, 'Cari lettori')
     .replace(/\s+([,.;:!?])/g, '$1')
     .replace(/\s{2,}/g, ' ')
     .trim()
