@@ -5,28 +5,26 @@ import { generateNewsFromPdfText } from '@/lib/news-ai-free'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-type PdfParseModule = {
-  PDFParse?: new (options: { data: Buffer | Uint8Array | ArrayBuffer }) => {
-    getText: () => Promise<{ text?: string }>
-    destroy?: () => Promise<void> | void
-  }
-}
+type PdfParseFunction = (buffer: Buffer) => Promise<{ text?: string }>
 
 async function extractPdfText(buffer: Buffer) {
-  const pdfModule = (await import('pdf-parse')) as unknown as PdfParseModule
+  const pdfModule = (await import('pdf-parse')) as unknown as {
+    default?: PdfParseFunction
+  } & PdfParseFunction
 
-  if (!pdfModule.PDFParse) {
+  const pdfParse =
+    typeof pdfModule.default === 'function'
+      ? pdfModule.default
+      : typeof pdfModule === 'function'
+        ? pdfModule
+        : null
+
+  if (!pdfParse) {
     throw new Error('Motore PDF non disponibile sul server.')
   }
 
-  const parser = new pdfModule.PDFParse({ data: buffer })
-
-  try {
-    const result = await parser.getText()
-    return result.text || ''
-  } finally {
-    await parser.destroy?.()
-  }
+  const result = await pdfParse(buffer)
+  return result.text || ''
 }
 
 export async function GET() {
