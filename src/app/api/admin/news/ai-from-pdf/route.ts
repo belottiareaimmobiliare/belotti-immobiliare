@@ -185,16 +185,20 @@ export async function POST(request: Request) {
       fileName: finalPdfFileName,
     })
 
-    const pdfFooterPlain = `Leggi il PDF completo:\n${sourcePdfUrl}`
-    const pdfFooterHtml = `<p><strong>Leggi il PDF completo:</strong><br><a href="${sourcePdfUrl}">${sourcePdfUrl}</a></p>`
+    const pdfFooterPlain = `Fonte PDF completa:\n${sourcePdfUrl}`
+    const pdfFooterHtml = `<p><strong>Fonte PDF completa:</strong><br><a href="${sourcePdfUrl}">${sourcePdfUrl}</a></p>`
 
     return NextResponse.json({
       ok: true,
       ...generatedBase,
       sourcePdfUrl,
       pdfFileName: finalPdfFileName,
-      plainContent: `${generatedBase.plainContent}\n\n${pdfFooterPlain}`,
-      content: `${generatedBase.content}\n${pdfFooterHtml}`,
+      plainContent: generatedBase.plainContent.includes(sourcePdfUrl)
+        ? generatedBase.plainContent
+        : `${generatedBase.plainContent}\n\n${pdfFooterPlain}`,
+      content: generatedBase.content.includes(sourcePdfUrl)
+        ? generatedBase.content
+        : `${generatedBase.content}\n${pdfFooterHtml}`,
     })
   } catch (error) {
     console.error('Errore AI News da PDF:', error)

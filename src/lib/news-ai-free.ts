@@ -4,6 +4,11 @@ export type GeneratedNews = {
   content: string
   plainContent: string
   keyPoints: string[]
+  sourcePdfUrl?: string
+}
+
+type GenerateNewsOptions = {
+  sourcePdfUrl?: string
 }
 
 const NOISE_PATTERNS = [
@@ -38,11 +43,8 @@ function normalizeText(input: string) {
 
 function normalizeBrokenWords(text: string) {
   return text
-    // parole spezzate con trattino e spazio/newline: "du- rata" -> "durata"
     .replace(/([a-zàèéìòù])-\s+([a-zàèéìòù])/gi, '$1$2')
-    // spezzature strane frequenti nei PDF giornale: "piat- taforme"
     .replace(/([a-zàèéìòù])\s+-\s+([a-zàèéìòù])/gi, '$1$2')
-    // apostrofi separati male
     .replace(/\s+’\s+/g, '’')
     .replace(/\s+'\s+/g, "'")
 }
@@ -58,7 +60,6 @@ function compactLines(rawText: string) {
   for (let i = 0; i < sourceLines.length; i += 1) {
     const line = sourceLines[i]
 
-    // Caso tipico OCR/PDF: "N" su una riga e "egli ultimi anni" sulla successiva.
     if (
       /^[A-ZÀÈÉÌÒÙ]$/.test(line) &&
       sourceLines[i + 1] &&
@@ -101,7 +102,7 @@ function uppercaseRatio(line: string) {
 function isHeadlineLine(line: string) {
   const clean = line.trim()
 
-  if (clean.length < 12 || clean.length > 130) return false
+  if (clean.length < 12 || clean.length > 135) return false
   if (/[a-zàèéìòù]{3,}/.test(clean)) return false
 
   const ratio = uppercaseRatio(clean)
@@ -162,9 +163,7 @@ function extractHeadline(lines: string[]) {
 
   if (headlineIndexes.length === 0) return null
 
-  // Cerco blocchi consecutivi in maiuscolo. Nei PDF giornale spesso il titolo è verso fine estrazione.
   const blocks: { start: number; lines: string[] }[] = []
-
   let current: { start: number; lines: string[] } | null = null
 
   for (const item of headlineIndexes) {
@@ -197,17 +196,11 @@ function extractHeadline(lines: string[]) {
   const subtitleLines = bestBlock.lines.slice(2, 6)
 
   return {
-    rawTitle: titleLines.join(' '),
     title: titleCaseFromHeadline(titleLines.join(' ')),
     subtitle: subtitleLines.length
       ? titleCaseFromHeadline(subtitleLines.join(' '))
       : '',
-    blockStart: bestBlock.start,
   }
-}
-
-function removeHeadlineBlockFromBody(lines: string[]) {
-  return lines.filter((line) => !isHeadlineLine(line))
 }
 
 function splitSentences(text: string) {
@@ -215,19 +208,7 @@ function splitSentences(text: string) {
     .replace(/\n/g, ' ')
     .split(/(?<=[.!?])\s+/)
     .map((sentence) => sentence.trim())
-    .filter((sentence) => sentence.length >= 55)
-}
-
-function clampText(text: string, max: number) {
-  const clean = text.trim()
-  if (clean.length <= max) return clean
-
-  return (
-    clean
-      .slice(0, max)
-      .trim()
-      .replace(/[\s,;:\-–—.]+$/, '') + '…'
-  )
+    .filter((sentence) => sentence.length >= 50)
 }
 
 function escapeHtml(value: string) {
@@ -237,132 +218,44 @@ function escapeHtml(value: string) {
     .replace(/>/g, '&gt;')
 }
 
-function fallbackTitle(bodyText: string) {
-  const sentence = splitSentences(bodyText)[0]
+function clampText(text: string, max: number) {
+  const clean = text.trim()
+  if (clean.length <= max) return clean
 
-  if (!sentence) return 'Aggiornamento dal mercato immobiliare'
-
-  return clampText(sentence.replace(/[.]+$/, ''), 82)
-}
-
-function buildBrief(headlineSubtitle: string, bodyText: string) {
-  if (headlineSubtitle && headlineSubtitle.length >= 80) {
-    return clampText(headlineSubtitle, 230)
-  }
-
-  const sentences = splitSentences(bodyText)
-  const useful =
-    sentences.find((sentence) => {
-      if (/^il modello/i.test(sentence)) return false
-      if (/^pagina:/i.test(sentence)) return false
-      return sentence.length <= 260
-    }) || sentences[0]
-
-  return clampText(
-    useful ||
-      'Una sintesi editoriale dedicata al mercato immobiliare, con spunti utili per proprietari, acquirenti e persone interessate a vendere o acquistare casa.',
-    230
+  const cut = clean.slice(0, max)
+  const lastStop = Math.max(
+    cut.lastIndexOf('.'),
+    cut.lastIndexOf(';'),
+    cut.lastIndexOf(':')
   )
+
+  if (lastStop > max * 0.55) {
+    return cut.slice(0, lastStop + 1).trim()
+  }
+
+  return cut.trim().replace(/[\s,;:\-–—.]+$/, '') + '…'
 }
 
-function scoreSentence(sentence: string) {
-  const keywords = [
-    'mercato',
-    'immobiliare',
-    'casa',
-    'affitti brevi',
-    'locazioni brevi',
-    'proprietari',
-    'bergamo',
-    'regolamento',
-    'comune',
-    'normativa',
-    'cin',
-    'registro nazionale',
-    'agibilità',
-    'impianti',
-    'requisiti',
-    'borghi storici',
-    'centri storici',
-    'tassazione',
-    'turistico',
-    'turistica',
-  ]
-
-  const lower = sentence.toLowerCase()
-  let score = 0
-
-  for (const keyword of keywords) {
-    if (lower.includes(keyword)) score += 2
-  }
-
-  if (sentence.length >= 85 && sentence.length <= 240) score += 2
-  if (/\d/.test(sentence)) score += 1
-
-  return score
-}
-
-function extractKeyPoints(bodyText: string) {
-  const sentences = splitSentences(bodyText)
-
-  const ranked = sentences
-    .map((sentence, index) => ({
-      sentence,
-      index,
-      score: scoreSentence(sentence),
-    }))
-    .filter((item) => item.sentence.length <= 280)
-    .sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score
-      return a.index - b.index
-    })
-
-  const points: string[] = []
-
-  for (const item of ranked) {
-    const point = clampText(item.sentence, 210)
-
-    if (
-      !points.some(
-        (existing) => existing.toLowerCase() === point.toLowerCase()
-      )
-    ) {
-      points.push(point)
-    }
-
-    if (points.length >= 3) break
-  }
-
-  return points
-}
-
-function paragraphize(bodyText: string) {
-  const paragraphs = bodyText
-    .split(/\n{2,}/)
-    .map((paragraph) => paragraph.trim())
-    .filter((paragraph) => paragraph.length >= 140)
-
-  if (paragraphs.length >= 2) {
-    return paragraphs.slice(0, 4).map((paragraph) => clampText(paragraph, 820))
-  }
-
-  const sentences = splitSentences(bodyText)
-  const chunks: string[] = []
-
-  for (let i = 0; i < sentences.length; i += 3) {
-    const chunk = sentences.slice(i, i + 3).join(' ')
-    if (chunk.length >= 120) chunks.push(clampText(chunk, 820))
-  }
-
-  return chunks.slice(0, 4)
+function removeHeadlineLines(lines: string[]) {
+  return lines.filter((line) => !isHeadlineLine(line))
 }
 
 function makeBodyText(lines: string[]) {
-  const bodyLines = removeHeadlineBlockFromBody(lines)
+  const bodyLines = removeHeadlineLines(lines)
 
-  const cutStartIndex = bodyLines.findIndex((line) =>
-    /negli ultimi anni|a livello europeo|il modello|le associazioni/i.test(line)
-  )
+  const startPriority = [
+    /negli ultimi anni/i,
+    /a livello europeo/i,
+    /il modello/i,
+    /le associazioni/i,
+  ]
+
+  let cutStartIndex = -1
+
+  for (const pattern of startPriority) {
+    cutStartIndex = bodyLines.findIndex((line) => pattern.test(line))
+    if (cutStartIndex >= 0) break
+  }
 
   const selectedLines =
     cutStartIndex >= 0 ? bodyLines.slice(cutStartIndex) : bodyLines
@@ -371,50 +264,229 @@ function makeBodyText(lines: string[]) {
     .join('\n')
     .replace(/\n(?=[a-zàèéìòù])/g, ' ')
     .replace(/[ ]{2,}/g, ' ')
+    .replace(
+      /Per valutare correttamente un immobile o approfondire il tema, Area Immobiliare può offrire un confronto diretto e mirato\./gi,
+      ''
+    )
     .trim()
 }
 
-export function generateNewsFromPdfText(rawText: string): GeneratedNews {
+function fallbackTitle(bodyText: string) {
+  const sentence = splitSentences(bodyText)[0]
+  if (!sentence) return 'Aggiornamento dal mercato immobiliare'
+
+  return clampText(sentence.replace(/[.]+$/, ''), 82)
+}
+
+function buildBrief(headlineSubtitle: string, bodyText: string) {
+  if (headlineSubtitle && headlineSubtitle.length >= 80) {
+    return clampText(headlineSubtitle, 260)
+  }
+
+  const sentences = splitSentences(bodyText)
+  const useful =
+    sentences.find((sentence) => {
+      if (/^il modello/i.test(sentence)) return false
+      if (/^pagina:/i.test(sentence)) return false
+      return sentence.length <= 280
+    }) || sentences[0]
+
+  return clampText(
+    useful ||
+      'Sintesi editoriale dedicata al mercato immobiliare, con spunti utili per proprietari, acquirenti e persone interessate al tema casa.',
+    260
+  )
+}
+
+function findSentence(bodyText: string, patterns: RegExp[]) {
+  const sentences = splitSentences(bodyText)
+
+  return sentences.find((sentence) =>
+    patterns.some((pattern) => pattern.test(sentence))
+  )
+}
+
+function buildKeyPoints(bodyText: string) {
+  const points: string[] = []
+
+  const euPoint = findSentence(bodyText, [
+    /regolamento.*2024\/1028/i,
+    /20 maggio 2026/i,
+    /trasparenza.*dati/i,
+  ])
+
+  if (euPoint) {
+    points.push(clampText(euPoint, 260))
+  }
+
+  const bergamoPoint = findSentence(bodyText, [
+    /comune di bergamo/i,
+    /borghi storici/i,
+    /requisiti qualitativi/i,
+    /agibilità/i,
+  ])
+
+  if (bergamoPoint) {
+    points.push(clampText(bergamoPoint, 260))
+  }
+
+  const associazioniPoint = findSentence(bodyText, [
+    /confedilizia/i,
+    /fiaip/i,
+    /confabitare/i,
+    /associazioni/i,
+    /operatori del settore/i,
+  ])
+
+  if (associazioniPoint) {
+    points.push(clampText(associazioniPoint, 260))
+  }
+
+  const fallback = splitSentences(bodyText)
+    .filter((sentence) => sentence.length <= 260)
+    .slice(0, 3)
+
+  for (const sentence of fallback) {
+    if (points.length >= 3) break
+
+    const clean = clampText(sentence, 260)
+    if (!points.some((point) => point.toLowerCase() === clean.toLowerCase())) {
+      points.push(clean)
+    }
+  }
+
+  return points.slice(0, 3)
+}
+
+function buildSection(bodyText: string, title: string, patterns: RegExp[]) {
+  const sentences = splitSentences(bodyText)
+  const startIndex = sentences.findIndex((sentence) =>
+    patterns.some((pattern) => pattern.test(sentence))
+  )
+
+  if (startIndex < 0) return null
+
+  const sectionSentences = sentences.slice(startIndex, startIndex + 3)
+  const paragraph = sectionSentences.join(' ').trim()
+
+  if (!paragraph) return null
+
+  return {
+    title,
+    paragraph: clampText(paragraph, 920),
+  }
+}
+
+function buildSections(bodyText: string) {
+  const sections: { title: string; paragraph: string }[] = []
+
+  const introSentences = splitSentences(bodyText).slice(0, 3)
+  if (introSentences.length > 0) {
+    sections.push({
+      title: 'Il contesto',
+      paragraph: clampText(introSentences.join(' '), 920),
+    })
+  }
+
+  const european = buildSection(bodyText, 'Il quadro europeo', [
+    /a livello europeo/i,
+    /regolamento.*2024\/1028/i,
+    /20 maggio 2026/i,
+  ])
+
+  if (european) sections.push(european)
+
+  const bergamo = buildSection(bodyText, 'Il caso Bergamo', [
+    /bergamo/i,
+    /orio/i,
+    /borghi storici/i,
+    /comune di bergamo/i,
+  ])
+
+  if (bergamo) sections.push(bergamo)
+
+  const operators = buildSection(bodyText, 'Le posizioni degli operatori', [
+    /confedilizia/i,
+    /fiaip/i,
+    /confabitare/i,
+    /associazioni/i,
+    /operatori del settore/i,
+  ])
+
+  if (operators) sections.push(operators)
+
+  const uniqueSections: { title: string; paragraph: string }[] = []
+
+  for (const section of sections) {
+    if (
+      !uniqueSections.some(
+        (existing) =>
+          existing.title === section.title ||
+          existing.paragraph.toLowerCase() === section.paragraph.toLowerCase()
+      )
+    ) {
+      uniqueSections.push(section)
+    }
+  }
+
+  return uniqueSections.slice(0, 4)
+}
+
+function normalizePdfUrl(value?: string) {
+  const clean = value?.trim()
+  if (!clean) return ''
+
+  return clean
+}
+
+export function generateNewsFromPdfText(
+  rawText: string,
+  options: GenerateNewsOptions = {}
+): GeneratedNews {
   const lines = cleanLines(rawText)
   const headline = extractHeadline(lines)
   const bodyText = makeBodyText(lines)
 
   const title = headline?.title || fallbackTitle(bodyText)
   const brief = buildBrief(headline?.subtitle || '', bodyText)
-  const keyPoints = extractKeyPoints(bodyText)
-  const paragraphs = paragraphize(bodyText)
-
-  const intro =
-    paragraphs[0] ||
-    'Il documento offre spunti utili per leggere con maggiore attenzione il contesto immobiliare e orientare le scelte in modo più consapevole.'
+  const keyPoints = buildKeyPoints(bodyText)
+  const sections = buildSections(bodyText)
+  const sourcePdfUrl = normalizePdfUrl(options.sourcePdfUrl)
 
   const plainParts: string[] = []
 
-  plainParts.push(intro)
-
-  if (keyPoints.length > 0) {
-    plainParts.push('Punti chiave:')
-    keyPoints.forEach((point) => {
-      plainParts.push(`- ${point}`)
-    })
-  }
-
-  paragraphs.slice(1, 4).forEach((paragraph) => {
-    plainParts.push(paragraph)
+  sections.forEach((section, index) => {
+    if (index === 0) {
+      plainParts.push(section.paragraph)
+    } else {
+      plainParts.push(`${section.title}\n${section.paragraph}`)
+    }
   })
 
-  plainParts.push(
-    'Per valutare correttamente un immobile o approfondire il tema, Area Immobiliare può offrire un confronto diretto e mirato.'
-  )
+  if (keyPoints.length > 0) {
+    plainParts.push(
+      `Punti principali\n${keyPoints.map((point) => `- ${point}`).join('\n')}`
+    )
+  }
+
+  if (sourcePdfUrl) {
+    plainParts.push(`Fonte PDF completa\n${sourcePdfUrl}`)
+  }
 
   const plainContent = plainParts.join('\n\n')
 
   const htmlParts: string[] = []
 
-  htmlParts.push(`<p>${escapeHtml(intro)}</p>`)
+  sections.forEach((section, index) => {
+    if (index > 0) {
+      htmlParts.push(`<h3>${escapeHtml(section.title)}</h3>`)
+    }
+
+    htmlParts.push(`<p>${escapeHtml(section.paragraph)}</p>`)
+  })
 
   if (keyPoints.length > 0) {
-    htmlParts.push('<h3>Punti chiave</h3>')
+    htmlParts.push('<h3>Punti principali</h3>')
     htmlParts.push(
       `<ul>${keyPoints
         .map((point) => `<li>${escapeHtml(point)}</li>`)
@@ -422,13 +494,13 @@ export function generateNewsFromPdfText(rawText: string): GeneratedNews {
     )
   }
 
-  paragraphs.slice(1, 4).forEach((paragraph) => {
-    htmlParts.push(`<p>${escapeHtml(paragraph)}</p>`)
-  })
-
-  htmlParts.push(
-    '<p>Per valutare correttamente un immobile o approfondire il tema, Area Immobiliare può offrire un confronto diretto e mirato.</p>'
-  )
+  if (sourcePdfUrl) {
+    htmlParts.push(
+      `<p><strong>Fonte PDF completa:</strong><br><a href="${escapeHtml(
+        sourcePdfUrl
+      )}">${escapeHtml(sourcePdfUrl)}</a></p>`
+    )
+  }
 
   return {
     title,
@@ -436,5 +508,6 @@ export function generateNewsFromPdfText(rawText: string): GeneratedNews {
     content: htmlParts.join('\n'),
     plainContent,
     keyPoints,
+    sourcePdfUrl: sourcePdfUrl || undefined,
   }
 }

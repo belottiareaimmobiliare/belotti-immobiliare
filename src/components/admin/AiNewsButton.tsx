@@ -69,6 +69,52 @@ function CopyButton({
   )
 }
 
+function CopyHtmlButton({
+  html,
+  plain,
+}: {
+  html: string
+  plain: string
+}) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    try {
+      if ('ClipboardItem' in window) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': new Blob([html], { type: 'text/html' }),
+            'text/plain': new Blob([plain], { type: 'text/plain' }),
+          }),
+        ])
+      } else {
+        await navigator.clipboard.writeText(plain)
+      }
+
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1400)
+    } catch {
+      try {
+        await navigator.clipboard.writeText(plain)
+        setCopied(true)
+        window.setTimeout(() => setCopied(false), 1400)
+      } catch {
+        setCopied(false)
+      }
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="rounded-xl border border-[var(--site-border)] bg-[var(--site-surface)] px-3 py-2 text-xs font-semibold text-[var(--site-text)] transition hover:bg-[var(--site-surface-2)]"
+    >
+      {copied ? 'Copiato' : 'Copia formattato'}
+    </button>
+  )
+}
+
 export default function AiNewsButton() {
   const inputRef = useRef<HTMLInputElement | null>(null)
   const [loading, setLoading] = useState(false)
@@ -232,18 +278,21 @@ export default function AiNewsButton() {
               <p className="theme-admin-faint text-xs uppercase tracking-[0.2em]">
                 Corpo news
               </p>
-              <CopyButton value={generated.plainContent || generated.content} />
+              <div className="flex flex-wrap gap-2">
+                <CopyHtmlButton
+                  html={generated.content}
+                  plain={generated.plainContent || generated.content}
+                />
+                <CopyButton
+                  value={generated.plainContent || generated.content}
+                  label="Copia testo"
+                />
+              </div>
             </div>
-            <div className="max-h-[360px] overflow-auto rounded-xl bg-[var(--site-bg-soft)] p-4 text-sm leading-7 text-[var(--site-text-muted)]">
-              {(generated.plainContent || generated.content)
-                .split('\n')
-                .filter(Boolean)
-                .map((line, index) => (
-                  <p key={`${line.slice(0, 20)}-${index}`} className="mb-3">
-                    {line}
-                  </p>
-                ))}
-            </div>
+            <div
+              className="prose prose-sm max-h-[360px] max-w-none overflow-auto rounded-xl bg-[var(--site-bg-soft)] p-4 leading-7 text-[var(--site-text-muted)] prose-headings:text-[var(--site-text)] prose-p:text-[var(--site-text-muted)] prose-li:text-[var(--site-text-muted)]"
+              dangerouslySetInnerHTML={{ __html: generated.content }}
+            />
           </div>
         </div>
       ) : null}
