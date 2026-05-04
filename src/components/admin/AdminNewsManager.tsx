@@ -5,6 +5,7 @@ import { ChangeEvent, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import RichTextEditor from '@/components/admin/RichTextEditor'
+import AiNewsButton from '@/components/admin/AiNewsButton'
 import {
   createNewsItem,
   createNewsMediaRecord,
@@ -537,6 +538,11 @@ export default function AdminNewsManager({ items, authors }: Props) {
                   {items.filter((item) => item.source_type === 'facebook').length}
                 </p>
               </div>
+            </div>
+
+
+            <div className="mt-5">
+              <AiNewsButton />
             </div>
 
             <div className="mt-5 flex flex-wrap gap-3">

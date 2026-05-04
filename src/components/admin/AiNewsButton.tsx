@@ -1,0 +1,199 @@
+'use client'
+
+import { useRef, useState } from 'react'
+import AiSparklesMark from '@/components/admin/AiSparklesMark'
+
+type GeneratedNews = {
+  title: string
+  brief: string
+  content: string
+  plainContent: string
+  keyPoints: string[]
+}
+
+function CopyButton({
+  value,
+  label = 'Copia',
+}: {
+  value: string
+  label?: string
+}) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1400)
+    } catch {
+      setCopied(false)
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="rounded-xl border border-[var(--site-border)] bg-[var(--site-surface)] px-3 py-2 text-xs font-semibold text-[var(--site-text)] transition hover:bg-[var(--site-surface-2)]"
+    >
+      {copied ? 'Copiato' : label}
+    </button>
+  )
+}
+
+export default function AiNewsButton() {
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+  const [generated, setGenerated] = useState<GeneratedNews | null>(null)
+
+  const openPicker = () => {
+    if (loading) return
+    inputRef.current?.click()
+  }
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setLoading(true)
+    setMessage(null)
+    setGenerated(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/admin/news/ai-from-pdf', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Errore durante l’analisi del PDF.')
+      }
+
+      setGenerated({
+        title: data.title || '',
+        brief: data.brief || '',
+        content: data.content || '',
+        plainContent: data.plainContent || '',
+        keyPoints: Array.isArray(data.keyPoints) ? data.keyPoints : [],
+      })
+
+      setMessage('Bozza news generata. Controlla e copia i testi nel form news.')
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Errore durante l’analisi del PDF.'
+      )
+    } finally {
+      setLoading(false)
+      if (inputRef.current) inputRef.current.value = ''
+    }
+  }
+
+  return (
+    <section className="theme-admin-card rounded-3xl p-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="theme-admin-faint text-xs uppercase tracking-[0.22em]">
+            Assistente editoriale
+          </p>
+          <h3 className="mt-2 text-xl font-semibold text-[var(--site-text)]">
+            Genera una bozza news da PDF
+          </h3>
+          <p className="theme-admin-muted mt-2 max-w-2xl text-sm">
+            Carica un PDF: il sistema legge il testo e prepara titolo, breve
+            descrizione e corpo della news. La pubblicazione resta sempre manuale.
+          </p>
+        </div>
+
+        <div className="flex flex-col items-start gap-2">
+          <input
+            ref={inputRef}
+            type="file"
+            accept="application/pdf,.pdf"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+
+          <button
+            type="button"
+            onClick={openPicker}
+            disabled={loading}
+            className="ai-premium-button inline-flex min-w-[185px] items-center justify-center px-5 py-3 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <span className="ai-premium-button__content">
+              <AiSparklesMark
+                variant="gradient"
+                className="ai-premium-button__icon h-[24px] w-auto shrink-0"
+              />
+              <span className="ai-premium-button__text text-sm font-semibold">
+                {loading ? 'Analisi PDF...' : 'AI News'}
+              </span>
+            </span>
+          </button>
+
+          {message ? (
+            <p className="max-w-xs text-xs leading-5 text-[var(--site-text-muted)]">
+              {message}
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      {generated ? (
+        <div className="mt-5 grid gap-4">
+          <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] p-4">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="theme-admin-faint text-xs uppercase tracking-[0.2em]">
+                Titolo
+              </p>
+              <CopyButton value={generated.title} />
+            </div>
+            <p className="text-base font-semibold text-[var(--site-text)]">
+              {generated.title}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] p-4">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="theme-admin-faint text-xs uppercase tracking-[0.2em]">
+                Brief
+              </p>
+              <CopyButton value={generated.brief} />
+            </div>
+            <p className="text-sm leading-7 text-[var(--site-text-muted)]">
+              {generated.brief}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] p-4">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="theme-admin-faint text-xs uppercase tracking-[0.2em]">
+                Corpo news
+              </p>
+              <CopyButton value={generated.plainContent || generated.content} />
+            </div>
+            <div className="max-h-[360px] overflow-auto rounded-xl bg-[var(--site-bg-soft)] p-4 text-sm leading-7 text-[var(--site-text-muted)]">
+              {(generated.plainContent || generated.content)
+                .split('\n')
+                .filter(Boolean)
+                .map((line, index) => (
+                  <p key={`${line.slice(0, 20)}-${index}`} className="mb-3">
+                    {line}
+                  </p>
+                ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </section>
+  )
+}
