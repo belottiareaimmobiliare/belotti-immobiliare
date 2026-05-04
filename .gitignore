@@ -36,3 +36,5 @@ pnpm-debug.log*
 
 # logs
 *.log
+# Local security/report temp files
+tmp/
