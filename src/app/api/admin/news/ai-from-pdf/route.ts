@@ -1,14 +1,45 @@
 import { NextResponse } from 'next/server'
 import { createRequire } from 'module'
 import { getCurrentAdminProfile } from '@/lib/admin-auth'
+import { createServiceClient } from '@/lib/supabase/service'
 import { generateNewsFromPdfText } from '@/lib/news-ai-free'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const require = createRequire(import.meta.url)
+const NEWS_PDF_BUCKET = 'news-pdfs'
 
 type PdfParseFunction = (buffer: Buffer) => Promise<{ text?: string }>
+
+function slugifyFileName(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 90) || 'news'
+}
+
+function formatRomeDateTime() {
+  const parts = new Intl.DateTimeFormat('it-IT', {
+    timeZone: 'Europe/Rome',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(new Date())
+
+  const get = (type: string) =>
+    parts.find((part) => part.type === type)?.value || '00'
+
+  return `${get('year')}-${get('month')}-${get('day')}_${get('hour')}-${get(
+    'minute'
+  )}`
+}
 
 async function extractPdfText(buffer: Buffer) {
   const pdfParse = require('pdf-parse/lib/pdf-parse.js') as PdfParseFunction
@@ -19,6 +50,63 @@ async function extractPdfText(buffer: Buffer) {
 
   const result = await pdfParse(buffer)
   return result.text || ''
+}
+
+async function ensureNewsPdfBucket() {
+  const service = createServiceClient()
+  const { data: buckets, error: listError } = await service.storage.listBuckets()
+
+  if (listError) {
+    throw new Error(`Errore verifica bucket PDF: ${listError.message}`)
+  }
+
+  const exists = buckets?.some((bucket) => bucket.name === NEWS_PDF_BUCKET)
+
+  if (!exists) {
+    const { error: createError } = await service.storage.createBucket(
+      NEWS_PDF_BUCKET,
+      {
+        public: false,
+        allowedMimeTypes: ['application/pdf'],
+        fileSizeLimit: 10 * 1024 * 1024,
+      }
+    )
+
+    if (createError) {
+      throw new Error(`Errore creazione bucket PDF: ${createError.message}`)
+    }
+  }
+
+  return service
+}
+
+async function savePdfToStorage({
+  buffer,
+  fileName,
+}: {
+  buffer: Buffer
+  fileName: string
+}) {
+  const service = await ensureNewsPdfBucket()
+
+  const { error } = await service.storage
+    .from(NEWS_PDF_BUCKET)
+    .upload(fileName, buffer, {
+      contentType: 'application/pdf',
+      upsert: true,
+    })
+
+  if (error) {
+    throw new Error(`Errore salvataggio PDF: ${error.message}`)
+  }
+}
+
+function buildPublicPdfUrl(request: Request, fileName: string) {
+  const originFromRequest = new URL(request.url).origin
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || originFromRequest
+
+  return `${baseUrl}/pdf/${encodeURIComponent(fileName)}`
 }
 
 export async function GET() {
@@ -85,11 +173,28 @@ export async function POST(request: Request) {
       )
     }
 
-    const generated = generateNewsFromPdfText(extractedText)
+    const generatedBase = generateNewsFromPdfText(extractedText)
+
+    const safeTitle = slugifyFileName(generatedBase.title)
+    const timestamp = formatRomeDateTime()
+    const finalPdfFileName = `${safeTitle}_${timestamp}.pdf`
+    const sourcePdfUrl = buildPublicPdfUrl(request, finalPdfFileName)
+
+    await savePdfToStorage({
+      buffer,
+      fileName: finalPdfFileName,
+    })
+
+    const pdfFooterPlain = `Leggi il PDF completo:\n${sourcePdfUrl}`
+    const pdfFooterHtml = `<p><strong>Leggi il PDF completo:</strong><br><a href="${sourcePdfUrl}">${sourcePdfUrl}</a></p>`
 
     return NextResponse.json({
       ok: true,
-      ...generated,
+      ...generatedBase,
+      sourcePdfUrl,
+      pdfFileName: finalPdfFileName,
+      plainContent: `${generatedBase.plainContent}\n\n${pdfFooterPlain}`,
+      content: `${generatedBase.content}\n${pdfFooterHtml}`,
     })
   } catch (error) {
     console.error('Errore AI News da PDF:', error)

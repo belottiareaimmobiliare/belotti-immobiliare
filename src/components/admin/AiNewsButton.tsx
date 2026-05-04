@@ -9,6 +9,8 @@ type GeneratedNews = {
   content: string
   plainContent: string
   keyPoints: string[]
+  sourcePdfUrl?: string
+  pdfFileName?: string
 }
 
 type ApiResponse = Partial<GeneratedNews> & {
@@ -113,9 +115,13 @@ export default function AiNewsButton() {
         content: data.content || '',
         plainContent: data.plainContent || '',
         keyPoints: Array.isArray(data.keyPoints) ? data.keyPoints : [],
+        sourcePdfUrl: data.sourcePdfUrl || '',
+        pdfFileName: data.pdfFileName || '',
       })
 
-      setMessage('Bozza news generata. Controlla e copia i testi nel form news.')
+      setMessage(
+        'Bozza news generata. Il PDF è stato salvato e il link è stato aggiunto in fondo al testo.'
+      )
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -139,8 +145,8 @@ export default function AiNewsButton() {
             Genera una bozza news da PDF
           </h3>
           <p className="theme-admin-muted mt-2 max-w-2xl text-sm">
-            Carica un PDF: il sistema legge il testo e prepara titolo, breve
-            descrizione e corpo della news. La pubblicazione resta sempre manuale.
+            Carica un PDF: il sistema legge il testo, genera la bozza news,
+            rinomina il file e lo rende disponibile come fonte PDF completa.
           </p>
         </div>
 
@@ -203,6 +209,23 @@ export default function AiNewsButton() {
               {generated.brief}
             </p>
           </div>
+
+          {generated.sourcePdfUrl ? (
+            <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] p-4">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <p className="theme-admin-faint text-xs uppercase tracking-[0.2em]">
+                  PDF salvato
+                </p>
+                <CopyButton value={generated.sourcePdfUrl} />
+              </div>
+              <p className="text-sm font-semibold text-[var(--site-text)]">
+                {generated.pdfFileName}
+              </p>
+              <p className="mt-2 break-all text-sm leading-7 text-[var(--site-text-muted)]">
+                {generated.sourcePdfUrl}
+              </p>
+            </div>
+          ) : null}
 
           <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] p-4">
             <div className="mb-2 flex items-center justify-between gap-3">
