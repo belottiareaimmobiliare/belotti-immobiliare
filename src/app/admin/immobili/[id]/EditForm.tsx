@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { updateProperty, updatePropertyGeocode } from '@/app/admin/immobili/actions'
 import italyLocations from '@/data/italyLocations.json'
 import { analyzePropertyDescription } from '@/lib/propertyDescriptionAnalyzer'
+import AiSparklesMark from '@/components/admin/AiSparklesMark'
 
 type ProvinceItem = { name: string
   code: string
@@ -343,9 +344,12 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                         <button
                           type="button"
                           onClick={handleAnalyzeDescription}
-                          className="rounded-xl border border-sky-300 bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-950 transition hover:bg-sky-200"
+                          className="inline-flex min-w-[210px] items-center justify-center rounded-2xl border border-[#9dd8f7] bg-[#d7f2ff] px-5 py-4 text-sm font-semibold text-[#16324a] shadow-[inset_0_1px_0_rgba(255,255,255,0.65),0_10px_24px_rgba(0,0,0,0.10)] transition hover:-translate-y-[1px] hover:brightness-[0.99]"
                         >
-                          AI analisi descrizione
+                          <span className="inline-flex items-center justify-center gap-2">
+                            <AiSparklesMark className="h-[24px] w-auto shrink-0 text-[#16324a]" />
+                            <span>AI analisi descrizione</span>
+                          </span>
                         </button>
                       </div>
           
@@ -357,16 +361,15 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
           
                       <div className="relative mt-4">
                         {!form.description?.trim() ? (
-                          <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center">
-                            <span
-                              className="select-none text-[96px] font-black uppercase tracking-[0.42em] text-black/20 dark:text-black/25"
+                          <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center overflow-hidden rounded-xl">
+                            <AiSparklesMark
+                              className="h-auto w-[270px] max-w-[74%] select-none text-[#9fb4c6]"
                               style={{
-                                textShadow:
-                                  '0 1px 0 rgba(255,255,255,0.04), 0 -1px 0 rgba(0,0,0,0.42)',
+                                opacity: 0.22,
+                                filter:
+                                  'drop-shadow(0 1px 0 rgba(255,255,255,0.04)) drop-shadow(0 -1px 0 rgba(0,0,0,0.34))',
                               }}
-                            >
-                              IA
-                            </span>
+                            />
                           </div>
                         ) : null}
 
