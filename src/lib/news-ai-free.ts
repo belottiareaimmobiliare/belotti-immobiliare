@@ -608,6 +608,44 @@ function buildSections(bodyText: string) {
   return uniqueSections.slice(0, 4)
 }
 
+
+function makeStrongShortTitle(title: string) {
+  const clean = fixPdfHyphenation(title)
+    .replace(/\s+/g, ' ')
+    .replace(/,$/, '')
+    .trim()
+
+  if (clean.length <= 64) return clean
+
+  const separators = ['. ', ': ', ' - ', ' – ', ', ']
+
+  for (const separator of separators) {
+    const index = clean.indexOf(separator)
+    if (index > 28 && index <= 64) {
+      return clean.slice(0, index).trim()
+    }
+  }
+
+  return clampText(clean, 64)
+}
+
+function makeLightBrief(brief: string, bodyText: string) {
+  const clean = fixPdfHyphenation(brief)
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  if (clean && clean.length <= 210) return clean
+
+  const firstSentence = splitSentences(bodyText)[0]
+
+  if (firstSentence) {
+    return clampText(firstSentence, 210)
+  }
+
+  return clampText(clean || 'Sintesi della notizia con i principali elementi utili per comprendere il tema trattato.', 210)
+}
+
+
 function normalizePdfUrl(value?: string) {
   return value?.trim() || ''
 }
@@ -674,11 +712,11 @@ export function generateNewsFromPdfText(
   }
 
   return {
-    title: fixPdfHyphenation(title),
-    brief: fixPdfHyphenation(brief),
+    title: makeStrongShortTitle(title),
+    brief: makeLightBrief(brief, bodyText),
     content: htmlParts.join('\n'),
     plainContent,
-    keyPoints: keyPoints.map((point) => fixPdfHyphenation(point)),
+    keyPoints: [],
     sourcePdfUrl: sourcePdfUrl || undefined,
   }
 }
