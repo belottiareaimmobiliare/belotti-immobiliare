@@ -1026,3 +1026,48 @@ a[href*="tiktok.com"][title]:hover {
   transform: none;
   filter: grayscale(0.15);
 }
+
+/* === ADMIN SOFT BUTTON HOVER === */
+.theme-admin-soft-hover,
+.theme-admin-button-secondary,
+.theme-admin-card button:not(.ai-premium-button):not(.theme-admin-button-gold):not(.theme-admin-chip-active):not(:disabled),
+.theme-panel button:not(.ai-premium-button):not(.theme-admin-button-gold):not(.theme-admin-chip-active):not(:disabled) {
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    filter 180ms ease;
+}
+
+.theme-admin-soft-hover:hover,
+.theme-admin-soft-hover:focus-visible,
+.theme-admin-button-secondary:hover,
+.theme-admin-button-secondary:focus-visible,
+.theme-admin-card button:not(.ai-premium-button):not(.theme-admin-button-gold):not(.theme-admin-chip-active):not(:disabled):hover,
+.theme-admin-card button:not(.ai-premium-button):not(.theme-admin-button-gold):not(.theme-admin-chip-active):not(:disabled):focus-visible,
+.theme-panel button:not(.ai-premium-button):not(.theme-admin-button-gold):not(.theme-admin-chip-active):not(:disabled):hover,
+.theme-panel button:not(.ai-premium-button):not(.theme-admin-button-gold):not(.theme-admin-chip-active):not(:disabled):focus-visible {
+  background-color: color-mix(in srgb, var(--site-surface) 82%, #d7a735 18%);
+  border-color: color-mix(in srgb, var(--site-border) 48%, #d7a735 52%);
+  color: var(--site-text);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.16),
+    0 10px 24px rgba(120,82,20,0.12);
+}
+
+.theme-admin-soft-hover:active,
+.theme-admin-button-secondary:active,
+.theme-admin-card button:not(.ai-premium-button):not(.theme-admin-button-gold):not(.theme-admin-chip-active):not(:disabled):active,
+.theme-panel button:not(.ai-premium-button):not(.theme-admin-button-gold):not(.theme-admin-chip-active):not(:disabled):active {
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+/* Variante più elegante sui pulsanti piccoli tipo Copia / Apri / filtri */
+.theme-admin-card button:not(.ai-premium-button):not(.theme-admin-button-gold):not(.theme-admin-chip-active):not(:disabled):hover svg,
+.theme-panel button:not(.ai-premium-button):not(.theme-admin-button-gold):not(.theme-admin-chip-active):not(:disabled):hover svg {
+  filter: drop-shadow(0 0 8px rgba(215,167,53,0.18));
+}
