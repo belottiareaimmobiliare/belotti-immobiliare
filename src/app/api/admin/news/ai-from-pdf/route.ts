@@ -1,25 +1,19 @@
 import { NextResponse } from 'next/server'
+import { createRequire } from 'module'
 import { getCurrentAdminProfile } from '@/lib/admin-auth'
 import { generateNewsFromPdfText } from '@/lib/news-ai-free'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+const require = createRequire(import.meta.url)
+
 type PdfParseFunction = (buffer: Buffer) => Promise<{ text?: string }>
 
 async function extractPdfText(buffer: Buffer) {
-  const pdfModule = (await import('pdf-parse')) as unknown as {
-    default?: PdfParseFunction
-  } & PdfParseFunction
+  const pdfParse = require('pdf-parse/lib/pdf-parse.js') as PdfParseFunction
 
-  const pdfParse =
-    typeof pdfModule.default === 'function'
-      ? pdfModule.default
-      : typeof pdfModule === 'function'
-        ? pdfModule
-        : null
-
-  if (!pdfParse) {
+  if (typeof pdfParse !== 'function') {
     throw new Error('Motore PDF non disponibile sul server.')
   }
 
