@@ -910,10 +910,13 @@ function NewsRow({
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false,
+        contentType: file.type,
       })
 
     if (uploadError) {
-      throw uploadError
+      throw new Error(
+        `Errore Supabase Storage: ${uploadError.message || 'upload non riuscito'}`
+      )
     }
 
     const { data } = supabase.storage
@@ -952,14 +955,23 @@ function NewsRow({
       return
     }
 
+    if (file.size > 8 * 1024 * 1024) {
+      alert('Immagine troppo pesante. Carica un file massimo da 8 MB.')
+      return
+    }
+
     try {
       setIsUploadingImage(true)
       const imageUrl = await uploadNewsImage(file)
       await addMediaRecord(imageUrl)
       router.refresh()
     } catch (error) {
-      console.error(error)
-      alert("Errore durante l'upload immagine.")
+      console.error('Errore upload immagine news:', error)
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Errore durante l'upload immagine."
+      )
     } finally {
       setIsUploadingImage(false)
     }

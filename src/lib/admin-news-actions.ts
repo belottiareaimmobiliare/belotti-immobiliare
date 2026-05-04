@@ -247,7 +247,9 @@ export async function createNewsMediaRecord(input: {
 
   if (error) {
     console.error('Errore inserimento immagine news:', error)
-    throw new Error('Errore inserimento immagine news')
+    throw new Error(
+      `Errore inserimento immagine news: ${error.message || 'record non creato'}`
+    )
   }
 
   revalidatePath('/admin/news')
