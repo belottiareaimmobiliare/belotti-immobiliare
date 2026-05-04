@@ -304,7 +304,7 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                           onClick={handleAnalyzeDescription}
                           className="rounded-xl border border-sky-300 bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-950 transition hover:bg-sky-200"
                         >
-                          Analizza descrizione
+                          AI analisi descrizione
                         </button>
                       </div>
           
@@ -314,14 +314,30 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                         </div>
                       )}
           
-                      <textarea
-                        name="description"
-                        placeholder="Descrizione completa dell’immobile"
-                        rows={8}
-                        value={form.description}
-                        onChange={handleChange}
-                        className="theme-admin-input mt-4 w-full rounded-xl px-4 py-3"
-                      />
+                      <div className="relative mt-4">
+                        {!form.description?.trim() ? (
+                          <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center">
+                            <span
+                              className="select-none text-[96px] font-black uppercase tracking-[0.42em] text-black/20 dark:text-black/25"
+                              style={{
+                                textShadow:
+                                  '0 1px 0 rgba(255,255,255,0.04), 0 -1px 0 rgba(0,0,0,0.42)',
+                              }}
+                            >
+                              IA
+                            </span>
+                          </div>
+                        ) : null}
+
+                        <textarea
+                          name="description"
+                          placeholder="Descrizione completa dell’immobile"
+                          rows={8}
+                          value={form.description}
+                          onChange={handleChange}
+                          className="theme-admin-input relative z-10 w-full rounded-xl !bg-transparent px-4 py-3"
+                        />
+                      </div>
                     </div>
 
 
