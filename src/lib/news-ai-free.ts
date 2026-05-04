@@ -11,32 +11,41 @@ type GenerateNewsOptions = {
   sourcePdfUrl?: string
 }
 
+type NewsTopic =
+  | 'closing-editorial'
+  | 'short-rentals'
+  | 'housing-plan'
+  | 'valore-casa'
+  | 'generic'
+
 const NOISE_PATTERNS = [
   /^pagina:/i,
   /^orario bozza:/i,
   /^autore:/i,
   /^l’eco di bergamo$/i,
   /^l'eco di bergamo$/i,
-  /^sabato\s+\d+/i,
-  /^venerdì\s+\d+/i,
-  /^giovedì\s+\d+/i,
-  /^mercoledì\s+\d+/i,
-  /^martedì\s+\d+/i,
-  /^lunedì\s+\d+/i,
-  /^domenica\s+\d+/i,
   /^a cura di/i,
   /^www\./i,
   /^di gianfederico belotti/i,
+  /^di marco offredi/i,
   /^\*direttore/i,
+  /^direttore valore casa/i,
+  /^gianfederico belotti$/i,
   /^claudia lenzini$/i,
   /^lorella ghilardi$/i,
   /^giuliano olivati$/i,
   /^marco tacchini$/i,
+  /^antonello pezzini$/i,
+  /^alessio agliardi$/i,
+  /^carlos de carvalho$/i,
+  /^emilio gramano$/i,
   /^chicercacasa$/i,
   /^spm pubblicità$/i,
   /^il contesto$/i,
   /^punti principali$/i,
+  /^fonte pdf completa$/i,
   /^\d+$/,
+  /^(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\s+\d+/i,
 ]
 
 function fixPdfText(value: string) {
@@ -47,12 +56,10 @@ function fixPdfText(value: string) {
     .replace(/([A-Za-zÀ-ÖØ-öø-ÿ])-\s*\n\s*([A-Za-zÀ-ÖØ-öø-ÿ])/g, '$1$2')
     .replace(/\b([dDlLsScC])\s+[’']\s*/g, '$1’')
     .replace(/\b([dDlLsScC])-\s+[’']\s*/g, '$1’')
-    // rimuove date editoriali/testata tipo: Venerdì 1 Maggio 2026
     .replace(
       /\b(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\s+\d{1,2}\s+[a-zàèéìòù]+\s+\d{4}\s+/gi,
       ''
     )
-    // correzione frequente quando la C iniziale viene persa dal parser PDF
     .replace(/^ari lettori/i, 'Cari lettori')
     .replace(/\bari lettori\b/gi, 'Cari lettori')
     .replace(/\s+([,.;:!?])/g, '$1')
@@ -68,16 +75,46 @@ function normalizeText(input: string) {
     .trim()
 }
 
-function cleanLines(rawText: string) {
-  return normalizeText(rawText)
+function compactLines(rawText: string) {
+  const sourceLines = normalizeText(rawText)
     .split('\n')
     .map((line) => fixPdfText(line.trim()))
-    .filter((line) => {
-      if (!line) return false
-      if (line.length <= 2) return false
-      if (/^[\W_]+$/.test(line)) return false
-      return !NOISE_PATTERNS.some((pattern) => pattern.test(line))
-    })
+    .filter(Boolean)
+
+  const lines: string[] = []
+
+  for (let i = 0; i < sourceLines.length; i += 1) {
+    const line = sourceLines[i]
+    const next = sourceLines[i + 1]
+
+    if (
+      /^[A-ZÀÈÉÌÒÙ]$/.test(line) &&
+      next &&
+      /^[a-zàèéìòù]/.test(next)
+    ) {
+      lines.push(fixPdfText(line + next))
+      i += 1
+      continue
+    }
+
+    lines.push(line)
+  }
+
+  return lines
+}
+
+function isNoiseLine(line: string) {
+  const clean = fixPdfText(line)
+
+  if (!clean) return true
+  if (clean.length <= 2) return true
+  if (/^[\W_]+$/.test(clean)) return true
+
+  return NOISE_PATTERNS.some((pattern) => pattern.test(clean))
+}
+
+function cleanLines(rawText: string) {
+  return compactLines(rawText).filter((line) => !isNoiseLine(line))
 }
 
 function uppercaseRatio(line: string) {
@@ -91,10 +128,10 @@ function uppercaseRatio(line: string) {
 function isHeadlineLine(line: string) {
   const clean = fixPdfText(line)
 
-  if (clean.length < 12 || clean.length > 150) return false
+  if (clean.length < 12 || clean.length > 170) return false
   if (/[a-zàèéìòù]{3,}/.test(clean)) return false
 
-  return uppercaseRatio(clean) >= 0.66 && /[A-ZÀÈÉÌÒÙ]{4,}/.test(clean)
+  return uppercaseRatio(clean) >= 0.64 && /[A-ZÀÈÉÌÒÙ]{4,}/.test(clean)
 }
 
 function titleCase(value: string) {
@@ -103,6 +140,7 @@ function titleCase(value: string) {
     ['dpp', 'DPP'],
     ['cin', 'CIN'],
     ['sca', 'SCA'],
+    ['bim', 'BIM'],
     ['spm', 'SPM'],
   ])
 
@@ -162,11 +200,11 @@ function titleCase(value: string) {
 }
 
 function extractHeadline(lines: string[]) {
-  const headlineLines = lines.filter((line) => isHeadlineLine(line))
+  const candidates = lines.filter((line) => isHeadlineLine(line))
 
-  if (headlineLines.length === 0) return null
+  if (candidates.length === 0) return null
 
-  const joined = headlineLines.slice(-4).join(' ')
+  const joined = candidates.slice(-5).join(' ')
   return titleCase(joined)
 }
 
@@ -209,11 +247,12 @@ function makeBodyText(lines: string[]) {
 
   const startPriority = [
     /cari lettori/i,
-    /il\s+\d{1,2}\s+\w+\s+\d{4}/i,
+    /sta per tornare in edicola/i,
     /negli ultimi anni/i,
-    /a livello europeo/i,
+    /il\s+\d{1,2}\s+\w+\s+\d{4}/i,
     /la commissione europea/i,
     /per la prima volta/i,
+    /a livello europeo/i,
   ]
 
   let startIndex = -1
@@ -228,12 +267,16 @@ function makeBodyText(lines: string[]) {
   return fixPdfText(selected.join(' '))
 }
 
-function detectTopic(bodyText: string) {
-  if (/chi cerca casa|ultima uscita|sospensione|fine lavori|redazionali/i.test(bodyText)) {
+function detectTopic(bodyText: string): NewsTopic {
+  if (/chi cerca casa|ultima uscita|sospensione|fine lavori|120 redazionali/i.test(bodyText)) {
     return 'closing-editorial'
   }
 
-  if (/affitti brevi|locazioni brevi|affitto turistico|case vacanze/i.test(bodyText)) {
+  if (/valore casa&terreni|valore casa|una bussola per l’immobiliare|18 anni|quotazioni|mappe dei valori immobiliari/i.test(bodyText)) {
+    return 'valore-casa'
+  }
+
+  if (/affitti brevi|locazioni brevi|affitto turistico|case vacanze|borghi storici/i.test(bodyText)) {
     return 'short-rentals'
   }
 
@@ -242,14 +285,6 @@ function detectTopic(bodyText: string) {
   }
 
   return 'generic'
-}
-
-function findSentence(bodyText: string, patterns: RegExp[]) {
-  const sentences = splitSentences(bodyText)
-
-  return sentences.find((sentence) =>
-    patterns.some((pattern) => pattern.test(sentence))
-  )
 }
 
 function findSentences(bodyText: string, patterns: RegExp[], max = 3) {
@@ -269,28 +304,31 @@ function findSentences(bodyText: string, patterns: RegExp[], max = 3) {
   return found
 }
 
-function makeStrongTitle(rawTitle: string | null, bodyText: string) {
-  const body = bodyText.toLowerCase()
-  const title = rawTitle ? fixPdfText(rawTitle).replace(/,$/, '') : ''
+function makeStrongTitle(headline: string | null, bodyText: string) {
+  const topic = detectTopic(bodyText)
+  const extracted = headline ? fixPdfText(headline).replace(/,$/, '') : ''
 
-  if (/chi cerca casa|ultima uscita|sospensione|fine lavori/.test(body)) {
+  if (topic === 'closing-editorial') {
     return 'Chi cerca casa: arrivederci, per ora'
   }
 
-  if (/piano europeo|piano casa ue|edilizia abitativa|abitare accessibile/.test(body)) {
+  if (topic === 'valore-casa') {
+    return 'Valore Casa&Terreni: la bussola immobiliare'
+  }
+
+  if (topic === 'short-rentals') {
+    return 'Affitti brevi: nuove regole nei borghi storici'
+  }
+
+  if (topic === 'housing-plan') {
     return 'Piano Casa UE: abitare accessibile'
   }
 
-  if (/affitti brevi|locazioni brevi/.test(body)) {
-    return 'Affitti brevi: nuove regole'
-  }
-
-  if (title && title.length <= 70) return title
-
-  if (title) return clampText(title, 70)
+  if (extracted && extracted.length <= 74) return extracted
+  if (extracted) return clampText(extracted, 74)
 
   const first = splitSentences(bodyText)[0] || 'Aggiornamento immobiliare'
-  return clampText(first.replace(/[.]+$/, ''), 70)
+  return clampText(first.replace(/[.]+$/, ''), 74)
 }
 
 function makeBrief(bodyText: string) {
@@ -298,6 +336,10 @@ function makeBrief(bodyText: string) {
 
   if (topic === 'closing-editorial') {
     return 'L’editoriale «Chi cerca casa» si ferma temporaneamente dopo un percorso settimanale dedicato al mondo della casa e del mercato immobiliare.'
+  }
+
+  if (topic === 'valore-casa') {
+    return 'Torna «Valore Casa&Terreni», il volume che raccoglie analisi, quotazioni e approfondimenti sul mercato immobiliare bergamasco.'
   }
 
   if (topic === 'housing-plan') {
@@ -311,110 +353,110 @@ function makeBrief(bodyText: string) {
   return clampText(splitSentences(bodyText)[0] || 'Sintesi della notizia.', 220)
 }
 
-function buildClosingEditorialSummary(bodyText: string) {
-  const paragraphs: string[] = []
-
-  paragraphs.push(
-    'L’appuntamento editoriale «Chi cerca casa» si sospende per ragioni tecniche, dopo un percorso iniziato a gennaio 2024 e sviluppato attraverso circa 120 redazionali. Settimana dopo settimana, la rubrica ha raccontato il tema della casa nelle sue molte sfaccettature, unendo aspetti pratici, emotivi, tecnici e culturali.'
-  )
-
-  paragraphs.push(
-    'Il filo conduttore del progetto è stato il valore della casa come luogo di vita, memoria e progettualità. Non solo un immobile, quindi, ma uno spazio capace di accogliere storie, relazioni, sogni e scelte importanti.'
-  )
-
-  paragraphs.push(
-    'Nel corso dei mesi, l’editoriale ha coinvolto professionisti, agenti immobiliari, tecnici, associazioni di settore e istituzioni, offrendo ai lettori strumenti utili per orientarsi tra compravendita, locazione, aspetti legali, fiscali e urbanistici. La sospensione viene presentata come un arrivederci, con l’obiettivo di tornare in una veste rinnovata.'
-  )
-
-  return paragraphs.map((paragraph) => fixPdfText(paragraph))
+function buildClosingEditorialSummary() {
+  return [
+    'L’appuntamento editoriale «Chi cerca casa» si sospende per ragioni tecniche, dopo un percorso iniziato a gennaio 2024 e sviluppato attraverso circa 120 redazionali. Settimana dopo settimana, la rubrica ha raccontato il tema della casa nelle sue molte sfaccettature, unendo aspetti pratici, emotivi, tecnici e culturali.',
+    'Il filo conduttore del progetto è stato il valore della casa come luogo di vita, memoria e progettualità. Non solo un immobile, quindi, ma uno spazio capace di accogliere storie, relazioni, sogni e scelte importanti.',
+    'Nel corso dei mesi, l’editoriale ha coinvolto professionisti, agenti immobiliari, tecnici, associazioni di settore e istituzioni, offrendo ai lettori strumenti utili per orientarsi tra compravendita, locazione, aspetti legali, fiscali e urbanistici. La sospensione viene presentata come un arrivederci, con l’obiettivo di tornare in una veste rinnovata.',
+  ].map((paragraph) => fixPdfText(paragraph))
 }
 
-function buildHousingPlanSummary(bodyText: string) {
-  const paragraphs: string[] = []
+function buildValoreCasaSummary(bodyText: string) {
+  const paragraphs = [
+    '«Valore Casa&Terreni» torna come appuntamento editoriale dedicato al mercato immobiliare di Bergamo e provincia. Il volume raccoglie dati, mappe, analisi e racconti sul modo di abitare, mettendo insieme il punto di vista degli operatori e quello di chi vive quotidianamente la casa.',
+    'Il progetto, nato nel 2006 e giunto a un percorso ormai consolidato, si conferma come una bussola per leggere quotazioni, compravendite, locazioni, trasformazioni urbane e nuove esigenze abitative. Al centro resta il valore della casa come bene concreto, investimento e riferimento di sicurezza.',
+    'Accanto ai valori immobiliari aggiornati, il volume affronta temi come rigenerazione urbana, consumo di suolo, qualità dell’abitare, spazi flessibili, contratti di locazione e casi architettonici. Il risultato è una lettura ampia del territorio, utile sia agli addetti ai lavori sia a chi vuole orientarsi nel mercato.',
+  ]
 
-  const plan = findSentences(bodyText, [
-    /commissione europea/i,
-    /piano europeo/i,
-    /edilizia abitativa/i,
-    /prezzi accessibili/i,
-    /svolta storica/i,
-  ], 3)
-
-  if (plan.length > 0) {
-    paragraphs.push(clampText(plan.join(' '), 760))
+  const release = findSentences(bodyText, [/24 dicembre/i, /esce con/i], 1)[0]
+  if (release) {
+    paragraphs[0] = clampText(
+      `Torna in edicola «Valore Casa&Terreni», il volume dedicato al mercato immobiliare di Bergamo e provincia. ${release}`,
+      760
+    )
   }
 
-  const operations = findSentences(bodyText, [
-    /cantieri/i,
-    /ristrutturazioni/i,
-    /passaporto digitale/i,
-    /\bDPP\b/i,
-    /titoli edilizi/i,
-    /urbanistica/i,
-    /burocrazia/i,
-  ], 3)
-
-  if (operations.length > 0) {
-    paragraphs.push(clampText(operations.join(' '), 760))
-  }
-
-  const market = findSentences(bodyText, [
-    /investimenti/i,
-    /edilizia sociale/i,
-    /offerta abitativa/i,
-    /mercato/i,
-    /imprese edili/i,
-    /professionisti tecnici/i,
-  ], 3)
-
-  if (market.length > 0) {
-    paragraphs.push(clampText(market.join(' '), 760))
-  }
-
-  return paragraphs
+  return paragraphs.map((paragraph) => fixPdfText(paragraph))
 }
 
 function buildShortRentalsSummary(bodyText: string) {
   const paragraphs: string[] = []
 
-  const overview = findSentences(bodyText, [
-    /affitti brevi/i,
-    /locazioni brevi/i,
-    /proprietari/i,
-    /piattaforme/i,
-  ], 3)
+  const overview = findSentences(
+    bodyText,
+    [/affitti brevi/i, /locazioni brevi/i, /proprietari/i, /piattaforme/i],
+    3
+  )
 
   if (overview.length > 0) {
     paragraphs.push(clampText(overview.join(' '), 760))
   }
 
-  const rules = findSentences(bodyText, [
-    /regolamento/i,
-    /2024\/1028/i,
-    /20 maggio 2026/i,
-    /trasparenza/i,
-    /registro nazionale/i,
-    /\bCIN\b/i,
-  ], 3)
+  const rules = findSentences(
+    bodyText,
+    [/regolamento/i, /2024\/1028/i, /20 maggio 2026/i, /trasparenza/i, /registro nazionale/i, /\bCIN\b/i],
+    3
+  )
 
   if (rules.length > 0) {
     paragraphs.push(clampText(rules.join(' '), 760))
   }
 
-  const impact = findSentences(bodyText, [
-    /centri storici/i,
-    /borghi storici/i,
-    /stress abitativo/i,
-    /bergamo/i,
-    /operatori/i,
-    /associazioni/i,
-  ], 3)
+  const localImpact = findSentences(
+    bodyText,
+    [/bergamo/i, /borghi storici/i, /agibilità/i, /impianti/i, /associazioni/i, /confedilizia/i, /fiaip/i, /confabitare/i],
+    4
+  )
 
-  if (impact.length > 0) {
-    paragraphs.push(clampText(impact.join(' '), 760))
+  if (localImpact.length > 0) {
+    paragraphs.push(clampText(localImpact.join(' '), 820))
   }
 
-  return paragraphs
+  if (paragraphs.length === 0) {
+    return buildGenericSummary(bodyText)
+  }
+
+  return paragraphs.map((paragraph) => fixPdfText(paragraph)).slice(0, 3)
+}
+
+function buildHousingPlanSummary(bodyText: string) {
+  const paragraphs: string[] = []
+
+  const plan = findSentences(
+    bodyText,
+    [/commissione europea/i, /piano europeo/i, /edilizia abitativa/i, /prezzi accessibili/i, /svolta storica/i],
+    3
+  )
+
+  if (plan.length > 0) {
+    paragraphs.push(clampText(plan.join(' '), 760))
+  }
+
+  const operations = findSentences(
+    bodyText,
+    [/cantieri/i, /ristrutturazioni/i, /passaporto digitale/i, /\bDPP\b/i, /titoli edilizi/i, /urbanistica/i, /burocrazia/i, /BIM/i],
+    4
+  )
+
+  if (operations.length > 0) {
+    paragraphs.push(clampText(operations.join(' '), 820))
+  }
+
+  const market = findSentences(
+    bodyText,
+    [/investimenti/i, /edilizia sociale/i, /offerta abitativa/i, /mercato/i, /imprese edili/i, /professionisti tecnici/i, /micro-imprese/i],
+    4
+  )
+
+  if (market.length > 0) {
+    paragraphs.push(clampText(market.join(' '), 820))
+  }
+
+  if (paragraphs.length === 0) {
+    return buildGenericSummary(bodyText)
+  }
+
+  return paragraphs.map((paragraph) => fixPdfText(paragraph)).slice(0, 3)
 }
 
 function buildGenericSummary(bodyText: string) {
@@ -428,7 +470,7 @@ function buildGenericSummary(bodyText: string) {
     }
   }
 
-  return paragraphs
+  return paragraphs.map((paragraph) => fixPdfText(paragraph))
 }
 
 function buildSummary(bodyText: string) {
@@ -437,16 +479,14 @@ function buildSummary(bodyText: string) {
   let paragraphs: string[] = []
 
   if (topic === 'closing-editorial') {
-    paragraphs = buildClosingEditorialSummary(bodyText)
-  } else if (topic === 'housing-plan') {
-    paragraphs = buildHousingPlanSummary(bodyText)
+    paragraphs = buildClosingEditorialSummary()
+  } else if (topic === 'valore-casa') {
+    paragraphs = buildValoreCasaSummary(bodyText)
   } else if (topic === 'short-rentals') {
     paragraphs = buildShortRentalsSummary(bodyText)
+  } else if (topic === 'housing-plan') {
+    paragraphs = buildHousingPlanSummary(bodyText)
   } else {
-    paragraphs = buildGenericSummary(bodyText)
-  }
-
-  if (paragraphs.length === 0) {
     paragraphs = buildGenericSummary(bodyText)
   }
 
@@ -460,7 +500,7 @@ function buildSummary(bodyText: string) {
       !unique.some(
         (item) =>
           item.toLowerCase() === clean.toLowerCase() ||
-          item.toLowerCase().includes(clean.toLowerCase().slice(0, 80))
+          item.toLowerCase().includes(clean.toLowerCase().slice(0, 100))
       )
     ) {
       unique.push(clean)
