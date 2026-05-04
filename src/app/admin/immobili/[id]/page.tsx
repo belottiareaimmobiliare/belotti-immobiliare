@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import EditForm from './EditForm'
 import PropertyMediaManagerV2 from '@/components/admin/PropertyMediaManagerV2'
+import AiSparklesMark from '@/components/admin/AiSparklesMark'
+import FacebookMiniMark from '@/components/admin/FacebookMiniMark'
 
 export default async function EditPropertyPage({
   params,
@@ -64,11 +66,20 @@ export default async function EditPropertyPage({
           </div>
 
           <Link
-            href={`/admin/immobili/${property.id}/scheda-social`}
-            className="theme-admin-button-primary rounded-2xl px-5 py-3 text-center text-sm font-semibold"
-          >
-            Genera scheda social / vetrina
-          </Link>
+          href={`/admin/immobili/${property.id}/scheda-social`}
+          className="ai-premium-button inline-flex items-center justify-center px-5 py-3"
+        >
+          <span className="ai-premium-button__content">
+            <AiSparklesMark
+              variant="gradient"
+              className="ai-premium-button__icon h-[23px] w-auto shrink-0"
+            />
+            <span className="ai-premium-button__text text-sm font-semibold">
+              social per
+            </span>
+            <FacebookMiniMark className="ai-premium-button__trailing h-6 w-6 shrink-0" />
+          </span>
+        </Link>
         </div>
       </div>
 

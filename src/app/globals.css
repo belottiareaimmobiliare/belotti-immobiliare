@@ -867,3 +867,130 @@ a[href*="tiktok.com"][title]:hover {
   border-color: rgb(56, 189, 248) !important;
   box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
 }
+
+/* === AI PREMIUM BUTTONS === */
+@keyframes ai-premium-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.ai-premium-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(180deg, rgba(29, 34, 44, 0.98) 0%, rgba(13, 17, 23, 0.98) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 10px 26px rgba(0, 0, 0, 0.28);
+  transition:
+    transform 180ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+}
+
+.ai-premium-button::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    #18e0d0 0%,
+    #12cfff 24%,
+    #7c88ff 53%,
+    #e07acf 78%,
+    #18e0d0 100%
+  );
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 220ms ease;
+  z-index: -2;
+}
+
+.ai-premium-button::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(31, 36, 47, 0.96) 0%, rgba(14, 18, 24, 0.98) 100%);
+  z-index: -1;
+}
+
+.ai-premium-button:hover,
+.ai-premium-button:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(137, 196, 255, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 14px 34px rgba(0, 0, 0, 0.34);
+}
+
+.ai-premium-button:hover::before,
+.ai-premium-button:focus-visible::before {
+  opacity: 1;
+  animation: ai-premium-shift 2.8s linear infinite;
+}
+
+.ai-premium-button__content {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.68rem;
+}
+
+.ai-premium-button__icon,
+.ai-premium-button__trailing {
+  transition:
+    transform 180ms ease,
+    filter 220ms ease,
+    opacity 220ms ease;
+}
+
+.ai-premium-button:hover .ai-premium-button__icon,
+.ai-premium-button:focus-visible .ai-premium-button__icon,
+.ai-premium-button:hover .ai-premium-button__trailing,
+.ai-premium-button:focus-visible .ai-premium-button__trailing {
+  transform: scale(1.04);
+  filter: drop-shadow(0 0 10px rgba(115, 197, 255, 0.18));
+}
+
+.ai-premium-button__text {
+  color: #edf5ff;
+  transition: color 220ms ease;
+}
+
+.ai-premium-button:hover .ai-premium-button__text,
+.ai-premium-button:focus-visible .ai-premium-button__text {
+  background-image: linear-gradient(
+    90deg,
+    #18e0d0 0%,
+    #16cfff 24%,
+    #7c88ff 56%,
+    #e07acf 82%,
+    #18e0d0 100%
+  );
+  background-size: 200% 100%;
+  animation: ai-premium-shift 2.8s linear infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.ai-premium-button__meta {
+  color: #b7c4d6;
+  transition: color 220ms ease;
+}
+
+.ai-premium-button:hover .ai-premium-button__meta,
+.ai-premium-button:focus-visible .ai-premium-button__meta {
+  color: #eef5ff;
+}

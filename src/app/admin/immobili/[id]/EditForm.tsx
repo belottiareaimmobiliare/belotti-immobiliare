@@ -72,30 +72,38 @@ type FeatureToggleProps = { label: string
   onClick: () => void
   fullWidth?: boolean }
 
-function FeatureToggle({ label,
+function FeatureToggle({
+  label,
   checked,
   onClick,
-  fullWidth = false, }: FeatureToggleProps) { return (
+  fullWidth = false,
+}: {
+  label: string
+  checked: boolean
+  onClick: () => void
+  fullWidth?: boolean
+}) {
+  return (
     <button
       type="button"
       onClick={onClick}
-      className={`theme-admin-input flex items-center justify-between gap-4 rounded-2xl px-4 py-3 text-left text-sm transition hover:opacity-95 ${ fullWidth ? 'md:col-span-2' : '' }`}
+      className={`theme-admin-input flex items-center justify-between gap-4 rounded-2xl px-4 py-3 text-left text-sm transition hover:opacity-95 ${fullWidth ? 'md:col-span-2' : ''}`}
     >
-      <span className="text-[var(--site-text-soft)]">{label}</span>
-
+      <span className="text-[var(--site-text)]">{label}</span>
       <span
-        className={`relative inline-flex h-7 w-12 shrink-0 rounded-full border transition ${ checked
-            ? 'border-[var(--site-gold)] bg-[var(--site-gold)]'
-            : 'border-[var(--site-border-strong)] bg-[var(--site-surface-2)]' }`}
+        className={`flex h-6 w-11 items-center rounded-full p-1 transition ${
+          checked ? 'bg-sky-300' : 'bg-[var(--site-surface-2)]'
+        }`}
       >
         <span
-          className={`absolute top-1 h-5 w-5 rounded-full border transition ${ checked
-              ? 'left-6 border-[#0b0f17] bg-[#0b0f17] shadow-[0_2px_8px_rgba(0,0,0,0.35)]'
-              : 'left-1 border-[var(--site-border-strong)] bg-[var(--site-bg)] shadow-[0_2px_8px_rgba(0,0,0,0.18)]' }`}
+          className={`h-4 w-4 rounded-full bg-white transition ${
+            checked ? 'translate-x-5' : 'translate-x-0'
+          }`}
         />
       </span>
     </button>
-  ) }
+  )
+}
 
 export default function EditForm({ property }: EditFormProps) { const supabase = createClient()
   const router = useRouter()
@@ -344,11 +352,16 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
                         <button
                           type="button"
                           onClick={handleAnalyzeDescription}
-                          className="inline-flex min-w-[210px] items-center justify-center rounded-2xl border border-[#9dd8f7] bg-[#d7f2ff] px-5 py-4 text-sm font-semibold text-[#16324a] shadow-[inset_0_1px_0_rgba(255,255,255,0.65),0_10px_24px_rgba(0,0,0,0.10)] transition hover:-translate-y-[1px] hover:brightness-[0.99]"
+                          className="ai-premium-button inline-flex min-w-[235px] items-center justify-center px-5 py-4"
                         >
-                          <span className="inline-flex items-center justify-center gap-2">
-                            <AiSparklesMark className="h-[24px] w-auto shrink-0 text-[#16324a]" />
-                            <span>AI analisi descrizione</span>
+                          <span className="ai-premium-button__content">
+                            <AiSparklesMark
+                              variant="gradient"
+                              className="ai-premium-button__icon h-[25px] w-auto shrink-0"
+                            />
+                            <span className="ai-premium-button__text text-sm font-semibold">
+                              AI analisi descrizione
+                            </span>
                           </span>
                         </button>
                       </div>

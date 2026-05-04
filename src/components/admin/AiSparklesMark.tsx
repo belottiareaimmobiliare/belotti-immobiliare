@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import type { CSSProperties } from 'react'
 
 type AiSparklesMarkProps = {
@@ -5,6 +6,7 @@ type AiSparklesMarkProps = {
   style?: CSSProperties
   title?: string
   decorative?: boolean
+  variant?: 'mono' | 'gradient'
 }
 
 export default function AiSparklesMark({
@@ -12,7 +14,11 @@ export default function AiSparklesMark({
   style,
   title = 'AI',
   decorative = true,
+  variant = 'mono',
 }: AiSparklesMarkProps) {
+  const gradientId = useId()
+  const fillValue = variant === 'gradient' ? `url(#${gradientId})` : 'currentColor'
+
   return (
     <svg
       viewBox="0 0 260 170"
@@ -26,11 +32,21 @@ export default function AiSparklesMark({
     >
       {!decorative ? <title>{title}</title> : null}
 
-      <g fill="currentColor">
+      {variant === 'gradient' ? (
+        <defs>
+          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#18E0D0" />
+            <stop offset="35%" stopColor="#14C8FF" />
+            <stop offset="67%" stopColor="#7F7FFF" />
+            <stop offset="100%" stopColor="#E07ACF" />
+          </linearGradient>
+        </defs>
+      ) : null}
+
+      <g fill={fillValue}>
         <path d="M40 8c5.2 21 12.8 28.6 33.8 33.8C52.8 47 45.2 54.6 40 75.6 34.8 54.6 27.2 47 6.2 41.8 27.2 36.6 34.8 29 40 8Z" />
         <path d="M25 75c3.5 14.2 8.5 19.2 22.7 22.7C33.5 101.2 28.5 106.2 25 120.4 21.5 106.2 16.5 101.2 2.3 97.7 16.5 94.2 21.5 89.2 25 75Z" />
         <path d="M54 118c2.4 9.8 5.8 13.2 15.6 15.6-9.8 2.4-13.2 5.8-15.6 15.6-2.4-9.8-5.8-13.2-15.6-15.6 9.8-2.4 13.2-5.8 15.6-15.6Z" />
-
         <path d="M105 30h43.5L187 142h-32.2l-6.8-22.4h-43.6L97.6 142H67L105 30Zm21.8 29.2-14.1 38.9h28.2l-14.1-38.9Z" />
         <path d="M197 30h31v112h-31V30Z" />
       </g>
