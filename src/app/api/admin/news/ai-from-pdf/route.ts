@@ -1,13 +1,25 @@
 import { NextResponse } from 'next/server'
-import { PDFParse } from 'pdf-parse'
 import { getCurrentAdminProfile } from '@/lib/admin-auth'
 import { generateNewsFromPdfText } from '@/lib/news-ai-free'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+type PdfParseModule = {
+  PDFParse?: new (options: { data: Buffer | Uint8Array | ArrayBuffer }) => {
+    getText: () => Promise<{ text?: string }>
+    destroy?: () => Promise<void> | void
+  }
+}
+
 async function extractPdfText(buffer: Buffer) {
-  const parser = new PDFParse({ data: buffer })
+  const pdfModule = (await import('pdf-parse')) as unknown as PdfParseModule
+
+  if (!pdfModule.PDFParse) {
+    throw new Error('Motore PDF non disponibile sul server.')
+  }
+
+  const parser = new pdfModule.PDFParse({ data: buffer })
 
   try {
     const result = await parser.getText()
