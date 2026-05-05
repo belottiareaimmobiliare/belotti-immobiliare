@@ -1446,3 +1446,113 @@ body.dark.is-non-home-route .lead-status-btn-archived:not(:disabled):hover *,
 body.dark.is-non-home-route .lead-status-btn-archived:not(:disabled):focus-visible * {
   color: #111111 !important;
 }
+
+/* === SOCIAL BUTTONS ORBIT EXCLUDE === */
+
+/*
+  I tasti social non devono prendere il bordo oro orbit.
+  Devono restare puliti, tondi, con hover colore piattaforma.
+*/
+body.is-non-home-route a[href*="facebook"],
+body.is-non-home-route a[href*="fb.com"],
+body.is-non-home-route a[href*="instagram"],
+body.is-non-home-route a[href*="tiktok"],
+body.is-non-home-route a[href*="whatsapp"],
+body.is-non-home-route a[href*="wa.me"],
+body.is-non-home-route a[aria-label*="Facebook"],
+body.is-non-home-route a[aria-label*="Instagram"],
+body.is-non-home-route a[aria-label*="TikTok"],
+body.is-non-home-route a[aria-label*="WhatsApp"] {
+  position: relative;
+  isolation: auto;
+  overflow: hidden;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease;
+}
+
+body.is-non-home-route a[href*="facebook"]::before,
+body.is-non-home-route a[href*="fb.com"]::before,
+body.is-non-home-route a[href*="instagram"]::before,
+body.is-non-home-route a[href*="tiktok"]::before,
+body.is-non-home-route a[href*="whatsapp"]::before,
+body.is-non-home-route a[href*="wa.me"]::before,
+body.is-non-home-route a[aria-label*="Facebook"]::before,
+body.is-non-home-route a[aria-label*="Instagram"]::before,
+body.is-non-home-route a[aria-label*="TikTok"]::before,
+body.is-non-home-route a[aria-label*="WhatsApp"]::before {
+  display: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+  background: none !important;
+}
+
+/* Hover social: niente oro, solo colore coerente piattaforma */
+body.is-non-home-route a[href*="facebook"]:hover,
+body.is-non-home-route a[href*="fb.com"]:hover,
+body.is-non-home-route a[aria-label*="Facebook"]:hover,
+body.is-non-home-route a[href*="facebook"]:focus-visible,
+body.is-non-home-route a[href*="fb.com"]:focus-visible,
+body.is-non-home-route a[aria-label*="Facebook"]:focus-visible {
+  transform: translateY(-1px);
+  border-color: #1877f2 !important;
+  background: #1877f2 !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 26px rgba(24, 119, 242, 0.28) !important;
+}
+
+body.is-non-home-route a[href*="instagram"]:hover,
+body.is-non-home-route a[aria-label*="Instagram"]:hover,
+body.is-non-home-route a[href*="instagram"]:focus-visible,
+body.is-non-home-route a[aria-label*="Instagram"]:focus-visible {
+  transform: translateY(-1px);
+  border-color: #e1306c !important;
+  background:
+    radial-gradient(circle at 30% 110%, #feda75 0%, #fa7e1e 25%, #d62976 55%, #962fbf 78%, #4f5bd5 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 26px rgba(225, 48, 108, 0.25) !important;
+}
+
+body.is-non-home-route a[href*="tiktok"]:hover,
+body.is-non-home-route a[aria-label*="TikTok"]:hover,
+body.is-non-home-route a[href*="tiktok"]:focus-visible,
+body.is-non-home-route a[aria-label*="TikTok"]:focus-visible {
+  transform: translateY(-1px);
+  border-color: #25f4ee !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  box-shadow:
+    7px 7px 0 rgba(254, 44, 85, 0.18),
+    -7px -7px 0 rgba(37, 244, 238, 0.16),
+    0 12px 26px rgba(0,0,0,0.22) !important;
+}
+
+body.is-non-home-route a[href*="whatsapp"]:hover,
+body.is-non-home-route a[href*="wa.me"]:hover,
+body.is-non-home-route a[aria-label*="WhatsApp"]:hover,
+body.is-non-home-route a[href*="whatsapp"]:focus-visible,
+body.is-non-home-route a[href*="wa.me"]:focus-visible,
+body.is-non-home-route a[aria-label*="WhatsApp"]:focus-visible {
+  transform: translateY(-1px);
+  border-color: #25d366 !important;
+  background: #25d366 !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 26px rgba(37, 211, 102, 0.25) !important;
+}
+
+body.is-non-home-route a[href*="facebook"]:hover *,
+body.is-non-home-route a[href*="fb.com"]:hover *,
+body.is-non-home-route a[href*="instagram"]:hover *,
+body.is-non-home-route a[href*="tiktok"]:hover *,
+body.is-non-home-route a[href*="whatsapp"]:hover *,
+body.is-non-home-route a[href*="wa.me"]:hover *,
+body.is-non-home-route a[aria-label*="Facebook"]:hover *,
+body.is-non-home-route a[aria-label*="Instagram"]:hover *,
+body.is-non-home-route a[aria-label*="TikTok"]:hover *,
+body.is-non-home-route a[aria-label*="WhatsApp"]:hover * {
+  color: inherit !important;
+}
