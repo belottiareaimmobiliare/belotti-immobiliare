@@ -1280,3 +1280,25 @@ a[href*="tiktok.com"][title]:hover {
     --gold-orbit-angle: 360deg;
   }
 }
+
+/* === PRIMARY BUTTON TEXT CONTRAST FIX === */
+.theme-button-primary,
+.theme-admin-button-primary,
+.theme-admin-button-gold {
+  color: #17120a !important;
+}
+
+.theme-button-primary:hover,
+.theme-button-primary:focus-visible,
+.theme-admin-button-primary:hover,
+.theme-admin-button-primary:focus-visible,
+.theme-admin-button-gold:hover,
+.theme-admin-button-gold:focus-visible {
+  color: #17120a !important;
+}
+
+.theme-button-primary *,
+.theme-admin-button-primary *,
+.theme-admin-button-gold * {
+  color: inherit !important;
+}
