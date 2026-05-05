@@ -16,6 +16,13 @@ type NewsTopic =
   | 'short-rentals'
   | 'housing-plan'
   | 'valore-casa'
+  | 'buying-selling'
+  | 'valuation'
+  | 'mortgages'
+  | 'renovation-energy'
+  | 'urban-planning'
+  | 'traditional-rentals'
+  | 'market-analysis'
   | 'generic'
 
 const NOISE_PATTERNS = [
@@ -87,11 +94,7 @@ function compactLines(rawText: string) {
     const line = sourceLines[i]
     const next = sourceLines[i + 1]
 
-    if (
-      /^[A-ZÀÈÉÌÒÙ]$/.test(line) &&
-      next &&
-      /^[a-zàèéìòù]/.test(next)
-    ) {
+    if (/^[A-ZÀÈÉÌÒÙ]$/.test(line) && next && /^[a-zàèéìòù]/.test(next)) {
       lines.push(fixPdfText(line + next))
       i += 1
       continue
@@ -141,6 +144,10 @@ function titleCase(value: string) {
     ['cin', 'CIN'],
     ['sca', 'SCA'],
     ['bim', 'BIM'],
+    ['imu', 'IMU'],
+    ['tari', 'TARI'],
+    ['iva', 'IVA'],
+    ['ape', 'APE'],
     ['spm', 'SPM'],
   ])
 
@@ -253,6 +260,10 @@ function makeBodyText(lines: string[]) {
     /la commissione europea/i,
     /per la prima volta/i,
     /a livello europeo/i,
+    /comprare casa/i,
+    /vendere casa/i,
+    /valutare un immobile/i,
+    /il mercato immobiliare/i,
   ]
 
   let startIndex = -1
@@ -267,6 +278,12 @@ function makeBodyText(lines: string[]) {
   return fixPdfText(selected.join(' '))
 }
 
+function score(body: string, patterns: Array<[RegExp, number]>) {
+  return patterns.reduce((total, [pattern, points]) => {
+    return total + (pattern.test(body) ? points : 0)
+  }, 0)
+}
+
 function detectTopic(bodyText: string): NewsTopic {
   const body = fixPdfText(bodyText).toLowerCase()
 
@@ -278,40 +295,148 @@ function detectTopic(bodyText: string): NewsTopic {
     return 'valore-casa'
   }
 
-  let housingScore = 0
-  let rentalsScore = 0
-
-  if (/piano casa ue|piano europeo|piano europeo per l’edilizia abitativa/i.test(body)) housingScore += 5
-  if (/edilizia abitativa|abitare accessibile|prezzi accessibili/i.test(body)) housingScore += 4
-  if (/4 pilastri|quattro pilastri|10 azioni|dieci azioni/i.test(body)) housingScore += 3
-  if (/cantieri|ristrutturazioni|passaporto digitale|dpp|bim/i.test(body)) housingScore += 3
-  if (/investimenti|edilizia sociale|housing accessibile|micro-imprese/i.test(body)) housingScore += 3
-  if (/commissione europea|dan jorgensen|antonello pezzini/i.test(body)) housingScore += 2
-
-  if (/affitti brevi|locazioni brevi|affitto turistico|case vacanze/i.test(body)) rentalsScore += 4
-  if (/borghi storici|città alta|orio|bergamo/i.test(body)) rentalsScore += 3
-  if (/regolamento comunale|comune di bergamo|palafrizzoni/i.test(body)) rentalsScore += 3
-  if (/agibilità|s\.c\.a|impianti|visitabilità|parcheggi/i.test(body)) rentalsScore += 3
-  if (/confedilizia|fiaip|confabitare|lorella ghilardi|giuliano olivati|marco tacchini/i.test(body)) rentalsScore += 3
-  if (/airbnb|booking|vrbo|registro nazionale degli affitti brevi|cin|2024\/1028/i.test(body)) rentalsScore += 2
-
-  // Importante: i PDF Piano Casa citano anche gli affitti brevi come terzo pilastro.
-  // Non basta trovare "affitti brevi": deve essere il tema dominante.
-  if (housingScore >= rentalsScore + 3) {
-    return 'housing-plan'
+  const scores: Record<NewsTopic, number> = {
+    'closing-editorial': 0,
+    'short-rentals': score(body, [
+      [/affitti brevi|locazioni brevi|affitto turistico|case vacanze/i, 4],
+      [/borghi storici|città alta|orio|bergamo/i, 3],
+      [/regolamento comunale|comune di bergamo|palafrizzoni/i, 3],
+      [/agibilità|s\.c\.a|impianti|visitabilità|parcheggi/i, 3],
+      [/confedilizia|fiaip|confabitare|lorella ghilardi|giuliano olivati|marco tacchini/i, 3],
+      [/airbnb|booking|vrbo|registro nazionale degli affitti brevi|cin|2024\/1028/i, 2],
+    ]),
+    'housing-plan': score(body, [
+      [/piano casa ue|piano europeo|piano europeo per l’edilizia abitativa/i, 5],
+      [/edilizia abitativa|abitare accessibile|prezzi accessibili/i, 4],
+      [/4 pilastri|quattro pilastri|10 azioni|dieci azioni/i, 3],
+      [/cantieri|ristrutturazioni|passaporto digitale|dpp|bim/i, 3],
+      [/investimenti|edilizia sociale|housing accessibile|micro-imprese/i, 3],
+      [/commissione europea|dan jorgensen|antonello pezzini/i, 2],
+    ]),
+    'valore-casa': 0,
+    'buying-selling': score(body, [
+      [/comprare casa|acquistare casa|vendere casa|compravendita/i, 4],
+      [/rogito|proposta d’acquisto|preliminare|caparra|notaio/i, 4],
+      [/trattativa|documenti|conformità|visura|catasto/i, 3],
+      [/acquirente|venditore|agenzia immobiliare/i, 2],
+    ]),
+    valuation: score(body, [
+      [/valutazione|valutare un immobile|stimare il valore|prezzo corretto/i, 5],
+      [/quotazione|prezzo di mercato|comparabili|zona|posizione/i, 3],
+      [/superficie|stato manutentivo|classe energetica|contesto/i, 3],
+      [/sovrastimare|sottostimare|margine di trattativa/i, 2],
+    ]),
+    mortgages: score(body, [
+      [/mutuo|mutui|tasso fisso|tasso variabile|spread/i, 5],
+      [/bce|euribor|surroga|rata|finanziamento/i, 4],
+      [/credito|banca|istruttoria|loan to value|ltv/i, 3],
+      [/prima casa|agevolazioni prima casa/i, 2],
+    ]),
+    'renovation-energy': score(body, [
+      [/ristrutturazione|riqualificazione|efficientamento|efficienza energetica/i, 5],
+      [/classe energetica|ape|cappotto|impianto|pompa di calore/i, 4],
+      [/bonus|superbonus|ecobonus|detrazione/i, 3],
+      [/sostenibilità|emissioni|energia/i, 2],
+    ]),
+    'urban-planning': score(body, [
+      [/urbanistica|titoli edilizi|permesso di costruire|scia|cila/i, 5],
+      [/agibilità|conformità urbanistica|catastale|sanatoria/i, 4],
+      [/rigenerazione urbana|consumo di suolo|pgt|piano di governo del territorio/i, 3],
+      [/vincoli|destinazione d’uso|cambio d’uso/i, 3],
+    ]),
+    'traditional-rentals': score(body, [
+      [/locazione|affitto|canone|inquilino|proprietario/i, 3],
+      [/canone concordato|contratto 4\+4|contratto 3\+2|cedolare secca/i, 5],
+      [/morosità|sfratto|deposito cauzionale|garanzie/i, 4],
+      [/studenti|lavoratori|famiglie/i, 2],
+    ]),
+    'market-analysis': score(body, [
+      [/mercato immobiliare|prezzi delle case|compravendite|domanda|offerta/i, 4],
+      [/bergamo|provincia|quotazioni|valori immobiliari/i, 3],
+      [/trend|andamento|crescita|calo|stabilità/i, 3],
+      [/residenziale|uffici|negozi|logistica/i, 2],
+    ]),
+    generic: 0,
   }
 
-  if (rentalsScore >= housingScore + 2) {
-    return 'short-rentals'
-  }
+  // I PDF Piano Casa citano anche gli affitti brevi: vince solo se è tema dominante.
+  if (scores['housing-plan'] >= scores['short-rentals'] + 3) return 'housing-plan'
+  if (scores['short-rentals'] >= scores['housing-plan'] + 2) return 'short-rentals'
 
-  if (housingScore >= 6) return 'housing-plan'
-  if (rentalsScore >= 6) return 'short-rentals'
+  const ordered = Object.entries(scores)
+    .filter(([topic]) => topic !== 'generic')
+    .sort((a, b) => b[1] - a[1]) as Array<[NewsTopic, number]>
+
+  const [bestTopic, bestScore] = ordered[0] || ['generic', 0]
+
+  if (bestScore >= 5) return bestTopic
 
   return 'generic'
 }
 
+function makeStrongTitle(headline: string | null, bodyText: string) {
+  const topic = detectTopic(bodyText)
+  const extracted = headline ? fixPdfText(headline).replace(/,$/, '') : ''
 
+  const titles: Record<NewsTopic, string | null> = {
+    'closing-editorial': 'Chi cerca casa: arrivederci, per ora',
+    'valore-casa': 'Valore Casa&Terreni: la bussola immobiliare',
+    'short-rentals': 'Affitti brevi: nuove regole nei borghi storici',
+    'housing-plan': 'Piano Casa UE: abitare accessibile',
+    'buying-selling': 'Comprare o vendere casa: cosa sapere',
+    valuation: 'Valutare casa: il prezzo giusto conta',
+    mortgages: 'Mutui casa: cosa cambia per chi compra',
+    'renovation-energy': 'Casa ed energia: ristrutturare meglio',
+    'urban-planning': 'Urbanistica e casa: regole da conoscere',
+    'traditional-rentals': 'Affitti casa: regole e tutele',
+    'market-analysis': 'Mercato immobiliare: segnali da leggere',
+    generic: null,
+  }
+
+  const fixedTitle = titles[topic]
+  if (fixedTitle) return fixedTitle
+
+  if (extracted && extracted.length <= 74) return extracted
+  if (extracted) return clampText(extracted, 74)
+
+  const first = splitSentences(bodyText)[0] || 'Aggiornamento immobiliare'
+  return clampText(first.replace(/[.]+$/, ''), 74)
+}
+
+function makeBrief(bodyText: string) {
+  const topic = detectTopic(bodyText)
+
+  const briefs: Record<NewsTopic, string | null> = {
+    'closing-editorial':
+      'L’editoriale «Chi cerca casa» si ferma temporaneamente dopo un percorso settimanale dedicato al mondo della casa e del mercato immobiliare.',
+    'valore-casa':
+      'Torna «Valore Casa&Terreni», il volume che raccoglie analisi, quotazioni e approfondimenti sul mercato immobiliare bergamasco.',
+    'short-rentals':
+      'Una sintesi sulle nuove regole per gli affitti brevi, tra trasparenza europea, requisiti locali e ricadute per proprietari e operatori.',
+    'housing-plan':
+      'Una sintesi del Piano europeo per l’edilizia abitativa accessibile e dei suoi effetti su cantieri, ristrutturazioni e mercato.',
+    'buying-selling':
+      'Una guida sintetica per capire meglio passaggi, controlli e attenzioni nella compravendita immobiliare.',
+    valuation:
+      'Un approfondimento sul valore corretto dell’immobile e sugli elementi che incidono davvero sul prezzo.',
+    mortgages:
+      'Un quadro sintetico su mutui, tassi e accesso al credito per chi sta valutando l’acquisto di una casa.',
+    'renovation-energy':
+      'Una panoramica su ristrutturazioni, efficienza energetica e interventi che possono migliorare valore e qualità dell’immobile.',
+    'urban-planning':
+      'Una sintesi su titoli edilizi, conformità e aspetti urbanistici da considerare quando si parla di casa.',
+    'traditional-rentals':
+      'Un riepilogo sulle locazioni abitative, tra canoni, contratti, garanzie e tutele per proprietari e inquilini.',
+    'market-analysis':
+      'Una lettura sintetica dell’andamento immobiliare, con attenzione a prezzi, domanda, offerta e territorio.',
+    generic: null,
+  }
+
+  const fixedBrief = briefs[topic]
+  if (fixedBrief) return fixedBrief
+
+  return clampText(splitSentences(bodyText)[0] || 'Sintesi della notizia.', 220)
+}
 
 function findSentences(bodyText: string, patterns: RegExp[], max = 3) {
   const sentences = splitSentences(bodyText)
@@ -329,59 +454,6 @@ function findSentences(bodyText: string, patterns: RegExp[], max = 3) {
 
   return found
 }
-
-function makeStrongTitle(headline: string | null, bodyText: string) {
-  const topic = detectTopic(bodyText)
-  const extracted = headline ? fixPdfText(headline).replace(/,$/, '') : ''
-
-  if (topic === 'closing-editorial') {
-    return 'Chi cerca casa: arrivederci, per ora'
-  }
-
-  if (topic === 'valore-casa') {
-    return 'Valore Casa&Terreni: la bussola immobiliare'
-  }
-
-  if (topic === 'short-rentals') {
-    return 'Affitti brevi: nuove regole nei borghi storici'
-  }
-
-  if (topic === 'housing-plan') {
-    return 'Piano Casa UE: abitare accessibile'
-  }
-
-  if (extracted && extracted.length <= 74) return extracted
-  if (extracted) return clampText(extracted, 74)
-
-  const first = splitSentences(bodyText)[0] || 'Aggiornamento immobiliare'
-  return clampText(first.replace(/[.]+$/, ''), 74)
-}
-
-
-
-function makeBrief(bodyText: string) {
-  const topic = detectTopic(bodyText)
-
-  if (topic === 'closing-editorial') {
-    return 'L’editoriale «Chi cerca casa» si ferma temporaneamente dopo un percorso settimanale dedicato al mondo della casa e del mercato immobiliare.'
-  }
-
-  if (topic === 'valore-casa') {
-    return 'Torna «Valore Casa&Terreni», il volume che raccoglie analisi, quotazioni e approfondimenti sul mercato immobiliare bergamasco.'
-  }
-
-  if (topic === 'housing-plan') {
-    return 'Una sintesi del Piano europeo per l’edilizia abitativa accessibile e dei suoi effetti su cantieri, ristrutturazioni e mercato.'
-  }
-
-  if (topic === 'short-rentals') {
-    return 'Una sintesi sulle nuove regole per gli affitti brevi, tra trasparenza europea, requisiti locali e ricadute per proprietari e operatori.'
-  }
-
-  return clampText(splitSentences(bodyText)[0] || 'Sintesi della notizia.', 220)
-}
-
-
 
 function buildClosingEditorialSummary() {
   return [
@@ -429,19 +501,60 @@ function buildShortRentalsSummary(bodyText: string) {
   return paragraphs.map((paragraph) => fixPdfText(paragraph))
 }
 
-
-
-function buildHousingPlanSummary(bodyText: string) {
-  const paragraphs = [
+function buildHousingPlanSummary() {
+  return [
     'Il Piano Casa UE segna un cambio di passo sul tema dell’abitare accessibile, portando la crisi abitativa al centro dell’agenda europea. L’obiettivo è aumentare l’offerta di alloggi, sostenere nuove costruzioni e ristrutturazioni e ridurre gli ostacoli che frenano il mercato.',
     'Il piano si muove su più fronti: semplificazione dei titoli edilizi, digitalizzazione dei processi, passaporto digitale dei prodotti da costruzione, uso di strumenti come BIM e intelligenza artificiale, oltre a nuove modalità di coordinamento tra Unione Europea, Stati, Regioni e città.',
     'Per imprese edili, progettisti e operatori immobiliari si apre una fase di trasformazione concreta. Gli investimenti pubblici e privati, l’edilizia sociale, la riqualificazione dell’esistente e l’innovazione dei cantieri diventeranno elementi centrali per restare competitivi nei prossimi anni.',
-  ]
-
-  return paragraphs.map((paragraph) => fixPdfText(paragraph))
+  ].map((paragraph) => fixPdfText(paragraph))
 }
 
+function buildTemplateSummary(topic: NewsTopic) {
+  const templates: Record<NewsTopic, string[] | null> = {
+    'closing-editorial': null,
+    'valore-casa': null,
+    'short-rentals': null,
+    'housing-plan': null,
+    'buying-selling': [
+      'La compravendita immobiliare richiede attenzione fin dalle prime fasi, perché prezzo, documenti, condizioni dell’immobile e tempi dell’operazione incidono sulla qualità della scelta. Una lettura corretta evita decisioni affrettate e riduce il rischio di imprevisti.',
+      'Per chi compra, è importante verificare non solo le caratteristiche apparenti della casa, ma anche conformità, situazione catastale, spese, stato manutentivo e contesto. Per chi vende, una presentazione corretta e una valutazione realistica aiutano a intercettare interlocutori realmente interessati.',
+      'Il ruolo dell’agenzia diventa centrale nel coordinare informazioni, trattativa e passaggi operativi, accompagnando le parti verso una decisione più consapevole e sostenibile.',
+    ],
+    valuation: [
+      'La valutazione di un immobile non dipende da un solo elemento, ma dall’equilibrio tra posizione, stato dell’abitazione, superficie, caratteristiche interne, contesto e andamento reale della domanda. Un prezzo corretto nasce da una lettura concreta del mercato.',
+      'Sovrastimare un immobile può allungare i tempi di vendita e ridurre l’interesse dei potenziali acquirenti, mentre sottostimarlo rischia di penalizzare il proprietario. Per questo è importante distinguere tra valore percepito e valore effettivamente sostenibile dal mercato.',
+      'Una valutazione ben costruita permette di impostare una strategia più credibile, migliorare la qualità delle visite e affrontare la trattativa con maggiore consapevolezza.',
+    ],
+    mortgages: [
+      'Mutui, tassi e accesso al credito restano elementi decisivi per chi vuole acquistare casa. Le condizioni proposte dagli istituti bancari incidono direttamente sulla capacità di spesa delle famiglie e sulla scelta dell’immobile.',
+      'La valutazione della rata, della durata, del tipo di tasso e delle garanzie richieste deve essere affrontata prima di avviare una trattativa, così da evitare squilibri tra desiderio di acquisto e sostenibilità economica.',
+      'Un corretto inquadramento finanziario aiuta a cercare immobili coerenti con il proprio profilo, rendendo il percorso di acquisto più ordinato e realistico.',
+    ],
+    'renovation-energy': [
+      'Ristrutturazione ed efficienza energetica sono sempre più centrali nel valore di un immobile. Interventi ben progettati possono migliorare comfort, consumi, qualità abitativa e attrattività sul mercato.',
+      'La scelta delle opere deve tenere insieme aspetti tecnici, costi, tempi, normative e benefici reali. Classe energetica, impianti, isolamento e materiali incidono sia sull’uso quotidiano della casa sia sulla sua futura rivendibilità.',
+      'Per proprietari e acquirenti diventa quindi importante valutare gli interventi non come semplici lavori, ma come parte di una strategia complessiva sul valore dell’immobile.',
+    ],
+    'urban-planning': [
+      'Gli aspetti urbanistici e documentali sono una parte essenziale di ogni operazione immobiliare. Titoli edilizi, conformità, agibilità e destinazione d’uso possono incidere in modo decisivo sulla sicurezza della compravendita.',
+      'Una verifica preventiva consente di individuare eventuali criticità prima che diventino ostacoli nella trattativa o nel percorso verso il rogito. Questo vale soprattutto per immobili datati, ristrutturati nel tempo o inseriti in contesti complessi.',
+      'Affrontare questi controlli con metodo permette di tutelare venditore e acquirente, rendendo l’operazione più trasparente e gestibile.',
+    ],
+    'traditional-rentals': [
+      'Il mercato delle locazioni richiede un equilibrio tra esigenze dei proprietari e bisogni degli inquilini. Canoni, durata del contratto, garanzie e sostenibilità economica sono elementi che incidono sulla stabilità del rapporto.',
+      'Contratti corretti e condizioni chiare aiutano a ridurre incomprensioni e rischi, soprattutto in una fase in cui la domanda abitativa resta forte e l’offerta disponibile non sempre risponde alle necessità delle famiglie e dei lavoratori.',
+      'Una gestione attenta della locazione permette di valorizzare l’immobile e, allo stesso tempo, costruire rapporti più solidi e trasparenti tra le parti.',
+    ],
+    'market-analysis': [
+      'Il mercato immobiliare va letto attraverso più segnali: andamento dei prezzi, domanda, offerta, tempi di vendita, tipologia degli immobili richiesti e caratteristiche del territorio. Solo una visione complessiva consente di interpretare correttamente le tendenze.',
+      'Bergamo e la provincia presentano dinamiche differenziate, con zone più richieste, aree in trasformazione e segmenti che rispondono in modo diverso alle esigenze di famiglie, investitori e operatori.',
+      'Per chi compra, vende o investe, una lettura aggiornata del mercato aiuta a prendere decisioni più consapevoli e a impostare strategie coerenti con il contesto reale.',
+    ],
+    generic: null,
+  }
 
+  return templates[topic]?.map((paragraph) => fixPdfText(paragraph)) || []
+}
 
 function buildGenericSummary(bodyText: string) {
   const sentences = splitSentences(bodyText)
@@ -469,8 +582,12 @@ function buildSummary(bodyText: string) {
   } else if (topic === 'short-rentals') {
     paragraphs = buildShortRentalsSummary(bodyText)
   } else if (topic === 'housing-plan') {
-    paragraphs = buildHousingPlanSummary(bodyText)
+    paragraphs = buildHousingPlanSummary()
   } else {
+    paragraphs = buildTemplateSummary(topic)
+  }
+
+  if (paragraphs.length === 0) {
     paragraphs = buildGenericSummary(bodyText)
   }
 
