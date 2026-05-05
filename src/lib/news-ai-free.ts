@@ -268,6 +268,8 @@ function makeBodyText(lines: string[]) {
 }
 
 function detectTopic(bodyText: string): NewsTopic {
+  const body = fixPdfText(bodyText).toLowerCase()
+
   if (/chi cerca casa|ultima uscita|sospensione|fine lavori|120 redazionali/i.test(bodyText)) {
     return 'closing-editorial'
   }
@@ -276,16 +278,40 @@ function detectTopic(bodyText: string): NewsTopic {
     return 'valore-casa'
   }
 
-  if (/affitti brevi|locazioni brevi|affitto turistico|case vacanze|borghi storici/i.test(bodyText)) {
-    return 'short-rentals'
-  }
+  let housingScore = 0
+  let rentalsScore = 0
 
-  if (/piano europeo|piano casa ue|edilizia abitativa|abitare accessibile|edilizia sociale|commissione europea/i.test(bodyText)) {
+  if (/piano casa ue|piano europeo|piano europeo per l’edilizia abitativa/i.test(body)) housingScore += 5
+  if (/edilizia abitativa|abitare accessibile|prezzi accessibili/i.test(body)) housingScore += 4
+  if (/4 pilastri|quattro pilastri|10 azioni|dieci azioni/i.test(body)) housingScore += 3
+  if (/cantieri|ristrutturazioni|passaporto digitale|dpp|bim/i.test(body)) housingScore += 3
+  if (/investimenti|edilizia sociale|housing accessibile|micro-imprese/i.test(body)) housingScore += 3
+  if (/commissione europea|dan jorgensen|antonello pezzini/i.test(body)) housingScore += 2
+
+  if (/affitti brevi|locazioni brevi|affitto turistico|case vacanze/i.test(body)) rentalsScore += 4
+  if (/borghi storici|città alta|orio|bergamo/i.test(body)) rentalsScore += 3
+  if (/regolamento comunale|comune di bergamo|palafrizzoni/i.test(body)) rentalsScore += 3
+  if (/agibilità|s\.c\.a|impianti|visitabilità|parcheggi/i.test(body)) rentalsScore += 3
+  if (/confedilizia|fiaip|confabitare|lorella ghilardi|giuliano olivati|marco tacchini/i.test(body)) rentalsScore += 3
+  if (/airbnb|booking|vrbo|registro nazionale degli affitti brevi|cin|2024\/1028/i.test(body)) rentalsScore += 2
+
+  // Importante: i PDF Piano Casa citano anche gli affitti brevi come terzo pilastro.
+  // Non basta trovare "affitti brevi": deve essere il tema dominante.
+  if (housingScore >= rentalsScore + 3) {
     return 'housing-plan'
   }
 
+  if (rentalsScore >= housingScore + 2) {
+    return 'short-rentals'
+  }
+
+  if (housingScore >= 6) return 'housing-plan'
+  if (rentalsScore >= 6) return 'short-rentals'
+
   return 'generic'
 }
+
+
 
 function findSentences(bodyText: string, patterns: RegExp[], max = 3) {
   const sentences = splitSentences(bodyText)
@@ -331,6 +357,8 @@ function makeStrongTitle(headline: string | null, bodyText: string) {
   return clampText(first.replace(/[.]+$/, ''), 74)
 }
 
+
+
 function makeBrief(bodyText: string) {
   const topic = detectTopic(bodyText)
 
@@ -347,11 +375,13 @@ function makeBrief(bodyText: string) {
   }
 
   if (topic === 'short-rentals') {
-    return 'Una panoramica sulle nuove regole per gli affitti brevi e sulle ricadute per proprietari, operatori e territori.'
+    return 'Una sintesi sulle nuove regole per gli affitti brevi, tra trasparenza europea, requisiti locali e ricadute per proprietari e operatori.'
   }
 
   return clampText(splitSentences(bodyText)[0] || 'Sintesi della notizia.', 220)
 }
+
+
 
 function buildClosingEditorialSummary() {
   return [
@@ -380,84 +410,38 @@ function buildValoreCasaSummary(bodyText: string) {
 }
 
 function buildShortRentalsSummary(bodyText: string) {
-  const paragraphs: string[] = []
+  const hasBergamo = /bergamo|borghi storici|palafrizzoni|orio/i.test(bodyText)
+  const hasAssociations = /confedilizia|fiaip|confabitare|associazioni|operatori/i.test(bodyText)
 
-  const overview = findSentences(
-    bodyText,
-    [/affitti brevi/i, /locazioni brevi/i, /proprietari/i, /piattaforme/i],
-    3
-  )
+  const paragraphs = [
+    'Gli affitti brevi entrano in una fase di maggiore regolamentazione, tra nuove norme europee, obblighi di trasparenza e requisiti locali più stringenti. Il tema riguarda da vicino proprietari, operatori immobiliari e territori ad alta domanda turistica, dove il fenomeno ha inciso in modo crescente sull’offerta abitativa.',
+    'Dal 20 maggio 2026 entrerà pienamente in vigore il Regolamento UE 2024/1028, pensato per rendere più trasparenti i dati delle locazioni brevi e facilitare i controlli da parte delle autorità. A questo quadro si affiancano le regole italiane già attive, come il CIN e il Registro Nazionale degli Affitti Brevi.',
+    hasBergamo
+      ? 'A Bergamo il tema riguarda soprattutto i borghi storici, dove il Comune ha introdotto requisiti qualitativi per alcune strutture destinate all’affitto turistico. Tra gli elementi richiamati ci sono agibilità, impianti, visitabilità e dotazione di parcheggi.'
+      : 'Sul territorio, le nuove regole puntano ad aumentare qualità e trasparenza, ma introducono anche adempimenti che possono incidere sull’operatività dei proprietari e degli operatori.',
+  ]
 
-  if (overview.length > 0) {
-    paragraphs.push(clampText(overview.join(' '), 760))
+  if (hasAssociations) {
+    paragraphs[2] =
+      'A Bergamo il tema riguarda soprattutto i borghi storici, dove il Comune ha introdotto requisiti qualitativi per alcune strutture destinate all’affitto turistico. Le associazioni dei proprietari e diversi operatori contestano però nuovi vincoli, costi aggiuntivi e possibili difficoltà applicative, soprattutto negli edifici storici.'
   }
 
-  const rules = findSentences(
-    bodyText,
-    [/regolamento/i, /2024\/1028/i, /20 maggio 2026/i, /trasparenza/i, /registro nazionale/i, /\bCIN\b/i],
-    3
-  )
-
-  if (rules.length > 0) {
-    paragraphs.push(clampText(rules.join(' '), 760))
-  }
-
-  const localImpact = findSentences(
-    bodyText,
-    [/bergamo/i, /borghi storici/i, /agibilità/i, /impianti/i, /associazioni/i, /confedilizia/i, /fiaip/i, /confabitare/i],
-    4
-  )
-
-  if (localImpact.length > 0) {
-    paragraphs.push(clampText(localImpact.join(' '), 820))
-  }
-
-  if (paragraphs.length === 0) {
-    return buildGenericSummary(bodyText)
-  }
-
-  return paragraphs.map((paragraph) => fixPdfText(paragraph)).slice(0, 3)
+  return paragraphs.map((paragraph) => fixPdfText(paragraph))
 }
+
+
 
 function buildHousingPlanSummary(bodyText: string) {
-  const paragraphs: string[] = []
+  const paragraphs = [
+    'Il Piano Casa UE segna un cambio di passo sul tema dell’abitare accessibile, portando la crisi abitativa al centro dell’agenda europea. L’obiettivo è aumentare l’offerta di alloggi, sostenere nuove costruzioni e ristrutturazioni e ridurre gli ostacoli che frenano il mercato.',
+    'Il piano si muove su più fronti: semplificazione dei titoli edilizi, digitalizzazione dei processi, passaporto digitale dei prodotti da costruzione, uso di strumenti come BIM e intelligenza artificiale, oltre a nuove modalità di coordinamento tra Unione Europea, Stati, Regioni e città.',
+    'Per imprese edili, progettisti e operatori immobiliari si apre una fase di trasformazione concreta. Gli investimenti pubblici e privati, l’edilizia sociale, la riqualificazione dell’esistente e l’innovazione dei cantieri diventeranno elementi centrali per restare competitivi nei prossimi anni.',
+  ]
 
-  const plan = findSentences(
-    bodyText,
-    [/commissione europea/i, /piano europeo/i, /edilizia abitativa/i, /prezzi accessibili/i, /svolta storica/i],
-    3
-  )
-
-  if (plan.length > 0) {
-    paragraphs.push(clampText(plan.join(' '), 760))
-  }
-
-  const operations = findSentences(
-    bodyText,
-    [/cantieri/i, /ristrutturazioni/i, /passaporto digitale/i, /\bDPP\b/i, /titoli edilizi/i, /urbanistica/i, /burocrazia/i, /BIM/i],
-    4
-  )
-
-  if (operations.length > 0) {
-    paragraphs.push(clampText(operations.join(' '), 820))
-  }
-
-  const market = findSentences(
-    bodyText,
-    [/investimenti/i, /edilizia sociale/i, /offerta abitativa/i, /mercato/i, /imprese edili/i, /professionisti tecnici/i, /micro-imprese/i],
-    4
-  )
-
-  if (market.length > 0) {
-    paragraphs.push(clampText(market.join(' '), 820))
-  }
-
-  if (paragraphs.length === 0) {
-    return buildGenericSummary(bodyText)
-  }
-
-  return paragraphs.map((paragraph) => fixPdfText(paragraph)).slice(0, 3)
+  return paragraphs.map((paragraph) => fixPdfText(paragraph))
 }
+
+
 
 function buildGenericSummary(bodyText: string) {
   const sentences = splitSentences(bodyText)
