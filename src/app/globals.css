@@ -1556,3 +1556,109 @@ body.is-non-home-route a[aria-label*="TikTok"]:hover *,
 body.is-non-home-route a[aria-label*="WhatsApp"]:hover * {
   color: inherit !important;
 }
+
+/* === PUBLIC NON HOME FILTER MAP BUTTON ORBIT === */
+
+/*
+  Estende l'effetto oro orbit ai bottoni pubblici fuori Home:
+  - filtri ricerca immobili
+  - vendita / affitto
+  - seleziona comuni
+  - disegna area su mappa
+  - altri bottoni testuali simili
+
+  Esclude:
+  - Home
+  - social
+  - controlli Leaflet + / -
+  - bottoni stato colorati
+  - AI buttons
+*/
+body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out),
+body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn),
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]) {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    filter 180ms ease;
+  will-change: transform;
+}
+
+body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out)::before,
+body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn)::before,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"])::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  padding: 1.5px;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    conic-gradient(
+      from var(--button-orbit-angle, 0deg),
+      transparent 0deg,
+      transparent 235deg,
+      rgba(255, 255, 255, 0.96) 265deg,
+      rgba(248, 226, 148, 0.98) 292deg,
+      rgba(215, 167, 53, 1) 318deg,
+      transparent 350deg,
+      transparent 360deg
+    );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: button-orbit-spin 1.45s linear infinite;
+  transition: opacity 180ms ease;
+}
+
+body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):hover,
+body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):focus-visible,
+body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn):hover,
+body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn):focus-visible,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):hover,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):focus-visible {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--site-border) 30%, #d7a735 70%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    0 12px 28px rgba(120,82,20,0.16);
+}
+
+body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):hover::before,
+body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):focus-visible::before,
+body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn):hover::before,
+body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn):focus-visible::before,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):hover::before,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):focus-visible::before {
+  opacity: 1;
+}
+
+/* Evita che il bordo orbit copra il testo */
+body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out) > *,
+body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn) > *,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn) > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* I controlli zoom della mappa restano puliti */
+body.is-non-home-route .leaflet-control-zoom a,
+body.is-non-home-route .leaflet-control-zoom button {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+body.is-non-home-route .leaflet-control-zoom a::before,
+body.is-non-home-route .leaflet-control-zoom button::before {
+  display: none !important;
+}
