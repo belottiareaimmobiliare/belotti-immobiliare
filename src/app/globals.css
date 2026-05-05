@@ -1694,3 +1694,44 @@ body.is-map-area-route [aria-label*="WhatsApp"],
 body.is-map-area-route [aria-label*="whatsapp"] {
   display: none !important;
 }
+
+/* === WHATSAPP FLOATING POSITION FIX === */
+
+/*
+  Widget WhatsApp:
+  - sempre ancorato in basso a destra
+  - sopra i contenuti normali
+  - nascosto solo nella mappa espansa /immobili/mappa-area
+*/
+.site-whatsapp-floating {
+  position: fixed !important;
+  right: max(1rem, env(safe-area-inset-right)) !important;
+  left: auto !important;
+  bottom: max(1rem, env(safe-area-inset-bottom)) !important;
+  top: auto !important;
+  z-index: 70 !important;
+}
+
+/* Mobile: resta in basso a destra, leggermente più compatto */
+@media (max-width: 640px) {
+  .site-whatsapp-floating {
+    right: max(0.85rem, env(safe-area-inset-right)) !important;
+    bottom: max(0.85rem, env(safe-area-inset-bottom)) !important;
+    left: auto !important;
+    top: auto !important;
+  }
+}
+
+/* Solo nella mappa espansa deve sparire */
+body.is-map-area-route .site-whatsapp-floating {
+  display: none !important;
+}
+
+/* Regola di sicurezza: se un link WhatsApp floating ha ancora classi left, lo forziamo a destra */
+body:not(.is-map-area-route) a.site-whatsapp-floating,
+body:not(.is-map-area-route) [class*="site-whatsapp-floating"] {
+  right: max(1rem, env(safe-area-inset-right)) !important;
+  left: auto !important;
+  bottom: max(1rem, env(safe-area-inset-bottom)) !important;
+  top: auto !important;
+}
