@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic'
 
 type Property = {
   id: string
+  slug: string | null
   title: string | null
   comune: string | null
   province: string | null
@@ -104,6 +105,25 @@ export default async function AdminExportsPage() {
                   <p className="theme-admin-muted mt-2 text-sm">
                     {property.comune || '—'} ({property.province || '—'})
                   </p>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {property.slug ? (
+                      <Link
+                        href={`/immobili/${property.slug}`}
+                        target="_blank"
+                        className="theme-admin-button-primary inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold"
+                      >
+                        Apri scheda pubblica
+                      </Link>
+                    ) : null}
+
+                    <Link
+                      href={`/admin/immobili/${property.id}`}
+                      className="inline-flex items-center justify-center rounded-xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-2 text-sm font-semibold text-[var(--site-text)] transition hover:border-[#d7a735] hover:bg-[color:color-mix(in_srgb,var(--site-surface)_86%,#d7a735_14%)]"
+                    >
+                      Modifica immobile
+                    </Link>
+                  </div>
                 </div>
 
                 <p className="text-xl font-semibold">{formatPrice(property.price)}</p>
