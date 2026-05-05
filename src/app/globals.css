@@ -1662,3 +1662,18 @@ body.is-non-home-route .leaflet-control-zoom a::before,
 body.is-non-home-route .leaflet-control-zoom button::before {
   display: none !important;
 }
+
+/* === HIDE WHATSAPP ON FULL MAP PAGE === */
+
+/*
+  Nella mappa espansa il widget WhatsApp copre i controlli e la UI.
+  Lo nascondiamo solo su /immobili/mappa-area.
+*/
+body.is-map-area-route a[href*="whatsapp"],
+body.is-map-area-route a[href*="wa.me"],
+body.is-map-area-route [class*="WhatsApp"],
+body.is-map-area-route [class*="whatsapp"],
+body.is-map-area-route [aria-label*="WhatsApp"],
+body.is-map-area-route [aria-label*="whatsapp"] {
+  display: none !important;
+}
