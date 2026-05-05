@@ -69,10 +69,22 @@ async function getAvailableNewsSlug(
       return candidate
     }
 
-    const stamp = new Date()
-      .toISOString()
-      .replace(/\D/g, '')
-      .slice(0, 12)
+    const stampParts = new Intl.DateTimeFormat('it-IT', {
+      timeZone: 'Europe/Rome',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).formatToParts(new Date())
+
+    const getPart = (type: string) =>
+      stampParts.find((part) => part.type === type)?.value || '00'
+
+    const stamp = `${getPart('year')}${getPart('month')}${getPart(
+      'day'
+    )}${getPart('hour')}${getPart('minute')}`
 
     candidate =
       attempt === 0
