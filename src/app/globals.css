@@ -1212,3 +1212,71 @@ a[href*="tiktok.com"][title]:hover {
 .theme-panel a:not(.ai-premium-button):not(.theme-admin-button-gold):active {
   transform: translateY(0);
 }
+
+/* === GOLD ORBIT BORDER HOVER === */
+@property --gold-orbit-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.theme-admin-button-primary,
+.theme-button-primary,
+.theme-admin-button-gold,
+.theme-admin-button-secondary,
+.theme-button-secondary {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.theme-admin-button-primary::before,
+.theme-button-primary::before,
+.theme-admin-button-gold::before,
+.theme-admin-button-secondary::before,
+.theme-button-secondary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    conic-gradient(
+      from var(--gold-orbit-angle),
+      transparent 0deg,
+      transparent 245deg,
+      rgba(255, 255, 255, 0.95) 275deg,
+      rgba(242, 211, 122, 0.95) 292deg,
+      rgba(215, 167, 53, 0.95) 314deg,
+      transparent 350deg,
+      transparent 360deg
+    );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: gold-orbit-spin 1.45s linear infinite;
+  transition: opacity 180ms ease;
+}
+
+.theme-admin-button-primary:hover::before,
+.theme-admin-button-primary:focus-visible::before,
+.theme-button-primary:hover::before,
+.theme-button-primary:focus-visible::before,
+.theme-admin-button-gold:hover::before,
+.theme-admin-button-gold:focus-visible::before,
+.theme-admin-button-secondary:hover::before,
+.theme-admin-button-secondary:focus-visible::before,
+.theme-button-secondary:hover::before,
+.theme-button-secondary:focus-visible::before {
+  opacity: 1;
+}
+
+@keyframes gold-orbit-spin {
+  to {
+    --gold-orbit-angle: 360deg;
+  }
+}
