@@ -1421,3 +1421,28 @@ body.is-non-home-route .lead-status-btn-archived:not(:disabled):focus-visible {
   filter: brightness(1.14);
   box-shadow: 0 10px 22px rgba(0,0,0,0.16);
 }
+
+/* === DARK MODE ARCHIVED BUTTON HOVER FIX === */
+html.dark body.is-non-home-route .lead-status-btn-archived:not(:disabled):hover,
+html.dark body.is-non-home-route .lead-status-btn-archived:not(:disabled):focus-visible,
+[data-theme="dark"] body.is-non-home-route .lead-status-btn-archived:not(:disabled):hover,
+[data-theme="dark"] body.is-non-home-route .lead-status-btn-archived:not(:disabled):focus-visible,
+body.dark.is-non-home-route .lead-status-btn-archived:not(:disabled):hover,
+body.dark.is-non-home-route .lead-status-btn-archived:not(:disabled):focus-visible {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+  color: #111111 !important;
+  filter: none !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 12px 26px rgba(0,0,0,0.22) !important;
+}
+
+html.dark body.is-non-home-route .lead-status-btn-archived:not(:disabled):hover *,
+html.dark body.is-non-home-route .lead-status-btn-archived:not(:disabled):focus-visible *,
+[data-theme="dark"] body.is-non-home-route .lead-status-btn-archived:not(:disabled):hover *,
+[data-theme="dark"] body.is-non-home-route .lead-status-btn-archived:not(:disabled):focus-visible *,
+body.dark.is-non-home-route .lead-status-btn-archived:not(:disabled):hover *,
+body.dark.is-non-home-route .lead-status-btn-archived:not(:disabled):focus-visible * {
+  color: #111111 !important;
+}
