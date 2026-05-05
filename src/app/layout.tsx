@@ -4,6 +4,7 @@ import './globals.css'
 import CookieBanner from '@/components/public/CookieBanner'
 import WhatsAppChatButton from '@/components/public/WhatsAppChatButton'
 import ThemeInitializer from '@/components/public/ThemeInitializer'
+import RouteBodyClass from '@/components/RouteBodyClass'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -88,6 +89,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-[var(--site-bg)] text-[var(--site-text)] transition-colors duration-300">
+        <RouteBodyClass />
         <ThemeInitializer />
         {children}
         <WhatsAppChatButton />

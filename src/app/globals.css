@@ -1302,3 +1302,122 @@ a[href*="tiktok.com"][title]:hover {
 .theme-admin-button-gold * {
   color: inherit !important;
 }
+
+/* === NON HOME BUTTON ORBIT HOVER === */
+@property --button-orbit-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/*
+  Effetto bottoni testuali fuori dalla Home.
+  Esclude:
+  - bottoni disabilitati
+  - AI buttons
+  - bottoni stato colorati lead
+  - liquid buttons
+  - bottoni già gestiti come gold premium
+*/
+body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button),
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button) {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    filter 180ms ease;
+  will-change: transform;
+}
+
+body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button)::before,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  padding: 1.5px;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    conic-gradient(
+      from var(--button-orbit-angle),
+      transparent 0deg,
+      transparent 235deg,
+      rgba(255, 255, 255, 0.95) 265deg,
+      rgba(248, 226, 148, 0.98) 292deg,
+      rgba(215, 167, 53, 1) 318deg,
+      transparent 350deg,
+      transparent 360deg
+    );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: button-orbit-spin 1.45s linear infinite;
+  transition: opacity 180ms ease;
+}
+
+body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):hover,
+body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):focus-visible,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):hover,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):focus-visible {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--site-border) 35%, #d7a735 65%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    0 12px 28px rgba(120,82,20,0.16);
+}
+
+body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):hover::before,
+body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):focus-visible::before,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):hover::before,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):focus-visible::before {
+  opacity: 1;
+}
+
+body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):active,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):active {
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+@keyframes button-orbit-spin {
+  to {
+    --button-orbit-angle: 360deg;
+  }
+}
+
+/* Mantiene leggibili i bottoni chiari/oro anche in dark mode */
+body.is-non-home-route .theme-button-primary,
+body.is-non-home-route .theme-admin-button-primary,
+body.is-non-home-route .theme-admin-button-gold {
+  color: #17120a !important;
+}
+
+body.is-non-home-route .theme-button-primary *,
+body.is-non-home-route .theme-admin-button-primary *,
+body.is-non-home-route .theme-admin-button-gold * {
+  color: inherit !important;
+}
+
+/* I bottoni stato colorati restano come sono. Solo Archivato si schiarisce leggermente al passaggio. */
+body.is-non-home-route .lead-status-btn-archived:not(:disabled) {
+  transition:
+    transform 180ms ease,
+    filter 180ms ease,
+    box-shadow 180ms ease;
+}
+
+body.is-non-home-route .lead-status-btn-archived:not(:disabled):hover,
+body.is-non-home-route .lead-status-btn-archived:not(:disabled):focus-visible {
+  transform: translateY(-1px);
+  filter: brightness(1.14);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.16);
+}
