@@ -1677,3 +1677,20 @@ body.is-map-area-route [aria-label*="WhatsApp"],
 body.is-map-area-route [aria-label*="whatsapp"] {
   display: none !important;
 }
+
+/* === HIDE WHATSAPP ONLY ON MAP AREA PAGE === */
+
+/*
+  Nasconde il widget WhatsApp SOLO nella pagina:
+  /immobili/mappa-area
+
+  Su /immobili e sulle schede /immobili/[slug] resta visibile.
+*/
+body.is-map-area-route a[href*="whatsapp"],
+body.is-map-area-route a[href*="wa.me"],
+body.is-map-area-route [class*="WhatsApp"],
+body.is-map-area-route [class*="whatsapp"],
+body.is-map-area-route [aria-label*="WhatsApp"],
+body.is-map-area-route [aria-label*="whatsapp"] {
+  display: none !important;
+}

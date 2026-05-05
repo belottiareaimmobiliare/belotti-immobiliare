@@ -8,7 +8,7 @@ export default function RouteBodyClass() {
 
   useEffect(() => {
     const isHome = pathname === '/'
-    const isMapArea = pathname?.startsWith('/immobili/mappa-area') || false
+    const isMapArea = pathname === '/immobili/mappa-area'
 
     document.body.classList.toggle('is-home-route', isHome)
     document.body.classList.toggle('is-non-home-route', !isHome)
