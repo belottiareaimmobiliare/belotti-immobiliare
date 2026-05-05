@@ -1691,3 +1691,64 @@ body.is-non-home-route .leaflet-control-zoom button::before {
 body.is-map-area-route .site-whatsapp-floating {
   display: none !important;
 }
+
+/* === WHATSAPP FINAL FIX - TRUE FLOATING === */
+
+/*
+  Fix definitivo:
+  le regole social intercettano anche wa.me e possono trasformare il widget in position: relative.
+  Qui forziamo il vero widget WhatsApp a restare fixed basso/destra.
+*/
+body:not(.is-map-area-route) a.site-whatsapp-floating,
+body:not(.is-map-area-route) .site-whatsapp-floating {
+  position: fixed !important;
+  right: max(1rem, env(safe-area-inset-right)) !important;
+  bottom: max(1rem, env(safe-area-inset-bottom)) !important;
+  left: auto !important;
+  top: auto !important;
+  z-index: 999999 !important;
+  display: inline-flex !important;
+  transform: none;
+}
+
+body:not(.is-map-area-route) a.site-whatsapp-floating:hover,
+body:not(.is-map-area-route) .site-whatsapp-floating:hover {
+  transform: scale(1.02) !important;
+}
+
+/* Anche il box verde opzionale resta fixed sopra al bottone */
+body:not(.is-map-area-route) .site-whatsapp-owner-cta {
+  position: fixed !important;
+  right: max(1rem, env(safe-area-inset-right)) !important;
+  left: auto !important;
+  top: auto !important;
+  z-index: 999998 !important;
+}
+
+@media (min-width: 640px) {
+  body:not(.is-map-area-route) a.site-whatsapp-floating,
+  body:not(.is-map-area-route) .site-whatsapp-floating {
+    right: max(1.5rem, env(safe-area-inset-right)) !important;
+    bottom: max(1.5rem, env(safe-area-inset-bottom)) !important;
+  }
+
+  body:not(.is-map-area-route) .site-whatsapp-owner-cta {
+    right: max(1.5rem, env(safe-area-inset-right)) !important;
+  }
+}
+
+/* Nessun bordo oro / orbit sul widget WhatsApp */
+.site-whatsapp-floating::before,
+.site-whatsapp-owner-cta::before,
+.site-whatsapp-floating *::before,
+.site-whatsapp-owner-cta *::before {
+  display: none !important;
+  animation: none !important;
+  opacity: 0 !important;
+}
+
+/* Su /immobili/mappa-area sparisce tutto il widget WhatsApp */
+body.is-map-area-route .site-whatsapp-floating,
+body.is-map-area-route .site-whatsapp-owner-cta {
+  display: none !important;
+}

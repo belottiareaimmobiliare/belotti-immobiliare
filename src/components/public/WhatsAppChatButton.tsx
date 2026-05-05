@@ -96,13 +96,13 @@ export default function WhatsAppChatButton() {
     <>
       {showOwnerCta ? (
         <div
-          className={`fixed right-4 z-[109] w-[calc(100vw-2rem)] max-w-[340px] rounded-[24px] border border-white/20 bg-[#25D366]/80 p-4 text-white shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl md:right-6 ${bubbleBottomClass}`}
+          className={`site-whatsapp-owner-cta fixed right-4 z-[109] w-[calc(100vw-2rem)] max-w-[340px] rounded-[24px] border border-white/20 bg-[#25D366]/80 p-4 text-white shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl md:right-6 ${bubbleBottomClass}`}
         >
           <button
             type="button"
             onClick={closeOwnerCta}
             aria-label="Chiudi messaggio"
-            className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white/80 transition hover:bg-black/30 hover:text-white site-whatsapp-floating"
+            className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white/80 transition hover:bg-black/30 hover:text-white"
           >
             <X className="h-4 w-4" />
           </button>
@@ -135,7 +135,7 @@ export default function WhatsAppChatButton() {
         target="_blank"
         rel="noreferrer"
         aria-label="Chatta con noi su WhatsApp"
-        className={`group fixed right-4 z-[110] inline-flex items-center gap-3 rounded-full border border-white/10 bg-[#25D366] px-4 py-3 text-black shadow-[0_18px_40px_rgba(0,0,0,0.28)] transition hover:scale-[1.02] hover:shadow-[0_22px_50px_rgba(0,0,0,0.34)] md:right-6 ${bottomClass}`}
+        className={`site-whatsapp-floating group fixed right-4 z-[110] inline-flex items-center gap-3 rounded-full border border-white/10 bg-[#25D366] px-4 py-3 text-black shadow-[0_18px_40px_rgba(0,0,0,0.28)] transition hover:scale-[1.02] hover:shadow-[0_22px_50px_rgba(0,0,0,0.34)] md:right-6 ${bottomClass}`}
       >
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black/10">
           <MessageCircle className="h-5 w-5" strokeWidth={2.2} />
