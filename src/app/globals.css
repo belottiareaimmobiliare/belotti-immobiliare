@@ -1095,3 +1095,21 @@ a[href*="tiktok.com"][title]:hover {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
+
+/* === GIANFEDERICO PORTRAIT POLISH === */
+.belotti-portrait-polish {
+  filter:
+    contrast(1.12)
+    saturate(1.16)
+    brightness(1.03)
+    sepia(0.03);
+  transform: translateZ(0);
+}
+
+.belotti-portrait-polish:hover {
+  filter:
+    contrast(1.16)
+    saturate(1.2)
+    brightness(1.05)
+    sepia(0.02);
+}

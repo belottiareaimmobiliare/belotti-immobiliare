@@ -39,7 +39,7 @@ export default async function GianfedericoBelottiPage() {
                 alt="Gianfederico Belotti"
                 fill
                 priority
-                className="object-cover"
+                className="object-cover belotti-portrait-polish"
               />
             </div>
           </div>
