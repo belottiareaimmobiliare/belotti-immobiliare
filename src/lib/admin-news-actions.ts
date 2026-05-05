@@ -42,12 +42,54 @@ function cleanBoolean(value: unknown) {
   return value === true
 }
 
+
+async function getAvailableNewsSlug(
+  service: ReturnType<typeof createServiceClient>,
+  desiredSlug: string | null | undefined
+) {
+  const baseSlug = desiredSlug?.trim().replace(/^-+|-+$/g, '') || null
+
+  if (!baseSlug) return null
+
+  let candidate = baseSlug
+
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const { data, error } = await service
+      .from('news_items')
+      .select('id')
+      .eq('slug', candidate)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Errore verifica slug news:', error)
+      throw new Error('Errore verifica slug news')
+    }
+
+    if (!data) {
+      return candidate
+    }
+
+    const stamp = new Date()
+      .toISOString()
+      .replace(/\D/g, '')
+      .slice(0, 12)
+
+    candidate =
+      attempt === 0
+        ? `${baseSlug}-${stamp}`
+        : `${baseSlug}-${stamp}-${attempt + 1}`
+  }
+
+  return `${baseSlug}-${Date.now()}`
+}
+
 export async function createNewsItem(input: NewsItemInput) {
   const profile = await requireAdminProfile()
   const service = createServiceClient()
 
   const title = cleanString(input.title)
-  const slug = cleanString(input.slug)
+  const requestedSlug = cleanString(input.slug)
+  const slug = await getAvailableNewsSlug(service, requestedSlug)
 
   if (!title || !slug) {
     throw new Error('Titolo o slug news mancante')
