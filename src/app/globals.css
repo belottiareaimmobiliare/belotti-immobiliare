@@ -1113,3 +1113,102 @@ a[href*="tiktok.com"][title]:hover {
     brightness(1.05)
     sepia(0.02);
 }
+
+/* === GLOBAL BUTTON HOVER POLISH === */
+
+/* Bottoni principali admin / sito */
+.theme-admin-button-primary,
+.theme-button-primary {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+  will-change: transform;
+}
+
+.theme-admin-button-primary:hover,
+.theme-admin-button-primary:focus-visible,
+.theme-button-primary:hover,
+.theme-button-primary:focus-visible {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    0 14px 30px rgba(120,82,20,0.18);
+}
+
+.theme-admin-button-primary:active,
+.theme-button-primary:active {
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+/* Bottoni secondari admin / sito */
+.theme-admin-button-secondary,
+.theme-button-secondary {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    filter 180ms ease;
+  will-change: transform;
+}
+
+.theme-admin-button-secondary:hover,
+.theme-admin-button-secondary:focus-visible,
+.theme-button-secondary:hover,
+.theme-button-secondary:focus-visible {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--site-border) 45%, #d7a735 55%);
+  background-color: color-mix(in srgb, var(--site-surface) 86%, #d7a735 14%);
+  color: var(--site-text);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 10px 24px rgba(120,82,20,0.12);
+}
+
+.theme-admin-button-secondary:active,
+.theme-button-secondary:active {
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+/* Bottoni neutri admin con bordo, quelli che sembrano “morti” */
+.theme-admin-card button:not(.ai-premium-button):not(.theme-admin-button-gold):not(:disabled),
+.theme-admin-card a:not(.ai-premium-button):not(.theme-admin-button-gold),
+.theme-panel button:not(.ai-premium-button):not(.theme-admin-button-gold):not(:disabled),
+.theme-panel a:not(.ai-premium-button):not(.theme-admin-button-gold) {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    filter 180ms ease;
+}
+
+.theme-admin-card button:not(.ai-premium-button):not(.theme-admin-button-gold):not(:disabled):hover,
+.theme-admin-card button:not(.ai-premium-button):not(.theme-admin-button-gold):not(:disabled):focus-visible,
+.theme-admin-card a:not(.ai-premium-button):not(.theme-admin-button-gold):hover,
+.theme-admin-card a:not(.ai-premium-button):not(.theme-admin-button-gold):focus-visible,
+.theme-panel button:not(.ai-premium-button):not(.theme-admin-button-gold):not(:disabled):hover,
+.theme-panel button:not(.ai-premium-button):not(.theme-admin-button-gold):not(:disabled):focus-visible,
+.theme-panel a:not(.ai-premium-button):not(.theme-admin-button-gold):hover,
+.theme-panel a:not(.ai-premium-button):not(.theme-admin-button-gold):focus-visible {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--site-border) 45%, #d7a735 55%);
+  background-color: color-mix(in srgb, var(--site-surface) 88%, #d7a735 12%);
+  box-shadow: 0 10px 24px rgba(120,82,20,0.10);
+}
+
+.theme-admin-card button:not(.ai-premium-button):not(.theme-admin-button-gold):not(:disabled):active,
+.theme-admin-card a:not(.ai-premium-button):not(.theme-admin-button-gold):active,
+.theme-panel button:not(.ai-premium-button):not(.theme-admin-button-gold):not(:disabled):active,
+.theme-panel a:not(.ai-premium-button):not(.theme-admin-button-gold):active {
+  transform: translateY(0);
+}
