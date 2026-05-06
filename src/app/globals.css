@@ -2409,3 +2409,54 @@ footer a[href*="tiktok"]:focus-visible svg,
   filter: none !important;
 }
 
+
+/* === FIX SOLO TIKTOK NAVBAR: CENTRO NERO, SCIE FUORI === */
+
+body header a[href*="tiktok.com"],
+body header a[href*="tiktok.com"][aria-label],
+body header a[href*="tiktok.com"][title],
+body header a[href*="tiktok.com"]:hover,
+body header a[href*="tiktok.com"]:focus-visible,
+body header a[href*="tiktok.com"][aria-label]:hover,
+body header a[href*="tiktok.com"][aria-label]:focus-visible,
+body header a[href*="tiktok.com"][title]:hover,
+body header a[href*="tiktok.com"][title]:focus-visible {
+  background: #111111 !important;
+  background-color: #111111 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+body header a[href*="tiktok.com"]::before,
+body header a[href*="tiktok.com"]::after,
+body header a[href*="tiktok.com"][aria-label]::before,
+body header a[href*="tiktok.com"][aria-label]::after,
+body header a[href*="tiktok.com"][title]::before,
+body header a[href*="tiktok.com"][title]::after {
+  content: none !important;
+  display: none !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+body header a[href*="tiktok.com"]:hover,
+body header a[href*="tiktok.com"]:focus-visible,
+body header a[href*="tiktok.com"][aria-label]:hover,
+body header a[href*="tiktok.com"][aria-label]:focus-visible,
+body header a[href*="tiktok.com"][title]:hover,
+body header a[href*="tiktok.com"][title]:focus-visible {
+  filter:
+    drop-shadow(-3px -2px 0 #25F4EE)
+    drop-shadow(3px 2px 0 #FE2C55) !important;
+}
+
+body header a[href*="tiktok.com"] *,
+body header a[href*="tiktok.com"]:hover *,
+body header a[href*="tiktok.com"]:focus-visible * {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
