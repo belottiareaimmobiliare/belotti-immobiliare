@@ -2161,3 +2161,40 @@ body .home-search-map-preview-fixed:focus-visible::after {
 }
 
 /* === SOLO TASTO MAPPA RICERCA HOME FIX END === */
+
+/* === FIX DEFINITIVO TESTI NERI TASTO MAPPA RICERCA HOME === */
+
+body .home-search-map-preview-fixed,
+body .home-search-map-preview-fixed:hover,
+body .home-search-map-preview-fixed:focus-visible {
+  color: #050505 !important;
+}
+
+/* Tutti i testi del box mappa devono essere neri */
+body .home-search-map-preview-fixed :where(h1, h2, h3, h4, p, span, small, strong),
+body .home-search-map-preview-fixed:hover :where(h1, h2, h3, h4, p, span, small, strong),
+body .home-search-map-preview-fixed:focus-visible :where(h1, h2, h3, h4, p, span, small, strong) {
+  color: #050505 !important;
+  fill: #050505 !important;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55),
+    0 8px 20px rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Il bottone interno Apri resta nero con testo bianco */
+body .home-search-map-preview-fixed :where([class*="bg-black"], [class*="bg-[#050505"], [class*="bg-[#000"]),
+body .home-search-map-preview-fixed:hover :where([class*="bg-black"], [class*="bg-[#050505"], [class*="bg-[#000"]),
+body .home-search-map-preview-fixed:focus-visible :where([class*="bg-black"], [class*="bg-[#050505"], [class*="bg-[#000"]) {
+  background: #050505 !important;
+  background-color: #050505 !important;
+  color: #ffffff !important;
+}
+
+body .home-search-map-preview-fixed :where([class*="bg-black"], [class*="bg-[#050505"], [class*="bg-[#000"]) *,
+body .home-search-map-preview-fixed:hover :where([class*="bg-black"], [class*="bg-[#050505"], [class*="bg-[#000"]) *,
+body .home-search-map-preview-fixed:focus-visible :where([class*="bg-black"], [class*="bg-[#050505"], [class*="bg-[#000"]) * {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  text-shadow: none !important;
+}
+
