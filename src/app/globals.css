@@ -2319,3 +2319,93 @@ body .home-search-map-preview-fixed:focus-visible :where([class*="bg-black"], [c
 }
 
 /* === FOOTER COOKIE BUTTON CLEAN FIX END === */
+
+/* === TIKTOK FINAL: CENTRO NERO, SOLO BORDI/SCIE COLORATE === */
+
+/* Spegne qualsiasi riempimento rosa/blu precedente su TikTok */
+header a[href*="tiktok"],
+footer a[href*="tiktok"],
+.site-footer-force-dark a[href*="tiktok"],
+body.is-non-home-route header a[href*="tiktok"],
+body.is-non-home-route footer a[href*="tiktok"] {
+  position: relative !important;
+  overflow: visible !important;
+  isolation: isolate !important;
+}
+
+/* niente pseudo-elementi pieni che coprono il bottone */
+header a[href*="tiktok"]::before,
+header a[href*="tiktok"]::after,
+footer a[href*="tiktok"]::before,
+footer a[href*="tiktok"]::after,
+.site-footer-force-dark a[href*="tiktok"]::before,
+.site-footer-force-dark a[href*="tiktok"]::after,
+body.is-non-home-route header a[href*="tiktok"]::before,
+body.is-non-home-route header a[href*="tiktok"]::after,
+body.is-non-home-route footer a[href*="tiktok"]::before,
+body.is-non-home-route footer a[href*="tiktok"]::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Hover TikTok: centro nero, scie esterne piene */
+header a[href*="tiktok"]:hover,
+header a[href*="tiktok"]:focus-visible,
+footer a[href*="tiktok"]:hover,
+footer a[href*="tiktok"]:focus-visible,
+.site-footer-force-dark a[href*="tiktok"]:hover,
+.site-footer-force-dark a[href*="tiktok"]:focus-visible,
+body.is-non-home-route header a[href*="tiktok"]:hover,
+body.is-non-home-route header a[href*="tiktok"]:focus-visible,
+body.is-non-home-route footer a[href*="tiktok"]:hover,
+body.is-non-home-route footer a[href*="tiktok"]:focus-visible {
+  background: #050505 !important;
+  background-color: #050505 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  box-shadow: none !important;
+  filter:
+    drop-shadow(-8px -5px 0 #25F4EE)
+    drop-shadow(8px 5px 0 #FE2C55) !important;
+}
+
+/* Se dentro c'è il pallino/icona, anche quello resta nero al centro */
+header a[href*="tiktok"]:hover span.inline-flex,
+header a[href*="tiktok"]:focus-visible span.inline-flex,
+footer a[href*="tiktok"]:hover span.inline-flex,
+footer a[href*="tiktok"]:focus-visible span.inline-flex,
+.site-footer-force-dark a[href*="tiktok"]:hover span.inline-flex,
+.site-footer-force-dark a[href*="tiktok"]:focus-visible span.inline-flex {
+  background: #111111 !important;
+  background-color: #111111 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  box-shadow: none !important;
+  filter:
+    drop-shadow(-2px -1px 0 #25F4EE)
+    drop-shadow(2px 1px 0 #FE2C55) !important;
+}
+
+/* Testo e icona sempre bianchi */
+header a[href*="tiktok"]:hover *,
+header a[href*="tiktok"]:focus-visible *,
+footer a[href*="tiktok"]:hover *,
+footer a[href*="tiktok"]:focus-visible *,
+.site-footer-force-dark a[href*="tiktok"]:hover *,
+.site-footer-force-dark a[href*="tiktok"]:focus-visible * {
+  color: #ffffff !important;
+  fill: currentColor !important;
+}
+
+/* SVG senza gradienti/filtri strani interni */
+header a[href*="tiktok"]:hover svg,
+header a[href*="tiktok"]:focus-visible svg,
+footer a[href*="tiktok"]:hover svg,
+footer a[href*="tiktok"]:focus-visible svg,
+.site-footer-force-dark a[href*="tiktok"]:hover svg,
+.site-footer-force-dark a[href*="tiktok"]:focus-visible svg {
+  filter: none !important;
+}
+
