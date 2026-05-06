@@ -1753,38 +1753,118 @@ body.is-map-area-route .site-whatsapp-owner-cta {
   display: none !important;
 }
 
-/* === BELOTTI TIKTOK FOOTER + MAP CLOSE START === */
+/* === BELOTTI FINAL FOOTER TIKTOK SOLID START === */
 
-footer a[href*="tiktok"] {
-  position: relative;
-  overflow: hidden;
-  border-radius: 18px;
+/* Facebook: pill arrotondata, non rettangolare */
+footer a[href*="facebook"] {
+  border-radius: 999px !important;
+  overflow: visible !important;
   transition:
     transform 0.22s ease,
-    color 0.22s ease,
     background 0.22s ease,
+    color 0.22s ease,
     box-shadow 0.22s ease,
     border-color 0.22s ease;
 }
 
-footer a[href*="tiktok"]:hover,
-footer a[href*="tiktok"]:focus-visible {
+footer a[href*="facebook"]:hover,
+footer a[href*="facebook"]:focus-visible {
   color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.22) !important;
-  background:
-    linear-gradient(90deg, #25f4ee 0%, #25f4ee 47%, #fe2c55 53%, #fe2c55 100%) !important;
-  box-shadow:
-    0 18px 38px rgba(37, 244, 238, 0.22),
-    0 18px 38px rgba(254, 44, 85, 0.20);
+  background: #1877F2 !important;
+  border-color: #1877F2 !important;
+  box-shadow: 0 16px 34px rgba(24, 119, 242, 0.34) !important;
   transform: translateX(4px);
 }
 
-footer a[href*="tiktok"]:hover svg,
-footer a[href*="tiktok"]:focus-visible svg {
+footer a[href*="facebook"]:hover *,
+footer a[href*="facebook"]:focus-visible * {
   color: #ffffff !important;
-  filter: drop-shadow(1px 0 0 #25f4ee) drop-shadow(-1px 0 0 #fe2c55);
 }
 
+/* TikTok: le due scie esterne sono colori PIENI, non box-shadow trasparenti */
+footer a[href*="tiktok"],
+body.is-non-home-route footer a[href*="tiktok"] {
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: visible !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  transition:
+    transform 0.22s ease,
+    color 0.22s ease,
+    background 0.22s ease,
+    border-color 0.22s ease;
+}
+
+footer a[href*="tiktok"]::before,
+body.is-non-home-route footer a[href*="tiktok"]::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: -7px 16px 7px -10px !important;
+  z-index: -2 !important;
+  border-radius: 999px !important;
+  background: #25F4EE !important;
+  opacity: 0 !important;
+  transform: none !important;
+  animation: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+}
+
+footer a[href*="tiktok"]::after,
+body.is-non-home-route footer a[href*="tiktok"]::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 7px -10px -7px 16px !important;
+  z-index: -1 !important;
+  border-radius: 999px !important;
+  background: #FE2C55 !important;
+  opacity: 0 !important;
+  transform: none !important;
+  animation: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+}
+
+footer a[href*="tiktok"]:hover,
+footer a[href*="tiktok"]:focus-visible,
+body.is-non-home-route footer a[href*="tiktok"]:hover,
+body.is-non-home-route footer a[href*="tiktok"]:focus-visible {
+  background: #050505 !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  box-shadow: none !important;
+  transform: translateX(4px);
+}
+
+footer a[href*="tiktok"]:hover::before,
+footer a[href*="tiktok"]:focus-visible::before,
+footer a[href*="tiktok"]:hover::after,
+footer a[href*="tiktok"]:focus-visible::after,
+body.is-non-home-route footer a[href*="tiktok"]:hover::before,
+body.is-non-home-route footer a[href*="tiktok"]:focus-visible::before,
+body.is-non-home-route footer a[href*="tiktok"]:hover::after,
+body.is-non-home-route footer a[href*="tiktok"]:focus-visible::after {
+  opacity: 1 !important;
+}
+
+footer a[href*="tiktok"]:hover *,
+footer a[href*="tiktok"]:focus-visible *,
+body.is-non-home-route footer a[href*="tiktok"]:hover *,
+body.is-non-home-route footer a[href*="tiktok"]:focus-visible * {
+  color: #ffffff !important;
+}
+
+footer a[href*="tiktok"]:hover svg,
+footer a[href*="tiktok"]:focus-visible svg,
+body.is-non-home-route footer a[href*="tiktok"]:hover svg,
+body.is-non-home-route footer a[href*="tiktok"]:focus-visible svg {
+  filter: none !important;
+}
+
+/* X popup Leaflet */
 .leaflet-popup-close-button {
   display: flex !important;
   align-items: center !important;
@@ -1812,7 +1892,6 @@ footer a[href*="tiktok"]:focus-visible svg {
   position: relative !important;
 }
 
-/* Bottone X per i popup custom delle mappe */
 .map-card-close-button {
   position: absolute;
   top: 14px;
@@ -1830,10 +1909,6 @@ footer a[href*="tiktok"]:focus-visible svg {
   font-size: 24px;
   line-height: 1;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
-  transition:
-    transform 0.18s ease,
-    background 0.18s ease,
-    color 0.18s ease;
 }
 
 .map-card-close-button:hover,
@@ -1843,128 +1918,4 @@ footer a[href*="tiktok"]:focus-visible svg {
   transform: scale(1.04);
 }
 
-/* === BELOTTI TIKTOK FOOTER + MAP CLOSE END === */
-
-/* === BELOTTI FOOTER SOCIAL HOVER OVERRIDE START === */
-
-footer a[href*="facebook"],
-footer a[href*="tiktok"] {
-  position: relative;
-  overflow: hidden;
-  border-radius: 999px !important;
-  transition:
-    transform 0.22s ease,
-    color 0.22s ease,
-    background 0.22s ease,
-    border-color 0.22s ease,
-    box-shadow 0.22s ease;
-}
-
-/* FACEBOOK */
-footer a[href*="facebook"]:hover,
-footer a[href*="facebook"]:focus-visible {
-  color: #ffffff !important;
-  border-color: rgba(110, 168, 255, 0.35) !important;
-  background: linear-gradient(90deg, #2d7dff 0%, #1877f2 55%, #0f5fd7 100%) !important;
-  box-shadow:
-    0 14px 34px rgba(24, 119, 242, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.14);
-  transform: translateX(4px);
-}
-
-footer a[href*="facebook"]:hover svg,
-footer a[href*="facebook"]:focus-visible svg {
-  color: #ffffff !important;
-  fill: currentColor !important;
-}
-
-/* TIKTOK */
-footer a[href*="tiktok"]:hover,
-footer a[href*="tiktok"]:focus-visible {
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.14) !important;
-  background:
-    linear-gradient(
-      90deg,
-      #050505 0%,
-      #0a0a0a 36%,
-      rgba(37, 244, 238, 0.18) 48%,
-      rgba(254, 44, 85, 0.18) 52%,
-      #0a0a0a 64%,
-      #050505 100%
-    ) !important;
-  box-shadow:
-    -6px 0 0 rgba(37, 244, 238, 0.78),
-    6px 6px 0 rgba(254, 44, 85, 0.58),
-    0 16px 34px rgba(254, 44, 85, 0.16),
-    0 16px 34px rgba(37, 244, 238, 0.14);
-  transform: translateX(4px);
-}
-
-footer a[href*="tiktok"]:hover svg,
-footer a[href*="tiktok"]:focus-visible svg {
-  color: #ffffff !important;
-  filter:
-    drop-shadow(-2px 0 0 #25f4ee)
-    drop-shadow(2px 0 0 #fe2c55);
-}
-
-/* testo dentro i bottoni social */
-footer a[href*="facebook"]:hover *,
-footer a[href*="facebook"]:focus-visible *,
-footer a[href*="tiktok"]:hover *,
-footer a[href*="tiktok"]:focus-visible * {
-  color: #ffffff !important;
-}
-
-/* === BELOTTI FOOTER SOCIAL HOVER OVERRIDE END === */
-
-/* === BELOTTI TIKTOK OUTER SHADOW FIX START === */
-
-footer a[href*="tiktok"]:hover,
-footer a[href*="tiktok"]:focus-visible {
-  background: #050505 !important;
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.18) !important;
-  box-shadow:
-    -8px -6px 0 #25F4EE,
-    8px 6px 0 #FE2C55,
-    0 16px 34px rgba(0, 0, 0, 0.32) !important;
-  transform: translateX(4px);
-}
-
-/* non tocca il pallino/icona */
-footer a[href*="tiktok"]:hover svg,
-footer a[href*="tiktok"]:focus-visible svg {
-  filter: none !important;
-}
-
-/* === BELOTTI TIKTOK OUTER SHADOW FIX END === */
-
-/* TIKTOK FOOTER - OUTER SHADOW COLORS LIKE LOGO */
-footer a[href*="tiktok"] {
-  border-radius: 999px !important;
-}
-
-footer a[href*="tiktok"]:hover,
-footer a[href*="tiktok"]:focus-visible {
-  background: #050505 !important;
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.14) !important;
-  box-shadow:
-    -10px -6px 0 #25F4EE,
-    10px 6px 0 #FE2C55,
-    0 16px 34px rgba(0, 0, 0, 0.32) !important;
-  transform: translateX(4px);
-}
-
-footer a[href*="tiktok"]:hover svg,
-footer a[href*="tiktok"]:focus-visible svg {
-  filter: none !important;
-}
-
-footer a[href*="tiktok"]:hover *,
-footer a[href*="tiktok"]:focus-visible * {
-  color: #ffffff !important;
-}
-
+/* === BELOTTI FINAL FOOTER TIKTOK SOLID END === */
