@@ -1755,7 +1755,7 @@ body.is-map-area-route .site-whatsapp-owner-cta {
 
 /* === BELOTTI FINAL FOOTER TIKTOK SOLID START === */
 
-/* Facebook: pill arrotondata, non rettangolare */
+/* Facebook: pill arrotondata */
 footer a[href*="facebook"] {
   border-radius: 999px !important;
   overflow: visible !important;
@@ -1763,7 +1763,7 @@ footer a[href*="facebook"] {
     transform 0.22s ease,
     background 0.22s ease,
     color 0.22s ease,
-    box-shadow 0.22s ease,
+    filter 0.22s ease,
     border-color 0.22s ease;
 }
 
@@ -1772,7 +1772,7 @@ footer a[href*="facebook"]:focus-visible {
   color: #ffffff !important;
   background: #1877F2 !important;
   border-color: #1877F2 !important;
-  box-shadow: 0 16px 34px rgba(24, 119, 242, 0.34) !important;
+  filter: drop-shadow(0 14px 18px rgba(24, 119, 242, 0.34));
   transform: translateX(4px);
 }
 
@@ -1781,51 +1781,36 @@ footer a[href*="facebook"]:focus-visible * {
   color: #ffffff !important;
 }
 
-/* TikTok: le due scie esterne sono colori PIENI, non box-shadow trasparenti */
+/*
+  TikTok corretto:
+  - centro del tasto nero
+  - scia azzurra esterna piena
+  - scia fucsia esterna piena
+  - niente pseudo-elementi che coprono il tasto
+*/
 footer a[href*="tiktok"],
 body.is-non-home-route footer a[href*="tiktok"] {
   position: relative !important;
-  isolation: isolate !important;
-  overflow: visible !important;
   border-radius: 999px !important;
+  overflow: visible !important;
   background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
   transition:
     transform 0.22s ease,
     color 0.22s ease,
     background 0.22s ease,
-    border-color 0.22s ease;
+    border-color 0.22s ease,
+    filter 0.22s ease;
 }
 
+/* Spegne le vecchie scie che stavano coprendo il bottone */
 footer a[href*="tiktok"]::before,
-body.is-non-home-route footer a[href*="tiktok"]::before {
-  content: "" !important;
-  position: absolute !important;
-  inset: -7px 16px 7px -10px !important;
-  z-index: -2 !important;
-  border-radius: 999px !important;
-  background: #25F4EE !important;
-  opacity: 0 !important;
-  transform: none !important;
-  animation: none !important;
-  filter: none !important;
-  box-shadow: none !important;
-  pointer-events: none !important;
-}
-
 footer a[href*="tiktok"]::after,
+body.is-non-home-route footer a[href*="tiktok"]::before,
 body.is-non-home-route footer a[href*="tiktok"]::after {
-  content: "" !important;
-  position: absolute !important;
-  inset: 7px -10px -7px 16px !important;
-  z-index: -1 !important;
-  border-radius: 999px !important;
-  background: #FE2C55 !important;
-  opacity: 0 !important;
-  transform: none !important;
-  animation: none !important;
-  filter: none !important;
-  box-shadow: none !important;
-  pointer-events: none !important;
+  content: none !important;
+  display: none !important;
 }
 
 footer a[href*="tiktok"]:hover,
@@ -1834,20 +1819,12 @@ body.is-non-home-route footer a[href*="tiktok"]:hover,
 body.is-non-home-route footer a[href*="tiktok"]:focus-visible {
   background: #050505 !important;
   color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.16) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
   box-shadow: none !important;
+  filter:
+    drop-shadow(-8px -5px 0 #25F4EE)
+    drop-shadow(8px 5px 0 #FE2C55) !important;
   transform: translateX(4px);
-}
-
-footer a[href*="tiktok"]:hover::before,
-footer a[href*="tiktok"]:focus-visible::before,
-footer a[href*="tiktok"]:hover::after,
-footer a[href*="tiktok"]:focus-visible::after,
-body.is-non-home-route footer a[href*="tiktok"]:hover::before,
-body.is-non-home-route footer a[href*="tiktok"]:focus-visible::before,
-body.is-non-home-route footer a[href*="tiktok"]:hover::after,
-body.is-non-home-route footer a[href*="tiktok"]:focus-visible::after {
-  opacity: 1 !important;
 }
 
 footer a[href*="tiktok"]:hover *,
