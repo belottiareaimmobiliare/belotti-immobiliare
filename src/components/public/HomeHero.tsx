@@ -263,7 +263,7 @@ export default function HomeHero() {
 
                   <Link
                     href="/immobili/mappa-area"
-                    className="group relative overflow-hidden rounded-[26px] border border-white/18 bg-white/[0.10] shadow-[0_10px_28px_rgba(0,0,0,0.16)] backdrop-blur-sm transition hover:border-white/24"
+                    className="home-map-preview-card group relative overflow-hidden rounded-[26px] border border-white/18 bg-white/[0.10] shadow-[0_10px_28px_rgba(0,0,0,0.16)] backdrop-blur-sm transition hover:border-white/24"
                   >
                     <div
                       className="absolute inset-0 bg-cover bg-center opacity-100"

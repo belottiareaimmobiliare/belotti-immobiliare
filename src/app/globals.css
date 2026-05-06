@@ -1912,7 +1912,7 @@ body.is-non-home-route footer a[href*="tiktok"]:focus-visible svg {
 */
 
 /* TASTI CHIARI -> HOVER NERO */
-body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true"]):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.map-card-close-button):is(
+body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true"]):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.map-card-close-button):not(.home-map-preview-card):is(
   .theme-pill,
   .theme-button-secondary,
   [class*="bg-white"],
@@ -1923,7 +1923,7 @@ body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true
   [class*="bg-neutral-50"],
   [class*="bg-slate-50"]
 ):hover,
-body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true"]):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.map-card-close-button):is(
+body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true"]):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.map-card-close-button):not(.home-map-preview-card):is(
   .theme-pill,
   .theme-button-secondary,
   [class*="bg-white"],
@@ -1939,7 +1939,7 @@ body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true
 }
 
 /* TASTI SCURI -> HOVER BIANCO */
-body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true"]):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.map-card-close-button):is(
+body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true"]):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.map-card-close-button):not(.home-map-preview-card):is(
   .theme-button-primary,
   [class*="bg-[#08111f]"],
   [class*="bg-black"],
@@ -1950,7 +1950,7 @@ body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true
   [class*="bg-zinc-900"],
   [class*="bg-zinc-950"]
 ):hover,
-body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true"]):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.map-card-close-button):is(
+body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true"]):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.map-card-close-button):not(.home-map-preview-card):is(
   .theme-button-primary,
   [class*="bg-[#08111f]"],
   [class*="bg-black"],
@@ -1966,8 +1966,8 @@ body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true
 }
 
 /* Testi, span, svg dentro i tasti: seguono il colore del tasto */
-body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true"]):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.map-card-close-button):hover :where(span, strong, small, p, svg),
-body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true"]):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.map-card-close-button):focus-visible :where(span, strong, small, p, svg) {
+body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true"]):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.map-card-close-button):not(.home-map-preview-card):hover :where(span, strong, small, p, svg),
+body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true"]):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.map-card-close-button):not(.home-map-preview-card):focus-visible :where(span, strong, small, p, svg) {
   color: inherit !important;
   fill: currentColor !important;
 }
