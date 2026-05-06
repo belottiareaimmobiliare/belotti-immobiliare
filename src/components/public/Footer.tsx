@@ -6,18 +6,17 @@ const partnerLogos = [
   {
     label: 'Immobiliare.it',
     src: '/images/partners/transparent-logo-immobiliareit.png',
+    href: 'https://www.immobiliare.it/agenzie-immobiliari/23950/area-bergamo/',
   },
   {
     label: 'Casa.it',
     src: '/images/partners/transparent-logo-casait.png',
+    href: 'https://www.casa.it/agenzie/area-immobiliare-sas-di-belotti-g-72711/',
   },
   {
     label: 'Idealista',
     src: '/images/partners/transparent-logo-idealista.png',
-  },
-  {
-    label: 'BergamoNews',
-    src: '/images/partners/transparent-logo-bergamonews.png',
+    href: 'https://www.idealista.it/pro/area-immobiliare-bergamo/',
   },
 ]
 
@@ -32,11 +31,15 @@ export default function Footer() {
         Partners
       </p>
 
-      <div className="mt-6 grid gap-2 md:grid-cols-2 md:gap-6 xl:grid-cols-4">
+      <div className="mt-6 grid gap-2 md:grid-cols-3 md:gap-6 xl:grid-cols-3">
   {partnerLogos.map((partner) => (
-    <div
+    <a
       key={partner.label}
-      className="flex min-h-[72px] items-center justify-start border-b border-white/10 py-3 md:min-h-[96px] md:justify-center md:border-b-0 md:py-0"
+      href={partner.href}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={`Apri il profilo ${partner.label} di Area Immobiliare`}
+      className="flex min-h-[72px] items-center justify-start border-b border-white/10 py-3 transition hover:scale-[1.03] hover:opacity-100 md:min-h-[96px] md:justify-center md:border-b-0 md:py-0"
     >
       <div className="flex w-[190px] items-center justify-start md:w-auto md:justify-center">
         <img
@@ -45,7 +48,7 @@ export default function Footer() {
           className="max-h-[44px] w-auto max-w-[180px] object-contain opacity-95 md:max-h-[70px] md:max-w-[200px]"
         />
       </div>
-    </div>
+    </a>
   ))}
 </div>
 
