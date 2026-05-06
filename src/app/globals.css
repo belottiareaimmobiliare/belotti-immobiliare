@@ -1973,3 +1973,17 @@ body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true
 }
 
 /* === BELOTTI BUTTON HOVER COLOR INVERT END === */
+
+/* === HOME MAP PREVIEW CARD HOVER FIX START === */
+
+.home-map-preview-card:hover,
+.home-map-preview-card:focus-visible {
+  background-color: inherit !important;
+}
+
+.home-map-preview-card:hover :where(h1, h2, h3, h4, p, span):not([class*="rounded"]):not([class*="bg-"]),
+.home-map-preview-card:focus-visible :where(h1, h2, h3, h4, p, span):not([class*="rounded"]):not([class*="bg-"]) {
+  color: inherit !important;
+}
+
+/* === HOME MAP PREVIEW CARD HOVER FIX END === */

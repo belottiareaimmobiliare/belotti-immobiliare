@@ -227,7 +227,7 @@ export default function Footer() {
             </Link>
             <Link
               href="/immobili/mappa-area"
-              className="transition hover:text-white"
+              className="home-map-preview-card transition hover:text-white"
             >
               Ricerca su mappa
             </Link>
