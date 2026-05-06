@@ -193,7 +193,7 @@ export default function HomeHero() {
 
               <Link
                 href="/chi-siamo"
-                className="home-map-preview-card rounded-2xl border border-white/18 bg-transparent px-6 py-3.5 text-sm font-semibold text-white/90 transition hover:bg-white/8 hover:text-white"
+                className="home-discover-brand-btn home-map-preview-card rounded-2xl border border-white/18 bg-transparent px-6 py-3.5 text-sm font-semibold text-white/90 transition hover:bg-white/8 hover:text-white"
               >
                 Scopri Area Immobiliare
               </Link>

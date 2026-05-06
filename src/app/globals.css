@@ -2063,3 +2063,37 @@ body .home-map-preview-card:hover :where(a, button, .inline-flex, [class*="round
 }
 
 /* === HOME MAP PREVIEW TEXT FINAL FIX END === */
+
+/* === SOLO SCOPRI AREA IMMOBILIARE FIX START === */
+
+/*
+  Solo tasto Home: "Scopri Area Immobiliare"
+  Stato normale: testo bianco
+  Hover: sfondo nero, testo bianco
+*/
+.home-discover-brand-btn,
+.home-discover-brand-btn:visited {
+  color: #ffffff !important;
+}
+
+.home-discover-brand-btn :where(span, strong, small, p, svg),
+.home-discover-brand-btn:visited :where(span, strong, small, p, svg) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+}
+
+.home-discover-brand-btn:hover,
+.home-discover-brand-btn:focus-visible {
+  background: #050505 !important;
+  background-color: #050505 !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+}
+
+.home-discover-brand-btn:hover :where(span, strong, small, p, svg),
+.home-discover-brand-btn:focus-visible :where(span, strong, small, p, svg) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+}
+
+/* === SOLO SCOPRI AREA IMMOBILIARE FIX END === */

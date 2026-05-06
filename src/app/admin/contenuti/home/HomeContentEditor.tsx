@@ -360,7 +360,7 @@ export default function HomeContentEditor({ initialContent }: Props) {
               type="button"
               onClick={restoreDefaults}
               disabled={isPending}
-              className="rounded-2xl border border-[var(--site-border)] px-5 py-3 text-sm font-semibold text-[var(--site-text)]"
+              className="home-discover-brand-btn rounded-2xl border border-[var(--site-border)] px-5 py-3 text-sm font-semibold text-[var(--site-text)]"
             >
               Ripristina default
             </button>
