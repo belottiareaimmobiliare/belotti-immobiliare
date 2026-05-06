@@ -45,7 +45,7 @@ export default function SinglePropertyMap({
 
   return (
     <div className="overflow-hidden rounded-[24px] border border-white/10">
-      <MapContainer
+      <MapContainer closePopupOnClick
         center={[latitude, longitude]}
         zoom={14}
         scrollWheelZoom
@@ -57,7 +57,7 @@ export default function SinglePropertyMap({
         />
 
         <Marker position={[latitude, longitude]} icon={icon}>
-          <Popup>
+          <Popup closeButton autoClose closeOnClick>
             <div className="min-w-[190px] text-black">
               <p className="font-semibold">{title || 'Immobile'}</p>
 

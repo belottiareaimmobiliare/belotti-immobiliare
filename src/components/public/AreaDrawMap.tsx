@@ -298,6 +298,17 @@ function SelectedPropertyOverlay({
   )
 }
 
+
+function CloseSelectedPropertyOnMapClick({ onClose }: { onClose: () => void }) {
+  useMapEvents({
+    click: () => {
+      onClose()
+    },
+  })
+
+  return null
+}
+
 export default function AreaDrawMap({ properties }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -465,12 +476,14 @@ export default function AreaDrawMap({ properties }: Props) {
         </div>
       </div>
 
-      <MapContainer
+      <MapContainer closePopupOnClick
         center={DEFAULT_CENTER}
         zoom={11}
         className="h-full w-full"
         zoomControl={true}
       >
+        <CloseSelectedPropertyOnMapClick onClose={() => setSelectedPropertyId(null)} />
+
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

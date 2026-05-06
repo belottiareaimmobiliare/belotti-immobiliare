@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { MapContainer, Marker, Polygon, TileLayer, useMap } from 'react-leaflet'
+import { MapContainer, Marker, Polygon, TileLayer, useMap, useMapEvents} from 'react-leaflet'
 import L from 'leaflet'
 import Link from 'next/link'
 
@@ -143,6 +143,17 @@ function FitMap({
   return null
 }
 
+
+function CloseSelectedPropertyOnMapClick({ onClose }: { onClose: () => void }) {
+  useMapEvents({
+    click: () => {
+      onClose()
+    },
+  })
+
+  return null
+}
+
 export default function PropertiesMap({
   properties,
   polygon = null,
@@ -173,7 +184,7 @@ export default function PropertiesMap({
 
   return (
     <div className={`relative w-full overflow-hidden rounded-[28px] ${heightClassName}`}>
-      <MapContainer
+      <MapContainer closePopupOnClick
         center={defaultCenter}
         zoom={10}
         scrollWheelZoom
@@ -184,6 +195,8 @@ export default function PropertiesMap({
       >
         <MapResizer />
         <FitMap properties={validProperties} polygon={polygon} />
+
+        <CloseSelectedPropertyOnMapClick onClose={() => setSelectedPropertyId(null)} />
 
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
