@@ -2011,3 +2011,55 @@ body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true
 }
 
 /* === HOME MAP PREVIEW CARD FIX END === */
+
+/* === HOME MAP PREVIEW TEXT FINAL FIX START === */
+
+/*
+  Fix solo per i box Home con sfondo mappa:
+  - non devono ereditare l'inversione globale dei bottoni
+  - i testi devono restare scuri/leggibili sulla mappa chiara
+  - il bottone interno "Apri" resta nero con testo bianco
+*/
+
+body .home-map-preview-card,
+body .home-map-preview-card:hover,
+body .home-map-preview-card:focus-visible {
+  color: #111827 !important;
+  background-color: transparent !important;
+}
+
+/* Testi descrittivi dentro la card mappa */
+body .home-map-preview-card :where(h1, h2, h3, h4, p, small, span),
+body .home-map-preview-card:hover :where(h1, h2, h3, h4, p, small, span),
+body .home-map-preview-card:focus-visible :where(h1, h2, h3, h4, p, small, span) {
+  color: #111827 !important;
+  fill: #111827 !important;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55),
+    0 8px 24px rgba(255, 255, 255, 0.32) !important;
+}
+
+/* Il bottone interno Apri deve restare nero */
+body .home-map-preview-card :where(a, button, .inline-flex, [class*="rounded-full"])[class*="bg-black"],
+body .home-map-preview-card :where(a, button, .inline-flex, [class*="rounded-full"])[class*="bg-[#"],
+body .home-map-preview-card :where(a, button, .inline-flex, [class*="rounded-full"])[class*="bg-slate-900"],
+body .home-map-preview-card:hover :where(a, button, .inline-flex, [class*="rounded-full"])[class*="bg-black"],
+body .home-map-preview-card:hover :where(a, button, .inline-flex, [class*="rounded-full"])[class*="bg-[#"],
+body .home-map-preview-card:hover :where(a, button, .inline-flex, [class*="rounded-full"])[class*="bg-slate-900"] {
+  background-color: #050505 !important;
+  color: #ffffff !important;
+}
+
+/* Testo dentro Apri */
+body .home-map-preview-card :where(a, button, .inline-flex, [class*="rounded-full"])[class*="bg-black"] *,
+body .home-map-preview-card :where(a, button, .inline-flex, [class*="rounded-full"])[class*="bg-[#"] *,
+body .home-map-preview-card :where(a, button, .inline-flex, [class*="rounded-full"])[class*="bg-slate-900"] *,
+body .home-map-preview-card:hover :where(a, button, .inline-flex, [class*="rounded-full"])[class*="bg-black"] *,
+body .home-map-preview-card:hover :where(a, button, .inline-flex, [class*="rounded-full"])[class*="bg-[#"] *,
+body .home-map-preview-card:hover :where(a, button, .inline-flex, [class*="rounded-full"])[class*="bg-slate-900"] * {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  text-shadow: none !important;
+}
+
+/* === HOME MAP PREVIEW TEXT FINAL FIX END === */
