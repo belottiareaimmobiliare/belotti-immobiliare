@@ -2202,64 +2202,57 @@ body .home-search-map-preview-fixed:focus-visible :where([class*="bg-black"], [c
 
 /*
   News card:
-  - illumina tutto il box esterno
-  - NON modifica i background interni
-  - evita effetto "testo selezionato"
+  hover su TUTTO il box, compresa la parte bassa vuota.
+  Niente overlay sopra al testo.
 */
 .news-card-full-hover {
   position: relative !important;
   overflow: hidden !important;
   transition:
+    background-color 0.24s ease,
     border-color 0.24s ease,
     box-shadow 0.24s ease,
     transform 0.24s ease !important;
 }
 
 .news-card-full-hover::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-  background: rgba(244, 239, 228, 0.92);
-  box-shadow:
-    inset 0 0 0 1px rgba(212, 175, 55, 0.75),
-    0 0 38px rgba(212, 175, 55, 0.22);
-  transition: opacity 0.24s ease;
-  z-index: 1;
+  content: none !important;
+  display: none !important;
 }
 
 .news-card-full-hover:hover,
 .news-card-full-hover:focus-within {
+  background-color: #252b34 !important;
   border-color: rgba(212, 175, 55, 0.85) !important;
   box-shadow:
-    0 22px 48px rgba(0, 0, 0, 0.28),
-    0 0 38px rgba(212, 175, 55, 0.22) !important;
+    0 0 0 1px rgba(212, 175, 55, 0.38),
+    0 22px 48px rgba(0, 0, 0, 0.30),
+    0 0 34px rgba(212, 175, 55, 0.20) !important;
 }
 
-.news-card-full-hover:hover::after,
-.news-card-full-hover:focus-within::after {
-  opacity: 1;
+/* evita che blocchi interni coprano l'illuminazione del contenitore */
+.news-card-full-hover:hover > :where(div, section, article),
+.news-card-full-hover:focus-within > :where(div, section, article) {
+  background-color: transparent !important;
 }
 
-/* contenuti sopra l'overlay */
-.news-card-full-hover > * {
-  position: relative;
-  z-index: 2;
-}
-
-/* testi leggibili quando l'overlay chiaro è attivo */
+/* testi restano chiari, non diventano neri */
 .news-card-full-hover:hover :where(h1, h2, h3, h4, p, span, small, time, a, strong),
 .news-card-full-hover:focus-within :where(h1, h2, h3, h4, p, span, small, time, a, strong) {
-  color: #111827 !important;
+  color: #ffffff !important;
 }
 
-/* badge senza effetto selezione */
+/* il badge resta coerente */
 .news-card-full-hover:hover :where([class*="rounded-full"]),
 .news-card-full-hover:focus-within :where([class*="rounded-full"]) {
-  background-color: rgba(17, 24, 39, 0.06) !important;
-  border-color: rgba(17, 24, 39, 0.24) !important;
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+}
+
+/* immagine appena più viva */
+.news-card-full-hover:hover img,
+.news-card-full-hover:focus-within img {
+  filter: brightness(1.05) contrast(1.03);
 }
 
 /* === NEWS CARD FULL BOX HOVER FIX END === */
