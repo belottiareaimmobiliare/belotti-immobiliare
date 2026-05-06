@@ -116,7 +116,7 @@ export default function HomeSearchBoxDesktop() {
         <button
           type="button"
           onClick={() => router.push('/immobili/mappa-area')}
-          className="group relative hidden min-w-[220px] shrink-0 overflow-hidden rounded-[18px] border border-white/10 shadow-[0_12px_28px_rgba(0,0,0,0.18)] transition hover:scale-[1.02] md:inline-flex"
+          className="home-search-map-preview-fixed group relative hidden min-w-[220px] shrink-0 overflow-hidden rounded-[18px] border border-white/10 shadow-[0_12px_28px_rgba(0,0,0,0.18)] transition hover:scale-[1.02] md:inline-flex"
         >
           <div className="absolute inset-0 bg-[url('/images/map-card-bg.jpg')] bg-cover bg-center opacity-100" />
           <div className="absolute inset-0 bg-white/35 backdrop-blur-[1.5px]" />

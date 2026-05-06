@@ -2097,3 +2097,67 @@ body .home-map-preview-card:hover :where(a, button, .inline-flex, [class*="round
 }
 
 /* === SOLO SCOPRI AREA IMMOBILIARE FIX END === */
+
+/* === SOLO TASTO MAPPA RICERCA HOME FIX START === */
+
+/*
+  Solo tasto con sfondo mappa nella ricerca Home.
+  Non deve invertire colori.
+  Hover = solo piccolo zoom.
+*/
+
+body .home-search-map-preview-fixed,
+body .home-search-map-preview-fixed:hover,
+body .home-search-map-preview-fixed:focus-visible {
+  background-color: inherit !important;
+  color: #ffffff !important;
+}
+
+body .home-search-map-preview-fixed {
+  transform: scale(1);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease !important;
+}
+
+body .home-search-map-preview-fixed:hover,
+body .home-search-map-preview-fixed:focus-visible {
+  transform: scale(1.025) !important;
+}
+
+/* testi interni sempre bianchi, anche in hover, dark e light */
+body .home-search-map-preview-fixed :where(h1, h2, h3, h4, p, span, small, strong),
+body .home-search-map-preview-fixed:hover :where(h1, h2, h3, h4, p, span, small, strong),
+body .home-search-map-preview-fixed:focus-visible :where(h1, h2, h3, h4, p, span, small, strong) {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* bottone interno Apri sempre nero con testo bianco */
+body .home-search-map-preview-fixed :where(a, button)[class*="rounded"],
+body .home-search-map-preview-fixed:hover :where(a, button)[class*="rounded"],
+body .home-search-map-preview-fixed:focus-visible :where(a, button)[class*="rounded"] {
+  background: #050505 !important;
+  background-color: #050505 !important;
+  color: #ffffff !important;
+}
+
+body .home-search-map-preview-fixed :where(a, button)[class*="rounded"] *,
+body .home-search-map-preview-fixed:hover :where(a, button)[class*="rounded"] *,
+body .home-search-map-preview-fixed:focus-visible :where(a, button)[class*="rounded"] * {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* blocca eventuali pseudo-effetti globali su questo tasto */
+body .home-search-map-preview-fixed::before,
+body .home-search-map-preview-fixed::after,
+body .home-search-map-preview-fixed:hover::before,
+body .home-search-map-preview-fixed:hover::after,
+body .home-search-map-preview-fixed:focus-visible::before,
+body .home-search-map-preview-fixed:focus-visible::after {
+  background-color: inherit !important;
+}
+
+/* === SOLO TASTO MAPPA RICERCA HOME FIX END === */
