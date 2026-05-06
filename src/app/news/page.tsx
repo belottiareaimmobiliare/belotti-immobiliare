@@ -104,7 +104,7 @@ function NewsCard({
           )}
         </div>
 
-        <div className="relative px-6 pb-7 pt-5 transition duration-300 group-hover:bg-[var(--site-surface-2)]">
+        <div className="relative px-6 pb-7 pt-5 transition duration-300">
           <div className="inline-flex rounded-full border border-[var(--site-border)] bg-[var(--site-surface-2)] px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-[var(--site-text-soft)] transition duration-300 group-hover:border-[var(--site-border-strong)] group-hover:text-[var(--site-text)]">
             {item.source_type === 'facebook' ? 'Facebook' : 'Editoriale'}
           </div>
