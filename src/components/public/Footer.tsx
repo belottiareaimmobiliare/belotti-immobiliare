@@ -159,7 +159,7 @@ export default function Footer() {
             <button
               type="button"
               onClick={handleOpenCookieBanner}
-              className="text-left text-white/72 transition hover:text-white"
+              className="footer-cookie-preferences-button text-left text-white/72 transition hover:text-white"
             >
               Modifica preferenze cookie
             </button>

@@ -2275,3 +2275,45 @@ body .home-search-map-preview-fixed:focus-visible :where([class*="bg-black"], [c
 }
 
 /* === FOOTER DARK LINKS FIX END === */
+
+/* === FOOTER COOKIE BUTTON CLEAN FIX START === */
+
+.site-footer-force-dark .footer-cookie-preferences-button,
+.site-footer-force-dark .footer-cookie-preferences-button:hover,
+.site-footer-force-dark .footer-cookie-preferences-button:focus-visible {
+  display: inline !important;
+  width: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transform: none !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.site-footer-force-dark .footer-cookie-preferences-button:hover,
+.site-footer-force-dark .footer-cookie-preferences-button:focus-visible {
+  color: #ffffff !important;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.site-footer-force-dark .footer-cookie-preferences-button::before,
+.site-footer-force-dark .footer-cookie-preferences-button::after,
+.site-footer-force-dark .footer-cookie-preferences-button:hover::before,
+.site-footer-force-dark .footer-cookie-preferences-button:hover::after,
+.site-footer-force-dark .footer-cookie-preferences-button:focus-visible::before,
+.site-footer-force-dark .footer-cookie-preferences-button:focus-visible::after {
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* === FOOTER COOKIE BUTTON CLEAN FIX END === */
