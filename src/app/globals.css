@@ -2247,3 +2247,31 @@ body .home-search-map-preview-fixed:focus-visible :where([class*="bg-black"], [c
 }
 
 /* === NEWS CARD FULL BOX HOVER FIX END === */
+
+/* === FOOTER DARK LINKS FIX START === */
+
+.site-footer-force-dark a,
+.site-footer-force-dark button {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.site-footer-force-dark a:hover,
+.site-footer-force-dark a:focus-visible,
+.site-footer-force-dark button:hover,
+.site-footer-force-dark button:focus-visible {
+  color: #ffffff !important;
+}
+
+.site-footer-force-dark a span,
+.site-footer-force-dark button span {
+  color: inherit !important;
+}
+
+/* icone social dentro il pallino restano bianche */
+.site-footer-force-dark a span.inline-flex,
+.site-footer-force-dark a span.inline-flex svg {
+  color: #ffffff !important;
+  fill: currentColor !important;
+}
+
+/* === FOOTER DARK LINKS FIX END === */
