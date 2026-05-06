@@ -1987,3 +1987,27 @@ body :where(button, a)[class*="rounded"]:not(:disabled):not([aria-disabled="true
 }
 
 /* === HOME MAP PREVIEW CARD HOVER FIX END === */
+
+/* === HOME MAP PREVIEW CARD FIX START === */
+
+.home-map-preview-card:hover,
+.home-map-preview-card:focus-visible {
+  background: inherit !important;
+  background-color: inherit !important;
+  color: inherit !important;
+}
+
+.home-map-preview-card:hover *,
+.home-map-preview-card:focus-visible * {
+  color: inherit !important;
+  fill: currentColor !important;
+}
+
+.home-map-preview-card:hover::before,
+.home-map-preview-card:hover::after,
+.home-map-preview-card:focus-visible::before,
+.home-map-preview-card:focus-visible::after {
+  opacity: inherit !important;
+}
+
+/* === HOME MAP PREVIEW CARD FIX END === */
