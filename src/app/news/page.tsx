@@ -79,7 +79,7 @@ function NewsCard({
   return (
     <Link
       href={hrefFor(item)}
-      className="theme-panel group relative overflow-hidden rounded-[30px] border transition duration-300 hover:border-[var(--site-border-strong)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.22)]"
+      className="news-card-full-hover theme-panel group relative overflow-hidden rounded-[30px] border transition duration-300 hover:border-[var(--site-border-strong)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.22)]"
     >
       <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.015)_30%,rgba(255,255,255,0.03)_60%,rgba(255,255,255,0.015)_100%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_14%,rgba(255,255,255,0.08),transparent_30%),radial-gradient(circle_at_82%_18%,rgba(255,255,255,0.04),transparent_24%)]" />
