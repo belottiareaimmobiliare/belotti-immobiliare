@@ -236,49 +236,53 @@ export default function ContattiPage() {
                 </div>
 
                 <div className="rounded-[20px] border border-[#e8dcc8] bg-transparent p-4">
-                  <p className="text-[11px] uppercase tracking-[0.32em] text-neutral-400">
-                    Indirizzo
-                  </p>
+                  <div className="flex items-center justify-between gap-5">
+                    <div className="min-w-0">
+                      <p className="text-[11px] uppercase tracking-[0.32em] text-neutral-400">
+                        Indirizzo
+                      </p>
 
-                  <div className="mt-5 space-y-2 text-sm leading-relaxed text-[var(--site-text-muted)]">
-                    <p>{String((content as any).addressLine1 ?? 'Via A. Locatelli 62')}</p>
-                    <p>{String((content as any).addressLine2 ?? '24121 Bergamo')}</p>
-                  </div>
+                      <div className="mt-5 space-y-2 text-sm leading-relaxed text-[var(--site-text-muted)]">
+                        <p>Via A. Locatelli 62</p>
+                        <p>24121 Bergamo</p>
+                      </div>
+                    </div>
 
-                  <div className="mt-7 flex items-center justify-center gap-4">
-                    <a
-                      href={wazeHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Apri su Waze"
-                      title="Apri su Waze"
-                      className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e3d7c3] bg-transparent p-0 text-[var(--site-text-muted)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-transparent focus:bg-transparent active:bg-transparent"
-                    >
-                      <Image
-                        src="/brand/navigation/waze.png"
-                        alt="Waze"
-                        width={1024}
-                        height={1024}
-                        className="block h-7 w-7 object-contain"
-                      />
-                    </a>
+                    <div className="flex shrink-0 flex-col items-center justify-center gap-3">
+                      <a
+                        href={googleMapsHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Apri su Google Maps"
+                        title="Apri su Google Maps"
+                        className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e3d7c3] bg-transparent p-0 shadow-none transition-transform duration-200 hover:-translate-y-0.5 hover:bg-transparent hover:shadow-none focus:bg-transparent active:bg-transparent"
+                      >
+                        <Image
+                          src="/brand/navigation/google-maps.png"
+                          alt="Google Maps"
+                          width={1024}
+                          height={1536}
+                          className="block h-7 w-7 object-contain"
+                        />
+                      </a>
 
-                    <a
-                      href={googleMapsHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Apri su Google Maps"
-                      title="Apri su Google Maps"
-                      className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e3d7c3] bg-transparent p-0 text-[var(--site-text-muted)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-transparent focus:bg-transparent active:bg-transparent"
-                    >
-                      <Image
-                        src="/brand/navigation/google-maps.png"
-                        alt="Google Maps"
-                        width={1024}
-                        height={1536}
-                        className="block h-7 w-7 object-contain"
-                      />
-                    </a>
+                      <a
+                        href={wazeHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Apri su Waze"
+                        title="Apri su Waze"
+                        className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e3d7c3] bg-transparent p-0 shadow-none transition-transform duration-200 hover:-translate-y-0.5 hover:bg-transparent hover:shadow-none focus:bg-transparent active:bg-transparent"
+                      >
+                        <Image
+                          src="/brand/navigation/waze.png"
+                          alt="Waze"
+                          width={1024}
+                          height={1024}
+                          className="block h-7 w-7 object-contain"
+                        />
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
