@@ -2724,3 +2724,32 @@ body.property-gallery-open .site-whatsapp-floating {
 body.property-gallery-open {
   overflow: hidden;
 }
+
+/* Admin: leggibilità badge e titoli privacy in light/dark */
+.admin-location-badge-precise {
+  color: #6ee7b7 !important;
+}
+
+.admin-location-badge-common {
+  color: #7dd3fc !important;
+}
+
+.admin-privacy-consent-title {
+  color: #047857 !important;
+}
+
+html.dark .admin-privacy-consent-title,
+body.dark .admin-privacy-consent-title,
+.dark .admin-privacy-consent-title,
+.theme-dark .admin-privacy-consent-title,
+[data-theme="dark"] .admin-privacy-consent-title,
+[data-mode="dark"] .admin-privacy-consent-title,
+[data-color-mode="dark"] .admin-privacy-consent-title {
+  color: #6ee7b7 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .admin-privacy-consent-title {
+    color: #6ee7b7 !important;
+  }
+}

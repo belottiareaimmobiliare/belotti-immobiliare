@@ -466,7 +466,7 @@ export default async function AdminLeadsPage({
                         ) : null}
 
                         <div className="mt-5 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-4">
-                          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-950">
+                          <p className="admin-privacy-consent-title text-xs font-semibold uppercase tracking-[0.22em]">
                             Privacy e consenso
                           </p>
 
