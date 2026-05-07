@@ -315,6 +315,41 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 
+
+function cleanPropertyDisplayValue(value: unknown) {
+  const clean = String(value ?? '').trim()
+
+  if (!clean || clean.toLowerCase() === 'null' || clean.toLowerCase() === 'undefined') {
+    return null
+  }
+
+  return clean
+}
+
+function formatFloorAndLevels(floor: unknown, totalFloors: unknown) {
+  const floorValue = cleanPropertyDisplayValue(floor)
+  const levelsValue = cleanPropertyDisplayValue(totalFloors)
+
+  if (!floorValue && !levelsValue) {
+    return 'Da definire'
+  }
+
+  const levelsNumber = Number(String(levelsValue || '').replace(',', '.'))
+  const levelsLabel =
+    Number.isFinite(levelsNumber) && levelsNumber === 1 ? 'livello' : 'livelli'
+
+  if (floorValue && levelsValue) {
+    return `Piano ${floorValue} · su ${levelsValue} ${levelsLabel}`
+  }
+
+  if (floorValue) {
+    return `Piano ${floorValue}`
+  }
+
+  return `Su ${levelsValue} ${levelsLabel}`
+}
+
+
 export default async function PropertyDetailPage({ params }: PageProps) {
   const { slug } = await params
   const supabase = await createClient()
@@ -390,8 +425,8 @@ export default async function PropertyDetailPage({ params }: PageProps) {
       spanClass: '',
     },
     {
-      label: 'Piano',
-      value: [currentProperty.floor, currentProperty.total_floors ? `di ${currentProperty.total_floors}` : null].filter(Boolean).join(' ') || 'Da definire',
+      label: shouldRenderOptionalField(currentProperty.floor) ? 'Piano / livelli' : 'Livelli',
+      value: formatFloorAndLevels(currentProperty.floor, currentProperty.total_floors),
       visible: shouldRenderOptionalField(currentProperty.floor) || shouldRenderOptionalField(currentProperty.total_floors),
       spanClass: '',
     },

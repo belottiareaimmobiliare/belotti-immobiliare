@@ -672,7 +672,7 @@ const handleSubmit = async (e: React.FormEvent) => { e.preventDefault()
 
               <div>
                 <label className="theme-admin-faint mb-2 block text-xs uppercase tracking-[0.2em]">
-                  Livelli immobile
+                  Livelli interni
                 </label>
               <input
                 name="total_floors"
