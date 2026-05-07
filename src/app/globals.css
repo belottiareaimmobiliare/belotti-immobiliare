@@ -2203,7 +2203,6 @@ body .home-search-map-preview-fixed:focus-visible :where([class*="bg-black"], [c
 .news-card-full-hover {
   position: relative !important;
   overflow: hidden !important;
-  background-color: #141b26 !important;
   transition:
     background-color 0.24s ease,
     border-color 0.24s ease,
@@ -2211,36 +2210,62 @@ body .home-search-map-preview-fixed:focus-visible :where([class*="bg-black"], [c
     transform 0.24s ease !important;
 }
 
+/* Hover base: illumina tutto il box */
 .news-card-full-hover:hover,
 .news-card-full-hover:focus-visible {
-  background-color: #252b34 !important;
   border-color: rgba(212, 175, 55, 0.88) !important;
   box-shadow:
     0 0 0 1px rgba(212, 175, 55, 0.45),
-    0 22px 48px rgba(0, 0, 0, 0.32),
-    0 0 36px rgba(212, 175, 55, 0.22) !important;
+    0 22px 48px rgba(0, 0, 0, 0.24),
+    0 0 36px rgba(212, 175, 55, 0.18) !important;
 }
 
-/* blocchi interni: non devono creare un rettangolo separato solo sotto al testo */
+/* Evita rettangoli interni separati */
 .news-card-full-hover:hover > div,
 .news-card-full-hover:focus-visible > div {
   background-color: transparent !important;
 }
 
-/* testi restano chiari */
-.news-card-full-hover:hover :where(h1, h2, h3, h4, p, span, small, time, a, strong),
-.news-card-full-hover:focus-visible :where(h1, h2, h3, h4, p, span, small, time, a, strong) {
+/* DARK THEME: mantiene l'effetto attuale */
+html[data-theme='dark'] .news-card-full-hover {
+  background-color: #141b26 !important;
+}
+
+html[data-theme='dark'] .news-card-full-hover:hover,
+html[data-theme='dark'] .news-card-full-hover:focus-visible {
+  background-color: #252b34 !important;
+}
+
+html[data-theme='dark'] .news-card-full-hover:hover :where(h1, h2, h3, h4, p, span, small, time, a, strong),
+html[data-theme='dark'] .news-card-full-hover:focus-visible :where(h1, h2, h3, h4, p, span, small, time, a, strong) {
   color: #ffffff !important;
 }
 
-/* badge editoriale coerente */
-.news-card-full-hover:hover :where([class*="rounded-full"]),
-.news-card-full-hover:focus-visible :where([class*="rounded-full"]) {
+html[data-theme='dark'] .news-card-full-hover:hover :where([class*="rounded-full"]),
+html[data-theme='dark'] .news-card-full-hover:focus-visible :where([class*="rounded-full"]) {
   background-color: rgba(255, 255, 255, 0.06) !important;
   border-color: rgba(255, 255, 255, 0.30) !important;
 }
 
-/* immagine appena più viva */
+/* LIGHT THEME: niente testi bianchi su hover */
+html[data-theme='light'] .news-card-full-hover:hover,
+html[data-theme='light'] .news-card-full-hover:focus-visible {
+  background-color: #d9d9d9 !important;
+}
+
+html[data-theme='light'] .news-card-full-hover:hover :where(h1, h2, h3, h4, p, span, small, time, a, strong),
+html[data-theme='light'] .news-card-full-hover:focus-visible :where(h1, h2, h3, h4, p, span, small, time, a, strong) {
+  color: #111827 !important;
+}
+
+html[data-theme='light'] .news-card-full-hover:hover :where([class*="rounded-full"]),
+html[data-theme='light'] .news-card-full-hover:focus-visible :where([class*="rounded-full"]) {
+  background-color: rgba(255, 255, 255, 0.72) !important;
+  border-color: rgba(17, 24, 39, 0.18) !important;
+  color: #111827 !important;
+}
+
+/* Immagine appena più viva */
 .news-card-full-hover:hover img,
 .news-card-full-hover:focus-visible img {
   filter: brightness(1.05) contrast(1.03);
