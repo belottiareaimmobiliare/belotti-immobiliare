@@ -2753,3 +2753,54 @@ body.dark .admin-privacy-consent-title,
     color: #6ee7b7 !important;
   }
 }
+
+/* Admin final contrast override:
+   Light mode = testo più scuro
+   Dark mode = testo più luminoso
+*/
+
+/* POSIZIONE PRECISA */
+.admin-location-badge-precise {
+  color: #047857 !important;
+}
+
+/* POSIZIONE COMUNE */
+.admin-location-badge-common {
+  color: #0369a1 !important;
+}
+
+/* PRIVACY E CONSENSO */
+.admin-privacy-consent-title {
+  color: #065f46 !important;
+}
+
+/* DARK MODE */
+html.dark .admin-location-badge-precise,
+body.dark .admin-location-badge-precise,
+.dark .admin-location-badge-precise,
+.theme-dark .admin-location-badge-precise,
+[data-theme="dark"] .admin-location-badge-precise,
+[data-mode="dark"] .admin-location-badge-precise,
+[data-color-mode="dark"] .admin-location-badge-precise {
+  color: #6ee7b7 !important;
+}
+
+html.dark .admin-location-badge-common,
+body.dark .admin-location-badge-common,
+.dark .admin-location-badge-common,
+.theme-dark .admin-location-badge-common,
+[data-theme="dark"] .admin-location-badge-common,
+[data-mode="dark"] .admin-location-badge-common,
+[data-color-mode="dark"] .admin-location-badge-common {
+  color: #7dd3fc !important;
+}
+
+html.dark .admin-privacy-consent-title,
+body.dark .admin-privacy-consent-title,
+.dark .admin-privacy-consent-title,
+.theme-dark .admin-privacy-consent-title,
+[data-theme="dark"] .admin-privacy-consent-title,
+[data-mode="dark"] .admin-privacy-consent-title,
+[data-color-mode="dark"] .admin-privacy-consent-title {
+  color: #6ee7b7 !important;
+}
