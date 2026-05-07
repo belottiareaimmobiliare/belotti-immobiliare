@@ -2734,3 +2734,35 @@ body.is-home-route a.home-draw-area-btn:focus-visible * {
 }
 
 /* === HOME DISEGNA AREA BUTTON FINAL CLEAN END === */
+
+/* === HOME DISEGNA AREA BUTTON 65 OPACITY OVERRIDE === */
+
+html body.is-home-route a.home-draw-area-btn:hover,
+html body.is-home-route a.home-draw-area-btn:focus-visible {
+  background: rgba(0, 0, 0, 0.65) !important;
+  background-color: rgba(0, 0, 0, 0.65) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.20) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+html body.is-home-route a.home-draw-area-btn:hover *,
+html body.is-home-route a.home-draw-area-btn:focus-visible * {
+  color: #ffffff !important;
+  fill: currentColor !important;
+}
+
+html body.is-home-route a.home-draw-area-btn:hover::before,
+html body.is-home-route a.home-draw-area-btn:hover::after,
+html body.is-home-route a.home-draw-area-btn:focus-visible::before,
+html body.is-home-route a.home-draw-area-btn:focus-visible::after {
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
