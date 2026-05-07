@@ -14,6 +14,7 @@ import {
 } from 'react-leaflet'
 import L, { LatLngExpression } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import MarkerClusterGroup from 'react-leaflet-cluster'
 
 type MapProperty = {
   id: string
@@ -309,6 +310,24 @@ function CloseSelectedPropertyOnMapClick({ onClose }: { onClose: () => void }) {
   return null
 }
 
+type MarkerClusterLike = {
+  getChildCount: () => number
+}
+
+const createClusterCustomIcon = (cluster: MarkerClusterLike) => {
+  const count = cluster.getChildCount()
+
+  let sizeClass = ''
+  if (count >= 10 && count < 30) sizeClass = ' is-medium'
+  if (count >= 30) sizeClass = ' is-large'
+
+  return L.divIcon({
+    html: `<div class="map-cluster-badge${sizeClass}">${count}</div>`,
+    className: 'map-cluster',
+    iconSize: [54, 54],
+  })
+}
+
 export default function AreaDrawMap({ properties }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -496,7 +515,15 @@ export default function AreaDrawMap({ properties }: Props) {
           onAddPoint={handleAddPoint}
         />
 
-        {validProperties.map((property) => (
+        <MarkerClusterGroup
+          chunkedLoading
+          showCoverageOnHover={false}
+          spiderfyOnMaxZoom
+          zoomToBoundsOnClick
+          maxClusterRadius={55}
+          iconCreateFunction={createClusterCustomIcon}
+        >
+          {validProperties.map((property) => (
           <Marker
             key={property.id}
             position={[property.latitude, property.longitude]}
@@ -508,6 +535,7 @@ export default function AreaDrawMap({ properties }: Props) {
             }}
           />
         ))}
+        </MarkerClusterGroup>
 
         {polygonPoints.length > 0 && !isClosed && (
           <Polyline

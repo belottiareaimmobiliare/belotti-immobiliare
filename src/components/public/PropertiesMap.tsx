@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { MapContainer, Marker, Polygon, TileLayer, useMap, useMapEvents} from 'react-leaflet'
-import L from 'leaflet'
 import Link from 'next/link'
+import MarkerClusterGroup from 'react-leaflet-cluster'
+import L from 'leaflet'
 
 type MapProperty = {
   id: string
@@ -154,6 +155,24 @@ function CloseSelectedPropertyOnMapClick({ onClose }: { onClose: () => void }) {
   return null
 }
 
+type MarkerClusterLike = {
+  getChildCount: () => number
+}
+
+const createClusterCustomIcon = (cluster: MarkerClusterLike) => {
+  const count = cluster.getChildCount()
+
+  let sizeClass = ''
+  if (count >= 10 && count < 30) sizeClass = ' is-medium'
+  if (count >= 30) sizeClass = ' is-large'
+
+  return L.divIcon({
+    html: `<div class="map-cluster-badge${sizeClass}">${count}</div>`,
+    className: 'map-cluster',
+    iconSize: [54, 54],
+  })
+}
+
 export default function PropertiesMap({
   properties,
   polygon = null,
@@ -215,7 +234,15 @@ export default function PropertiesMap({
           />
         )}
 
-        {validProperties.map((property) => (
+        <MarkerClusterGroup
+          chunkedLoading
+          showCoverageOnHover={false}
+          spiderfyOnMaxZoom
+          zoomToBoundsOnClick
+          maxClusterRadius={55}
+          iconCreateFunction={createClusterCustomIcon}
+        >
+          {validProperties.map((property) => (
           <Marker
             key={property.id}
             position={[property.latitude as number, property.longitude as number]}
@@ -227,6 +254,7 @@ export default function PropertiesMap({
             }}
           />
         ))}
+        </MarkerClusterGroup>
       </MapContainer>
 
       {selectedProperty && (
