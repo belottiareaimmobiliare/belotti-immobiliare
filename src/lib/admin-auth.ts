@@ -117,7 +117,7 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
       label: 'Amministrazione',
       children: [
         { href: '/admin/utenti', label: 'Active Directory' },
-        { href: '/admin/autori', label: 'Editors' },
+        { href: '/admin/autori', label: 'Autori' },
         { href: '/admin/kpi', label: 'KPI agenti' },
         { href: '/admin/logs', label: 'Logs' },
       ],
