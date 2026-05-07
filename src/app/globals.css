@@ -2714,3 +2714,13 @@ body.is-home-route a.home-draw-area-btn:focus-visible::after {
 }
 
 /* === HOME DISEGNA AREA BUTTON OVERLAY FIX END === */
+
+/* Galleria immobile aperta: nasconde il pulsante WhatsApp flottante */
+body.property-gallery-open .site-whatsapp-floating {
+  display: none !important;
+}
+
+/* Evita lo scroll della pagina sotto la galleria */
+body.property-gallery-open {
+  overflow: hidden;
+}

@@ -40,9 +40,11 @@ export default function PropertyGalleryLightbox({
 
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    document.body.classList.add('property-gallery-open')
 
     return () => {
       document.body.style.overflow = previousOverflow
+      document.body.classList.remove('property-gallery-open')
     }
   }, [isOpen, initialIndex])
 
@@ -87,7 +89,7 @@ export default function PropertyGalleryLightbox({
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, images.length])
+  }, [isOpen, images.length, onClose])
 
   const currentImage = useMemo(() => images[currentIndex], [images, currentIndex])
 
@@ -100,9 +102,11 @@ export default function PropertyGalleryLightbox({
   const zoomOut = () => {
     setZoom((prev) => {
       const next = Math.max(prev - 0.25, MIN_ZOOM)
+
       if (next === 1) {
         setTranslate({ x: 0, y: 0 })
       }
+
       return next
     })
   }
@@ -111,6 +115,7 @@ export default function PropertyGalleryLightbox({
     event.preventDefault()
 
     const delta = event.deltaY
+
     setZoom((prev) => {
       const next =
         delta < 0
@@ -163,55 +168,55 @@ export default function PropertyGalleryLightbox({
     zoom > 1 ? (dragging ? 'grabbing' : 'grab') : 'zoom-in'
 
   return (
-    <div className="fixed inset-0 z-[120] bg-black">
+    <div className="fixed inset-0 z-[10040] bg-black">
       <div className="absolute inset-0 bg-black/95" onClick={onClose} />
 
-      <div className="absolute left-1/2 top-5 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-black/50 px-4 py-2 text-sm text-white/80 backdrop-blur">
-        <span className="hidden sm:inline">Premi ESC per uscire</span>
-        <span className="hidden sm:inline text-white/30">•</span>
-        <span>
-          {currentIndex + 1} / {images.length}
-        </span>
-      </div>
+      <div className="pointer-events-none fixed left-0 right-0 top-[calc(env(safe-area-inset-top)+12px)] z-[10060] flex justify-center px-3 sm:top-5 sm:px-6">
+        <div className="pointer-events-auto flex max-w-[calc(100vw-24px)] items-center gap-2 rounded-full border border-white/10 bg-black/75 px-2 py-2 text-white shadow-2xl backdrop-blur-xl sm:gap-3 sm:px-3">
+          <button
+            type="button"
+            onClick={zoomOut}
+            className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5 text-lg text-white transition hover:bg-white/15 sm:inline-flex"
+            aria-label="Riduci zoom"
+          >
+            −
+          </button>
 
-      <div className="absolute right-5 top-5 z-20 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={zoomOut}
-          className="rounded-2xl border border-white/10 bg-black/50 px-4 py-2 text-sm text-white/85 transition hover:bg-white/10"
-        >
-          −
-        </button>
+          <button
+            type="button"
+            onClick={zoomIn}
+            className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5 text-lg text-white transition hover:bg-white/15 sm:inline-flex"
+            aria-label="Aumenta zoom"
+          >
+            +
+          </button>
 
-        <button
-          type="button"
-          onClick={zoomIn}
-          className="rounded-2xl border border-white/10 bg-black/50 px-4 py-2 text-sm text-white/85 transition hover:bg-white/10"
-        >
-          +
-        </button>
+          <div className="flex h-10 min-w-[66px] shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5 px-3 text-sm font-medium text-white sm:min-w-[78px]">
+            {currentIndex + 1} / {images.length}
+          </div>
 
-        <button
-          type="button"
-          onClick={resetView}
-          className="rounded-2xl border border-white/10 bg-black/50 px-4 py-2 text-sm text-white/85 transition hover:bg-white/10"
-        >
-          Reset
-        </button>
+          <button
+            type="button"
+            onClick={resetView}
+            className="h-10 shrink-0 rounded-full border border-white/15 bg-white/5 px-4 text-sm font-medium text-white transition hover:bg-white/15"
+          >
+            Reset
+          </button>
 
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-2xl border border-white/10 bg-black/50 px-4 py-2 text-sm text-white/85 transition hover:bg-white/10"
-        >
-          Chiudi
-        </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-10 shrink-0 rounded-full border border-white/15 bg-white/5 px-4 text-sm font-medium text-white transition hover:bg-white/15"
+          >
+            Chiudi
+          </button>
+        </div>
       </div>
 
       <button
         type="button"
         onClick={goPrev}
-        className="absolute left-5 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/10 bg-black/50 px-5 py-4 text-3xl leading-none text-white/90 transition hover:bg-white/10"
+        className="absolute left-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/45 text-4xl leading-none text-white/90 transition hover:bg-white/10 sm:left-5 sm:h-auto sm:w-auto sm:px-5 sm:py-4"
         aria-label="Immagine precedente"
       >
         ‹
@@ -220,14 +225,14 @@ export default function PropertyGalleryLightbox({
       <button
         type="button"
         onClick={goNext}
-        className="absolute right-5 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/10 bg-black/50 px-5 py-4 text-3xl leading-none text-white/90 transition hover:bg-white/10"
+        className="absolute right-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/45 text-4xl leading-none text-white/90 transition hover:bg-white/10 sm:right-5 sm:h-auto sm:w-auto sm:px-5 sm:py-4"
         aria-label="Immagine successiva"
       >
         ›
       </button>
 
       <div
-        className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden"
+        className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden px-3"
         onWheel={handleWheel}
         onMouseMove={handleMouseMove}
         onMouseUp={stopDragging}
@@ -239,7 +244,7 @@ export default function PropertyGalleryLightbox({
           draggable={false}
           onMouseDown={handleMouseDown}
           onDoubleClick={handleDoubleClick}
-          className="max-h-[92vh] max-w-[92vw] select-none object-contain"
+          className="max-h-[82vh] max-w-[94vw] select-none object-contain sm:max-h-[92vh] sm:max-w-[92vw]"
           style={{
             transform: `translate(${translate.x}px, ${translate.y}px) scale(${zoom})`,
             cursor: imageCursor,
