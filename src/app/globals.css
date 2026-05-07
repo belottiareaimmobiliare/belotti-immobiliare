@@ -2690,50 +2690,33 @@ body.is-home-route .home-discover-brand-btn:focus-visible :where(span, strong, s
   fill: currentColor !important;
 }
 
-/* === HOME DISEGNA AREA BUTTON HOVER FIX START === */
+/* === HOME DISEGNA AREA BUTTON FINAL CLEAN START === */
 
-body.is-home-route .home-draw-area-btn:hover,
-body.is-home-route .home-draw-area-btn:focus-visible {
+body.is-home-route a.home-draw-area-btn,
+body.is-home-route a.home-draw-area-btn:visited {
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.20) !important;
+}
+
+body.is-home-route a.home-draw-area-btn:hover,
+body.is-home-route a.home-draw-area-btn:focus-visible {
   background: rgba(0, 0, 0, 0.75) !important;
   background-color: rgba(0, 0, 0, 0.75) !important;
   background-image: none !important;
   color: #ffffff !important;
-}
-
-body.is-home-route .home-draw-area-btn:hover :where(span, strong, small, p, svg),
-body.is-home-route .home-draw-area-btn:focus-visible :where(span, strong, small, p, svg) {
-  color: #ffffff !important;
-  fill: currentColor !important;
-}
-
-/* === HOME DISEGNA AREA BUTTON HOVER FIX END === */
-
-/* === HOME DISEGNA AREA BUTTON HOVER 75 PERCENT FINAL === */
-
-html body .home-draw-area-btn:hover,
-html body .home-draw-area-btn:focus-visible,
-html body.is-home-route .home-draw-area-btn:hover,
-html body.is-home-route .home-draw-area-btn:focus-visible,
-html[data-theme='light'] body .home-draw-area-btn:hover,
-html[data-theme='light'] body .home-draw-area-btn:focus-visible,
-html[data-theme='dark'] body .home-draw-area-btn:hover,
-html[data-theme='dark'] body .home-draw-area-btn:focus-visible {
-  background: rgba(0, 0, 0, 0.75) !important;
-  background-color: rgba(0, 0, 0, 0.75) !important;
-  background-image: none !important;
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.28) !important;
+  border-color: rgba(255, 255, 255, 0.20) !important;
   box-shadow: none !important;
   opacity: 1 !important;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
-/* spegne eventuali effetti globali/pseudo-elementi che lo rendono nero pieno */
-html body .home-draw-area-btn:hover::before,
-html body .home-draw-area-btn:hover::after,
-html body .home-draw-area-btn:focus-visible::before,
-html body .home-draw-area-btn:focus-visible::after {
+body.is-home-route a.home-draw-area-btn::before,
+body.is-home-route a.home-draw-area-btn::after,
+body.is-home-route a.home-draw-area-btn:hover::before,
+body.is-home-route a.home-draw-area-btn:hover::after,
+body.is-home-route a.home-draw-area-btn:focus-visible::before,
+body.is-home-route a.home-draw-area-btn:focus-visible::after {
   content: none !important;
   display: none !important;
   opacity: 0 !important;
@@ -2743,10 +2726,11 @@ html body .home-draw-area-btn:focus-visible::after {
   box-shadow: none !important;
 }
 
-/* testo sempre bianco */
-html body .home-draw-area-btn:hover *,
-html body .home-draw-area-btn:focus-visible * {
+body.is-home-route a.home-draw-area-btn *,
+body.is-home-route a.home-draw-area-btn:hover *,
+body.is-home-route a.home-draw-area-btn:focus-visible * {
   color: #ffffff !important;
   fill: currentColor !important;
 }
 
+/* === HOME DISEGNA AREA BUTTON FINAL CLEAN END === */
