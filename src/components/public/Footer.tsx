@@ -4,19 +4,22 @@ import Link from 'next/link'
 
 const partnerLogos = [
   {
-    label: 'Immobiliare.it',
+    label: 'immobiliare.it',
     src: '/images/partners/transparent-logo-immobiliareit.png',
     href: 'https://www.immobiliare.it/agenzie-immobiliari/23950/area-bergamo/',
+    fitClass: 'max-w-[300px] max-h-[58px]',
   },
   {
-    label: 'Casa.it',
+    label: 'casa.it',
     src: '/images/partners/transparent-logo-casait.png',
     href: 'https://www.casa.it/agenzie/area-immobiliare-sas-di-belotti-g-72711/',
+    fitClass: 'max-w-[250px] max-h-[64px]',
   },
   {
-    label: 'Idealista',
+    label: 'idealista',
     src: '/images/partners/transparent-logo-idealista.png',
     href: 'https://www.idealista.it/pro/area-immobiliare-bergamo/',
+    fitClass: 'max-w-[270px] max-h-[58px]',
   },
 ]
 
@@ -33,23 +36,23 @@ export default function Footer() {
 
       <div className="mt-6 grid gap-2 md:grid-cols-3 md:gap-6 xl:grid-cols-3">
   {partnerLogos.map((partner) => (
-    <a
-      key={partner.label}
-      href={partner.href}
-      target="_blank"
-      rel="noreferrer"
-      aria-label={`Apri il profilo ${partner.label} di Area Immobiliare`}
-      className="flex min-h-[72px] items-center justify-start border-b border-white/10 py-3 transition hover:scale-[1.03] hover:opacity-100 md:min-h-[96px] md:justify-center md:border-b-0 md:py-0"
-    >
-      <div className="flex w-[190px] items-center justify-start md:w-auto md:justify-center">
-        <img
-          src={partner.src}
-          alt={partner.label}
-          className="max-h-[44px] w-auto max-w-[180px] object-contain opacity-95 md:max-h-[70px] md:max-w-[200px]"
-        />
-      </div>
-    </a>
-  ))}
+          <a
+            key={partner.label}
+            href={partner.href}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`Apri il profilo ${partner.label} di Area Immobiliare`}
+            className="group flex min-h-[140px] items-center justify-center rounded-[28px] px-6 py-6 transition hover:bg-white/[0.02]"
+          >
+            <div className="flex h-[88px] w-full items-center justify-center">
+              <img
+                src={partner.src}
+                alt={partner.label}
+                className={`h-auto w-auto object-contain ${partner.fitClass} transition duration-200 group-hover:scale-[1.02]`}
+              />
+            </div>
+          </a>
+        ))}
 </div>
 
       <div className="mt-10 block xl:hidden">
