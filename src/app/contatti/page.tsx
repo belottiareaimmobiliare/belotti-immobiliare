@@ -243,14 +243,15 @@ export default function ContattiPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Apri su Waze"
-                  className="flex h-24 items-center justify-center bg-transparent p-0 shadow-none outline-none transition-transform duration-200 hover:scale-[1.03] hover:bg-transparent hover:shadow-none focus:bg-transparent active:bg-transparent"
+                  className="flex h-[112px] items-center justify-center !bg-transparent bg-transparent p-0 !shadow-none shadow-none outline-none transition-none hover:!bg-transparent hover:bg-transparent hover:!shadow-none hover:shadow-none focus:!bg-transparent active:!bg-transparent"
+                  style={{ backgroundColor: 'transparent', boxShadow: 'none' }}
                 >
                   <Image
                     src="/brand/navigation/waze.png"
                     alt="Waze"
                     width={1024}
                     height={1024}
-                    className="h-[92px] w-auto max-w-[118px] object-contain"
+                    className="block h-[92px] w-auto max-w-[110px] object-contain"
                   />
                 </a>
 
@@ -259,14 +260,15 @@ export default function ContattiPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Apri su Google Maps"
-                  className="flex h-24 items-center justify-center bg-transparent p-0 shadow-none outline-none transition-transform duration-200 hover:scale-[1.03] hover:bg-transparent hover:shadow-none focus:bg-transparent active:bg-transparent"
+                  className="flex h-[112px] items-center justify-center !bg-transparent bg-transparent p-0 !shadow-none shadow-none outline-none transition-none hover:!bg-transparent hover:bg-transparent hover:!shadow-none hover:shadow-none focus:!bg-transparent active:!bg-transparent"
+                  style={{ backgroundColor: 'transparent', boxShadow: 'none' }}
                 >
                   <Image
                     src="/brand/navigation/google-maps.png"
                     alt="Google Maps"
                     width={1024}
                     height={1536}
-                    className="h-[92px] w-auto max-w-[118px] object-contain"
+                    className="block h-[92px] w-auto max-w-[110px] object-contain"
                   />
                 </a>
               </div>
