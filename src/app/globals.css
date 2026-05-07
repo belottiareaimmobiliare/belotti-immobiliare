@@ -2561,3 +2561,57 @@ body header a[href*="tiktok.com"]:focus-visible * {
 }
 
 /* === MAP POPUP OPEN BUTTON END === */
+
+/* === MAP POPUP APRI SCHEDA FINAL OVERRIDE === */
+/* Solo tasto "Apri scheda" nei popup mappa */
+
+.map-popup-open-btn {
+  background: #08111f !important;
+  background-color: #08111f !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border: 1px solid #08111f !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+  font-weight: 700 !important;
+}
+
+/* Hover: bianco + scritta nera + bordo nero sottile */
+.map-popup-open-btn:hover,
+.map-popup-open-btn:focus-visible {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #08111f !important;
+  border: 1px solid #08111f !important;
+  box-shadow: 0 8px 18px rgba(8, 17, 31, 0.12) !important;
+  text-decoration: none !important;
+}
+
+/* Spegne qualsiasi oro/pseudo-effetto globale rimasto */
+.map-popup-open-btn::before,
+.map-popup-open-btn::after,
+.map-popup-open-btn:hover::before,
+.map-popup-open-btn:hover::after,
+.map-popup-open-btn:focus-visible::before,
+.map-popup-open-btn:focus-visible::after {
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+/* Testo coerente dentro al bottone */
+.map-popup-open-btn *,
+.map-popup-open-btn:hover *,
+.map-popup-open-btn:focus-visible * {
+  color: inherit !important;
+  fill: currentColor !important;
+  text-decoration: none !important;
+}
+
