@@ -160,42 +160,51 @@ export default function ContattiPage() {
 
               <div className="mt-5 space-y-4">
                 <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
-              <div className="mt-6 flex items-center justify-center gap-4">
-                <a
-                  href={wazeHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Apri su Waze"
-                  title="Apri su Waze"
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e3d7c3] bg-[#fbf7ee] p-0 shadow-[0_8px_22px_rgba(45,38,24,0.08)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-[#fbf7ee] hover:shadow-[0_10px_26px_rgba(45,38,24,0.10)] focus:bg-[#fbf7ee] active:bg-[#fbf7ee]"
-                  style={{ backgroundColor: '#fbf7ee' }}
-                >
-                  <Image
-                    src="/brand/navigation/waze.png"
-                    alt="Waze"
-                    width={1024}
-                    height={1024}
-                    className="block h-7 w-7 object-contain"
-                  />
-                </a>
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.32em] text-neutral-400">
+                  Indirizzo
+                </p>
 
-                <a
-                  href={googleMapsHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Apri su Google Maps"
-                  title="Apri su Google Maps"
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e3d7c3] bg-[#fbf7ee] p-0 shadow-[0_8px_22px_rgba(45,38,24,0.08)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-[#fbf7ee] hover:shadow-[0_10px_26px_rgba(45,38,24,0.10)] focus:bg-[#fbf7ee] active:bg-[#fbf7ee]"
-                  style={{ backgroundColor: '#fbf7ee' }}
-                >
-                  <Image
-                    src="/brand/navigation/google-maps.png"
-                    alt="Google Maps"
-                    width={1024}
-                    height={1536}
-                    className="block h-7 w-7 object-contain"
-                  />
-                </a>
+                <div className="mt-5 space-y-2 text-sm leading-relaxed text-neutral-700">
+                  <p>Via A. Locatelli 62</p>
+                  <p>24121 Bergamo</p>
+                </div>
+
+                <div className="mt-7 flex items-center justify-center gap-4">
+                  <a
+                    href={wazeHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Apri su Waze"
+                    title="Apri su Waze"
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e3d7c3] bg-[#fbf7ee] p-0 shadow-[0_8px_22px_rgba(45,38,24,0.08)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-[#fbf7ee] hover:shadow-[0_10px_26px_rgba(45,38,24,0.10)] focus:bg-[#fbf7ee] active:bg-[#fbf7ee]"
+                  >
+                    <Image
+                      src="/brand/navigation/waze.png"
+                      alt="Waze"
+                      width={1024}
+                      height={1024}
+                      className="block h-7 w-7 object-contain"
+                    />
+                  </a>
+
+                  <a
+                    href={googleMapsHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Apri su Google Maps"
+                    title="Apri su Google Maps"
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e3d7c3] bg-[#fbf7ee] p-0 shadow-[0_8px_22px_rgba(45,38,24,0.08)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-[#fbf7ee] hover:shadow-[0_10px_26px_rgba(45,38,24,0.10)] focus:bg-[#fbf7ee] active:bg-[#fbf7ee]"
+                  >
+                    <Image
+                      src="/brand/navigation/google-maps.png"
+                      alt="Google Maps"
+                      width={1024}
+                      height={1536}
+                      className="block h-7 w-7 object-contain"
+                    />
+                  </a>
+                </div>
               </div>
                 </div>
               </div>
