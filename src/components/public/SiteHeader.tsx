@@ -130,7 +130,7 @@ export default function SiteHeader() {
               target="_blank"
               rel="noreferrer"
               aria-label="TikTok Consigli Immobiliari AI"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--site-border)] bg-[var(--site-surface-2)] text-[var(--site-text)] transition hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface)]"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--site-border)] bg-[var(--site-surface-2)] text-[var(--site-text)] transition hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface)] navbar-home-tiktok-icon"
               title="Consigli Immobiliari AI"
             >
               <svg

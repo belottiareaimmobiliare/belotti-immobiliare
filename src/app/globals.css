@@ -2577,3 +2577,62 @@ body .leaflet-container a.map-popup-open-btn:focus-visible * {
 }
 
 /* === MAP POPUP OPEN BUTTON CLEAN END === */
+
+/* === HOME NAVBAR TIKTOK ICON FIX START === */
+
+body.is-home-route header .navbar-home-tiktok-icon,
+body.is-home-route header .navbar-home-tiktok-icon:hover,
+body.is-home-route header .navbar-home-tiktok-icon:focus-visible {
+  position: relative !important;
+  overflow: visible !important;
+  isolation: isolate !important;
+  background: #050505 !important;
+  background-color: #050505 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+body.is-home-route header .navbar-home-tiktok-icon::before,
+body.is-home-route header .navbar-home-tiktok-icon::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: -3px !important;
+  border-radius: 999px !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+body.is-home-route header .navbar-home-tiktok-icon::before {
+  border: 2px solid #25F4EE !important;
+  transform: translate(-4px, -2px) !important;
+  z-index: -2 !important;
+}
+
+body.is-home-route header .navbar-home-tiktok-icon::after {
+  border: 2px solid #FE2C55 !important;
+  transform: translate(4px, 2px) !important;
+  z-index: -3 !important;
+}
+
+body.is-home-route header .navbar-home-tiktok-icon svg,
+body.is-home-route header .navbar-home-tiktok-icon:hover svg,
+body.is-home-route header .navbar-home-tiktok-icon:focus-visible svg {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  filter: none !important;
+}
+
+body.is-home-route header .navbar-home-tiktok-icon > *,
+body.is-home-route header .navbar-home-tiktok-icon:hover > *,
+body.is-home-route header .navbar-home-tiktok-icon:focus-visible > * {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* === HOME NAVBAR TIKTOK ICON FIX END === */
