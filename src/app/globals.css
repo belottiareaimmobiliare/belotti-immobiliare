@@ -2804,3 +2804,18 @@ body.dark .admin-privacy-consent-title,
 [data-color-mode="dark"] .admin-privacy-consent-title {
   color: #6ee7b7 !important;
 }
+
+/* Admin immobili: badge Published leggibile in light/dark */
+.admin-property-status-published {
+  color: #047857 !important;
+}
+
+html.dark .admin-property-status-published,
+body.dark .admin-property-status-published,
+.dark .admin-property-status-published,
+.theme-dark .admin-property-status-published,
+[data-theme="dark"] .admin-property-status-published,
+[data-mode="dark"] .admin-property-status-published,
+[data-color-mode="dark"] .admin-property-status-published {
+  color: #6ee7b7 !important;
+}

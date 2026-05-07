@@ -130,7 +130,7 @@ function getLocationBadge(property: Property) {
     return {
       label: 'Posizione precisa',
       className:
-        'admin-location-badge-precise border-emerald-400/30 bg-emerald-500/10 text-emerald-300',
+        'admin-location-badge-precise admin-property-status-published border-emerald-400/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
     }
   }
 
