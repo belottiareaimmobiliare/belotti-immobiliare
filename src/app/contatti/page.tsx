@@ -154,58 +154,132 @@ export default function ContattiPage() {
         <div className="grid gap-8 lg:grid-cols-[380px_minmax(0,1fr)]">
           <aside className="space-y-5">
             <div className="theme-panel rounded-[30px] border p-7">
-              <p className="text-xs uppercase tracking-[0.24em] text-[var(--site-text-faint)]">
+              <p className="text-xs uppercase tracking-[0.32em] text-[var(--site-text-faint)]">
                 Recapiti
               </p>
 
-              <div className="mt-5 space-y-4">
-                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.32em] text-neutral-400">
-                  Indirizzo
-                </p>
+              <div className="mt-6 space-y-4">
+                <div className="rounded-[20px] border border-[#e8dcc8] bg-transparent p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.32em] text-neutral-400">
+                        Telefono
+                      </p>
+                      <p className="mt-3 text-sm text-[var(--site-text-muted)]">
+                        {String((content as any).phone ?? '035 221206')}
+                      </p>
+                    </div>
 
-                <div className="mt-5 space-y-2 text-sm leading-relaxed text-neutral-700">
-                  <p>Via A. Locatelli 62</p>
-                  <p>24121 Bergamo</p>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(String((content as any).phone ?? '035 221206'), 'phone')}
+                      aria-label="Copia telefono"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#e3d7c3] bg-transparent text-[var(--site-text-muted)] transition hover:bg-transparent hover:text-[var(--site-text)]"
+                    >
+                      {copiedField === 'phone' ? (
+                        <span className="text-sm font-semibold">✓</span>
+                      ) : (
+                        <svg
+                          aria-hidden="true"
+                          viewBox="0 0 24 24"
+                          className="h-4 w-4"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <rect x="9" y="9" width="10" height="10" rx="2" />
+                          <path d="M5 15V7a2 2 0 0 1 2-2h8" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="mt-7 flex items-center justify-center gap-4">
-                  <a
-                    href={wazeHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Apri su Waze"
-                    title="Apri su Waze"
-                    className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e3d7c3] bg-[#fbf7ee] p-0 shadow-[0_8px_22px_rgba(45,38,24,0.08)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-[#fbf7ee] hover:shadow-[0_10px_26px_rgba(45,38,24,0.10)] focus:bg-[#fbf7ee] active:bg-[#fbf7ee]"
-                  >
-                    <Image
-                      src="/brand/navigation/waze.png"
-                      alt="Waze"
-                      width={1024}
-                      height={1024}
-                      className="block h-7 w-7 object-contain"
-                    />
-                  </a>
+                <div className="rounded-[20px] border border-[#e8dcc8] bg-transparent p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.32em] text-neutral-400">
+                        Email
+                      </p>
+                      <p className="mt-3 text-sm text-[var(--site-text-muted)]">
+                        {String((content as any).email ?? 'info@areaimmobiliare.com')}
+                      </p>
+                    </div>
 
-                  <a
-                    href={googleMapsHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Apri su Google Maps"
-                    title="Apri su Google Maps"
-                    className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e3d7c3] bg-[#fbf7ee] p-0 shadow-[0_8px_22px_rgba(45,38,24,0.08)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-[#fbf7ee] hover:shadow-[0_10px_26px_rgba(45,38,24,0.10)] focus:bg-[#fbf7ee] active:bg-[#fbf7ee]"
-                  >
-                    <Image
-                      src="/brand/navigation/google-maps.png"
-                      alt="Google Maps"
-                      width={1024}
-                      height={1536}
-                      className="block h-7 w-7 object-contain"
-                    />
-                  </a>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(String((content as any).email ?? 'info@areaimmobiliare.com'), 'email')}
+                      aria-label="Copia email"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#e3d7c3] bg-transparent text-[var(--site-text-muted)] transition hover:bg-transparent hover:text-[var(--site-text)]"
+                    >
+                      {copiedField === 'email' ? (
+                        <span className="text-sm font-semibold">✓</span>
+                      ) : (
+                        <svg
+                          aria-hidden="true"
+                          viewBox="0 0 24 24"
+                          className="h-4 w-4"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <rect x="9" y="9" width="10" height="10" rx="2" />
+                          <path d="M5 15V7a2 2 0 0 1 2-2h8" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
+
+                <div className="rounded-[20px] border border-[#e8dcc8] bg-transparent p-4">
+                  <p className="text-[11px] uppercase tracking-[0.32em] text-neutral-400">
+                    Indirizzo
+                  </p>
+
+                  <div className="mt-5 space-y-2 text-sm leading-relaxed text-[var(--site-text-muted)]">
+                    <p>{String((content as any).addressLine1 ?? 'Via A. Locatelli 62')}</p>
+                    <p>{String((content as any).addressLine2 ?? '24121 Bergamo')}</p>
+                  </div>
+
+                  <div className="mt-7 flex items-center justify-center gap-4">
+                    <a
+                      href={wazeHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Apri su Waze"
+                      title="Apri su Waze"
+                      className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e3d7c3] bg-transparent p-0 text-[var(--site-text-muted)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-transparent focus:bg-transparent active:bg-transparent"
+                    >
+                      <Image
+                        src="/brand/navigation/waze.png"
+                        alt="Waze"
+                        width={1024}
+                        height={1024}
+                        className="block h-7 w-7 object-contain"
+                      />
+                    </a>
+
+                    <a
+                      href={googleMapsHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Apri su Google Maps"
+                      title="Apri su Google Maps"
+                      className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e3d7c3] bg-transparent p-0 text-[var(--site-text-muted)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-transparent focus:bg-transparent active:bg-transparent"
+                    >
+                      <Image
+                        src="/brand/navigation/google-maps.png"
+                        alt="Google Maps"
+                        width={1024}
+                        height={1536}
+                        className="block h-7 w-7 object-contain"
+                      />
+                    </a>
+                  </div>
                 </div>
               </div>
 
