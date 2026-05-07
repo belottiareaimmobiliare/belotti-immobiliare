@@ -160,98 +160,22 @@ export default function ContattiPage() {
 
               <div className="mt-5 space-y-4">
                 <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <a
-                      href={`tel:${content.phoneHref}`}
-                      className="min-w-0 flex-1 transition hover:opacity-90"
-                    >
-                      <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-                        Telefono
-                      </p>
-                      <p className="mt-2 text-sm text-[var(--site-text-soft)]">
-                        {content.phoneLabel}
-                      </p>
-                    </a>
-
-                    <button
-                      type="button"
-                      onClick={() => handleCopy(content.phoneLabel, 'phone')}
-                      className="theme-button-secondary liquid-button inline-flex h-10 w-10 items-center justify-center rounded-xl transition"
-                      aria-label="Copia numero di telefono"
-                      title="Copia numero"
-                    >
-                      <CopyIcon />
-                    </button>
-                  </div>
-
-                  {copiedField === 'phone' && (
-                    <p className="mt-3 text-xs text-emerald-600 dark:text-emerald-300">
-                      Numero copiato
-                    </p>
-                  )}
-                </div>
-
-                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <a
-                      href="mailto:info@areaimmobiliare.com"
-                      className="min-w-0 flex-1 transition hover:opacity-90"
-                    >
-                      <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-                        Email
-                      </p>
-                      <p className="mt-2 break-all text-sm text-[var(--site-text-soft)]">
-                        info@areaimmobiliare.com
-                      </p>
-                    </a>
-
-                    <button
-                      type="button"
-                      onClick={() => handleCopy('info@areaimmobiliare.com', 'email')}
-                      className="theme-button-secondary liquid-button inline-flex h-10 w-10 items-center justify-center rounded-xl transition"
-                      aria-label="Copia email"
-                      title="Copia email"
-                    >
-                      <CopyIcon />
-                    </button>
-                  </div>
-
-                  {copiedField === 'email' && (
-                    <p className="mt-3 text-xs text-emerald-600 dark:text-emerald-300">
-                      Email copiata
-                    </p>
-                  )}
-                </div>
-
-                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-4">
-                  <div className="grid gap-4">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-                        Indirizzo
-                      </p>
-
-                      <p className="mt-3 text-sm leading-7 text-[var(--site-text-soft)]">
-                        Via A. Locatelli 62
-                        <br />
-                        24121 Bergamo
-                      </p>
-                    </div>
-
-              <div className="mt-6 grid grid-cols-2 items-center gap-6">
+              <div className="mt-6 flex items-center justify-center gap-4">
                 <a
                   href={wazeHref}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Apri su Waze"
-                  className="flex h-[112px] items-center justify-center !bg-transparent bg-transparent p-0 !shadow-none shadow-none outline-none transition-none hover:!bg-transparent hover:bg-transparent hover:!shadow-none hover:shadow-none focus:!bg-transparent active:!bg-transparent"
-                  style={{ backgroundColor: 'transparent', boxShadow: 'none' }}
+                  title="Apri su Waze"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e3d7c3] bg-[#fbf7ee] p-0 shadow-[0_8px_22px_rgba(45,38,24,0.08)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-[#fbf7ee] hover:shadow-[0_10px_26px_rgba(45,38,24,0.10)] focus:bg-[#fbf7ee] active:bg-[#fbf7ee]"
+                  style={{ backgroundColor: '#fbf7ee' }}
                 >
                   <Image
                     src="/brand/navigation/waze.png"
                     alt="Waze"
                     width={1024}
                     height={1024}
-                    className="block h-[92px] w-auto max-w-[110px] object-contain"
+                    className="block h-7 w-7 object-contain"
                   />
                 </a>
 
@@ -260,19 +184,19 @@ export default function ContattiPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Apri su Google Maps"
-                  className="flex h-[112px] items-center justify-center !bg-transparent bg-transparent p-0 !shadow-none shadow-none outline-none transition-none hover:!bg-transparent hover:bg-transparent hover:!shadow-none hover:shadow-none focus:!bg-transparent active:!bg-transparent"
-                  style={{ backgroundColor: 'transparent', boxShadow: 'none' }}
+                  title="Apri su Google Maps"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[#e3d7c3] bg-[#fbf7ee] p-0 shadow-[0_8px_22px_rgba(45,38,24,0.08)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-[#fbf7ee] hover:shadow-[0_10px_26px_rgba(45,38,24,0.10)] focus:bg-[#fbf7ee] active:bg-[#fbf7ee]"
+                  style={{ backgroundColor: '#fbf7ee' }}
                 >
                   <Image
                     src="/brand/navigation/google-maps.png"
                     alt="Google Maps"
                     width={1024}
                     height={1536}
-                    className="block h-[92px] w-auto max-w-[110px] object-contain"
+                    className="block h-7 w-7 object-contain"
                   />
                 </a>
               </div>
-                  </div>
                 </div>
               </div>
 
