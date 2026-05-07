@@ -130,14 +130,14 @@ function getLocationBadge(property: Property) {
     return {
       label: 'Posizione precisa',
       className:
-        'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-800',
+        'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-700 dark:text-emerald-300',
     }
   }
 
   if (property.location_mode === 'comune_center') {
     return {
       label: 'Posizione comune',
-      className: 'border-sky-500/25 bg-sky-500/10 text-sky-700 dark:text-sky-800',
+      className: 'border-sky-500/25 bg-sky-500/10 text-sky-700 dark:text-sky-700 dark:text-sky-300',
     }
   }
 
