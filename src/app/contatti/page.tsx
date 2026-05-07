@@ -246,43 +246,55 @@ export default function ContattiPage() {
                   )}
                 </div>
 
-                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
-                    Indirizzo
-                  </p>
+                <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-4">
+                  <div className="grid grid-cols-[minmax(0,1fr)_96px] gap-3 sm:grid-cols-[minmax(0,1fr)_108px]">
+                    <div className="min-w-0">
+                      <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
+                        Indirizzo
+                      </p>
 
-                  <p className="mt-2 text-sm leading-7 text-[var(--site-text-soft)]">
-                    Via A. Locatelli 62
-                    <br />
-                    24121 Bergamo
-                  </p>
+                      <p className="mt-3 text-sm leading-7 text-[var(--site-text-soft)]">
+                        Via A. Locatelli 62
+                        <br />
+                        24121 Bergamo
+                      </p>
 
-                  <div className="mt-4 grid gap-2">
-                    <a
-                      href={wazeHref}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-3 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-3 py-2.5 text-sm font-semibold text-[var(--site-text)] transition hover:-translate-y-[1px] hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)]"
-                      aria-label="Naviga con Waze"
-                    >
-                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#33ccff] text-white shadow-[0_8px_18px_rgba(51,204,255,0.28)]">
-                        <WazeIcon />
-                      </span>
-                      <span>Naviga con Waze</span>
-                    </a>
+                      <p className="mt-3 text-xs leading-5 text-[var(--site-text-faint)]">
+                        Avvia la navigazione con l’app che preferisci.
+                      </p>
+                    </div>
 
-                    <a
-                      href={googleMapsDirectionsHref}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-3 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-3 py-2.5 text-sm font-semibold text-[var(--site-text)] transition hover:-translate-y-[1px] hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)]"
-                      aria-label="Naviga con Google Maps"
-                    >
-                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-[0_8px_18px_rgba(66,133,244,0.22)]">
-                        <GoogleMapsIcon />
-                      </span>
-                      <span>Naviga con Google Maps</span>
-                    </a>
+                    <div className="grid grid-rows-2 gap-3">
+                      <a
+                        href={wazeHref}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="Naviga con Waze"
+                        className="group flex min-h-[88px] flex-col items-center justify-center rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-2 py-3 text-center transition hover:-translate-y-[1px] hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)]"
+                      >
+                        <span className="inline-flex h-12 w-12 items-center justify-center rounded-[18px] bg-[#7ad8ff] text-white shadow-[0_10px_24px_rgba(122,216,255,0.30)] transition group-hover:scale-[1.03]">
+                          <WazeIcon className="h-7 w-7" />
+                        </span>
+                        <span className="mt-2 text-[11px] font-semibold leading-tight text-[var(--site-text)]">
+                          Waze
+                        </span>
+                      </a>
+
+                      <a
+                        href={googleMapsDirectionsHref}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="Naviga con Google Maps"
+                        className="group flex min-h-[88px] flex-col items-center justify-center rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-2 py-3 text-center transition hover:-translate-y-[1px] hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)]"
+                      >
+                        <span className="inline-flex h-12 w-12 items-center justify-center rounded-[18px] bg-white shadow-[0_10px_24px_rgba(66,133,244,0.20)] transition group-hover:scale-[1.03]">
+                          <GoogleMapsIcon className="h-7 w-7" />
+                        </span>
+                        <span className="mt-2 text-[11px] font-semibold leading-tight text-[var(--site-text)]">
+                          G Maps
+                        </span>
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
