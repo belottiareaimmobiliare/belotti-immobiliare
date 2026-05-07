@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import SiteHeader from '@/components/public/SiteHeader'
 import Footer from '@/components/public/Footer'
@@ -31,30 +32,6 @@ function CopyIcon() {
     >
       <rect x="9" y="9" width="10" height="10" rx="2" />
       <path d="M5 15V7a2 2 0 0 1 2-2h8" />
-    </svg>
-  )
-}
-
-function WazeIcon({ className = 'h-[18px] w-[18px]' }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className={className}
-      fill="none"
-    >
-      <path
-        d="M12 3.4c-4.9 0-8.8 3.4-8.8 7.8 0 2.5 1.2 4.4 3.2 5.7.1 1.8 1.5 3.2 3.3 3.4.5.8 1.3 1.3 2.3 1.3s1.8-.5 2.3-1.3c1.8-.2 3.2-1.6 3.3-3.4 2-1.3 3.2-3.2 3.2-5.7 0-4.4-3.9-7.8-8.8-7.8Z"
-        fill="currentColor"
-      />
-      <circle cx="9.2" cy="11.2" r="1" fill="white" />
-      <circle cx="14.8" cy="11.2" r="1" fill="white" />
-      <path
-        d="M9.6 14.2c.7.6 1.6.9 2.4.9s1.7-.3 2.4-.9"
-        stroke="white"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
     </svg>
   )
 }
@@ -260,36 +237,37 @@ export default function ContattiPage() {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="mt-6 grid grid-cols-2 items-center gap-6">
                       <a
                         href={wazeHref}
                         target="_blank"
-                        rel="noreferrer"
-                        aria-label="Naviga con Waze"
-                        className="group flex aspect-square flex-col items-center justify-center overflow-hidden rounded-[26px] bg-[#7ad8ff] p-3 text-center shadow-[0_14px_30px_rgba(122,216,255,0.24)] transition hover:-translate-y-[1px] hover:scale-[1.02]"
+                        rel="noopener noreferrer"
+                        aria-label="Apri su Waze"
+                        className="flex h-28 items-center justify-center p-0 transition duration-300 hover:-translate-y-1 hover:scale-[1.03]"
                       >
-                        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#2d2d2d] shadow-[0_12px_24px_rgba(0,0,0,0.16)]">
-                          <WazeIcon className="h-10 w-10" />
-                        </span>
-                        <span className="mt-3 text-[11px] font-bold leading-none text-[#172f3f]">
-                          Waze
-                        </span>
+                        <Image
+                          src="/brand/navigation/waze.png"
+                          alt="Waze"
+                          width={512}
+                          height={512}
+                          className="h-28 w-auto max-w-full object-contain"
+                        />
                       </a>
 
                       <a
-                        href={googleMapsDirectionsHref}
+                        href={googleMapsHref}
                         target="_blank"
-                        rel="noreferrer"
-                        aria-label="Naviga con Google Maps"
-                        className="group relative flex aspect-square flex-col items-center justify-center overflow-hidden rounded-[26px] bg-white p-3 text-center shadow-[0_14px_30px_rgba(66,133,244,0.20)] transition hover:-translate-y-[1px] hover:scale-[1.02]"
+                        rel="noopener noreferrer"
+                        aria-label="Apri su Google Maps"
+                        className="flex h-28 items-center justify-center p-0 transition duration-300 hover:-translate-y-1 hover:scale-[1.03]"
                       >
-                        <span className="absolute inset-0 bg-[linear-gradient(135deg,#34a853_0%,#34a853_36%,#fbbc05_36%,#fbbc05_48%,#ffffff_48%,#ffffff_58%,#4285f4_58%,#4285f4_100%)] opacity-95" />
-                        <span className="relative z-10 flex h-16 w-16 items-center justify-center rounded-[20px] bg-white shadow-[0_12px_24px_rgba(0,0,0,0.16)]">
-                          <GoogleMapsIcon className="h-10 w-10" />
-                        </span>
-                        <span className="relative z-10 mt-3 rounded-full bg-black/55 px-2 py-1 text-[11px] font-bold leading-none text-white">
-                          Maps
-                        </span>
+                        <Image
+                          src="/brand/navigation/google-maps.png"
+                          alt="Google Maps"
+                          width={2406}
+                          height={800}
+                          className="h-auto w-full max-w-[190px] object-contain"
+                        />
                       </a>
                     </div>
                   </div>
