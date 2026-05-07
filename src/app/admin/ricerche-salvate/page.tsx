@@ -615,7 +615,7 @@ export default async function AdminSavedSearchesPage() {
                         </div>
 
                         <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-4">
-                          <p className="text-xs uppercase tracking-[0.22em] text-emerald-200">
+                          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-950">
                             Privacy e consenso
                           </p>
 

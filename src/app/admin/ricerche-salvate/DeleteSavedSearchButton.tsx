@@ -14,28 +14,28 @@ export default function DeleteSavedSearchButton({
       action={deleteAction}
       onSubmit={(event) => {
         const confirmed = window.confirm(
-          'Vuoi eliminare definitivamente questa ricerca salvata? Operazione consigliata solo per duplicati o test.'
+          'Vuoi eliminare definitivamente questa ricerca salvata? Operazione consigliata solo per duplicati o test.',
         )
 
         if (!confirmed) {
           event.preventDefault()
         }
       }}
-      className="mt-4 rounded-3xl border border-red-300 bg-red-100 p-4 text-red-950"
+      className="rounded-[1.5rem] border border-red-300 bg-red-50 p-5 shadow-sm"
     >
       <input type="hidden" name="id" value={savedSearchId} />
 
-      <p className="text-sm font-semibold text-red-950">
+      <p className="text-base font-semibold text-red-950">
         Zona eliminazione
       </p>
 
-      <p className="mt-2 text-xs leading-5 text-red-950/70">
+      <p className="mt-3 text-sm leading-6 text-red-900/75">
         Usa questa azione solo per ricerche duplicate, test o richieste inserite per errore.
       </p>
 
       <button
         type="submit"
-        className="mt-3 w-full rounded-full border border-red-300 bg-red-200 px-4 py-2.5 text-sm font-semibold text-red-950 transition hover:bg-red-300"
+        className="mt-5 w-full rounded-full border border-red-300 bg-red-100 px-5 py-3 text-sm font-semibold text-red-950 transition hover:bg-red-200"
       >
         Elimina ricerca
       </button>

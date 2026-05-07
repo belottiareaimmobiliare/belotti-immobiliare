@@ -14,28 +14,28 @@ export default function DeleteLeadButton({
       action={deleteAction}
       onSubmit={(event) => {
         const confirmed = window.confirm(
-          'Vuoi eliminare definitivamente questo lead? Operazione consigliata solo per duplicati o test.'
+          'Vuoi eliminare definitivamente questo lead? Operazione consigliata solo per duplicati o test.',
         )
 
         if (!confirmed) {
           event.preventDefault()
         }
       }}
-      className="mt-4 rounded-3xl border border-red-400/20 bg-red-950/40 p-4"
+      className="rounded-[1.5rem] border border-red-300 bg-red-50 p-5 shadow-sm"
     >
       <input type="hidden" name="id" value={leadId} />
 
-      <p className="text-sm font-semibold text-red-50">
+      <p className="text-base font-semibold text-red-950">
         Zona eliminazione
       </p>
 
-      <p className="mt-2 text-xs leading-5 text-red-50/65">
+      <p className="mt-3 text-sm leading-6 text-red-900/75">
         Usa questa azione solo per lead duplicati, test o richieste inserite per errore.
       </p>
 
       <button
         type="submit"
-        className="mt-3 w-full rounded-full border border-red-300/40 bg-red-700/35 px-4 py-2.5 text-sm font-semibold text-red-50 transition hover:bg-red-700/50"
+        className="mt-5 w-full rounded-full border border-red-300 bg-red-100 px-5 py-3 text-sm font-semibold text-red-950 transition hover:bg-red-200"
       >
         Elimina lead
       </button>
