@@ -2885,3 +2885,43 @@ body.dark button[class*='emerald'][class*='uppercase'][class*='tracking']:hover,
   border-color: rgba(110, 231, 183, 0.45) !important;
   color: #6ee7b7 !important;
 }
+
+/* === FOOTER PARTNER LOGOS: no card / no gold border / transparent hover === */
+.footer-partner-link,
+.footer-partner-link:hover,
+.footer-partner-link:focus,
+.footer-partner-link:focus-visible,
+.footer-partner-link:active {
+  background: transparent !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  ring: 0 !important;
+}
+
+.footer-partner-link::before,
+.footer-partner-link::after,
+.footer-partner-link:hover::before,
+.footer-partner-link:hover::after,
+.footer-partner-link:focus::before,
+.footer-partner-link:focus::after,
+.footer-partner-link:focus-visible::before,
+.footer-partner-link:focus-visible::after {
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.footer-partner-link img {
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.footer-partner-link:hover img {
+  transform: scale(1.06);
+}
