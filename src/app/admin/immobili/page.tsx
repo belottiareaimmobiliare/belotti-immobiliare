@@ -130,14 +130,14 @@ function getLocationBadge(property: Property) {
     return {
       label: 'Posizione precisa',
       className:
-        'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+        'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-800',
     }
   }
 
   if (property.location_mode === 'comune_center') {
     return {
       label: 'Posizione comune',
-      className: 'border-sky-500/25 bg-sky-500/10 text-sky-700 dark:text-sky-300',
+      className: 'border-sky-500/25 bg-sky-500/10 text-sky-700 dark:text-sky-800',
     }
   }
 
@@ -353,11 +353,11 @@ export default async function AdminPropertiesPage({
                     currentStatus={property.status || 'draft'}
                   />
 
-                  <span className="theme-admin-chip rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
+                  <span className="rounded-full border border-stone-300 bg-stone-50 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-stone-800">
                     {property.contract_type || 'contratto da definire'}
                   </span>
 
-                  <span className="theme-admin-chip rounded-full px-3 py-1 text-xs uppercase tracking-[0.18em]">
+                  <span className="rounded-full border border-stone-300 bg-stone-50 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-stone-800">
                     {formatPropertyTypeLabel(property.property_type)}
                   </span>
 
