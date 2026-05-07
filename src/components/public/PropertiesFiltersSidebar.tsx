@@ -369,8 +369,7 @@ export default function PropertiesFiltersSidebar({
               style={{ color: '#0f3b66' }}
             >
               Stai visualizzando gli immobili contenuti nella zona che hai
-              disegnato sulla mappa. I filtri di provincia e comuni sono nascosti
-              per evitare conflitti con l’area selezionata.
+              disegnato sulla mappa.
             </div>
           </div>
 
