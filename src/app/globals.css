@@ -2819,3 +2819,27 @@ body.dark .admin-property-status-published,
 [data-color-mode="dark"] .admin-property-status-published {
   color: #6ee7b7 !important;
 }
+
+/* === FORCE ADMIN PUBLISHED BADGE CONTRAST === */
+
+/* Light mode: verde scuro leggibile */
+.admin-property-status-published {
+  color: #047857 !important;
+}
+
+html[data-theme='light'] .admin-property-status-published,
+body[data-theme='light'] .admin-property-status-published,
+[data-theme='light'] .admin-property-status-published {
+  color: #047857 !important;
+}
+
+/* Dark mode: verde luminoso */
+html[data-theme='dark'] .admin-property-status-published,
+body[data-theme='dark'] .admin-property-status-published,
+[data-theme='dark'] .admin-property-status-published,
+html.dark .admin-property-status-published,
+body.dark .admin-property-status-published,
+.dark .admin-property-status-published,
+.theme-dark .admin-property-status-published {
+  color: #6ee7b7 !important;
+}
