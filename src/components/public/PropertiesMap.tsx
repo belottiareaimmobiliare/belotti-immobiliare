@@ -282,7 +282,7 @@ export default function PropertiesMap({
                   {selectedProperty.slug ? (
                     <Link
                       href={`/immobili/${selectedProperty.slug}`}
-                      className="inline-flex rounded-[12px] bg-[#08111f] px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+                      className="map-popup-open-btn inline-flex rounded-[12px] px-4 py-2.5 text-sm font-bold transition"
                     >
                       Apri scheda
                     </Link>

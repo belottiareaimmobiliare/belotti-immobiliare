@@ -2498,74 +2498,16 @@ body header a[href*="tiktok.com"]:focus-visible * {
 
 /* === MAP CLUSTER END === */
 
-/* === MAP POPUP OPEN BUTTON START === */
+/* === MAP POPUP OPEN BUTTON CLEAN START === */
 
-.map-popup-open-btn,
-.map-popup-open-btn:hover,
-.map-popup-open-btn:focus-visible,
-.map-popup-open-btn:active {
-  position: relative !important;
-  overflow: hidden !important;
-  isolation: isolate !important;
-}
-
-/* stato base */
-.map-popup-open-btn {
-  background: #08111f !important;
-  background-color: #08111f !important;
-  background-image: none !important;
-  color: #ffffff !important;
-  border: 1px solid #08111f !important;
-  box-shadow: none !important;
-  text-decoration: none !important;
-}
-
-/* hover invertito */
-.map-popup-open-btn:hover,
-.map-popup-open-btn:focus-visible {
-  background: #ffffff !important;
-  background-color: #ffffff !important;
-  background-image: none !important;
-  color: #08111f !important;
-  border-color: #d9dde4 !important;
-  box-shadow: 0 8px 20px rgba(8, 17, 31, 0.10) !important;
-  text-decoration: none !important;
-}
-
-/* click */
-.map-popup-open-btn:active {
-  transform: translateY(1px) !important;
-}
-
-/* niente oro / pseudo elementi */
-.map-popup-open-btn::before,
-.map-popup-open-btn::after,
-.map-popup-open-btn:hover::before,
-.map-popup-open-btn:hover::after,
-.map-popup-open-btn:focus-visible::before,
-.map-popup-open-btn:focus-visible::after {
-  content: none !important;
-  display: none !important;
-  background: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-}
-
-/* testo sempre coerente */
-.map-popup-open-btn *,
-.map-popup-open-btn:hover *,
-.map-popup-open-btn:focus-visible * {
-  color: inherit !important;
-  fill: currentColor !important;
-  text-decoration: none !important;
-}
-
-/* === MAP POPUP OPEN BUTTON END === */
-
-/* === MAP POPUP APRI SCHEDA FINAL OVERRIDE === */
-/* Solo tasto "Apri scheda" nei popup mappa */
-
-.map-popup-open-btn {
+body a.map-popup-open-btn,
+body a.map-popup-open-btn:visited,
+body .leaflet-container a.map-popup-open-btn,
+body .leaflet-container a.map-popup-open-btn:visited,
+body.is-non-home-route a.map-popup-open-btn,
+body.is-non-home-route a.map-popup-open-btn:visited,
+body.is-non-home-route a.map-popup-open-btn[class*="rounded"],
+body.is-non-home-route a.map-popup-open-btn[class*="rounded"]:visited {
   background: #08111f !important;
   background-color: #08111f !important;
   background-image: none !important;
@@ -2576,9 +2518,14 @@ body header a[href*="tiktok.com"]:focus-visible * {
   font-weight: 700 !important;
 }
 
-/* Hover: bianco + scritta nera + bordo nero sottile */
-.map-popup-open-btn:hover,
-.map-popup-open-btn:focus-visible {
+body a.map-popup-open-btn:hover,
+body a.map-popup-open-btn:focus-visible,
+body .leaflet-container a.map-popup-open-btn:hover,
+body .leaflet-container a.map-popup-open-btn:focus-visible,
+body.is-non-home-route a.map-popup-open-btn:hover,
+body.is-non-home-route a.map-popup-open-btn:focus-visible,
+body.is-non-home-route a.map-popup-open-btn[class*="rounded"]:hover,
+body.is-non-home-route a.map-popup-open-btn[class*="rounded"]:focus-visible {
   background: #ffffff !important;
   background-color: #ffffff !important;
   background-image: none !important;
@@ -2588,13 +2535,24 @@ body header a[href*="tiktok.com"]:focus-visible * {
   text-decoration: none !important;
 }
 
-/* Spegne qualsiasi oro/pseudo-effetto globale rimasto */
-.map-popup-open-btn::before,
-.map-popup-open-btn::after,
-.map-popup-open-btn:hover::before,
-.map-popup-open-btn:hover::after,
-.map-popup-open-btn:focus-visible::before,
-.map-popup-open-btn:focus-visible::after {
+body a.map-popup-open-btn::before,
+body a.map-popup-open-btn::after,
+body a.map-popup-open-btn:hover::before,
+body a.map-popup-open-btn:hover::after,
+body a.map-popup-open-btn:focus-visible::before,
+body a.map-popup-open-btn:focus-visible::after,
+body .leaflet-container a.map-popup-open-btn::before,
+body .leaflet-container a.map-popup-open-btn::after,
+body .leaflet-container a.map-popup-open-btn:hover::before,
+body .leaflet-container a.map-popup-open-btn:hover::after,
+body .leaflet-container a.map-popup-open-btn:focus-visible::before,
+body .leaflet-container a.map-popup-open-btn:focus-visible::after,
+body.is-non-home-route a.map-popup-open-btn[class*="rounded"]::before,
+body.is-non-home-route a.map-popup-open-btn[class*="rounded"]::after,
+body.is-non-home-route a.map-popup-open-btn[class*="rounded"]:hover::before,
+body.is-non-home-route a.map-popup-open-btn[class*="rounded"]:hover::after,
+body.is-non-home-route a.map-popup-open-btn[class*="rounded"]:focus-visible::before,
+body.is-non-home-route a.map-popup-open-btn[class*="rounded"]:focus-visible::after {
   content: none !important;
   display: none !important;
   opacity: 0 !important;
@@ -2604,14 +2562,18 @@ body header a[href*="tiktok.com"]:focus-visible * {
   border: 0 !important;
   box-shadow: none !important;
   animation: none !important;
+  transform: none !important;
 }
 
-/* Testo coerente dentro al bottone */
-.map-popup-open-btn *,
-.map-popup-open-btn:hover *,
-.map-popup-open-btn:focus-visible * {
+body a.map-popup-open-btn *,
+body a.map-popup-open-btn:hover *,
+body a.map-popup-open-btn:focus-visible *,
+body .leaflet-container a.map-popup-open-btn *,
+body .leaflet-container a.map-popup-open-btn:hover *,
+body .leaflet-container a.map-popup-open-btn:focus-visible * {
   color: inherit !important;
   fill: currentColor !important;
   text-decoration: none !important;
 }
 
+/* === MAP POPUP OPEN BUTTON CLEAN END === */
