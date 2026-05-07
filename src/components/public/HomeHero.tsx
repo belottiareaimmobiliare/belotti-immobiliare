@@ -186,9 +186,15 @@ export default function HomeHero() {
 
               <Link
                 href="/immobili/mappa-area"
-                className="home-draw-area-btn rounded-2xl border border-white/20 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white transition"
+                className="home-draw-area-btn group relative overflow-hidden rounded-2xl border border-white/20 px-6 py-3.5 text-sm font-semibold text-white transition"
               >
-                Disegna la tua area
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 rounded-2xl bg-white/10 transition duration-200 group-hover:bg-[rgba(0,0,0,0.55)] group-focus-visible:bg-[rgba(0,0,0,0.55)]"
+                />
+                <span className="relative z-10 text-white">
+                  Disegna la tua area
+                </span>
               </Link>
 
               <Link

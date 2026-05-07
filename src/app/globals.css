@@ -2690,25 +2690,17 @@ body.is-home-route .home-discover-brand-btn:focus-visible :where(span, strong, s
   fill: currentColor !important;
 }
 
-/* === HOME DISEGNA AREA BUTTON FINAL CLEAN START === */
+/* === HOME DISEGNA AREA BUTTON OVERLAY FIX START === */
 
 body.is-home-route a.home-draw-area-btn,
-body.is-home-route a.home-draw-area-btn:visited {
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.20) !important;
-}
-
 body.is-home-route a.home-draw-area-btn:hover,
 body.is-home-route a.home-draw-area-btn:focus-visible {
-  background: rgba(0, 0, 0, 0.75) !important;
-  background-color: rgba(0, 0, 0, 0.75) !important;
+  background: transparent !important;
+  background-color: transparent !important;
   background-image: none !important;
   color: #ffffff !important;
   border-color: rgba(255, 255, 255, 0.20) !important;
   box-shadow: none !important;
-  opacity: 1 !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
 }
 
 body.is-home-route a.home-draw-area-btn::before,
@@ -2719,50 +2711,6 @@ body.is-home-route a.home-draw-area-btn:focus-visible::before,
 body.is-home-route a.home-draw-area-btn:focus-visible::after {
   content: none !important;
   display: none !important;
-  opacity: 0 !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
 }
 
-body.is-home-route a.home-draw-area-btn *,
-body.is-home-route a.home-draw-area-btn:hover *,
-body.is-home-route a.home-draw-area-btn:focus-visible * {
-  color: #ffffff !important;
-  fill: currentColor !important;
-}
-
-/* === HOME DISEGNA AREA BUTTON FINAL CLEAN END === */
-
-/* === HOME DISEGNA AREA BUTTON 65 OPACITY OVERRIDE === */
-
-html body.is-home-route a.home-draw-area-btn:hover,
-html body.is-home-route a.home-draw-area-btn:focus-visible {
-  background: rgba(0, 0, 0, 0.55) !important;
-  background-color: rgba(0, 0, 0, 0.55) !important;
-  background-image: none !important;
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.20) !important;
-  box-shadow: none !important;
-  opacity: 1 !important;
-}
-
-html body.is-home-route a.home-draw-area-btn:hover *,
-html body.is-home-route a.home-draw-area-btn:focus-visible * {
-  color: #ffffff !important;
-  fill: currentColor !important;
-}
-
-html body.is-home-route a.home-draw-area-btn:hover::before,
-html body.is-home-route a.home-draw-area-btn:hover::after,
-html body.is-home-route a.home-draw-area-btn:focus-visible::before,
-html body.is-home-route a.home-draw-area-btn:focus-visible::after {
-  content: none !important;
-  display: none !important;
-  opacity: 0 !important;
-  background: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-}
-
+/* === HOME DISEGNA AREA BUTTON OVERLAY FIX END === */
