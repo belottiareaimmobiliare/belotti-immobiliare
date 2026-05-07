@@ -42,13 +42,13 @@ export default function Footer() {
             target="_blank"
             rel="noreferrer"
             aria-label={`Apri il profilo ${partner.label} di Area Immobiliare`}
-            className="group flex min-h-[140px] items-center justify-center rounded-[28px] px-6 py-6 transition hover:bg-white/[0.02]"
+            className="group flex min-h-[140px] items-center justify-center rounded-[28px] !border-0 !bg-transparent px-6 py-6 !shadow-none !outline-none ring-0 transition-transform duration-200 hover:!bg-transparent hover:!shadow-none hover:!outline-none hover:ring-0 focus:!bg-transparent focus:!shadow-none focus:!outline-none focus:ring-0 focus-visible:!bg-transparent focus-visible:!shadow-none focus-visible:!outline-none focus-visible:ring-0"
           >
-            <div className="flex h-[88px] w-full items-center justify-center">
+            <div className="flex h-[88px] w-full items-center justify-center bg-transparent">
               <img
                 src={partner.src}
                 alt={partner.label}
-                className={`h-auto w-auto object-contain ${partner.fitClass} transition duration-200 group-hover:scale-[1.02]`}
+                className={`h-auto w-auto object-contain ${partner.fitClass} transition-transform duration-200 ease-out group-hover:scale-[1.06]`}
               />
             </div>
           </a>
