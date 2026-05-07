@@ -2690,3 +2690,20 @@ body.is-home-route .home-discover-brand-btn:focus-visible :where(span, strong, s
   fill: currentColor !important;
 }
 
+/* === HOME DISEGNA AREA BUTTON HOVER FIX START === */
+
+body.is-home-route .home-draw-area-btn:hover,
+body.is-home-route .home-draw-area-btn:focus-visible {
+  background: rgba(0, 0, 0, 0.75) !important;
+  background-color: rgba(0, 0, 0, 0.75) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+}
+
+body.is-home-route .home-draw-area-btn:hover :where(span, strong, small, p, svg),
+body.is-home-route .home-draw-area-btn:focus-visible :where(span, strong, small, p, svg) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+}
+
+/* === HOME DISEGNA AREA BUTTON HOVER FIX END === */
