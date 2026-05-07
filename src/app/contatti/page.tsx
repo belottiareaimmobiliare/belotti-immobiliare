@@ -237,39 +237,39 @@ export default function ContattiPage() {
                       </p>
                     </div>
 
-                    <div className="mt-6 grid grid-cols-2 items-center gap-6">
-                      <a
-                        href={wazeHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="Apri su Waze"
-                        className="flex h-28 items-center justify-center p-0 transition duration-300 hover:-translate-y-1 hover:scale-[1.03]"
-                      >
-                        <Image
-                          src="/brand/navigation/waze.png"
-                          alt="Waze"
-                          width={512}
-                          height={512}
-                          className="h-28 w-auto max-w-full object-contain"
-                        />
-                      </a>
+              <div className="mt-6 grid grid-cols-2 items-center gap-6">
+                <a
+                  href={wazeHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Apri su Waze"
+                  className="flex h-24 items-center justify-center bg-transparent p-0 shadow-none outline-none transition-transform duration-200 hover:scale-[1.03] hover:bg-transparent hover:shadow-none focus:bg-transparent active:bg-transparent"
+                >
+                  <Image
+                    src="/brand/navigation/waze.png"
+                    alt="Waze"
+                    width={1024}
+                    height={1024}
+                    className="h-[92px] w-auto max-w-[118px] object-contain"
+                  />
+                </a>
 
-                      <a
-                        href={googleMapsHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="Apri su Google Maps"
-                        className="flex h-28 items-center justify-center p-0 transition duration-300 hover:-translate-y-1 hover:scale-[1.03]"
-                      >
-                        <Image
-                          src="/brand/navigation/google-maps.png"
-                          alt="Google Maps"
-                          width={2406}
-                          height={800}
-                          className="h-auto w-full max-w-[190px] object-contain"
-                        />
-                      </a>
-                    </div>
+                <a
+                  href={googleMapsHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Apri su Google Maps"
+                  className="flex h-24 items-center justify-center bg-transparent p-0 shadow-none outline-none transition-transform duration-200 hover:scale-[1.03] hover:bg-transparent hover:shadow-none focus:bg-transparent active:bg-transparent"
+                >
+                  <Image
+                    src="/brand/navigation/google-maps.png"
+                    alt="Google Maps"
+                    width={1024}
+                    height={1536}
+                    className="h-[92px] w-auto max-w-[118px] object-contain"
+                  />
+                </a>
+              </div>
                   </div>
                 </div>
               </div>
