@@ -168,11 +168,31 @@ export default function PropertyGalleryLightbox({
     zoom > 1 ? (dragging ? 'grabbing' : 'grab') : 'zoom-in'
 
   return (
-    <div className="fixed inset-0 z-[10040] bg-black">
+    <div className="property-gallery-lightbox fixed inset-0 z-[2147483647] bg-black">
+      <style jsx global>{`
+        body.property-gallery-open .site-whatsapp-floating,
+        body:has(.property-gallery-lightbox) .site-whatsapp-floating,
+        body.property-gallery-open a[href*='wa.me'],
+        body:has(.property-gallery-lightbox) a[href*='wa.me'],
+        body.property-gallery-open a[href*='whatsapp'],
+        body:has(.property-gallery-lightbox) a[href*='whatsapp'],
+        body.property-gallery-open [aria-label*='WhatsApp'],
+        body:has(.property-gallery-lightbox) [aria-label*='WhatsApp'] {
+          display: none !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+        }
+
+        body.property-gallery-open {
+          overflow: hidden !important;
+        }
+      `}</style>
+
       <div className="absolute inset-0 bg-black/95" onClick={onClose} />
 
-      <div className="pointer-events-none fixed left-0 right-0 top-[calc(env(safe-area-inset-top)+12px)] z-[10060] flex justify-center px-3 sm:top-5 sm:px-6">
-        <div className="pointer-events-auto flex max-w-[calc(100vw-24px)] items-center gap-2 rounded-full border border-white/10 bg-black/75 px-2 py-2 text-white shadow-2xl backdrop-blur-xl sm:gap-3 sm:px-3">
+      <div className="pointer-events-none fixed left-0 right-0 top-[calc(env(safe-area-inset-top)+12px)] z-[2147483647] flex justify-center px-3 sm:top-5 sm:px-6">
+        <div className="pointer-events-auto flex max-w-[calc(100vw-24px)] items-center gap-2 rounded-full border border-white/10 bg-black/80 px-2 py-2 text-white shadow-2xl backdrop-blur-xl sm:gap-3 sm:px-3">
           <button
             type="button"
             onClick={zoomOut}
@@ -216,7 +236,7 @@ export default function PropertyGalleryLightbox({
       <button
         type="button"
         onClick={goPrev}
-        className="absolute left-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/45 text-4xl leading-none text-white/90 transition hover:bg-white/10 sm:left-5 sm:h-auto sm:w-auto sm:px-5 sm:py-4"
+        className="fixed left-3 top-1/2 z-[2147483647] flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/60 text-4xl leading-none text-white/90 shadow-2xl transition hover:bg-white/10 sm:left-6 sm:h-16 sm:w-16"
         aria-label="Immagine precedente"
       >
         ‹
@@ -225,14 +245,14 @@ export default function PropertyGalleryLightbox({
       <button
         type="button"
         onClick={goNext}
-        className="absolute right-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/45 text-4xl leading-none text-white/90 transition hover:bg-white/10 sm:right-5 sm:h-auto sm:w-auto sm:px-5 sm:py-4"
+        className="fixed right-3 top-1/2 z-[2147483647] flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/60 text-4xl leading-none text-white/90 shadow-2xl transition hover:bg-white/10 sm:right-6 sm:h-16 sm:w-16"
         aria-label="Immagine successiva"
       >
         ›
       </button>
 
       <div
-        className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden px-3"
+        className="absolute inset-0 z-[2147483646] flex items-center justify-center overflow-hidden px-3"
         onWheel={handleWheel}
         onMouseMove={handleMouseMove}
         onMouseUp={stopDragging}
@@ -244,7 +264,7 @@ export default function PropertyGalleryLightbox({
           draggable={false}
           onMouseDown={handleMouseDown}
           onDoubleClick={handleDoubleClick}
-          className="max-h-[82vh] max-w-[94vw] select-none object-contain sm:max-h-[92vh] sm:max-w-[92vw]"
+          className="max-h-[82vh] max-w-[94vw] select-none object-contain sm:max-h-[88vh] sm:max-w-[82vw]"
           style={{
             transform: `translate(${translate.x}px, ${translate.y}px) scale(${zoom})`,
             cursor: imageCursor,
