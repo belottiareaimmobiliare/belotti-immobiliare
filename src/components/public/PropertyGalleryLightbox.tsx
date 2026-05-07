@@ -114,19 +114,38 @@ export default function PropertyGalleryLightbox({
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
     event.preventDefault()
 
+    const rect = event.currentTarget.getBoundingClientRect()
+    const centerX = rect.left + rect.width / 2
+    const centerY = rect.top + rect.height / 2
+
+    const pointerX = event.clientX - centerX
+    const pointerY = event.clientY - centerY
+
     const delta = event.deltaY
 
-    setZoom((prev) => {
-      const next =
+    setZoom((prevZoom) => {
+      const nextZoom =
         delta < 0
-          ? Math.min(prev + 0.2, MAX_ZOOM)
-          : Math.max(prev - 0.2, MIN_ZOOM)
+          ? Math.min(prevZoom + 0.2, MAX_ZOOM)
+          : Math.max(prevZoom - 0.2, MIN_ZOOM)
 
-      if (next === 1) {
-        setTranslate({ x: 0, y: 0 })
+      if (nextZoom === prevZoom) {
+        return prevZoom
       }
 
-      return next
+      if (nextZoom === 1) {
+        setTranslate({ x: 0, y: 0 })
+        return nextZoom
+      }
+
+      const zoomRatio = nextZoom / prevZoom
+
+      setTranslate((prevTranslate) => ({
+        x: pointerX - (pointerX - prevTranslate.x) * zoomRatio,
+        y: pointerY - (pointerY - prevTranslate.y) * zoomRatio,
+      }))
+
+      return nextZoom
     })
   }
 
