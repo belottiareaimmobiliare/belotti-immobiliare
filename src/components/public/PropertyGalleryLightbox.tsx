@@ -233,23 +233,27 @@ export default function PropertyGalleryLightbox({
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={goPrev}
-        className="fixed left-3 top-1/2 z-[2147483647] flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/60 text-4xl leading-none text-white/90 shadow-2xl transition hover:bg-white/10 sm:left-6 sm:h-16 sm:w-16"
-        aria-label="Immagine precedente"
-      >
-        ‹
-      </button>
+      <div className="pointer-events-none fixed inset-x-0 top-1/2 z-[2147483647] -translate-y-1/2 px-3 sm:px-6">
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={goPrev}
+            className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-black/60 text-4xl leading-none text-white/90 shadow-2xl transition hover:bg-white/10 sm:h-16 sm:w-16"
+            aria-label="Immagine precedente"
+          >
+            ‹
+          </button>
 
-      <button
-        type="button"
-        onClick={goNext}
-        className="fixed right-3 top-1/2 z-[2147483647] flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/60 text-4xl leading-none text-white/90 shadow-2xl transition hover:bg-white/10 sm:right-6 sm:h-16 sm:w-16"
-        aria-label="Immagine successiva"
-      >
-        ›
-      </button>
+          <button
+            type="button"
+            onClick={goNext}
+            className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-black/60 text-4xl leading-none text-white/90 shadow-2xl transition hover:bg-white/10 sm:h-16 sm:w-16"
+            aria-label="Immagine successiva"
+          >
+            ›
+          </button>
+        </div>
+      </div>
 
       <div
         className="absolute inset-0 z-[2147483646] flex items-center justify-center overflow-hidden px-3"
