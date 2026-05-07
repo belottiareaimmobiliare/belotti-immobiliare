@@ -2739,8 +2739,8 @@ body.is-home-route a.home-draw-area-btn:focus-visible * {
 
 html body.is-home-route a.home-draw-area-btn:hover,
 html body.is-home-route a.home-draw-area-btn:focus-visible {
-  background: rgba(0, 0, 0, 0.65) !important;
-  background-color: rgba(0, 0, 0, 0.65) !important;
+  background: rgba(0, 0, 0, 0.55) !important;
+  background-color: rgba(0, 0, 0, 0.55) !important;
   background-image: none !important;
   color: #ffffff !important;
   border-color: rgba(255, 255, 255, 0.20) !important;
