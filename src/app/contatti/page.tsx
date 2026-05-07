@@ -14,6 +14,8 @@ import {
 
 const googleMapsQuery = encodeURIComponent('Via A. Locatelli 62, 24121 Bergamo')
 const googleMapsHref = `https://www.google.com/maps/search/?api=1&query=${googleMapsQuery}`
+const googleMapsDirectionsHref = `https://www.google.com/maps/dir/?api=1&destination=${googleMapsQuery}`
+const wazeHref = `https://waze.com/ul?q=${googleMapsQuery}&navigate=yes`
 
 function CopyIcon() {
   return (
@@ -29,6 +31,47 @@ function CopyIcon() {
     >
       <rect x="9" y="9" width="10" height="10" rx="2" />
       <path d="M5 15V7a2 2 0 0 1 2-2h8" />
+    </svg>
+  )
+}
+
+function WazeIcon({ className = 'h-[18px] w-[18px]' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      fill="none"
+    >
+      <path
+        d="M12 3.4c-4.9 0-8.8 3.4-8.8 7.8 0 2.5 1.2 4.4 3.2 5.7.1 1.8 1.5 3.2 3.3 3.4.5.8 1.3 1.3 2.3 1.3s1.8-.5 2.3-1.3c1.8-.2 3.2-1.6 3.3-3.4 2-1.3 3.2-3.2 3.2-5.7 0-4.4-3.9-7.8-8.8-7.8Z"
+        fill="currentColor"
+      />
+      <circle cx="9.2" cy="11.2" r="1" fill="white" />
+      <circle cx="14.8" cy="11.2" r="1" fill="white" />
+      <path
+        d="M9.6 14.2c.7.6 1.6.9 2.4.9s1.7-.3 2.4-.9"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+function GoogleMapsIcon({ className = 'h-[18px] w-[18px]' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path
+        d="M12 2.2A6.8 6.8 0 0 0 5.2 9c0 4.8 5.8 11.8 6.4 12.6a.5.5 0 0 0 .8 0c.6-.8 6.4-7.8 6.4-12.6A6.8 6.8 0 0 0 12 2.2Z"
+        fill="#34A853"
+      />
+      <path
+        d="M12 2.2A6.8 6.8 0 0 0 5.2 9c0 1.4.4 2.8 1.2 4.2.9-1.2 2.2-2 3.8-2 2.5 0 4.6 2.1 4.6 4.6 0 .9-.3 1.8-.8 2.5 2.1-2.6 4.8-6.5 4.8-9.3A6.8 6.8 0 0 0 12 2.2Z"
+        fill="#4285F4"
+      />
+      <circle cx="12" cy="9" r="2.8" fill="#FBBC05" />
+      <circle cx="12" cy="9" r="1.35" fill="#EA4335" />
     </svg>
   )
 }
@@ -207,11 +250,40 @@ export default function ContattiPage() {
                   <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
                     Indirizzo
                   </p>
+
                   <p className="mt-2 text-sm leading-7 text-[var(--site-text-soft)]">
                     Via A. Locatelli 62
                     <br />
                     24121 Bergamo
                   </p>
+
+                  <div className="mt-4 grid gap-2">
+                    <a
+                      href={wazeHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-3 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-3 py-2.5 text-sm font-semibold text-[var(--site-text)] transition hover:-translate-y-[1px] hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)]"
+                      aria-label="Naviga con Waze"
+                    >
+                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#33ccff] text-white shadow-[0_8px_18px_rgba(51,204,255,0.28)]">
+                        <WazeIcon />
+                      </span>
+                      <span>Naviga con Waze</span>
+                    </a>
+
+                    <a
+                      href={googleMapsDirectionsHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-3 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-3 py-2.5 text-sm font-semibold text-[var(--site-text)] transition hover:-translate-y-[1px] hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)]"
+                      aria-label="Naviga con Google Maps"
+                    >
+                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-[0_8px_18px_rgba(66,133,244,0.22)]">
+                        <GoogleMapsIcon />
+                      </span>
+                      <span>Naviga con Google Maps</span>
+                    </a>
+                  </div>
                 </div>
               </div>
 
