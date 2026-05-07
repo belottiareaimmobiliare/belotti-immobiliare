@@ -247,8 +247,8 @@ export default function ContattiPage() {
                 </div>
 
                 <div className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-4">
-                  <div className="grid grid-cols-[minmax(0,1fr)_96px] gap-3 sm:grid-cols-[minmax(0,1fr)_108px]">
-                    <div className="min-w-0">
+                  <div className="grid gap-4">
+                    <div>
                       <p className="text-xs uppercase tracking-[0.2em] text-[var(--site-text-faint)]">
                         Indirizzo
                       </p>
@@ -258,24 +258,20 @@ export default function ContattiPage() {
                         <br />
                         24121 Bergamo
                       </p>
-
-                      <p className="mt-3 text-xs leading-5 text-[var(--site-text-faint)]">
-                        Avvia la navigazione con l’app che preferisci.
-                      </p>
                     </div>
 
-                    <div className="grid grid-rows-2 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       <a
                         href={wazeHref}
                         target="_blank"
                         rel="noreferrer"
                         aria-label="Naviga con Waze"
-                        className="group flex min-h-[88px] flex-col items-center justify-center rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-2 py-3 text-center transition hover:-translate-y-[1px] hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)]"
+                        className="group flex aspect-square flex-col items-center justify-center overflow-hidden rounded-[26px] bg-[#7ad8ff] p-3 text-center shadow-[0_14px_30px_rgba(122,216,255,0.24)] transition hover:-translate-y-[1px] hover:scale-[1.02]"
                       >
-                        <span className="inline-flex h-12 w-12 items-center justify-center rounded-[18px] bg-[#7ad8ff] text-white shadow-[0_10px_24px_rgba(122,216,255,0.30)] transition group-hover:scale-[1.03]">
-                          <WazeIcon className="h-7 w-7" />
+                        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#2d2d2d] shadow-[0_12px_24px_rgba(0,0,0,0.16)]">
+                          <WazeIcon className="h-10 w-10" />
                         </span>
-                        <span className="mt-2 text-[11px] font-semibold leading-tight text-[var(--site-text)]">
+                        <span className="mt-3 text-[11px] font-bold leading-none text-[#172f3f]">
                           Waze
                         </span>
                       </a>
@@ -285,13 +281,14 @@ export default function ContattiPage() {
                         target="_blank"
                         rel="noreferrer"
                         aria-label="Naviga con Google Maps"
-                        className="group flex min-h-[88px] flex-col items-center justify-center rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-2 py-3 text-center transition hover:-translate-y-[1px] hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)]"
+                        className="group relative flex aspect-square flex-col items-center justify-center overflow-hidden rounded-[26px] bg-white p-3 text-center shadow-[0_14px_30px_rgba(66,133,244,0.20)] transition hover:-translate-y-[1px] hover:scale-[1.02]"
                       >
-                        <span className="inline-flex h-12 w-12 items-center justify-center rounded-[18px] bg-white shadow-[0_10px_24px_rgba(66,133,244,0.20)] transition group-hover:scale-[1.03]">
-                          <GoogleMapsIcon className="h-7 w-7" />
+                        <span className="absolute inset-0 bg-[linear-gradient(135deg,#34a853_0%,#34a853_36%,#fbbc05_36%,#fbbc05_48%,#ffffff_48%,#ffffff_58%,#4285f4_58%,#4285f4_100%)] opacity-95" />
+                        <span className="relative z-10 flex h-16 w-16 items-center justify-center rounded-[20px] bg-white shadow-[0_12px_24px_rgba(0,0,0,0.16)]">
+                          <GoogleMapsIcon className="h-10 w-10" />
                         </span>
-                        <span className="mt-2 text-[11px] font-semibold leading-tight text-[var(--site-text)]">
-                          G Maps
+                        <span className="relative z-10 mt-3 rounded-full bg-black/55 px-2 py-1 text-[11px] font-bold leading-none text-white">
+                          Maps
                         </span>
                       </a>
                     </div>
