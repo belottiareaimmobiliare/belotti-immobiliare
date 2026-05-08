@@ -708,7 +708,7 @@ function PropertyLeadGroup({
           <div className="flex flex-col gap-2">
             <Link
               href={`/admin/immobili/${property.id}`}
-              className="no-gold-orbit inline-flex items-center justify-center rounded-full bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-[#eef2f7] hover:text-black"
+              className="no-gold-orbit inline-flex items-center justify-center rounded-full border border-black bg-white px-4 py-3 text-sm font-semibold text-black transition hover:border-black hover:bg-[#eef2f7] hover:text-black"
             >
               Modifica
             </Link>
