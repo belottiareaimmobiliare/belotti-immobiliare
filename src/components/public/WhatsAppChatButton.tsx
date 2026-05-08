@@ -1,156 +1,116 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { MessageCircle, X } from 'lucide-react'
-import { CONTACTS_CONTENT_KEY, defaultContactsContent, type ContactsContent } from '@/lib/site-content'
-import { readCookiePreferences } from '@/lib/cookie-consent'
+import { useMemo, useState } from 'react'
 
-const OWNER_CTA_STORAGE_KEY = 'area-owner-whatsapp-cta-closed'
+const WHATSAPP_NUMBER = '39035221206'
+const DISPLAY_PHONE = '035 221206'
 
 export default function WhatsAppChatButton() {
   const pathname = usePathname()
-  const [hasCookieChoice, setHasCookieChoice] = useState(true)
-  const [siteOrigin, setSiteOrigin] = useState('')
-  const [showOwnerCta, setShowOwnerCta] = useState(false)
-  const [contacts, setContacts] = useState<ContactsContent>(defaultContactsContent)
-
-  useEffect(() => {
-    const syncCookieState = () => {
-      const preferences = readCookiePreferences()
-      setHasCookieChoice(Boolean(preferences))
-    }
-
-    async function loadContacts() {
-      try {
-        const res = await fetch(`/api/site-content?key=${CONTACTS_CONTENT_KEY}`, {
-          cache: 'no-store',
-        })
-
-        if (!res.ok) return
-
-        const data = await res.json()
-        setContacts({
-          ...defaultContactsContent,
-          ...data,
-        })
-      } catch {
-        setContacts(defaultContactsContent)
-      }
-    }
-
-    syncCookieState()
-    loadContacts()
-
-    if (typeof window !== 'undefined') {
-      setSiteOrigin(window.location.origin)
-
-      const closedAt = window.localStorage.getItem(OWNER_CTA_STORAGE_KEY)
-      if (!closedAt) {
-        setShowOwnerCta(true)
-      }
-    }
-
-    window.addEventListener('cookie-preferences-updated', syncCookieState)
-
-    return () => {
-      window.removeEventListener('cookie-preferences-updated', syncCookieState)
-    }
-  }, [])
-
-  const isPublicPage = useMemo(() => {
-    return !pathname.startsWith('/admin')
-  }, [pathname])
-
-  const messageText = useMemo(() => {
-    const propertyPage =
-      pathname.startsWith('/immobili/') && pathname !== '/immobili/mappa-area'
-
-    if (propertyPage && siteOrigin) {
-      return contacts.whatsappPropertyMessage.replace('{url}', `${siteOrigin}${pathname}`)
-    }
-
-    return contacts.whatsappDefaultMessage
-  }, [contacts.whatsappDefaultMessage, contacts.whatsappPropertyMessage, pathname, siteOrigin])
+  const [isOpen, setIsOpen] = useState(true)
 
   const whatsappHref = useMemo(() => {
-    const cleanNumber = contacts.whatsappNumber.replace(/[^\d]/g, '')
-    return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(messageText)}`
-  }, [contacts.whatsappNumber, messageText])
+    const text = encodeURIComponent(
+      'Ciao, vorrei maggiori informazioni da Area Immobiliare.',
+    )
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`
+  }, [])
 
-  function closeOwnerCta() {
-    setShowOwnerCta(false)
-
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(OWNER_CTA_STORAGE_KEY, new Date().toISOString())
-    }
-  }
-
-  if (!isPublicPage) return null
-
-  const bottomClass = hasCookieChoice ? 'bottom-6' : 'bottom-28'
-  const bubbleBottomClass = hasCookieChoice ? 'bottom-[104px]' : 'bottom-[190px]'
-  const phoneHref = contacts.phoneHref.replace(/\s+/g, '')
+  if (!pathname) return null
+  if (pathname.startsWith('/admin')) return null
 
   return (
-    <>
-      {showOwnerCta ? (
-        <div
-          className={`site-whatsapp-owner-cta fixed right-4 z-[109] w-[calc(100vw-2rem)] max-w-[340px] rounded-[24px] border border-white/20 bg-[#25D366]/80 p-4 text-white shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl md:right-6 ${bubbleBottomClass}`}
-        >
-          <button
-            type="button"
-            onClick={closeOwnerCta}
-            aria-label="Chiudi messaggio"
-            className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white/80 transition hover:bg-[#eef2f7]/30 hover:text-white"
-          >
-            <X className="h-4 w-4" />
-          </button>
-
-          <p className="pr-9 text-sm font-semibold leading-6">
-            {contacts.ownerCtaTitle}
-          </p>
-
-          <p className="mt-2 pr-2 text-sm leading-6 text-white/85">
-            {contacts.ownerCtaText}
-          </p>
-
-          <p className="mt-3 text-sm leading-6 text-white/85">
-            {contacts.ownerCtaPhoneText}{' '}
-            <a
-              href={`tel:${phoneHref}`}
-              className="font-semibold text-white underline underline-offset-4"
+    <div className="fixed bottom-6 right-4 z-[80] flex flex-col items-end sm:right-6">
+      {isOpen ? (
+        <div className="mb-[-12px] mr-2 w-[min(34rem,calc(100vw-1.5rem))] max-w-[34rem]">
+          <div className="relative rounded-[2rem] bg-[#6dcc72] px-7 pb-8 pt-7 text-white shadow-[0_18px_60px_rgba(0,0,0,0.28)]">
+            <button
+              type="button"
+              aria-label="Chiudi messaggio WhatsApp"
+              onClick={() => setIsOpen(false)}
+              className="absolute right-5 top-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-black/10 text-white transition hover:bg-black/15"
             >
-              {contacts.phoneLabel}
-            </a>{' '}
-            oppure scrivici su WhatsApp dal pulsante verde qui sotto.
-          </p>
+              <svg
+                viewBox="0 0 24 24"
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M6 6l12 12" />
+                <path d="M18 6L6 18" />
+              </svg>
+            </button>
 
-          <div className="absolute -bottom-2 right-9 h-4 w-4 rotate-45 border-b border-r border-white/20 bg-[#25D366]/80" />
+            <h3 className="pr-16 text-[1.12rem] font-semibold leading-tight sm:text-[1.18rem]">
+              Hai un immobile da vendere o affittare?
+            </h3>
+
+            <p className="mt-5 text-[1rem] leading-8 text-white/96 sm:text-[1.02rem]">
+              Raccontaci cosa vuoi fare: vendita, affitto o semplice valutazione.
+              Area Immobiliare può aiutarti a capire il valore reale dell’immobile e
+              il percorso più adatto.
+            </p>
+
+            <p className="mt-6 text-[1rem] leading-8 text-white/96 sm:text-[1.02rem]">
+              Chiamaci al{' '}
+              <a
+                href={`tel:${DISPLAY_PHONE.replace(/\s+/g, '')}`}
+                className="font-semibold underline underline-offset-4"
+              >
+                {DISPLAY_PHONE}
+              </a>{' '}
+              oppure scrivici su WhatsApp dal pulsante verde qui sotto.
+            </p>
+
+            <span className="absolute -bottom-[10px] right-12 z-[1] h-5 w-5 rotate-45 bg-[#6dcc72]" />
+          </div>
         </div>
       ) : null}
 
-      <a
+      <Link
         href={whatsappHref}
         target="_blank"
         rel="noreferrer"
-        aria-label="Chatta con noi su WhatsApp"
-        className={`site-whatsapp-floating group fixed right-4 z-[110] inline-flex items-center gap-3 rounded-full border border-white/10 bg-[#25D366] px-4 py-3 text-black shadow-[0_18px_40px_rgba(0,0,0,0.28)] transition hover:scale-[1.02] hover:shadow-[0_22px_50px_rgba(0,0,0,0.34)] md:right-6 ${bottomClass}`}
+        className="relative z-[2] flex w-[min(30rem,calc(100vw-2rem))] items-center gap-4 rounded-[2rem] bg-[#69cf6e] px-5 py-5 text-black shadow-[0_18px_60px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5 hover:bg-[#75d679] sm:px-6"
       >
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black/10">
-          <MessageCircle className="h-5 w-5" strokeWidth={2.2} />
-        </div>
+        <span className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#57c95d]">
+          <svg
+            viewBox="0 0 32 32"
+            className="h-8 w-8"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16.02 5C10.02 5 5.16 9.83 5.16 15.77c0 2.1.62 4.13 1.78 5.88L5 27l5.54-1.79a10.95 10.95 0 0 0 5.48 1.49h.01c5.99 0 10.85-4.83 10.85-10.78C26.88 9.83 22.01 5 16.02 5Z"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M12.16 11.62c-.24-.52-.49-.53-.72-.54h-.61c-.21 0-.56.08-.85.39-.29.31-1.11 1.08-1.11 2.64 0 1.56 1.14 3.07 1.3 3.28.16.21 2.22 3.56 5.48 4.84 2.7 1.05 3.26.84 3.84.79.59-.05 1.88-.77 2.14-1.52.26-.75.26-1.4.18-1.53-.08-.13-.29-.21-.61-.37-.32-.16-1.88-.93-2.17-1.03-.29-.1-.5-.16-.72.16-.21.31-.82 1.03-1 1.24-.18.21-.37.23-.69.08-.32-.16-1.34-.49-2.55-1.57-.94-.84-1.57-1.87-1.76-2.18-.18-.31-.02-.48.14-.64.14-.14.32-.37.48-.55.16-.18.21-.31.32-.52.11-.21.05-.39-.03-.55-.08-.16-.72-1.78-1-2.44Z"
+              fill="currentColor"
+            />
+          </svg>
+        </span>
 
-        <div className="hidden md:block">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-black/60">
-            WhatsApp
-          </p>
-          <p className="text-sm font-semibold text-black">Chatta con noi</p>
-          <p className="text-[11px] text-black/70">
+        <span className="min-w-0">
+          <span className="block text-xs tracking-[0.42em] text-black/65">
+            WHATSAPP
+          </span>
+          <span className="mt-1 block text-[1.15rem] font-semibold leading-tight sm:text-[1.2rem]">
+            Chatta con noi
+          </span>
+          <span className="mt-1 block text-sm text-black/72 sm:text-[0.98rem]">
             Ti rispondiamo il prima possibile
-          </p>
-        </div>
-      </a>
-    </>
+          </span>
+        </span>
+      </Link>
+    </div>
   )
 }
