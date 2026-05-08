@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     if (
       !profile ||
       !profile.is_active ||
-      (profile.role !== 'owner' && !profile.can_manage_news)
+      (profile.role !== 'owner' && profile.role !== 'administrator' && !profile.can_manage_news)
     ) {
       return NextResponse.json(
         { error: 'Operazione non autorizzata.' },

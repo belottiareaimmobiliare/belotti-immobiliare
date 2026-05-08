@@ -9,7 +9,7 @@ export async function GET() {
   const profile = await requireAdminProfile()
 
   if (
-    profile.role !== 'owner' &&
+    profile.role !== 'owner' && profile.role !== 'administrator' &&
     !profile.can_manage_properties
   ) {
     return NextResponse.json(

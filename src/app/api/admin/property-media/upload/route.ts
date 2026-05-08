@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   try {
     const profile = await requireAdminProfile()
 
-    if (profile.role !== 'owner' && !profile.can_manage_properties) {
+    if (profile.role !== 'owner' && profile.role !== 'administrator' && !profile.can_manage_properties) {
       return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
     }
 

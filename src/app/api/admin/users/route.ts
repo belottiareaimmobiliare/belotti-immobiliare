@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getCurrentAdminProfile } from '@/lib/admin-auth'
 
-type UserRole = 'owner' | 'agent' | 'editor'
+type UserRole = 'administrator' | 'owner' | 'agent' | 'editor'
 
 type PermissionPayload = {
   can_manage_properties: boolean
@@ -75,7 +75,7 @@ async function getActorOwner() {
     }
   }
 
-  if (profile.role !== 'owner' || !profile.is_active) {
+  if ((profile.role !== 'owner' && profile.role !== 'administrator') || !profile.is_active) {
     return {
       error: NextResponse.json(
         { error: 'Accesso riservato ai proprietari.' },
@@ -166,7 +166,7 @@ export async function GET() {
     )
   }
 
-  const roleOrder = { owner: 0, agent: 1, editor: 2 }
+  const roleOrder = { administrator: -1, owner: 0, agent: 1, editor: 2 }
 
   const users = [...(data ?? [])].sort((a, b) => {
     const roleDiff = roleOrder[a.role as UserRole] - roleOrder[b.role as UserRole]

@@ -47,7 +47,7 @@ function extractName(text: string, email: string | null, phone: string | null) {
 export async function updateLeadStatus(leadId: string, status: LeadStatus) {
   const profile = await requireAdminProfile()
 
-  if (profile.role !== 'owner' && !profile.can_manage_properties) {
+  if (profile.role !== 'owner' && profile.role !== 'administrator' && !profile.can_manage_properties) {
     throw new Error('Non autorizzato')
   }
 
@@ -79,7 +79,7 @@ export async function updateLeadStatus(leadId: string, status: LeadStatus) {
 export async function createManualLeadFromNote(formData: FormData) {
   const profile = await requireAdminProfile()
 
-  if (profile.role !== 'owner' && !profile.can_manage_properties) {
+  if (profile.role !== 'owner' && profile.role !== 'administrator' && !profile.can_manage_properties) {
     throw new Error('Non autorizzato')
   }
 

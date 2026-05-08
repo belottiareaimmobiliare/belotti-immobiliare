@@ -12,7 +12,7 @@ type SidebarLink = {
 type SidebarProfile = {
   full_name: string
   username: string
-  role: 'owner' | 'agent' | 'editor'
+  role: 'administrator' | 'owner' | 'agent' | 'editor'
   is_active: boolean
 }
 
@@ -145,21 +145,21 @@ function SidebarContent({
   const currentSearch = searchParams.toString()
 
   const roleLabel =
-    profile.role === 'owner'
+    (profile.role === 'owner' || profile.role === 'administrator')
       ? 'Admin Proprietario'
       : profile.role === 'editor'
         ? 'Editor'
         : 'Agente'
 
   const footerTitle =
-    profile.role === 'owner'
+    (profile.role === 'owner' || profile.role === 'administrator')
       ? 'Pannello proprietario attivo'
       : profile.role === 'editor'
         ? 'Pannello editor attivo'
         : 'Pannello agente attivo'
 
   const footerText =
-    profile.role === 'owner'
+    (profile.role === 'owner' || profile.role === 'administrator')
       ? 'Gestione completa di contenuti, utenti, logs e controllo generale del sito.'
       : profile.role === 'editor'
         ? 'Accesso abilitato alla gestione delle news.'

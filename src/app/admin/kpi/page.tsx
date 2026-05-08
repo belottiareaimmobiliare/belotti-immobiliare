@@ -188,7 +188,7 @@ export default async function AdminKpiPage() {
         </div>
       </section>
 
-      {currentProfile.role === 'owner' ? (
+      {(currentProfile.role === 'owner' || currentProfile.role === 'administrator') ? (
         <KpiCleanupPanel
           adminName={currentProfile.full_name}
           adminEmail={

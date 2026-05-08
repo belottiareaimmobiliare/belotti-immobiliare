@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-type UserRole = 'owner' | 'agent' | 'editor'
+type UserRole = 'administrator' | 'owner' | 'agent' | 'editor'
 
 type ManagedUser = {
   id: string
@@ -91,6 +91,7 @@ function buildInitialCreateState(): CreateFormState {
 
 function sortUsers(users: ManagedUser[]) {
   const roleOrder: Record<UserRole, number> = {
+    administrator: -1,
     owner: 0,
     agent: 1,
     editor: 2,

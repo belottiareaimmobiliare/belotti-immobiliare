@@ -37,7 +37,7 @@ export default async function AdminExportsPage() {
   const supabase = await createClient()
   const exportToken = process.env.EXPORT_TOKEN || ''
 
-  if (profile.role !== 'owner' && !profile.can_manage_properties) {
+  if (profile.role !== 'owner' && profile.role !== 'administrator' && !profile.can_manage_properties) {
     return (
       <div className="theme-panel rounded-[30px] border p-6">
         <h1 className="text-2xl font-semibold">Accesso non autorizzato</h1>

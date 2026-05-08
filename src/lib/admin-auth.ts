@@ -13,7 +13,7 @@ export type AdminProfile = {
   username: string
   login_email: string
   authorized_google_email: string | null
-  role: 'owner' | 'agent' | 'editor'
+  role: 'administrator' | 'owner' | 'agent' | 'editor'
   is_active: boolean
   can_manage_properties: boolean
   can_manage_news: boolean
@@ -209,7 +209,7 @@ export async function requireAdminProfile() {
 export async function requireOwner() {
   const profile = await requireAdminProfile()
 
-  if (profile.role !== 'owner') {
+  if (profile.role !== 'owner' && profile.role !== 'administrator') {
     redirect('/admin')
   }
 
@@ -219,7 +219,7 @@ export async function requireOwner() {
 export async function requirePermission(permission: AdminPermission) {
   const profile = await requireAdminProfile()
 
-  if (profile.role === 'owner') {
+  if ((profile.role === 'owner' || profile.role === 'administrator')) {
     return profile
   }
 

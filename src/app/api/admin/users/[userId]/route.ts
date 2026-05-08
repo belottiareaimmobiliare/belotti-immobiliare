@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getCurrentAdminProfile } from '@/lib/admin-auth'
 
-type UserRole = 'owner' | 'agent' | 'editor'
+type UserRole = 'administrator' | 'owner' | 'agent' | 'editor'
 
 type UpdateUserPayload = {
   full_name: string
@@ -61,7 +61,7 @@ async function getActorOwner() {
     }
   }
 
-  if (profile.role !== 'owner' || !profile.is_active) {
+  if ((profile.role !== 'owner' && profile.role !== 'administrator') || !profile.is_active) {
     return {
       error: NextResponse.json(
         { error: 'Accesso riservato ai proprietari.' },
