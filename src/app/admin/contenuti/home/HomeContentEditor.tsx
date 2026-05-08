@@ -516,7 +516,7 @@ export default function HomeContentEditor({ initialContent }: Props) {
                   </p>
 
                   <h2
-                    className={`mt-6 max-w-[900px] text-5xl font-semibold leading-[0.98] md:text-7xl xl:text-[5.5rem] ${
+                    className={`hero-title-outline-subtle mt-6 max-w-[900px] text-5xl font-semibold leading-[0.98] md:text-7xl xl:text-[5.5rem] ${
                       isDark ? 'text-white' : 'text-slate-900'
                     }`}
                   >

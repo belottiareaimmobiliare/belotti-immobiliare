@@ -168,7 +168,7 @@ export default function HomeHero() {
               {content.overline}
             </p>
 
-            <h1 className="mt-6 max-w-[900px] text-5xl font-semibold leading-[0.98] text-white md:text-7xl xl:text-[5.5rem]">
+            <h1 className="hero-title-outline-subtle mt-6 max-w-[900px] text-5xl font-semibold leading-[0.98] text-white md:text-7xl xl:text-[5.5rem]">
               {content.title}
             </h1>
 
