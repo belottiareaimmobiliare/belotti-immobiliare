@@ -114,7 +114,7 @@ export default function LeadsFilters({
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Cerca nome, email, telefono, messaggio o immobile..."
+          placeholder="Cerca nome, email, telefono, messaggio, titolo o codice immobile..."
           className="rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-sm text-[var(--site-text)] outline-none transition placeholder:text-[var(--site-text-faint)] focus:border-[var(--site-border-strong)]"
         />
       </div>
