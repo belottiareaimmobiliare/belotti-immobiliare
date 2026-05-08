@@ -48,7 +48,8 @@ export default function AdminShell({
 
 
   const roleLabel = useMemo(() => {
-    if ((profile.role === 'owner' || profile.role === 'administrator')) return 'Admin Proprietario'
+    if (String(profile.role) === 'administrator') return 'Administrator'
+    if (profile.role === 'owner') return 'Admin Proprietario'
     if (profile.role === 'editor') return 'Editor'
     return 'Agente'
   }, [profile.role])
@@ -134,7 +135,7 @@ export default function AdminShell({
           <main className="min-w-0 flex-1 px-4 py-4 md:px-6 md:py-6 xl:px-8 xl:py-8">
             {children}
 
-        {profile.role === 'administrator' ? <AdminSectionVisibilityToggle /> : null}
+        {String(profile.role) === 'administrator' ? <AdminSectionVisibilityToggle /> : null}
           </main>
         </div>
       </div>
