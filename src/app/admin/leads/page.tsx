@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/service'
 import DeleteLeadButton from './DeleteLeadButton'
 import LeadsFilters from './LeadsFilters'
-import { createManualLeadFromNote } from './actions'
+import ManualLeadNoteBox from './ManualLeadNoteBox'
 
 type LeadStatus = 'new' | 'contacted' | 'closed' | 'archived'
 
@@ -708,7 +708,7 @@ function PropertyLeadGroup({
               href={`/admin/immobili/${property.id}`}
               className="inline-flex items-center justify-center rounded-full bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-[#eef2f7]"
             >
-              Apri immobile
+              Modifica
             </Link>
 
             <Link
@@ -717,7 +717,14 @@ function PropertyLeadGroup({
               rel="noreferrer"
               className="inline-flex items-center justify-center rounded-full border border-[var(--site-border)] px-4 py-3 text-sm font-semibold text-[var(--site-text-soft)] transition hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]"
             >
-              Scheda pubblica
+              Apri pagina pubblica
+            </Link>
+
+            <Link
+              href={`/admin/immobili/${property.id}/apri-nota`}
+              className="inline-flex items-center justify-center rounded-full border border-amber-400/35 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-[var(--site-text)] transition hover:border-amber-300/70 hover:bg-amber-400/20"
+            >
+              Apri + nota
             </Link>
           </div>
         </div>
@@ -738,35 +745,11 @@ function PropertyLeadGroup({
             + Nuova nota
           </summary>
 
-          <form
-            action={createManualLeadFromNote}
-            className="mt-4 w-full rounded-3xl border border-[var(--site-border)] bg-[var(--site-surface)] p-4 lg:w-[520px]"
-          >
-            <input type="hidden" name="property_id" value={property.id} />
-
-            <p className="text-sm font-semibold text-[var(--site-text)]">
-              Inserisci nota interessato
-            </p>
-
-            <p className="mt-2 text-xs leading-5 text-[var(--site-text-faint)]">
-              Scrivi liberamente nome, telefono, email e nota. Il sistema prova a leggere automaticamente i dati principali.
-            </p>
-
-            <textarea
-              name="raw_note"
-              required
-              rows={5}
-              placeholder="Mario Rossi 3331234567 mario@email.it&#10;Ha chiamato per questo immobile, vuole fissare una visita sabato mattina."
-              className="mt-4 w-full resize-y rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-sm leading-6 text-[var(--site-text)] outline-none placeholder:text-[var(--site-text-faint)] focus:border-[var(--site-border-strong)]"
-            />
-
-            <button
-              type="submit"
-              className="mt-4 w-full rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#eef2f7]"
-            >
-              Salva lead nota
-            </button>
-          </form>
+          <ManualLeadNoteBox
+            propertyId={property.id}
+            propertyTitle={property.title}
+            previewHref={`/admin/immobili/${property.id}/apri-nota`}
+          />
         </details>
       </div>
 
