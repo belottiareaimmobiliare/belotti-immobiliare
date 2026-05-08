@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import { requireAdminProfile } from '@/lib/admin-auth'
-import AdminSectionVisibilityGate from '@/components/admin/AdminSectionVisibilityGate'
 
 export default async function AdminProtectedLayout({
   children,
@@ -9,6 +8,5 @@ export default async function AdminProtectedLayout({
 }) {
   await requireAdminProfile()
 
-  return <>{children}
-      <AdminSectionVisibilityGate /></>
+  return <>{children}</>
 }
