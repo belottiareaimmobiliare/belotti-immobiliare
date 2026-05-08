@@ -369,7 +369,7 @@ function LeadRowCard({ lead }: { lead: Lead }) {
           <span className="hidden text-sm text-[var(--site-text-faint)] xl:inline">
             {formatDate(lead.created_at)}
           </span>
-          <span className="rounded-full border border-[var(--site-border)] px-3 py-1 text-xs text-[var(--site-text-muted)] transition group-open:bg-white group-open:text-black">
+          <span className="no-gold-orbit rounded-full border border-[var(--site-border)] px-3 py-1 text-xs text-[var(--site-text-muted)] transition group-open:bg-white group-open:text-black">
             <span className="group-open:hidden">Apri</span>
             <span className="hidden group-open:inline">Chiudi</span>
           </span>
@@ -436,7 +436,7 @@ function LeadRowCard({ lead }: { lead: Lead }) {
                     href={publicPropertyHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-[#eef2f7]"
+                    className="no-gold-orbit inline-flex items-center justify-center rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-[#eef2f7]"
                   >
                     Apri scheda pubblica
                   </Link>
@@ -445,7 +445,7 @@ function LeadRowCard({ lead }: { lead: Lead }) {
                 {adminPropertyHref ? (
                   <Link
                     href={adminPropertyHref}
-                    className="inline-flex items-center justify-center rounded-full border border-[var(--site-border)] px-4 py-2.5 text-sm font-semibold text-[var(--site-text-soft)] transition hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]"
+                    className="no-gold-orbit inline-flex items-center justify-center rounded-full border border-[var(--site-border)] px-4 py-2.5 text-sm font-semibold text-[var(--site-text-soft)] transition hover:border-[var(--site-border-strong)] hover:bg-[#eef2f7] hover:text-black"
                   >
                     Apri modifica immobile
                   </Link>
@@ -586,7 +586,7 @@ function LeadRowCard({ lead }: { lead: Lead }) {
 
                 <button
                   type="submit"
-                  className="w-full rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#eef2f7]"
+                  className="no-gold-orbit w-full rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#eef2f7]"
                 >
                   Salva modifiche
                 </button>
@@ -634,12 +634,12 @@ function PropertyLeadGroup({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             {property.reference_code ? (
-              <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-semibold text-[var(--site-text)]">
+              <span className="no-gold-orbit rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-semibold text-[var(--site-text)]">
                 Rif. {property.reference_code}
               </span>
             ) : null}
 
-            <span className="rounded-full border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-3 py-1 text-xs font-semibold text-[var(--site-text-soft)]">
+            <span className="no-gold-orbit rounded-full border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-3 py-1 text-xs font-semibold text-[var(--site-text-soft)]">
               {property.status || 'stato non indicato'}
             </span>
           </div>
@@ -708,7 +708,7 @@ function PropertyLeadGroup({
           <div className="flex flex-col gap-2">
             <Link
               href={`/admin/immobili/${property.id}`}
-              className="inline-flex items-center justify-center rounded-full bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-[#eef2f7] hover:text-black"
+              className="no-gold-orbit inline-flex items-center justify-center rounded-full bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-[#eef2f7] hover:text-black"
             >
               Modifica
             </Link>
@@ -717,14 +717,14 @@ function PropertyLeadGroup({
               href={`/immobili/${property.slug}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-full border border-[var(--site-border)] px-4 py-3 text-sm font-semibold text-[var(--site-text-soft)] transition hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]"
+              className="no-gold-orbit inline-flex items-center justify-center rounded-full border border-[var(--site-border)] px-4 py-3 text-sm font-semibold text-[var(--site-text-soft)] transition hover:border-[var(--site-border-strong)] hover:bg-[#eef2f7] hover:text-black"
             >
               Apri pagina pubblica
             </Link>
 
             <Link
               href={`/admin/immobili/${property.id}/apri-nota`}
-              className="inline-flex items-center justify-center rounded-full border border-amber-400/35 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-[var(--site-text)] transition hover:border-amber-300/70 hover:bg-amber-400/20"
+              className="no-gold-orbit inline-flex items-center justify-center rounded-full border border-[var(--site-border)] bg-transparent px-4 py-3 text-sm font-semibold text-[var(--site-text)] transition hover:border-[var(--site-border-strong)] hover:bg-[#eef2f7] hover:text-black"
             >
               Apri + nota
             </Link>
@@ -745,7 +745,7 @@ function PropertyLeadGroup({
         <details className="group">
           <summary
             aria-label="Nuova nota"
-            className="group/note relative inline-flex min-w-[190px] cursor-pointer list-none items-center justify-center overflow-hidden rounded-full bg-white px-6 py-3 text-sm font-semibold text-black transition duration-300 hover:bg-[#eef2f7] [&::-webkit-details-marker]:hidden"
+            className="no-gold-orbit group/note relative inline-flex min-w-[190px] cursor-pointer list-none items-center justify-center overflow-hidden rounded-full bg-white px-6 py-3 text-sm font-semibold text-black transition duration-300 hover:bg-[#eef2f7] [&::-webkit-details-marker]:hidden"
           >
             <span
               aria-hidden="true"
@@ -935,7 +935,7 @@ export default async function AdminLeadsPage({
 
           <Link
             href="/admin"
-            className="inline-flex items-center justify-center rounded-full border border-[var(--site-border)] px-5 py-3 text-sm font-medium text-[var(--site-text-soft)] transition hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]"
+            className="no-gold-orbit inline-flex items-center justify-center rounded-full border border-[var(--site-border)] px-5 py-3 text-sm font-medium text-[var(--site-text-soft)] transition hover:border-[var(--site-border-strong)] hover:bg-[#eef2f7] hover:text-black"
           >
             Torna alla dashboard
           </Link>

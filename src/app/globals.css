@@ -1319,8 +1319,8 @@ a[href*="tiktok.com"][title]:hover {
   - liquid buttons
   - bottoni già gestiti come gold premium
 */
-body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button),
-body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button) {
+body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):not(.no-gold-orbit),
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):not(.no-gold-orbit) {
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -1334,8 +1334,8 @@ body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-sta
   will-change: transform;
 }
 
-body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button)::before,
-body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button)::before {
+body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):not(.no-gold-orbit)::before,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):not(.no-gold-orbit)::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1364,10 +1364,10 @@ body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-sta
   transition: opacity 180ms ease;
 }
 
-body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):hover,
-body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):focus-visible,
-body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):hover,
-body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):focus-visible {
+body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):not(.no-gold-orbit):hover,
+body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):not(.no-gold-orbit):focus-visible,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):not(.no-gold-orbit):hover,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):not(.no-gold-orbit):focus-visible {
   transform: translateY(-1px);
   border-color: color-mix(in srgb, var(--site-border) 35%, #d7a735 65%);
   box-shadow:
@@ -1375,15 +1375,15 @@ body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-sta
     0 12px 28px rgba(120,82,20,0.16);
 }
 
-body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):hover::before,
-body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):focus-visible::before,
-body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):hover::before,
-body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):focus-visible::before {
+body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):not(.no-gold-orbit):hover::before,
+body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):not(.no-gold-orbit):focus-visible::before,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):not(.no-gold-orbit):hover::before,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):not(.no-gold-orbit):focus-visible::before {
   opacity: 1;
 }
 
-body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):active,
-body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):active {
+body.is-non-home-route button[class*="rounded"]:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):not(.no-gold-orbit):active,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.liquid-button):not(.no-gold-orbit):active {
   transform: translateY(0);
   filter: brightness(0.98);
 }
@@ -1574,9 +1574,9 @@ body.is-non-home-route a[aria-label*="WhatsApp"]:hover * {
   - bottoni stato colorati
   - AI buttons
 */
-body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out),
-body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn),
-body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]) {
+body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.no-gold-orbit),
+body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn):not(.no-gold-orbit),
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.no-gold-orbit):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]) {
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -1590,9 +1590,9 @@ body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-sta
   will-change: transform;
 }
 
-body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out)::before,
-body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn)::before,
-body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"])::before {
+body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.no-gold-orbit)::before,
+body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn):not(.no-gold-orbit)::before,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.no-gold-orbit):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"])::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1621,12 +1621,12 @@ body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-sta
   transition: opacity 180ms ease;
 }
 
-body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):hover,
-body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):focus-visible,
-body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn):hover,
-body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn):focus-visible,
-body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):hover,
-body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):focus-visible {
+body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.no-gold-orbit):hover,
+body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.no-gold-orbit):focus-visible,
+body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn):not(.no-gold-orbit):hover,
+body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn):not(.no-gold-orbit):focus-visible,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.no-gold-orbit):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):hover,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.no-gold-orbit):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):focus-visible {
   transform: translateY(-1px);
   border-color: color-mix(in srgb, var(--site-border) 30%, #d7a735 70%) !important;
   box-shadow:
@@ -1634,18 +1634,18 @@ body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-sta
     0 12px 28px rgba(120,82,20,0.16);
 }
 
-body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):hover::before,
-body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):focus-visible::before,
-body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn):hover::before,
-body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn):focus-visible::before,
-body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):hover::before,
-body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):focus-visible::before {
+body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.no-gold-orbit):hover::before,
+body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.no-gold-orbit):focus-visible::before,
+body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn):not(.no-gold-orbit):hover::before,
+body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn):not(.no-gold-orbit):focus-visible::before,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.no-gold-orbit):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):hover::before,
+body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn):not(.no-gold-orbit):not([href*="facebook"]):not([href*="instagram"]):not([href*="tiktok"]):not([href*="whatsapp"]):not([href*="wa.me"]):focus-visible::before {
   opacity: 1;
 }
 
 /* Evita che il bordo orbit copra il testo */
-body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out) > *,
-body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn) > *,
+body.is-non-home-route button:not(:disabled):not(.ai-premium-button):not(.lead-status-btn):not(.leaflet-control-zoom-in):not(.leaflet-control-zoom-out):not(.no-gold-orbit) > *,
+body.is-non-home-route a[role="button"]:not(.ai-premium-button):not(.lead-status-btn):not(.no-gold-orbit) > *,
 body.is-non-home-route a[class*="rounded"]:not(.ai-premium-button):not(.lead-status-btn) > * {
   position: relative;
   z-index: 2;
@@ -2926,3 +2926,25 @@ body.dark button[class*='emerald'][class*='uppercase'][class*='tracking']:hover,
   transform: scale(1.06);
 }
 
+/* === NO GOLD ORBIT EXCLUSION START === */
+.no-gold-orbit,
+.no-gold-orbit:hover,
+.no-gold-orbit:focus-visible {
+  background-image: none !important;
+  box-shadow: none;
+}
+
+.no-gold-orbit::before,
+.no-gold-orbit::after,
+.no-gold-orbit:hover::before,
+.no-gold-orbit:hover::after,
+.no-gold-orbit:focus-visible::before,
+.no-gold-orbit:focus-visible::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  background-image: none !important;
+  animation: none !important;
+  opacity: 0 !important;
+}
+/* === NO GOLD ORBIT EXCLUSION END === */

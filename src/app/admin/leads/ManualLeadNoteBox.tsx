@@ -100,7 +100,7 @@ export default function ManualLeadNoteBox({
           type="button"
           onClick={saveNote}
           disabled={isPending}
-          className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#eef2f7] hover:text-black disabled:cursor-not-allowed disabled:opacity-60"
+          className="no-gold-orbit rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#eef2f7] hover:text-black disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? 'Salvataggio...' : 'Salva lead nota'}
         </button>
@@ -108,7 +108,7 @@ export default function ManualLeadNoteBox({
         <button
           type="button"
           onClick={openWithNote}
-          className="rounded-full border border-amber-400/35 bg-amber-400/10 px-5 py-3 text-sm font-semibold text-[var(--site-text)] transition hover:border-amber-300/70 hover:bg-amber-400/20"
+          className="no-gold-orbit rounded-full border border-[var(--site-border)] bg-transparent px-5 py-3 text-sm font-semibold text-[var(--site-text)] transition hover:border-[var(--site-border-strong)] hover:bg-[#eef2f7] hover:text-black"
         >
           Apri + nota
         </button>
