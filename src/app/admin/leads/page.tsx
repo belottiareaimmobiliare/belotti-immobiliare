@@ -615,18 +615,20 @@ function PropertyLeadGroup({
   return (
     <section className="overflow-hidden rounded-[28px] border border-[var(--site-border)] bg-[var(--site-surface)] shadow-xl shadow-black/10">
       <div className="grid gap-5 border-b border-[var(--site-border)] p-5 lg:grid-cols-[220px_minmax(0,1fr)_280px]">
-        <div className="overflow-hidden rounded-3xl border border-[var(--site-border)] bg-[var(--site-surface-strong)]">
-          {coverUrl ? (
-            <img
-              src={coverUrl}
-              alt={property.title}
-              className="aspect-[4/3] w-full object-cover"
-            />
-          ) : (
-            <div className="flex aspect-[4/3] items-center justify-center bg-[var(--site-surface-strong)] px-4 text-center text-sm text-[var(--site-text-faint)]">
-              Nessuna immagine
-            </div>
-          )}
+        <div className="self-start overflow-hidden rounded-3xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] shadow-lg shadow-black/10">
+          <div className="relative aspect-[4/3] w-full">
+            {coverUrl ? (
+              <img
+                src={coverUrl}
+                alt={property.title}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-[var(--site-surface-strong)] px-4 text-center text-sm text-[var(--site-text-faint)]">
+                Nessuna immagine
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="min-w-0">
