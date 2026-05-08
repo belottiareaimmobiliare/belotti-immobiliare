@@ -2,7 +2,6 @@
 
 import { ChangeEvent, DragEvent, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import {
   createPropertyMediaRecord,
   deletePropertyMedia,
@@ -34,7 +33,6 @@ export default function PropertyMediaManagerV2({
   photoComingSoon = false,
   noPhotoAvailable = false,
 }: Props) {
-  const supabase = createClient()
   const router = useRouter()
 
   const imageInputRef = useRef<HTMLInputElement | null>(null)
@@ -63,46 +61,26 @@ export default function PropertyMediaManagerV2({
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
 
   const uploadFile = async (file: File, mediaType: 'image' | 'plan') => {
-    const { data: userData, error: userError } = await supabase.auth.getUser()
+    const formData = new FormData()
+    formData.set('property_id', propertyId)
+    formData.set('media_type', mediaType)
+    formData.set('file', file)
 
-    if (userError || !userData.user) {
-      console.error('Utente Supabase non autenticato durante upload:', userError)
-      throw new Error('Sessione admin non valida o scaduta. Fai logout/login e riprova.')
-    }
-
-    const extension = file.name.split('.').pop() || (mediaType === 'plan' ? 'pdf' : 'jpg')
-    const fileName = `${mediaType}-${Date.now()}-${Math.random()
-      .toString(36)
-      .slice(2)}.${extension}`
-
-    const bucketName = mediaType === 'image' ? 'property-media' : 'property-plans'
-    const filePath = `properties/${propertyId}/${fileName}`
-
-    console.log('Upload media immobile:', {
-      bucketName,
-      filePath,
-      fileName: file.name,
-      fileSize: file.size,
-      fileType: file.type,
-      userId: userData.user.id,
+    const response = await fetch('/api/admin/property-media/upload', {
+      method: 'POST',
+      body: formData,
     })
 
-    const { error: uploadError } = await supabase.storage
-      .from(bucketName)
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false,
-      })
+    const result = await response.json().catch(() => null)
 
-    if (uploadError) {
-      console.error('Errore Supabase Storage upload:', uploadError)
+    if (!response.ok || !result?.publicUrl) {
+      console.error('Errore upload API admin:', result)
       throw new Error(
-        `Upload fallito su bucket ${bucketName}: ${uploadError.message || 'errore sconosciuto'}`
+        result?.error || `Upload fallito con codice ${response.status}`
       )
     }
 
-    const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath)
-    return data.publicUrl
+    return String(result.publicUrl)
   }
 
   const insertMediaRecord = async (
