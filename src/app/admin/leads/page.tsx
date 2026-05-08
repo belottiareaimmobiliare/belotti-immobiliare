@@ -743,8 +743,23 @@ function PropertyLeadGroup({
         </div>
 
         <details className="group">
-          <summary className="inline-flex cursor-pointer list-none items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#eef2f7] [&::-webkit-details-marker]:hidden">
-            + Nuova nota
+          <summary
+            aria-label="Nuova nota"
+            className="group/note relative inline-flex min-w-[190px] cursor-pointer list-none items-center justify-center overflow-hidden rounded-full bg-white px-6 py-3 text-sm font-semibold text-black transition duration-300 hover:bg-[#eef2f7] [&::-webkit-details-marker]:hidden"
+          >
+            <span
+              aria-hidden="true"
+              className="absolute left-6 top-1/2 -translate-y-1/2 text-base font-semibold transition-all duration-300 ease-out group-hover/note:left-1/2 group-hover/note:-translate-x-1/2 group-hover/note:scale-125 group-hover/note:font-black"
+            >
+              +
+            </span>
+
+            <span
+              aria-hidden="true"
+              className="pl-4 transition-all duration-200 ease-out group-hover/note:translate-x-3 group-hover/note:opacity-0"
+            >
+              Nuova nota
+            </span>
           </summary>
 
           <ManualLeadNoteBox
