@@ -21,7 +21,13 @@ export default function StatusToggleButton({
   const handleClick = () => {
     startTransition(async () => {
       try {
-        await togglePropertyStatus(propertyId, currentStatus)
+        const result = await togglePropertyStatus(propertyId, currentStatus)
+
+        if (!result.ok) {
+          alert(result.error || 'Errore aggiornamento stato immobile')
+          return
+        }
+
         router.refresh()
       } catch (error) {
         console.error(error)
