@@ -708,7 +708,7 @@ function PropertyLeadGroup({
           <div className="flex flex-col gap-2">
             <Link
               href={`/admin/immobili/${property.id}`}
-              className="admin-gold-spin-hover inline-flex items-center justify-center rounded-full bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-black hover:text-white"
+              className="inline-flex items-center justify-center rounded-full bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-[#eef2f7] hover:text-black"
             >
               Modifica
             </Link>
@@ -717,14 +717,14 @@ function PropertyLeadGroup({
               href={`/immobili/${property.slug}`}
               target="_blank"
               rel="noreferrer"
-              className="admin-gold-spin-hover inline-flex items-center justify-center rounded-full border border-[var(--site-border)] px-4 py-3 text-sm font-semibold text-[var(--site-text-soft)] transition hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]"
+              className="inline-flex items-center justify-center rounded-full border border-[var(--site-border)] px-4 py-3 text-sm font-semibold text-[var(--site-text-soft)] transition hover:border-[var(--site-border-strong)] hover:bg-[var(--site-surface-2)] hover:text-[var(--site-text)]"
             >
               Apri pagina pubblica
             </Link>
 
             <Link
               href={`/admin/immobili/${property.id}/apri-nota`}
-              className="admin-gold-spin-hover inline-flex items-center justify-center rounded-full border border-amber-400/35 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-[var(--site-text)] transition hover:border-amber-300/70 hover:bg-amber-400/20"
+              className="inline-flex items-center justify-center rounded-full border border-amber-400/35 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-[var(--site-text)] transition hover:border-amber-300/70 hover:bg-amber-400/20"
             >
               Apri + nota
             </Link>
