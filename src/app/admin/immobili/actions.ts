@@ -10,6 +10,7 @@ type PropertyQuality = {
   description: string | null
   price: number | null
   comune: string | null
+  city: string | null
   contract_type: string | null
   property_type: string | null
   status: string | null
@@ -21,7 +22,7 @@ function getMissingQualityFields(property: PropertyQuality) {
   if (!property.title?.trim()) missing.push('titolo')
   if (!property.description?.trim()) missing.push('descrizione')
   if (!property.price) missing.push('prezzo')
-  if (!property.comune?.trim()) missing.push('comune')
+  if (!property.comune?.trim() && !property.city?.trim()) missing.push('comune')
   if (!property.contract_type?.trim()) missing.push('contratto')
   if (!property.property_type?.trim()) missing.push('tipologia')
 
@@ -40,7 +41,7 @@ export async function togglePropertyStatus(
 
     const { data: property, error: propertyError } = await service
       .from('properties')
-      .select('id, title, description, price, comune, contract_type, property_type, status')
+      .select('id, title, description, price, comune, city, contract_type, property_type, status')
       .eq('id', propertyId)
       .single()
 
@@ -62,10 +63,16 @@ export async function togglePropertyStatus(
 
     const now = new Date().toISOString()
 
+    const comuneFromLegacyCity =
+      !property.comune?.trim() && property.city?.trim()
+        ? property.city.trim()
+        : null
+
     const updatePayload =
       nextStatus === 'published'
         ? {
             status: nextStatus,
+            comune: comuneFromLegacyCity || property.comune,
             published_by: profile.id,
             published_at: now,
             updated_by: profile.id,
