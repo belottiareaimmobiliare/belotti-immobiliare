@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import { createManualLeadFromNote } from './actions'
 
 type ManualLeadNoteBoxProps = {
@@ -14,9 +14,26 @@ export default function ManualLeadNoteBox({
   propertyTitle,
   previewHref,
 }: ManualLeadNoteBoxProps) {
+  const storageKey = useMemo(
+    () => `belotti-lead-note-draft-${propertyId}`,
+    [propertyId],
+  )
+
   const [note, setNote] = useState('')
   const [feedback, setFeedback] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+
+  useEffect(() => {
+    const savedDraft = window.localStorage.getItem(storageKey)
+
+    if (savedDraft) {
+      setNote(savedDraft)
+    }
+  }, [storageKey])
+
+  useEffect(() => {
+    window.localStorage.setItem(storageKey, note)
+  }, [note, storageKey])
 
   function saveNote() {
     const cleanNote = note.trim()
@@ -45,6 +62,7 @@ export default function ManualLeadNoteBox({
 
     if (cleanNote) {
       url.searchParams.set('note', cleanNote)
+      window.localStorage.setItem(storageKey, cleanNote)
     }
 
     window.location.href = url.toString()
