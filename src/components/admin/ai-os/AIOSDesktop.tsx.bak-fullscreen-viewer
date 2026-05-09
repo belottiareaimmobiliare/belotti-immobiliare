@@ -11,8 +11,6 @@ type AIOSFile = {
   size?: string
   content?: string
   status?: 'saved' | 'local'
-  mimeType?: string
-  previewUrl?: string
 }
 
 type AIOSFolder = {
@@ -151,7 +149,6 @@ export default function AIOSDesktop() {
   const [txtDraft, setTxtDraft] = useState('')
   const [notice, setNotice] = useState('AI-OS avviato. Desktop operativo in modalità demo locale.')
   const [startOpen, setStartOpen] = useState(false)
-  const [previewFile, setPreviewFile] = useState<AIOSFile | null>(null)
 
   const activeFolder = useMemo(
     () => folders.find((folder) => folder.id === activeFolderId) ?? null,
@@ -172,8 +169,6 @@ export default function AIOSDesktop() {
       kind: getFileKind(file),
       size: formatFileSize(file.size),
       status: 'local',
-      mimeType: file.type || undefined,
-      previewUrl: URL.createObjectURL(file),
       content: file.name.toLowerCase().endsWith('.txt') ? '' : undefined,
     }))
 
@@ -206,16 +201,6 @@ export default function AIOSDesktop() {
     setTxtDraft(file.content ?? '')
     setDesktopWindowOpen(true)
     setNotice(`Editor aperto: ${file.name}`)
-  }
-
-  const openFile = (file: AIOSFile) => {
-    if (file.kind === 'txt') {
-      openTxtEditor(file)
-      return
-    }
-
-    setPreviewFile(file)
-    setNotice(`Anteprima fullscreen aperta: ${file.name}`)
   }
 
   const saveTxtDraft = () => {
@@ -347,6 +332,13 @@ export default function AIOSDesktop() {
                   <button
                     type="button"
                     onClick={() => setDesktopWindowOpen(false)}
+                    className="rounded-full border border-emerald-300/20 px-3 py-1.5 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-300/10"
+                  >
+                    Minimizza
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDesktopWindowOpen(false)}
                     className="flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 text-sm text-red-100 transition hover:bg-red-500/20"
                     aria-label="Chiudi finestra"
                   >
@@ -474,7 +466,10 @@ export default function AIOSDesktop() {
                           <button
                             key={file.id}
                             type="button"
-                            onClick={() => openFile(file)}
+                            onClick={() => {
+                              if (file.kind === 'txt') openTxtEditor(file)
+                              else setNotice(`Selezionato file: ${file.name}`)
+                            }}
                             className={`group rounded-2xl border p-4 text-left transition ${
                               selectedTxtId === file.id
                                 ? 'border-violet-300/55 bg-violet-400/15'
@@ -556,97 +551,6 @@ export default function AIOSDesktop() {
           ) : null}
         </div>
       </section>
-
-      {previewFile ? (
-        <section className="fixed inset-0 z-[10020] flex flex-col bg-black/96 text-white">
-          <header className="flex h-16 shrink-0 items-center justify-between border-b border-emerald-300/15 bg-black/80 px-4 backdrop-blur-2xl">
-            <div className="min-w-0">
-              <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/70">
-                Anteprima file
-              </p>
-              <h2 className="truncate text-sm font-semibold text-white md:text-base">
-                {iconForFile(previewFile.kind)} {previewFile.name}
-              </h2>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setPreviewFile(null)}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-red-300/30 text-xl text-red-100 transition hover:bg-red-500/20"
-              aria-label="Chiudi anteprima"
-            >
-              ×
-            </button>
-          </header>
-
-          <div className="flex min-h-0 flex-1 items-center justify-center p-4">
-            {previewFile.previewUrl && previewFile.kind === 'image' ? (
-              <img
-                src={previewFile.previewUrl}
-                alt={previewFile.name}
-                className="max-h-full max-w-full rounded-2xl object-contain shadow-2xl shadow-black"
-              />
-            ) : null}
-
-            {previewFile.previewUrl && previewFile.kind === 'video' ? (
-              <video
-                src={previewFile.previewUrl}
-                controls
-                autoPlay
-                className="max-h-full max-w-full rounded-2xl shadow-2xl shadow-black"
-              />
-            ) : null}
-
-            {previewFile.previewUrl &&
-            (previewFile.kind === 'pdf' ||
-              previewFile.kind === 'plan' ||
-              previewFile.mimeType === 'application/pdf') ? (
-              <iframe
-                src={previewFile.previewUrl}
-                title={previewFile.name}
-                className="h-full w-full rounded-2xl border border-emerald-300/15 bg-white"
-              />
-            ) : null}
-
-            {previewFile.previewUrl &&
-            previewFile.kind !== 'image' &&
-            previewFile.kind !== 'video' &&
-            previewFile.kind !== 'pdf' &&
-            previewFile.kind !== 'plan' &&
-            previewFile.mimeType !== 'application/pdf' ? (
-              <div className="w-full max-w-xl rounded-3xl border border-emerald-300/20 bg-emerald-950/25 p-6 text-center shadow-2xl shadow-black/50">
-                <div className="text-5xl">{iconForFile(previewFile.kind)}</div>
-                <h3 className="mt-4 text-xl font-semibold text-white">{previewFile.name}</h3>
-                <p className="mt-2 text-sm leading-6 text-emerald-100/65">
-                  Questo tipo di documento potrebbe non essere visualizzabile direttamente dal browser.
-                  Se il browser lo supporta, puoi aprirlo in una nuova scheda.
-                </p>
-
-                <a
-                  href={previewFile.previewUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-5 inline-flex rounded-2xl bg-emerald-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-200"
-                >
-                  Apri documento
-                </a>
-              </div>
-            ) : null}
-
-            {!previewFile.previewUrl ? (
-              <div className="w-full max-w-xl rounded-3xl border border-emerald-300/20 bg-emerald-950/25 p-6 text-center shadow-2xl shadow-black/50">
-                <div className="text-5xl">{iconForFile(previewFile.kind)}</div>
-                <h3 className="mt-4 text-xl font-semibold text-white">{previewFile.name}</h3>
-                <p className="mt-2 text-sm leading-6 text-emerald-100/65">
-                  Questo è un file demo già presente nella cartella. L’anteprima reale sarà disponibile per i file caricati o quando collegheremo Supabase Storage.
-                </p>
-              </div>
-            ) : null}
-          </div>
-        </section>
-      ) : null}
-
-
 
       <footer className="relative z-20 flex h-14 items-center justify-between border-t border-emerald-300/15 bg-black/72 px-3 backdrop-blur-2xl">
         <div className="relative">
