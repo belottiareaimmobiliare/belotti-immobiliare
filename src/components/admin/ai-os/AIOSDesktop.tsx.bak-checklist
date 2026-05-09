@@ -104,17 +104,6 @@ type AIOSPropertyOwnerForm = {
   isPrimary: boolean
 }
 
-type AIOSChecklistItem = {
-  id: string
-  property_id: string
-  item_key: string
-  label: string
-  is_done: boolean
-  notes?: string | null
-  created_at?: string
-  updated_at?: string
-}
-
 type AIOSDocumentRequest = {
   id: string
   property_id: string
@@ -264,14 +253,14 @@ const AI_OS_VISURA_OPTIONS = [
 ]
 
 const AI_OS_CHECKLIST_ITEMS = [
-  { id: 'owner_data', label: 'Dati proprietario completi' },
-  { id: 'owner_identity', label: 'Documento identità proprietario' },
-  { id: 'owner_tax_code', label: 'Codice fiscale proprietario' },
-  { id: 'mandate_signed', label: 'Incarico firmato' },
-  { id: 'cadastral_document', label: 'Visura catastale aggiornata' },
-  { id: 'cadastral_plan', label: 'Planimetria catastale' },
-  { id: 'energy_certificate', label: 'APE / classe energetica' },
-  { id: 'media_ready', label: 'Foto e video caricati' },
+  'Dati proprietario completi',
+  'Documento identità proprietario',
+  'Codice fiscale proprietario',
+  'Incarico firmato',
+  'Visura catastale aggiornata',
+  'Planimetria catastale',
+  'APE / classe energetica',
+  'Foto e video caricati',
 ]
 
 const desktopFolders = [
@@ -653,9 +642,6 @@ export default function AIOSDesktop() {
   const [propertyOwnerUpdating, setPropertyOwnerUpdating] = useState<string | null>(null)
   const [editingOwnerId, setEditingOwnerId] = useState<string | null>(null)
   const [ownerForm, setOwnerForm] = useState<AIOSPropertyOwnerForm>(() => createEmptyOwnerForm())
-  const [checklistItems, setChecklistItems] = useState<AIOSChecklistItem[]>([])
-  const [checklistLoading, setChecklistLoading] = useState(false)
-  const [checklistUpdating, setChecklistUpdating] = useState<string | null>(null)
 
   const activeFolder = useMemo(
     () => folders.find((folder) => folder.id === activeFolderId) ?? null,
@@ -890,81 +876,6 @@ export default function AIOSDesktop() {
     }
   }
 
-  async function loadChecklist(propertyId: string) {
-    if (!propertyId) return
-
-    setChecklistLoading(true)
-
-    try {
-      const response = await fetch(
-        `/api/admin/ai-os/checklist?propertyId=${encodeURIComponent(propertyId)}`,
-        { cache: 'no-store' },
-      )
-
-      const payload = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Errore caricamento checklist')
-      }
-
-      setChecklistItems(Array.isArray(payload?.items) ? payload.items : [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Errore caricamento checklist'
-      setNotice(message)
-    } finally {
-      setChecklistLoading(false)
-    }
-  }
-
-  async function toggleChecklistItem(itemKey: string, label: string, nextDone: boolean) {
-    if (!activeFolderId) {
-      setNotice('Seleziona prima una cartella immobile.')
-      return
-    }
-
-    setChecklistUpdating(itemKey)
-
-    try {
-      const response = await fetch('/api/admin/ai-os/checklist', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          propertyId: activeFolderId,
-          itemKey,
-          label,
-          isDone: nextDone,
-        }),
-      })
-
-      const payload = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Errore aggiornamento checklist')
-      }
-
-      if (payload?.item) {
-        setChecklistItems((current) => {
-          const exists = current.some((item) => item.item_key === itemKey)
-
-          if (exists) {
-            return current.map((item) => (item.item_key === itemKey ? payload.item : item))
-          }
-
-          return [...current, payload.item]
-        })
-      }
-
-      setNotice(`${label}: ${nextDone ? 'completato' : 'rimesso da completare'}.`)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Errore aggiornamento checklist'
-      setNotice(message)
-    } finally {
-      setChecklistUpdating(null)
-    }
-  }
-
   async function loadDocumentRequests(propertyId: string) {
     if (!propertyId) return
 
@@ -1126,7 +1037,6 @@ export default function AIOSDesktop() {
           void loadFilesForFolder(current, activeSection)
           void loadDocumentRequests(current)
           void loadPropertyOwners(current)
-          void loadChecklist(current)
           return current
         }
 
@@ -1134,7 +1044,6 @@ export default function AIOSDesktop() {
           void loadFilesForFolder(firstFolderId, activeSection)
           void loadDocumentRequests(firstFolderId)
           void loadPropertyOwners(firstFolderId)
-          void loadChecklist(firstFolderId)
         }
 
         return firstFolderId
@@ -1513,7 +1422,6 @@ export default function AIOSDesktop() {
     void loadFilesForFolder(activeFolderId, activeSection)
     void loadDocumentRequests(activeFolderId)
     void loadPropertyOwners(activeFolderId)
-    void loadChecklist(activeFolderId)
     void loadQuota()
   }
 
@@ -1529,7 +1437,6 @@ export default function AIOSDesktop() {
     void loadFilesForFolder(folder.id, 'root')
     void loadDocumentRequests(folder.id)
     void loadPropertyOwners(folder.id)
-    void loadChecklist(folder.id)
   }
 
   const handlePreviewWheel = (event: WheelEvent<HTMLDivElement>) => {
@@ -2060,64 +1967,18 @@ export default function AIOSDesktop() {
             </div>
           </div>
         ) : activeAgencyTool.id === 'checklist' ? (
-          <div className="space-y-4">
-            <div className="rounded-2xl border border-[#8FBCBB]/12 bg-[#2E3440]/35 p-4">
-              <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/70">
-                    Stato fascicolo
-                  </p>
-                  <p className="mt-1 text-sm text-[#D8DEE9]/58">
-                    Spunta i documenti completati per capire subito se l’immobile è pronto.
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => activeFolderId && loadChecklist(activeFolderId)}
-                  className="rounded-full border border-[#8FBCBB]/25 bg-[#A3BE8C]/10 px-3 py-1.5 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#A3BE8C]/18"
-                >
-                  Aggiorna
-                </button>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {AI_OS_CHECKLIST_ITEMS.map((item) => (
+              <div
+                key={item}
+                className="flex items-center gap-3 rounded-2xl border border-[#8FBCBB]/12 bg-[#3B4252]/32 px-3 py-2"
+              >
+                <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[#8FBCBB]/25 bg-[#2E3440]/65 text-xs text-[#88C0D0]">
+                  □
+                </span>
+                <span className="text-sm text-[#E5E9F0]">{item}</span>
               </div>
-
-              {checklistLoading ? (
-                <p className="text-sm text-[#D8DEE9]/55">Caricamento checklist...</p>
-              ) : (
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {AI_OS_CHECKLIST_ITEMS.map((item) => {
-                    const savedItem = checklistItems.find((entry) => entry.item_key === item.id)
-                    const isDone = Boolean(savedItem?.is_done)
-                    const isUpdating = checklistUpdating === item.id
-
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        disabled={isUpdating}
-                        onClick={() => toggleChecklistItem(item.id, item.label, !isDone)}
-                        className={`flex items-center gap-3 rounded-2xl border px-3 py-2 text-left transition disabled:cursor-wait disabled:opacity-60 ${
-                          isDone
-                            ? 'border-[#A3BE8C]/30 bg-[#A3BE8C]/12'
-                            : 'border-[#8FBCBB]/12 bg-[#3B4252]/32 hover:border-[#B48EAD]/35 hover:bg-[#B48EAD]/10'
-                        }`}
-                      >
-                        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-bold ${
-                          isDone
-                            ? 'border-[#A3BE8C]/35 bg-[#A3BE8C]/20 text-[#A3BE8C]'
-                            : 'border-[#8FBCBB]/25 bg-[#2E3440]/65 text-[#88C0D0]'
-                        }`}>
-                          {isDone ? '✓' : '□'}
-                        </span>
-                        <span className={`text-sm ${isDone ? 'text-[#E5E9F0]' : 'text-[#D8DEE9]/78'}`}>
-                          {item.label}
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
+            ))}
           </div>
         ) : (
           <div className="rounded-2xl border border-[#8FBCBB]/15 bg-[#3B4252]/35 p-4">
