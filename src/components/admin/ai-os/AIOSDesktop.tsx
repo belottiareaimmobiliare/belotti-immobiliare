@@ -83,6 +83,33 @@ const initialFolders: AIOSFolder[] = [
   },
 ]
 
+const desktopFolders = [
+  {
+    id: 'properties',
+    label: 'Immobili',
+    icon: '📁',
+    hint: 'Cartelle immobili',
+  },
+  {
+    id: 'uploads',
+    label: 'Upload',
+    icon: '⬆️',
+    hint: 'Foto e video',
+  },
+  {
+    id: 'notes',
+    label: 'Note TXT',
+    icon: '📝',
+    hint: 'File modificabili',
+  },
+  {
+    id: 'settings',
+    label: 'Aspetto',
+    icon: '⚙️',
+    hint: 'Solo admin',
+  },
+]
+
 function getFileKind(file: File): AIOSFileKind {
   if (file.type.startsWith('image/')) return 'image'
   if (file.type.startsWith('video/')) return 'video'
@@ -117,9 +144,11 @@ function iconForFile(kind: AIOSFileKind) {
 export default function AIOSDesktop() {
   const [folders, setFolders] = useState<AIOSFolder[]>(initialFolders)
   const [activeFolderId, setActiveFolderId] = useState<string>(initialFolders[0]?.id ?? '')
+  const [desktopWindowOpen, setDesktopWindowOpen] = useState(true)
   const [selectedTxtId, setSelectedTxtId] = useState<string | null>(null)
   const [txtDraft, setTxtDraft] = useState('')
-  const [notice, setNotice] = useState('AI-OS inizializzato. Modalità demo locale attiva.')
+  const [notice, setNotice] = useState('AI-OS avviato. Desktop operativo in modalità demo locale.')
+  const [startOpen, setStartOpen] = useState(false)
 
   const activeFolder = useMemo(
     () => folders.find((folder) => folder.id === activeFolderId) ?? null,
@@ -154,9 +183,7 @@ export default function AIOSDesktop() {
       ),
     )
 
-    setNotice(
-      `${newFiles.length} file aggiunto/i alla cartella "${activeFolder?.name ?? 'immobile'}". Upload reale da collegare a Supabase.`,
-    )
+    setNotice(`${newFiles.length} file aggiunto/i in "${activeFolder?.name ?? 'cartella'}".`)
   }
 
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
@@ -172,6 +199,7 @@ export default function AIOSDesktop() {
   const openTxtEditor = (file: AIOSFile) => {
     setSelectedTxtId(file.id)
     setTxtDraft(file.content ?? '')
+    setDesktopWindowOpen(true)
     setNotice(`Editor aperto: ${file.name}`)
   }
 
@@ -198,7 +226,7 @@ export default function AIOSDesktop() {
       ),
     )
 
-    setNotice(`File "${selectedTxt.name}" salvato nella cartella demo.`)
+    setNotice(`File "${selectedTxt.name}" salvato.`)
   }
 
   const createTxtFile = () => {
@@ -227,259 +255,369 @@ export default function AIOSDesktop() {
 
     setSelectedTxtId(newFile.id)
     setTxtDraft('')
+    setDesktopWindowOpen(true)
     setNotice(`Creato nuovo file TXT: ${fileName}`)
   }
 
+  const openMainFolder = () => {
+    setDesktopWindowOpen(true)
+    setStartOpen(false)
+    setNotice('Cartella Immobili aperta.')
+  }
+
   return (
-    <main className="min-h-screen overflow-hidden bg-[#020617] text-emerald-100">
-      <div className="relative min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.28),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(245,158,11,0.18),transparent_34%)]">
-        <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.7)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.7)_1px,transparent_1px)] [background-size:36px_36px]" />
+    <main className="fixed inset-0 z-[9999] h-dvh w-screen overflow-hidden bg-[#030712] text-emerald-100">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(16,185,129,0.26),transparent_34%),radial-gradient(circle_at_76%_76%,rgba(124,58,237,0.18),transparent_32%),linear-gradient(135deg,#03130f_0%,#030712_48%,#090312_100%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.11] [background-image:linear-gradient(rgba(45,212,191,.55)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,.55)_1px,transparent_1px)] [background-size:42px_42px]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_18%,rgba(0,0,0,0.35))]" />
 
-        <header className="relative z-10 flex items-center justify-between border-b border-emerald-300/15 bg-black/35 px-4 py-3 backdrop-blur-xl md:px-6">
-          <div>
-            <p className="text-xs uppercase tracking-[0.45em] text-emerald-300/80">
-              Area Immobiliare
-            </p>
-            <h1 className="text-xl font-semibold text-white md:text-2xl">
-              AI-OS Media Desktop
-            </h1>
-          </div>
+      <section className="relative z-10 flex h-[calc(100dvh-56px)] w-full">
+        <aside className="flex w-[118px] shrink-0 flex-col items-center gap-4 px-3 py-5 md:w-[142px]">
+          <button
+            type="button"
+            onClick={openMainFolder}
+            className="group flex w-full flex-col items-center gap-2 rounded-2xl border border-emerald-300/0 px-2 py-3 text-center transition hover:border-emerald-300/25 hover:bg-emerald-300/10"
+          >
+            <span className="text-4xl drop-shadow-[0_0_16px_rgba(16,185,129,0.55)]">📁</span>
+            <span className="text-xs font-semibold text-emerald-50">Immobili</span>
+          </button>
 
-          <div className="hidden rounded-full border border-emerald-300/20 bg-emerald-300/10 px-4 py-2 text-xs text-emerald-100 md:block">
-            Admin / Proprietà / Agenti / Fotografi
-          </div>
-        </header>
+          {desktopFolders.slice(1).map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => {
+                setDesktopWindowOpen(true)
+                setStartOpen(false)
+                setNotice(`${item.label}: area demo, collegamento reale da costruire.`)
+              }}
+              className="group flex w-full flex-col items-center gap-2 rounded-2xl border border-emerald-300/0 px-2 py-3 text-center transition hover:border-violet-300/30 hover:bg-violet-400/10"
+            >
+              <span className="text-3xl">{item.icon}</span>
+              <span className="text-xs font-semibold text-emerald-50/90">{item.label}</span>
+            </button>
+          ))}
+        </aside>
 
-        <section className="relative z-10 grid min-h-[calc(100vh-66px)] grid-cols-1 gap-4 p-3 pb-20 md:grid-cols-[260px_1fr] md:p-6 md:pb-20">
-          <aside className="rounded-3xl border border-emerald-300/15 bg-black/35 p-4 shadow-2xl shadow-black/35 backdrop-blur-xl">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/70">
-                  Cartelle
-                </p>
-                <h2 className="text-lg font-semibold text-white">Immobili</h2>
-              </div>
-              <span className="rounded-full bg-emerald-300/15 px-3 py-1 text-xs text-emerald-200">
-                {folders.length}
-              </span>
+        <div className="relative min-w-0 flex-1 p-3 md:p-5">
+          <header className="mb-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.48em] text-emerald-300/80">
+                Area Immobiliare
+              </p>
+              <h1 className="text-2xl font-semibold text-white md:text-3xl">
+                AI-OS Desktop
+              </h1>
             </div>
 
-            <div className="space-y-2">
-              {folders.map((folder) => (
-                <button
-                  key={folder.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveFolderId(folder.id)
-                    setSelectedTxtId(null)
-                    setTxtDraft('')
-                    setNotice(`Cartella aperta: ${folder.name}`)
-                  }}
-                  className={`w-full rounded-2xl border px-3 py-3 text-left transition ${
-                    activeFolderId === folder.id
-                      ? 'border-amber-300/60 bg-amber-300/15 text-white shadow-lg shadow-amber-900/20'
-                      : 'border-emerald-300/10 bg-white/[0.03] text-emerald-100 hover:border-emerald-300/35 hover:bg-emerald-300/10'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">📁</span>
-                    <div>
-                      <p className="font-medium leading-tight">{folder.name}</p>
-                      <p className="mt-1 text-xs text-emerald-200/65">
-                        Rif. {folder.propertyRef} · {folder.files.length} file
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              ))}
+            <div className="hidden rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-xs font-medium text-emerald-100 backdrop-blur-xl md:block">
+              Admin / Proprietà / Agenti / Fotografi
             </div>
-          </aside>
+          </header>
 
-          <section className="relative rounded-3xl border border-emerald-300/15 bg-black/25 p-3 shadow-2xl shadow-black/30 backdrop-blur-xl md:p-6">
-            <div className="mb-4 rounded-2xl border border-emerald-300/10 bg-black/30 px-4 py-3 text-sm text-emerald-100/85">
-              <span className="text-emerald-300">system:</span> {notice}
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-3xl border border-emerald-300/15 bg-black/35 p-4 md:col-span-2">
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/70">
-                      Finestra aperta
-                    </p>
-                    <h2 className="text-2xl font-semibold text-white">
-                      {activeFolder?.name ?? 'Nessuna cartella'}
+          {desktopWindowOpen ? (
+            <section className="h-[calc(100dvh-142px)] overflow-hidden rounded-[28px] border border-emerald-300/15 bg-black/38 shadow-2xl shadow-black/45 backdrop-blur-2xl">
+              <div className="flex items-center justify-between border-b border-emerald-300/15 bg-black/35 px-4 py-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="text-xl">📁</span>
+                  <div className="min-w-0">
+                    <h2 className="truncate text-sm font-semibold text-white md:text-base">
+                      Cartella Immobili
                     </h2>
-                    {activeFolder ? (
-                      <p className="mt-1 text-sm text-emerald-100/65">
-                        {activeFolder.address} · Proprietario: {activeFolder.owner}
-                      </p>
-                    ) : null}
+                    <p className="truncate text-xs text-emerald-100/55">{notice}</p>
                   </div>
+                </div>
 
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={createTxtFile}
-                    className="rounded-full border border-amber-300/40 bg-amber-300/15 px-4 py-2 text-sm font-medium text-amber-100 transition hover:bg-amber-300/25"
+                    onClick={() => setDesktopWindowOpen(false)}
+                    className="rounded-full border border-emerald-300/20 px-3 py-1.5 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-300/10"
                   >
-                    + Nuovo TXT
+                    Minimizza
                   </button>
-                </div>
-
-                <div
-                  onDrop={handleDrop}
-                  onDragOver={(event) => event.preventDefault()}
-                  className="min-h-[55vh] rounded-3xl border border-dashed border-emerald-300/30 bg-emerald-950/20 p-4 md:min-h-[65vh]"
-                >
-                  <div className="mb-4 rounded-2xl border border-emerald-300/10 bg-black/35 p-4">
-                    <p className="text-sm font-medium text-white">
-                      Trascina qui foto, video, planimetrie o documenti
-                    </p>
-                    <p className="mt-1 text-xs text-emerald-100/60">
-                      In questa fase i file vengono solo simulati nella UI. Nel prossimo step li colleghiamo a Supabase Storage.
-                    </p>
-
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <label className="cursor-pointer rounded-full bg-emerald-300 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-200">
-                        Carica file
-                        <input
-                          type="file"
-                          multiple
-                          className="hidden"
-                          onChange={handleFileInput}
-                        />
-                      </label>
-
-                      <label className="cursor-pointer rounded-full border border-emerald-300/30 bg-black/30 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/10">
-                        Fotocamera
-                        <input
-                          type="file"
-                          accept="image/*"
-                          capture="environment"
-                          className="hidden"
-                          onChange={handleFileInput}
-                        />
-                      </label>
-
-                      <label className="cursor-pointer rounded-full border border-emerald-300/30 bg-black/30 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/10">
-                        Video
-                        <input
-                          type="file"
-                          accept="video/*"
-                          capture="environment"
-                          className="hidden"
-                          onChange={handleFileInput}
-                        />
-                      </label>
-                    </div>
-                  </div>
-
-                  {activeFolder && activeFolder.files.length > 0 ? (
-                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                      {activeFolder.files.map((file) => (
-                        <button
-                          key={file.id}
-                          type="button"
-                          onClick={() => {
-                            if (file.kind === 'txt') openTxtEditor(file)
-                            else setNotice(`Selezionato file: ${file.name}`)
-                          }}
-                          className={`group rounded-2xl border p-4 text-left transition ${
-                            selectedTxtId === file.id
-                              ? 'border-amber-300/70 bg-amber-300/15'
-                              : 'border-emerald-300/10 bg-black/30 hover:border-emerald-300/35 hover:bg-emerald-300/10'
-                          }`}
-                        >
-                          <div className="flex items-start gap-3">
-                            <span className="text-3xl">{iconForFile(file.kind)}</span>
-                            <div className="min-w-0">
-                              <p className="truncate font-medium text-white">{file.name}</p>
-                              <p className="mt-1 text-xs text-emerald-100/55">
-                                {file.size ?? '—'} · {file.status === 'local' ? 'locale' : 'salvato'}
-                              </p>
-                              {file.kind === 'txt' ? (
-                                <p className="mt-2 text-xs text-amber-100/80">
-                                  clicca per modificare
-                                </p>
-                              ) : null}
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex min-h-[260px] items-center justify-center rounded-2xl border border-emerald-300/10 bg-black/20 text-center">
-                      <div>
-                        <p className="text-4xl">📂</p>
-                        <p className="mt-3 font-medium text-white">Cartella vuota</p>
-                        <p className="mt-1 text-sm text-emerald-100/55">
-                          Carica o trascina qui i primi file.
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => setDesktopWindowOpen(false)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 text-sm text-red-100 transition hover:bg-red-500/20"
+                    aria-label="Chiudi finestra"
+                  >
+                    ×
+                  </button>
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-emerald-300/15 bg-black/35 p-4">
-                <div className="mb-4">
-                  <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/70">
-                    Editor TXT
-                  </p>
-                  <h3 className="text-lg font-semibold text-white">
-                    {selectedTxt?.name ?? 'Nessun file aperto'}
-                  </h3>
-                </div>
+              <div className="grid h-[calc(100%-53px)] grid-cols-1 overflow-hidden lg:grid-cols-[260px_minmax(0,1fr)_390px]">
+                <aside className="border-b border-emerald-300/10 bg-emerald-950/18 p-4 lg:border-b-0 lg:border-r">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.34em] text-emerald-300/70">
+                        Cartelle
+                      </p>
+                      <h3 className="text-lg font-semibold text-white">Immobili</h3>
+                    </div>
+                    <span className="rounded-full bg-emerald-300/15 px-3 py-1 text-xs text-emerald-200">
+                      {folders.length}
+                    </span>
+                  </div>
 
-                {selectedTxt ? (
-                  <div className="space-y-3">
-                    <textarea
-                      value={txtDraft}
-                      onChange={(event) => setTxtDraft(event.target.value)}
-                      className="min-h-[340px] w-full resize-none rounded-2xl border border-emerald-300/15 bg-slate-950/80 p-4 font-mono text-sm text-emerald-100 outline-none ring-0 transition placeholder:text-emerald-100/30 focus:border-amber-300/60"
-                      placeholder="Scrivi le note del fotografo..."
-                    />
+                  <div className="space-y-2">
+                    {folders.map((folder) => (
+                      <button
+                        key={folder.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveFolderId(folder.id)
+                          setSelectedTxtId(null)
+                          setTxtDraft('')
+                          setNotice(`Cartella aperta: ${folder.name}`)
+                        }}
+                        className={`w-full rounded-2xl border px-3 py-3 text-left transition ${
+                          activeFolderId === folder.id
+                            ? 'border-emerald-300/35 bg-emerald-400/15 text-white'
+                            : 'border-emerald-300/10 bg-black/20 text-emerald-100 hover:border-violet-300/35 hover:bg-violet-400/10'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className="text-2xl">📂</span>
+                          <div className="min-w-0">
+                            <p className="truncate font-medium leading-tight">{folder.name}</p>
+                            <p className="mt-1 text-xs text-emerald-200/65">
+                              Rif. {folder.propertyRef} · {folder.files.length} file
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </aside>
+
+                <section className="min-h-0 overflow-auto p-4">
+                  <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.32em] text-emerald-300/70">
+                        Finestra aperta
+                      </p>
+                      <h2 className="text-2xl font-semibold text-white">
+                        {activeFolder?.name ?? 'Nessuna cartella'}
+                      </h2>
+                      {activeFolder ? (
+                        <p className="mt-1 text-sm text-emerald-100/65">
+                          {activeFolder.address} · Proprietario: {activeFolder.owner}
+                        </p>
+                      ) : null}
+                    </div>
 
                     <button
                       type="button"
-                      onClick={saveTxtDraft}
-                      className="w-full rounded-2xl bg-amber-300 px-4 py-3 font-semibold text-slate-950 transition hover:bg-amber-200"
+                      onClick={createTxtFile}
+                      className="rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-100 transition hover:bg-emerald-400/18"
                     >
-                      Salva TXT
+                      + Nuovo TXT
                     </button>
                   </div>
-                ) : (
-                  <div className="rounded-2xl border border-emerald-300/10 bg-black/25 p-4 text-sm text-emerald-100/60">
-                    Apri un file `.txt` dalla cartella per modificarlo.
-                  </div>
-                )}
 
-                <div className="mt-4 rounded-2xl border border-emerald-300/10 bg-emerald-300/5 p-4 text-xs leading-relaxed text-emerald-100/65">
-                  Prossimi collegamenti reali:
-                  <br />
-                  Supabase Storage, permessi per ruolo, cartelle per immobile, upload automatico da mobile, accesso fotografo con email/password.
-                </div>
+                  <div
+                    onDrop={handleDrop}
+                    onDragOver={(event) => event.preventDefault()}
+                    className="min-h-[520px] rounded-3xl border border-dashed border-emerald-300/25 bg-black/22 p-4"
+                  >
+                    <div className="mb-4 rounded-2xl border border-emerald-300/10 bg-black/35 p-4">
+                      <p className="text-sm font-medium text-white">
+                        Trascina qui foto, video, planimetrie o documenti
+                      </p>
+                      <p className="mt-1 text-xs text-emerald-100/60">
+                        Ora è demo locale. Poi colleghiamo Supabase Storage, ruoli e cartelle reali per immobile.
+                      </p>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <label className="cursor-pointer rounded-full bg-emerald-300 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-200">
+                          Carica file
+                          <input type="file" multiple className="hidden" onChange={handleFileInput} />
+                        </label>
+
+                        <label className="cursor-pointer rounded-full border border-emerald-300/30 bg-black/30 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/10">
+                          Fotocamera
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            onChange={handleFileInput}
+                          />
+                        </label>
+
+                        <label className="cursor-pointer rounded-full border border-emerald-300/30 bg-black/30 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/10">
+                          Video
+                          <input
+                            type="file"
+                            accept="video/*"
+                            capture="environment"
+                            className="hidden"
+                            onChange={handleFileInput}
+                          />
+                        </label>
+                      </div>
+                    </div>
+
+                    {activeFolder && activeFolder.files.length > 0 ? (
+                      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                        {activeFolder.files.map((file) => (
+                          <button
+                            key={file.id}
+                            type="button"
+                            onClick={() => {
+                              if (file.kind === 'txt') openTxtEditor(file)
+                              else setNotice(`Selezionato file: ${file.name}`)
+                            }}
+                            className={`group rounded-2xl border p-4 text-left transition ${
+                              selectedTxtId === file.id
+                                ? 'border-violet-300/55 bg-violet-400/15'
+                                : 'border-emerald-300/10 bg-black/30 hover:border-violet-300/35 hover:bg-violet-400/10'
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <span className="text-3xl">{iconForFile(file.kind)}</span>
+                              <div className="min-w-0">
+                                <p className="truncate font-medium text-white">{file.name}</p>
+                                <p className="mt-1 text-xs text-emerald-100/55">
+                                  {file.size ?? '—'} · {file.status === 'local' ? 'locale' : 'salvato'}
+                                </p>
+                                {file.kind === 'txt' ? (
+                                  <p className="mt-2 text-xs text-violet-100/80">
+                                    clicca per modificare
+                                  </p>
+                                ) : null}
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-emerald-300/10 bg-black/20 text-center">
+                        <div>
+                          <p className="text-4xl">📂</p>
+                          <p className="mt-3 font-medium text-white">Cartella vuota</p>
+                          <p className="mt-1 text-sm text-emerald-100/55">
+                            Carica o trascina qui i primi file.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </section>
+
+                <aside className="min-h-0 overflow-auto border-t border-emerald-300/10 bg-black/20 p-4 lg:border-l lg:border-t-0">
+                  <div className="mb-4">
+                    <p className="text-xs uppercase tracking-[0.32em] text-emerald-300/70">
+                      Editor TXT
+                    </p>
+                    <h3 className="truncate text-lg font-semibold text-white">
+                      {selectedTxt?.name ?? 'Nessun file aperto'}
+                    </h3>
+                  </div>
+
+                  {selectedTxt ? (
+                    <div className="space-y-3">
+                      <textarea
+                        value={txtDraft}
+                        onChange={(event) => setTxtDraft(event.target.value)}
+                        className="min-h-[330px] w-full resize-none rounded-2xl border border-emerald-300/15 bg-slate-950/80 p-4 font-mono text-sm text-emerald-100 outline-none transition placeholder:text-emerald-100/30 focus:border-violet-300/60"
+                        placeholder="Scrivi le note del fotografo..."
+                      />
+
+                      <button
+                        type="button"
+                        onClick={saveTxtDraft}
+                        className="w-full rounded-2xl bg-emerald-300 px-4 py-3 font-semibold text-slate-950 transition hover:bg-emerald-200"
+                      >
+                        Salva TXT
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-emerald-300/10 bg-black/25 p-4 text-sm text-emerald-100/60">
+                      Apri un file `.txt` dalla cartella per modificarlo.
+                    </div>
+                  )}
+
+                  <div className="mt-4 rounded-2xl border border-emerald-300/10 bg-emerald-300/5 p-4 text-xs leading-relaxed text-emerald-100/65">
+                    Prossimi collegamenti reali:
+                    <br />
+                    Supabase Storage, permessi per ruolo, cartelle per immobile, upload automatico da mobile, accesso fotografo con email/password.
+                  </div>
+                </aside>
+              </div>
+            </section>
+          ) : (
+            <button
+              type="button"
+              onClick={openMainFolder}
+              className="mt-10 flex w-[120px] flex-col items-center gap-2 rounded-2xl border border-emerald-300/0 px-3 py-4 text-center transition hover:border-emerald-300/25 hover:bg-emerald-300/10"
+            >
+              <span className="text-5xl">📁</span>
+              <span className="text-xs font-semibold text-white">Immobili</span>
+            </button>
+          )}
+        </div>
+      </section>
+
+      <footer className="relative z-20 flex h-14 items-center justify-between border-t border-emerald-300/15 bg-black/72 px-3 backdrop-blur-2xl">
+        <div className="relative">
+          {startOpen ? (
+            <div className="absolute bottom-14 left-0 w-[310px] overflow-hidden rounded-3xl border border-emerald-300/20 bg-slate-950/95 text-emerald-50 shadow-2xl shadow-black/60 backdrop-blur-2xl">
+              <div className="border-b border-emerald-300/10 p-4">
+                <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/70">Account</p>
+                <p className="mt-2 font-semibold text-white">Omar Martalò</p>
+                <p className="text-xs text-emerald-100/55">Administrator</p>
+              </div>
+
+              <div className="space-y-2 p-3">
+                <button
+                  type="button"
+                  onClick={openMainFolder}
+                  className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/10"
+                >
+                  Apri cartella Immobili
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.location.href = '/admin'
+                  }}
+                  className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/10"
+                >
+                  Chiudi AI-OS e torna alla Dashboard
+                </button>
               </div>
             </div>
-          </section>
-        </section>
+          ) : null}
 
-        <footer className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-between border-t border-emerald-300/15 bg-black/70 px-4 py-3 backdrop-blur-xl">
           <button
             type="button"
-            onClick={() => {
-              window.location.href = '/admin'
-            }}
-            className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/20"
+            onClick={() => setStartOpen((value) => !value)}
+            className="rounded-2xl border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-400/18"
           >
-            Start &gt; Logout
+            Start
           </button>
+        </div>
 
-          <div className="hidden text-xs text-emerald-100/55 md:block">
-            AI-OS demo · cartelle immobili · media desktop · webapp mobile
-          </div>
-        </footer>
-      </div>
+        <button
+          type="button"
+          onClick={openMainFolder}
+          className={`hidden rounded-xl border px-4 py-2 text-xs font-semibold transition md:block ${
+            desktopWindowOpen
+              ? 'border-emerald-300/30 bg-emerald-400/10 text-emerald-100'
+              : 'border-emerald-300/15 bg-black/25 text-emerald-100/70 hover:bg-emerald-400/10'
+          }`}
+        >
+          📁 Cartella Immobili
+        </button>
+
+        <div className="text-xs text-emerald-100/45">
+          AI-OS demo · desktop mode
+        </div>
+      </footer>
     </main>
   )
 }
