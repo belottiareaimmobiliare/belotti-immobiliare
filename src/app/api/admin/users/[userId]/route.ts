@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getCurrentAdminProfile } from '@/lib/admin-auth'
 
-type UserRole = 'administrator' | 'owner' | 'agent' | 'editor'
+type UserRole = 'administrator' | 'owner' | 'secretary' | 'agent' | 'editor'
 
 type UpdateUserPayload = {
   full_name: string
@@ -48,7 +48,7 @@ function parseBoolean(value: unknown) {
 }
 
 function parseRole(value: unknown): UserRole | null {
-  if (value === 'owner' || value === 'agent' || value === 'editor') return value
+  if (value === 'administrator' || value === 'owner' || value === 'secretary' || value === 'agent' || value === 'editor') return value
   return null
 }
 

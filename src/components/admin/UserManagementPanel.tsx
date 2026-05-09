@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-type UserRole = 'administrator' | 'owner' | 'agent' | 'editor'
+type UserRole = 'administrator' | 'owner' | 'secretary' | 'agent' | 'editor'
 
 type ManagedUser = {
   id: string
@@ -72,7 +72,19 @@ const editorPreset = {
 
 function getPreset(role: UserRole) {
   if (role === 'owner') return ownerPreset
-  if (role === 'agent') return agentPreset
+  if (role === 'secretary') {
+      return {
+        can_manage_properties: true,
+        can_manage_news: true,
+        can_manage_site_content: true,
+        can_manage_users: false,
+        can_view_logs: false,
+        can_view_kpis: false,
+        can_publish_properties: true,
+      }
+    }
+
+    if (role === 'agent') return agentPreset
   return editorPreset
 }
 
@@ -93,8 +105,9 @@ function sortUsers(users: ManagedUser[]) {
   const roleOrder: Record<UserRole, number> = {
     administrator: -1,
     owner: 0,
-    agent: 1,
-    editor: 2,
+    secretary: 1,
+    agent: 2,
+    editor: 3,
   }
 
   return [...users].sort((a, b) => {
@@ -269,9 +282,11 @@ function CreateUserForm({
             onChange={(e) => applyPreset(e.target.value as UserRole)}
             className="mt-3 w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-bg)] px-3 py-2 text-sm text-[var(--site-text)]"
           >
-            <option value="agent">Agente</option>
+            <option value="secretary">Segretaria</option>
+<option value="agent">Agente</option>
             <option value="editor">Editor</option>
             <option value="owner">Proprietario</option>
+<option value="secretary">Segretaria</option>
           </select>
 
           <p className="mt-3 text-xs leading-6 text-[var(--site-text-muted)]">
@@ -543,9 +558,11 @@ function ManagedUserAccordionItem({
                 onChange={(e) => applyPreset(e.target.value as UserRole)}
                 className="mt-3 w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-3 py-2 text-sm text-[var(--site-text)]"
               >
-                <option value="agent">Agente</option>
+                <option value="secretary">Segretaria</option>
+<option value="agent">Agente</option>
                 <option value="editor">Editor</option>
                 <option value="owner">Proprietario</option>
+<option value="secretary">Segretaria</option>
               </select>
 
               <p className="mt-3 text-xs leading-6 text-[var(--site-text-muted)]">

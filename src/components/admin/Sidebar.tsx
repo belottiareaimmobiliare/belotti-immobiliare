@@ -12,7 +12,7 @@ type SidebarLink = {
 type SidebarProfile = {
   full_name: string
   username: string
-  role: 'administrator' | 'owner' | 'agent' | 'editor'
+  role: 'administrator' | 'owner' | 'secretary' | 'agent' | 'editor'
   is_active: boolean
 }
 

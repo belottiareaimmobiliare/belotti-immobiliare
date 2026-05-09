@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getCurrentAdminProfile } from '@/lib/admin-auth'
 
-type UserRole = 'administrator' | 'owner' | 'agent' | 'editor'
+type UserRole = 'administrator' | 'owner' | 'secretary' | 'agent' | 'editor'
 
 type PermissionPayload = {
   can_manage_properties: boolean
@@ -50,7 +50,7 @@ function parseBoolean(value: unknown) {
 }
 
 function parseRole(value: unknown): UserRole | null {
-  if (value === 'owner' || value === 'agent' || value === 'editor') return value
+  if (value === 'administrator' || value === 'owner' || value === 'secretary' || value === 'agent' || value === 'editor') return value
   return null
 }
 
@@ -166,7 +166,7 @@ export async function GET() {
     )
   }
 
-  const roleOrder = { administrator: -1, owner: 0, agent: 1, editor: 2 }
+  const roleOrder = { administrator: -1, owner: 0, secretary: 1, agent: 2, editor: 3 }
 
   const users = [...(data ?? [])].sort((a, b) => {
     const roleDiff = roleOrder[a.role as UserRole] - roleOrder[b.role as UserRole]

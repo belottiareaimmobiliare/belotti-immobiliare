@@ -13,7 +13,7 @@ export type AdminProfile = {
   username: string
   login_email: string
   authorized_google_email: string | null
-  role: 'administrator' | 'owner' | 'agent' | 'editor'
+  role: 'administrator' | 'owner' | 'secretary' | 'agent' | 'editor'
   is_active: boolean
   can_manage_properties: boolean
   can_manage_news: boolean
@@ -72,6 +72,32 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
 
   if (profile.role === 'editor') {
     return [{ href: '/admin/news', label: 'News' }]
+  }
+
+  if (profile.role === 'secretary') {
+    return [
+      { href: '/admin', label: 'Dashboard' },
+      {
+        label: 'Immobili',
+        href: '/admin/immobili',
+        children: [
+          { href: '/admin/immobili?contractType=affitto', label: 'Affitti' },
+          { href: '/admin/immobili?contractType=vendita', label: 'Vendite' },
+        ],
+      },
+      { href: '/admin/leads', label: 'Messaggi' },
+      { href: '/admin/ricerche-salvate', label: 'Ricerche salvate' },
+      { href: '/admin/news', label: 'News' },
+      {
+        label: 'Modifica Pagine Sito',
+        children: [
+          { href: '/admin/contenuti/home', label: 'Modifica Home' },
+          { href: '/admin/contenuti/chi-siamo', label: 'Modifica Chi siamo' },
+          { href: '/admin/contenuti/gianfederico-belotti', label: 'Modifica Gianfederico' },
+          { href: '/admin/contenuti/contatti', label: 'Modifica Contatti' },
+        ],
+      },
+    ]
   }
 
   if (profile.role === 'agent') {

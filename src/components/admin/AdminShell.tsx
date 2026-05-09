@@ -15,7 +15,7 @@ type SidebarLink = {
 type ShellProfile = {
   full_name: string
   username: string
-  role: 'administrator' | 'owner' | 'agent' | 'editor'
+  role: 'administrator' | 'owner' | 'secretary' | 'agent' | 'editor'
   is_active: boolean
 }
 
@@ -51,6 +51,7 @@ export default function AdminShell({
   const roleLabel = useMemo(() => {
     if (String(profile.role) === 'administrator') return 'Administrator'
     if (profile.role === 'owner') return 'Admin Proprietario'
+    if (profile.role === 'secretary') return 'Segretaria'
     if (profile.role === 'editor') return 'Editor'
     return 'Agente'
   }, [profile.role])
