@@ -104,30 +104,6 @@ function formatQuotaMb(bytes: number) {
   return bytesToMb(bytes).toFixed(1)
 }
 
-function isGoogleDocsPreviewable(file: AIOSFile) {
-  const mimeType = (file.mimeType ?? '').toLowerCase()
-  const name = file.name.toLowerCase()
-
-  return (
-    mimeType === 'application/msword' ||
-    mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-    mimeType === 'application/vnd.ms-excel' ||
-    mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-    mimeType === 'application/vnd.ms-powerpoint' ||
-    mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
-    name.endsWith('.doc') ||
-    name.endsWith('.docx') ||
-    name.endsWith('.xls') ||
-    name.endsWith('.xlsx') ||
-    name.endsWith('.ppt') ||
-    name.endsWith('.pptx')
-  )
-}
-
-function getGoogleDocsViewerUrl(fileUrl: string) {
-  return `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(fileUrl)}`
-}
-
 function iconForFile(kind: AIOSFileKind) {
   switch (kind) {
     case 'image':
@@ -1636,55 +1612,19 @@ export default function AIOSDesktop() {
                 />
               </div>
             ) : null}
-            {previewFile.previewUrl &&
-            previewFile.kind !== 'image' &&
-            previewFile.kind !== 'video' &&
-            previewFile.kind !== 'pdf' &&
-            previewFile.kind !== 'plan' &&
-            previewFile.mimeType !== 'application/pdf' &&
-            isGoogleDocsPreviewable(previewFile) ? (
-              <div className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-emerald-300/15 bg-white">
-                <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-slate-950 px-4 py-3 text-white">
-                  <div className="min-w-0">
-                    <p className="text-xs uppercase tracking-[0.28em] text-emerald-300/80">
-                      Google Docs Viewer
-                    </p>
-                    <p className="truncate text-sm font-semibold">
-                      {previewFile.name}
-                    </p>
-                  </div>
-
-                  <a
-                    href={getGoogleDocsViewerUrl(previewFile.previewUrl)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="shrink-0 rounded-full border border-emerald-300/25 bg-emerald-400/10 px-3 py-2 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-400/18"
-                  >
-                    Apri fuori
-                  </a>
-                </div>
-
-                <iframe
-                  src={getGoogleDocsViewerUrl(previewFile.previewUrl)}
-                  title={previewFile.name}
-                  className="min-h-0 flex-1 bg-white"
-                />
-              </div>
-            ) : null}
 
             {previewFile.previewUrl &&
             previewFile.kind !== 'image' &&
             previewFile.kind !== 'video' &&
             previewFile.kind !== 'pdf' &&
             previewFile.kind !== 'plan' &&
-            previewFile.mimeType !== 'application/pdf' &&
-            !isGoogleDocsPreviewable(previewFile) ? (
+            previewFile.mimeType !== 'application/pdf' ? (
               <div className="w-full max-w-xl rounded-3xl border border-emerald-300/20 bg-emerald-950/25 p-6 text-center shadow-2xl shadow-black/50">
                 <div className="text-5xl">{iconForFile(previewFile.kind)}</div>
                 <h3 className="mt-4 text-xl font-semibold text-white">{previewFile.name}</h3>
                 <p className="mt-2 text-sm leading-6 text-emerald-100/65">
                   Questo tipo di documento potrebbe non essere visualizzabile direttamente dal browser.
-                  Puoi aprirlo o scaricarlo tramite il file originale.
+                  Se il browser lo supporta, puoi aprirlo in una nuova scheda.
                 </p>
 
                 <a
