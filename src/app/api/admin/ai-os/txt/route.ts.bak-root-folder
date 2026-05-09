@@ -5,7 +5,6 @@ import {
   canUseAIOS,
   jsonError,
   mapAIOSFileRecord,
-  normalizeAIOSFolderType,
   safeFileName,
   textSizeBytes,
 } from '@/lib/ai-os'
@@ -24,7 +23,6 @@ export async function POST(request: Request) {
     const fileId = String(body?.fileId ?? '').trim()
     const fileNameRaw = String(body?.fileName ?? '').trim()
     const content = String(body?.content ?? '')
-    const folderType = normalizeAIOSFolderType(body?.folderType)
 
     if (!propertyId && !fileId) {
       return NextResponse.json(
@@ -58,7 +56,7 @@ export async function POST(request: Request) {
         .update({
           file_name: fileNameRaw ? safeFileName(fileNameRaw) : existing.file_name,
           file_kind: 'txt',
-          folder_type: folderType,
+          folder_type: 'docs',
           mime_type: 'text/plain',
           size_bytes: sizeBytes,
           txt_content: content,
@@ -89,7 +87,7 @@ export async function POST(request: Request) {
         property_id: propertyId,
         file_name: finalName.endsWith('.txt') ? finalName : `${finalName}.txt`,
         file_kind: 'txt',
-        folder_type: folderType,
+        folder_type: 'docs',
         mime_type: 'text/plain',
         size_bytes: sizeBytes,
         storage_bucket: 'ai-os',

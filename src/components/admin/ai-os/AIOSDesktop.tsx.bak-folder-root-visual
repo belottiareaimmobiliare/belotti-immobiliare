@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 
 type AIOSFileKind = 'image' | 'video' | 'pdf' | 'txt' | 'plan' | 'generic'
 type AIOSFileStatus = 'saved' | 'local' | 'uploading' | 'error'
-type AIOSSection = 'root' | 'images' | 'docs'
+type AIOSSection = 'images' | 'docs'
 
 type AIOSFile = {
   id: string
@@ -66,22 +66,16 @@ const AI_OS_SECTIONS: Array<{
   description: string
 }> = [
   {
-    id: 'root',
-    label: 'Root cartella immobile',
-    icon: '📁',
-    description: 'File sparsi dell’immobile, non collegati alla galleria',
+    id: 'images',
+    label: 'Immagini',
+    icon: '🖼️',
+    description: 'Foto visibili anche nella galleria immobile',
   },
   {
     id: 'docs',
     label: 'Docs e planimetrie',
     icon: '📐',
     description: 'Documenti, PDF, planimetrie e note TXT',
-  },
-  {
-    id: 'images',
-    label: 'Immagini',
-    icon: '🖼️',
-    description: 'Foto visibili anche nella galleria immobile',
   },
 ]
 
@@ -377,7 +371,7 @@ export default function AIOSDesktop() {
   const [folders, setFolders] = useState<AIOSFolder[]>([])
   const [foldersLoading, setFoldersLoading] = useState(true)
   const [activeFolderId, setActiveFolderId] = useState<string>('')
-  const [activeSection, setActiveSection] = useState<AIOSSection>('root')
+  const [activeSection, setActiveSection] = useState<AIOSSection>('images')
   const [desktopWindowOpen, setDesktopWindowOpen] = useState(true)
   const [selectedTxtId, setSelectedTxtId] = useState<string | null>(null)
   const [txtDraft, setTxtDraft] = useState('')
@@ -809,7 +803,7 @@ export default function AIOSDesktop() {
         },
         body: JSON.stringify({
           propertyId: activeFolderId,
-          folderType: activeSection,
+          folderType: 'docs',
           fileName,
           content: '',
         }),
@@ -822,6 +816,8 @@ export default function AIOSDesktop() {
       }
 
       const createdFile = normalizeFileFromApi(payload.file)
+
+      setActiveSection('docs')
 
       setFolders((currentFolders) =>
         currentFolders.map((folder) =>
@@ -865,14 +861,14 @@ export default function AIOSDesktop() {
 
   const selectFolder = (folder: AIOSFolder, mobile = false) => {
     setActiveFolderId(folder.id)
-    setActiveSection('root')
+    setActiveSection('images')
     setSelectedTxtId(null)
     setTxtDraft('')
     setDesktopWindowOpen(true)
     setMobileFolderOpen(mobile)
     setStartOpen(false)
     setNotice(`Cartella aperta: ${folder.name}`)
-    void loadFilesForFolder(folder.id, 'root')
+    void loadFilesForFolder(folder.id, 'images')
   }
 
   const handlePreviewWheel = (event: WheelEvent<HTMLDivElement>) => {
@@ -943,93 +939,46 @@ export default function AIOSDesktop() {
   }
 
   const renderSectionSwitcher = (mobile = false) => {
-    const currentSectionMeta =
-      AI_OS_SECTIONS.find((section) => section.id === activeSection) ?? AI_OS_SECTIONS[0]
-
     return (
-      <div className="mb-4 space-y-4">
-        <div className="rounded-3xl border border-emerald-300/12 bg-black/24 px-4 py-3 backdrop-blur-xl">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-emerald-200/55">
-            Root cartella immobile
-          </p>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-white">
-            <span className="rounded-full border border-emerald-300/12 bg-emerald-400/8 px-3 py-1 text-emerald-100/85">
-              📁 Cartella immobile
-            </span>
-            <span className="text-emerald-100/35">/</span>
-            <span className="rounded-full border border-violet-300/20 bg-violet-400/10 px-3 py-1 text-violet-100">
-              {currentSectionMeta.icon} {currentSectionMeta.label}
-            </span>
-          </div>
-        </div>
+      <div
+        className={`mb-4 grid gap-3 ${
+          mobile ? 'grid-cols-1' : 'grid-cols-2'
+        }`}
+      >
+        {AI_OS_SECTIONS.map((section) => {
+          const isActive = activeSection === section.id
 
-        <div className={mobile ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-2 gap-4'}>
-          {AI_OS_SECTIONS.map((section) => {
-            const isActive = activeSection === section.id
-
-            return (
-              <button
-                key={section.id}
-                type="button"
-                onClick={() => {
-                  setActiveSection(section.id)
-                  setSelectedTxtId(null)
-                  setTxtDraft('')
-                  if (activeFolderId) {
-                    setNotice(`Apertura cartella ${section.label}...`)
-                    void loadFilesForFolder(activeFolderId, section.id)
-                  }
-                }}
-                className={`group relative overflow-hidden rounded-[28px] border p-4 text-left transition duration-200 ${
-                  isActive
-                    ? 'border-violet-300/45 bg-violet-400/12 shadow-[0_0_30px_rgba(167,139,250,0.16)]'
-                    : 'border-emerald-300/10 bg-black/22 hover:border-violet-300/28 hover:bg-violet-400/8'
-                }`}
-              >
-                <div
-                  className={`pointer-events-none absolute inset-x-0 top-0 h-12 ${
-                    isActive ? 'bg-violet-300/8' : 'bg-emerald-300/4'
-                  }`}
-                />
-
-                <div className="relative">
-                  <div className="mb-3">
-                    <div
-                      className={`inline-flex h-14 w-16 items-end justify-center rounded-t-[18px] rounded-b-[14px] border px-3 pb-2 text-3xl shadow-lg transition ${
-                        isActive
-                          ? 'border-violet-300/40 bg-gradient-to-b from-violet-300/30 to-violet-500/18 text-violet-50 shadow-violet-950/30'
-                          : 'border-emerald-300/15 bg-gradient-to-b from-emerald-200/14 to-emerald-500/8 text-emerald-100 shadow-black/25 group-hover:border-violet-300/25 group-hover:text-violet-100'
-                      }`}
-                    >
-                      📁
-                    </div>
-                  </div>
-
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p
-                        className={`text-base font-semibold ${
-                          isActive ? 'text-white' : 'text-emerald-50'
-                        }`}
-                      >
-                        {section.label}
-                      </p>
-                      <p className="mt-1 text-xs leading-5 text-emerald-100/55">
-                        {section.description}
-                      </p>
-                    </div>
-
-                    {isActive ? (
-                      <span className="shrink-0 rounded-full border border-violet-300/28 bg-violet-400/16 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-100">
-                        Aperta
-                      </span>
-                    ) : null}
-                  </div>
+          return (
+            <button
+              key={section.id}
+              type="button"
+              onClick={() => {
+                setActiveSection(section.id)
+                setSelectedTxtId(null)
+                setTxtDraft('')
+                if (activeFolderId) {
+                  setNotice(`Apertura cartella ${section.label}...`)
+                  void loadFilesForFolder(activeFolderId, section.id)
+                }
+              }}
+              className={`rounded-3xl border px-4 py-4 text-left transition ${
+                isActive
+                  ? 'border-violet-300/55 bg-violet-400/15 text-white shadow-[0_0_26px_rgba(167,139,250,0.14)]'
+                  : 'border-emerald-300/10 bg-black/24 text-emerald-100 hover:border-violet-300/35 hover:bg-violet-400/10'
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">{section.icon}</span>
+                <div className="min-w-0">
+                  <p className="font-semibold">{section.label}</p>
+                  <p className="mt-1 text-xs leading-5 text-emerald-100/55">
+                    {section.description}
+                  </p>
                 </div>
-              </button>
-            )
-          })}
-        </div>
+              </div>
+            </button>
+          )
+        })}
       </div>
     )
   }

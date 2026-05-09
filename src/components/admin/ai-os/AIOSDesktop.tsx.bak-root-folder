@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 
 type AIOSFileKind = 'image' | 'video' | 'pdf' | 'txt' | 'plan' | 'generic'
 type AIOSFileStatus = 'saved' | 'local' | 'uploading' | 'error'
-type AIOSSection = 'root' | 'images' | 'docs'
+type AIOSSection = 'images' | 'docs'
 
 type AIOSFile = {
   id: string
@@ -66,22 +66,16 @@ const AI_OS_SECTIONS: Array<{
   description: string
 }> = [
   {
-    id: 'root',
-    label: 'Root cartella immobile',
-    icon: '📁',
-    description: 'File sparsi dell’immobile, non collegati alla galleria',
+    id: 'images',
+    label: 'Immagini',
+    icon: '🖼️',
+    description: 'Foto visibili anche nella galleria immobile',
   },
   {
     id: 'docs',
     label: 'Docs e planimetrie',
     icon: '📐',
     description: 'Documenti, PDF, planimetrie e note TXT',
-  },
-  {
-    id: 'images',
-    label: 'Immagini',
-    icon: '🖼️',
-    description: 'Foto visibili anche nella galleria immobile',
   },
 ]
 
@@ -377,7 +371,7 @@ export default function AIOSDesktop() {
   const [folders, setFolders] = useState<AIOSFolder[]>([])
   const [foldersLoading, setFoldersLoading] = useState(true)
   const [activeFolderId, setActiveFolderId] = useState<string>('')
-  const [activeSection, setActiveSection] = useState<AIOSSection>('root')
+  const [activeSection, setActiveSection] = useState<AIOSSection>('images')
   const [desktopWindowOpen, setDesktopWindowOpen] = useState(true)
   const [selectedTxtId, setSelectedTxtId] = useState<string | null>(null)
   const [txtDraft, setTxtDraft] = useState('')
@@ -809,7 +803,7 @@ export default function AIOSDesktop() {
         },
         body: JSON.stringify({
           propertyId: activeFolderId,
-          folderType: activeSection,
+          folderType: 'docs',
           fileName,
           content: '',
         }),
@@ -822,6 +816,8 @@ export default function AIOSDesktop() {
       }
 
       const createdFile = normalizeFileFromApi(payload.file)
+
+      setActiveSection('docs')
 
       setFolders((currentFolders) =>
         currentFolders.map((folder) =>
@@ -865,14 +861,14 @@ export default function AIOSDesktop() {
 
   const selectFolder = (folder: AIOSFolder, mobile = false) => {
     setActiveFolderId(folder.id)
-    setActiveSection('root')
+    setActiveSection('images')
     setSelectedTxtId(null)
     setTxtDraft('')
     setDesktopWindowOpen(true)
     setMobileFolderOpen(mobile)
     setStartOpen(false)
     setNotice(`Cartella aperta: ${folder.name}`)
-    void loadFilesForFolder(folder.id, 'root')
+    void loadFilesForFolder(folder.id, 'images')
   }
 
   const handlePreviewWheel = (event: WheelEvent<HTMLDivElement>) => {

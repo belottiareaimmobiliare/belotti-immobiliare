@@ -1,7 +1,8 @@
 import type { AdminProfile } from '@/lib/admin-auth'
 
 export type AIOSFileKind = 'image' | 'video' | 'pdf' | 'txt' | 'plan' | 'generic'
-export type AIOSFolderType = 'root' | 'images' | 'docs'
+export type AIOSFolderType = 'images' | 'docs'
+
 
 export function canUseAIOS(profile: AdminProfile) {
   return (
@@ -81,9 +82,7 @@ export function mapAIOSFileRecord(
   signedUrl?: string | null,
 ) {
   const fileName = String(record.file_name ?? 'file')
-  const fileKind = String(
-    record.file_kind ?? getAIOSFileKind(fileName, String(record.mime_type ?? '')),
-  ) as AIOSFileKind
+  const fileKind = String(record.file_kind ?? getAIOSFileKind(fileName, String(record.mime_type ?? ''))) as AIOSFileKind
   const sizeBytes = Number(record.size_bytes ?? 0)
 
   return {
@@ -105,10 +104,15 @@ export function mapAIOSFileRecord(
   }
 }
 
+export function jsonError(error: unknown, fallback = 'Errore interno') {
+  if (error instanceof Error) return error.message
+  if (typeof error === 'string') return error
+  return fallback
+}
+
+
 export function normalizeAIOSFolderType(value: unknown): AIOSFolderType {
-  if (value === 'images') return 'images'
-  if (value === 'docs') return 'docs'
-  return 'root'
+  return value === 'images' ? 'images' : 'docs'
 }
 
 export function chooseAIOSStorageBucket(input: {
@@ -151,10 +155,4 @@ export function shouldCreatePropertyMedia(input: {
   }
 
   return null
-}
-
-export function jsonError(error: unknown, fallback = 'Errore interno') {
-  if (error instanceof Error) return error.message
-  if (typeof error === 'string') return error
-  return fallback
 }
