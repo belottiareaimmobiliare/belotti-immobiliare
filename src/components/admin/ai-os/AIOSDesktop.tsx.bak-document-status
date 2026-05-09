@@ -276,21 +276,6 @@ function getUploadAccept(section: AIOSSection) {
   return undefined
 }
 
-function labelForDocumentRequestStatus(status: string) {
-  if (status === 'todo') return 'Da richiedere'
-  if (status === 'working') return 'In lavorazione'
-  if (status === 'completed') return 'Completata'
-  if (status === 'cancelled') return 'Annullata'
-  return status || 'Da verificare'
-}
-
-function classForDocumentRequestStatus(status: string) {
-  if (status === 'completed') return 'border-[#A3BE8C]/30 bg-[#A3BE8C]/12 text-[#A3BE8C]'
-  if (status === 'working') return 'border-[#EBCB8B]/35 bg-[#EBCB8B]/12 text-[#EBCB8B]'
-  if (status === 'cancelled') return 'border-[#BF616A]/35 bg-[#BF616A]/12 text-[#BF616A]'
-  return 'border-[#B48EAD]/25 bg-[#B48EAD]/10 text-[#E5E9F0]'
-}
-
 function formatFileSize(size: number) {
   if (size < 1024) return `${size} B`
   if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`
@@ -570,7 +555,6 @@ export default function AIOSDesktop() {
   const [documentRequests, setDocumentRequests] = useState<AIOSDocumentRequest[]>([])
   const [documentRequestsLoading, setDocumentRequestsLoading] = useState(false)
   const [documentRequestSaving, setDocumentRequestSaving] = useState<string | null>(null)
-  const [documentRequestUpdating, setDocumentRequestUpdating] = useState<string | null>(null)
 
   const activeFolder = useMemo(
     () => folders.find((folder) => folder.id === activeFolderId) ?? null,
@@ -713,72 +697,6 @@ export default function AIOSDesktop() {
       setNotice(message)
     } finally {
       setDocumentRequestSaving(null)
-    }
-  }
-
-  async function updateDocumentRequestStatus(requestId: string, status: string) {
-    setDocumentRequestUpdating(requestId)
-
-    try {
-      const response = await fetch('/api/admin/ai-os/document-requests', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          requestId,
-          status,
-        }),
-      })
-
-      const payload = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Errore aggiornamento richiesta documento')
-      }
-
-      if (payload?.request) {
-        setDocumentRequests((current) =>
-          current.map((item) => (item.id === requestId ? payload.request : item)),
-        )
-      }
-
-      setNotice(`Richiesta aggiornata: ${labelForDocumentRequestStatus(status)}.`)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Errore aggiornamento richiesta documento'
-      setNotice(message)
-    } finally {
-      setDocumentRequestUpdating(null)
-    }
-  }
-
-  async function deleteDocumentRequest(requestId: string) {
-    setDocumentRequestUpdating(requestId)
-
-    try {
-      const response = await fetch('/api/admin/ai-os/document-requests', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          requestId,
-        }),
-      })
-
-      const payload = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Errore eliminazione richiesta documento')
-      }
-
-      setDocumentRequests((current) => current.filter((item) => item.id !== requestId))
-      setNotice('Richiesta documento eliminata.')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Errore eliminazione richiesta documento'
-      setNotice(message)
-    } finally {
-      setDocumentRequestUpdating(null)
     }
   }
 
@@ -1420,69 +1338,24 @@ export default function AIOSDesktop() {
                 <p className="text-sm text-[#D8DEE9]/55">Caricamento richieste...</p>
               ) : documentRequests.length > 0 ? (
                 <div className="space-y-2">
-                  {documentRequests.map((request) => {
-                    const isUpdating = documentRequestUpdating === request.id
-
-                    return (
-                      <div
-                        key={request.id}
-                        className="rounded-2xl border border-[#8FBCBB]/10 bg-[#3B4252]/30 px-3 py-3"
-                      >
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                          <div>
-                            <p className="text-sm font-semibold text-white">{request.title}</p>
-                            <p className="text-xs text-[#D8DEE9]/48">
-                              {request.created_at
-                                ? new Date(request.created_at).toLocaleString('it-IT')
-                                : 'Data non disponibile'}
-                            </p>
-                          </div>
-
-                          <span className={`w-fit rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${classForDocumentRequestStatus(request.status)}`}>
-                            {labelForDocumentRequestStatus(request.status)}
-                          </span>
-                        </div>
-
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            disabled={isUpdating}
-                            onClick={() => updateDocumentRequestStatus(request.id, 'working')}
-                            className="rounded-full border border-[#EBCB8B]/25 bg-[#EBCB8B]/10 px-3 py-1.5 text-[11px] font-semibold text-[#EBCB8B] transition hover:bg-[#EBCB8B]/18 disabled:cursor-wait disabled:opacity-50"
-                          >
-                            In lavorazione
-                          </button>
-
-                          <button
-                            type="button"
-                            disabled={isUpdating}
-                            onClick={() => updateDocumentRequestStatus(request.id, 'completed')}
-                            className="rounded-full border border-[#A3BE8C]/25 bg-[#A3BE8C]/10 px-3 py-1.5 text-[11px] font-semibold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/18 disabled:cursor-wait disabled:opacity-50"
-                          >
-                            Completata
-                          </button>
-
-                          <button
-                            type="button"
-                            disabled={isUpdating}
-                            onClick={() => updateDocumentRequestStatus(request.id, 'cancelled')}
-                            className="rounded-full border border-[#BF616A]/25 bg-[#BF616A]/10 px-3 py-1.5 text-[11px] font-semibold text-[#BF616A] transition hover:bg-[#BF616A]/18 disabled:cursor-wait disabled:opacity-50"
-                          >
-                            Annulla
-                          </button>
-
-                          <button
-                            type="button"
-                            disabled={isUpdating}
-                            onClick={() => deleteDocumentRequest(request.id)}
-                            className="rounded-full border border-[#D8DEE9]/15 bg-[#2E3440]/40 px-3 py-1.5 text-[11px] font-semibold text-[#D8DEE9]/70 transition hover:bg-[#D8DEE9]/10 disabled:cursor-wait disabled:opacity-50"
-                          >
-                            Elimina
-                          </button>
-                        </div>
+                  {documentRequests.map((request) => (
+                    <div
+                      key={request.id}
+                      className="flex flex-col gap-1 rounded-2xl border border-[#8FBCBB]/10 bg-[#3B4252]/30 px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-white">{request.title}</p>
+                        <p className="text-xs text-[#D8DEE9]/48">
+                          {request.created_at
+                            ? new Date(request.created_at).toLocaleString('it-IT')
+                            : 'Data non disponibile'}
+                        </p>
                       </div>
-                    )
-                  })}
+                      <span className="w-fit rounded-full border border-[#B48EAD]/25 bg-[#B48EAD]/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#E5E9F0]">
+                        {request.status === 'todo' ? 'Da richiedere' : request.status}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <p className="text-sm text-[#D8DEE9]/55">
