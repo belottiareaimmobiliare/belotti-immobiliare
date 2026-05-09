@@ -202,14 +202,6 @@ function SidebarContent({
       </div>
 
       <nav className="space-y-2">
-          <a
-            href="/admin/ai-os"
-            className="group flex items-center gap-3 rounded-2xl border border-emerald-300/15 bg-emerald-300/10 px-4 py-3 text-sm font-semibold text-emerald-50 transition hover:border-amber-300/50 hover:bg-amber-300/15 hover:text-white"
-          >
-            <span className="text-lg">🖥️</span>
-            <span>AI-OS</span>
-          </a>
-
         {links.map((link) => (
           <SidebarNavItem
             key={link.href || link.label}
