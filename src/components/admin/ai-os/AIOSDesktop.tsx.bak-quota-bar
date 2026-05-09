@@ -133,99 +133,6 @@ function formatFileSize(size: number) {
   return `${(size / 1024 / 1024).toFixed(1)} MB`
 }
 
-
-const AI_OS_MAX_TOTAL_BYTES = 838860800
-const AI_OS_WARN_TOTAL_BYTES = 681574400
-
-function bytesToMb(bytes: number) {
-  return bytes / 1024 / 1024
-}
-
-function parseFileSizeToBytes(size?: string) {
-  if (!size) return 0
-
-  const normalized = size.trim().replace(',', '.')
-  const match = normalized.match(/^([\d.]+)\s*(B|KB|MB|GB)$/i)
-
-  if (!match) return 0
-
-  const value = Number(match[1])
-  const unit = match[2].toUpperCase()
-
-  if (!Number.isFinite(value)) return 0
-
-  if (unit === 'GB') return value * 1024 * 1024 * 1024
-  if (unit === 'MB') return value * 1024 * 1024
-  if (unit === 'KB') return value * 1024
-
-  return value
-}
-
-function formatQuotaMb(bytes: number) {
-  return bytesToMb(bytes).toFixed(1)
-}
-
-function AIOSQuotaBar({
-  usedBytes,
-  maxBytes,
-  warnBytes,
-  compact = false,
-}: {
-  usedBytes: number
-  maxBytes: number
-  warnBytes: number
-  compact?: boolean
-}) {
-  const percent = Math.min(100, Math.max(0, (usedBytes / maxBytes) * 100))
-  const isWarning = usedBytes >= warnBytes
-  const isBlocked = usedBytes >= maxBytes
-
-  return (
-    <div
-      className={`rounded-2xl border bg-black/35 backdrop-blur-2xl ${
-        compact
-          ? 'border-emerald-300/15 px-3 py-2'
-          : 'border-emerald-300/20 px-4 py-3 shadow-2xl shadow-black/25'
-      }`}
-    >
-      <div className="mb-1.5 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span
-            className={`h-2 w-2 rounded-full ${
-              isBlocked
-                ? 'bg-red-400 shadow-[0_0_14px_rgba(248,113,113,0.9)]'
-                : isWarning
-                  ? 'bg-orange-300 shadow-[0_0_14px_rgba(253,186,116,0.9)]'
-                  : 'bg-emerald-300 shadow-[0_0_14px_rgba(110,231,183,0.9)]'
-            }`}
-          />
-          <span className="text-[10px] font-semibold uppercase tracking-[0.26em] text-emerald-200/80">
-            Quota
-          </span>
-        </div>
-
-        <span className="font-mono text-[11px] font-semibold text-emerald-50">
-          {formatQuotaMb(usedBytes)} MB / {formatQuotaMb(maxBytes)} MB
-        </span>
-      </div>
-
-      <div className="h-1.5 overflow-hidden rounded-full border border-emerald-300/10 bg-emerald-950/70">
-        <div
-          className={`h-full rounded-full transition-all duration-500 ${
-            isBlocked
-              ? 'bg-red-400 shadow-[0_0_18px_rgba(248,113,113,0.85)]'
-              : isWarning
-                ? 'bg-orange-300 shadow-[0_0_18px_rgba(253,186,116,0.85)]'
-                : 'bg-emerald-300 shadow-[0_0_18px_rgba(110,231,183,0.85)]'
-          }`}
-          style={{ width: `${percent}%` }}
-        />
-      </div>
-    </div>
-  )
-}
-
-
 function iconForFile(kind: AIOSFileKind) {
   switch (kind) {
     case 'image':
@@ -264,20 +171,6 @@ export default function AIOSDesktop() {
     if (!activeFolder || !selectedTxtId) return null
     return activeFolder.files.find((file) => file.id === selectedTxtId && file.kind === 'txt') ?? null
   }, [activeFolder, selectedTxtId])
-
-  const quotaUsedBytes = useMemo(() => {
-    return folders.reduce((folderTotal, folder) => {
-      const filesTotal = folder.files.reduce((fileTotal, file) => {
-        const fileSize = file.content
-          ? Math.max(parseFileSizeToBytes(file.size), new Blob([file.content]).size)
-          : parseFileSizeToBytes(file.size)
-
-        return fileTotal + fileSize
-      }, 0)
-
-      return folderTotal + filesTotal
-    }, 0)
-  }, [folders])
 
   const addFilesToActiveFolder = (files: File[]) => {
     if (!activeFolderId || files.length === 0) return
@@ -468,15 +361,6 @@ export default function AIOSDesktop() {
               <p className="mt-2 text-sm leading-6 text-emerald-100/65">
                 Seleziona una cartella immobile per caricare foto, video, documenti o note.
               </p>
-
-              <div className="mt-3">
-                <AIOSQuotaBar
-                  usedBytes={quotaUsedBytes}
-                  maxBytes={AI_OS_MAX_TOTAL_BYTES}
-                  warnBytes={AI_OS_WARN_TOTAL_BYTES}
-                  compact
-                />
-              </div>
             </header>
 
             <div className="min-h-0 flex-1 overflow-auto rounded-[28px] border border-emerald-300/15 bg-black/30 p-3 backdrop-blur-2xl">
@@ -556,15 +440,6 @@ export default function AIOSDesktop() {
                 >
                   Chiudi cartella
                 </button>
-              </div>
-
-              <div className="mt-3">
-                <AIOSQuotaBar
-                  usedBytes={quotaUsedBytes}
-                  maxBytes={AI_OS_MAX_TOTAL_BYTES}
-                  warnBytes={AI_OS_WARN_TOTAL_BYTES}
-                  compact
-                />
               </div>
             </header>
 
@@ -739,12 +614,8 @@ export default function AIOSDesktop() {
               </h1>
             </div>
 
-            <div className="hidden min-w-[320px] md:block">
-              <AIOSQuotaBar
-                usedBytes={quotaUsedBytes}
-                maxBytes={AI_OS_MAX_TOTAL_BYTES}
-                warnBytes={AI_OS_WARN_TOTAL_BYTES}
-              />
+            <div className="hidden rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-xs font-medium text-emerald-100 backdrop-blur-xl md:block">
+              Admin / Proprietà / Agenti / Fotografi
             </div>
           </header>
 
