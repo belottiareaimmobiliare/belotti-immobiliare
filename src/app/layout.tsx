@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import CookieBanner from '@/components/public/CookieBanner'
-import WhatsAppChatButton from '@/components/public/WhatsAppChatButton'
 import ThemeInitializer from '@/components/public/ThemeInitializer'
 import RouteBodyClass from '@/components/RouteBodyClass'
 
@@ -92,7 +91,6 @@ export default function RootLayout({
         <RouteBodyClass />
         <ThemeInitializer />
         {children}
-        <WhatsAppChatButton />
         <CookieBanner />
       </body>
     </html>
