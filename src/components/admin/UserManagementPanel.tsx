@@ -282,8 +282,7 @@ function CreateUserForm({
             onChange={(e) => applyPreset(e.target.value as UserRole)}
             className="mt-3 w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-bg)] px-3 py-2 text-sm text-[var(--site-text)]"
           >
-            <option value="secretary">Segretaria</option>
-<option value="agent">Agente</option>
+            <option value="agent">Agente</option>
             <option value="editor">Editor</option>
             <option value="owner">Proprietario</option>
 <option value="secretary">Segretaria</option>
@@ -558,8 +557,7 @@ function ManagedUserAccordionItem({
                 onChange={(e) => applyPreset(e.target.value as UserRole)}
                 className="mt-3 w-full rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] px-3 py-2 text-sm text-[var(--site-text)]"
               >
-                <option value="secretary">Segretaria</option>
-<option value="agent">Agente</option>
+                <option value="agent">Agente</option>
                 <option value="editor">Editor</option>
                 <option value="owner">Proprietario</option>
 <option value="secretary">Segretaria</option>
