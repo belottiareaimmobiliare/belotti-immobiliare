@@ -777,17 +777,6 @@ export default function AIOSDesktop() {
     setNotice(activeFolder ? `Cartella aperta: ${activeFolder.name}` : 'Cartelle AI-OS aperte.')
   }
 
-  const refreshActiveFolder = () => {
-    if (!activeFolderId) {
-      setNotice('Nessuna cartella selezionata da aggiornare.')
-      return
-    }
-
-    setNotice('Aggiornamento cartella AI-OS in corso...')
-    void loadFilesForFolder(activeFolderId)
-    void loadQuota()
-  }
-
   const selectFolder = (folder: AIOSFolder, mobile = false) => {
     setActiveFolderId(folder.id)
     setSelectedTxtId(null)
@@ -1043,28 +1032,18 @@ export default function AIOSDesktop() {
                   ) : null}
                 </div>
 
-                <div className="flex shrink-0 flex-col gap-2">
-                  <button
-                    type="button"
-                    onClick={refreshActiveFolder}
-                    className="rounded-full border border-violet-300/25 bg-violet-400/10 px-3 py-2 text-xs font-semibold text-violet-100 transition active:scale-[0.98] hover:bg-violet-400/18"
-                  >
-                    Aggiorna
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileFolderOpen(false)
-                      setSelectedTxtId(null)
-                      setTxtDraft('')
-                      setNotice('Lista cartelle aperta.')
-                    }}
-                    className="rounded-full border border-emerald-300/20 px-3 py-2 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-300/10"
-                  >
-                    Chiudi cartella
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileFolderOpen(false)
+                    setSelectedTxtId(null)
+                    setTxtDraft('')
+                    setNotice('Lista cartelle aperta.')
+                  }}
+                  className="shrink-0 rounded-full border border-emerald-300/20 px-3 py-2 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-300/10"
+                >
+                  Chiudi cartella
+                </button>
               </div>
 
               <div className="mt-3">
@@ -1307,23 +1286,13 @@ export default function AIOSDesktop() {
                       ) : null}
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={refreshActiveFolder}
-                        className="rounded-full border border-violet-300/25 bg-violet-400/10 px-4 py-2 text-sm font-medium text-violet-100 transition hover:bg-violet-400/18"
-                      >
-                        Aggiorna
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={createTxtFile}
-                        className="rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-100 transition hover:bg-emerald-400/18"
-                      >
-                        + Nuovo TXT
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={createTxtFile}
+                      className="rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-100 transition hover:bg-emerald-400/18"
+                    >
+                      + Nuovo TXT
+                    </button>
                   </div>
 
                   <div
