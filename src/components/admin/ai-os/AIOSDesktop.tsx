@@ -70,6 +70,18 @@ type AIOSContextMenu = {
   fileName: string
 } | null
 
+type AIOSDocumentRequest = {
+  id: string
+  property_id: string
+  request_type: string
+  status: string
+  title: string
+  notes?: string | null
+  created_at?: string
+  updated_at?: string
+  completed_at?: string | null
+}
+
 type AIOSQuotaStatus = {
   total_bytes: number
   warn_total_bytes: number
@@ -174,12 +186,36 @@ const AI_OS_AGENCY_TOOLS: AIOSAgencyTool[] = [
 ]
 
 const AI_OS_VISURA_OPTIONS = [
-  'Visura catastale immobile',
-  'Visura catastale soggetto',
-  'Visura camerale società',
-  'Visura ipotecaria / ipocatastale',
-  'Planimetria catastale',
-  'Elaborato planimetrico',
+  {
+    id: 'cadastral_property',
+    label: 'Visura catastale immobile',
+    hint: 'Documento collegato ai dati catastali dell’immobile.',
+  },
+  {
+    id: 'cadastral_subject',
+    label: 'Visura catastale soggetto',
+    hint: 'Documento collegato a codice fiscale o intestatario.',
+  },
+  {
+    id: 'chamber_company',
+    label: 'Visura camerale società',
+    hint: 'Utile quando il proprietario o referente è una società.',
+  },
+  {
+    id: 'mortgage',
+    label: 'Visura ipotecaria / ipocatastale',
+    hint: 'Controllo più avanzato su provenienza, gravami e formalità.',
+  },
+  {
+    id: 'cadastral_plan',
+    label: 'Planimetria catastale',
+    hint: 'Da usare per recuperare o verificare la planimetria.',
+  },
+  {
+    id: 'floor_plan_elaboration',
+    label: 'Elaborato planimetrico',
+    hint: 'Utile per immobili in condominio o complessi articolati.',
+  },
 ]
 
 const AI_OS_CHECKLIST_ITEMS = [
@@ -516,6 +552,9 @@ export default function AIOSDesktop() {
   const [contextMenu, setContextMenu] = useState<AIOSContextMenu>(null)
   const [quotaStatus, setQuotaStatus] = useState<AIOSQuotaStatus | null>(null)
   const [activeAgencyToolId, setActiveAgencyToolId] = useState<AIOSAgencyToolId | null>(null)
+  const [documentRequests, setDocumentRequests] = useState<AIOSDocumentRequest[]>([])
+  const [documentRequestsLoading, setDocumentRequestsLoading] = useState(false)
+  const [documentRequestSaving, setDocumentRequestSaving] = useState<string | null>(null)
 
   const activeFolder = useMemo(
     () => folders.find((folder) => folder.id === activeFolderId) ?? null,
@@ -596,6 +635,71 @@ export default function AIOSDesktop() {
     }
   }
 
+  async function loadDocumentRequests(propertyId: string) {
+    if (!propertyId) return
+
+    setDocumentRequestsLoading(true)
+
+    try {
+      const response = await fetch(
+        `/api/admin/ai-os/document-requests?propertyId=${encodeURIComponent(propertyId)}`,
+        { cache: 'no-store' },
+      )
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore caricamento richieste documenti')
+      }
+
+      setDocumentRequests(Array.isArray(payload?.requests) ? payload.requests : [])
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore caricamento richieste documenti'
+      setNotice(message)
+    } finally {
+      setDocumentRequestsLoading(false)
+    }
+  }
+
+  async function createDocumentRequest(requestType: string) {
+    if (!activeFolderId) {
+      setNotice('Seleziona prima una cartella immobile.')
+      return
+    }
+
+    setDocumentRequestSaving(requestType)
+
+    try {
+      const response = await fetch('/api/admin/ai-os/document-requests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          propertyId: activeFolderId,
+          requestType,
+        }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore creazione richiesta documento')
+      }
+
+      if (payload?.request) {
+        setDocumentRequests((current) => [payload.request, ...current])
+      }
+
+      setNotice(`Richiesta salvata: ${payload?.request?.title ?? 'documento'} · ${activeFolder?.name ?? 'immobile'}`)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore creazione richiesta documento'
+      setNotice(message)
+    } finally {
+      setDocumentRequestSaving(null)
+    }
+  }
+
   async function loadFolders() {
     setFoldersLoading(true)
 
@@ -624,11 +728,13 @@ export default function AIOSDesktop() {
       setActiveFolderId((current) => {
         if (current && nextFolders.some((folder) => folder.id === current)) {
           void loadFilesForFolder(current, activeSection)
+          void loadDocumentRequests(current)
           return current
         }
 
         if (firstFolderId) {
           void loadFilesForFolder(firstFolderId, activeSection)
+          void loadDocumentRequests(firstFolderId)
         }
 
         return firstFolderId
@@ -1005,6 +1111,7 @@ export default function AIOSDesktop() {
 
     setNotice('Aggiornamento cartella AI-OS in corso...')
     void loadFilesForFolder(activeFolderId, activeSection)
+    void loadDocumentRequests(activeFolderId)
     void loadQuota()
   }
 
@@ -1018,6 +1125,7 @@ export default function AIOSDesktop() {
     setStartOpen(false)
     setNotice(`Cartella aperta: ${folder.name}`)
     void loadFilesForFolder(folder.id, 'root')
+    void loadDocumentRequests(folder.id)
   }
 
   const handlePreviewWheel = (event: WheelEvent<HTMLDivElement>) => {
@@ -1182,22 +1290,79 @@ export default function AIOSDesktop() {
         </div>
 
         {activeAgencyTool.id === 'visure' ? (
-          <div className="grid gap-2 sm:grid-cols-2">
-            {AI_OS_VISURA_OPTIONS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() =>
-                  setNotice(`Richiesta preparata: ${option} · ${activeFolder?.name ?? 'immobile'}`)
-                }
-                className="rounded-2xl border border-[#8FBCBB]/15 bg-[#3B4252]/38 p-3 text-left transition hover:border-[#B48EAD]/45 hover:bg-[#B48EAD]/12"
-              >
-                <p className="text-sm font-semibold text-white">{option}</p>
-                <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/55">
-                  Per ora crea il flusso operativo. In seguito collegheremo API esterne e salvataggio PDF.
+          <div className="space-y-4">
+            <div className="grid gap-2 sm:grid-cols-2">
+              {AI_OS_VISURA_OPTIONS.map((option) => {
+                const isSaving = documentRequestSaving === option.id
+
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    disabled={Boolean(documentRequestSaving)}
+                    onClick={() => createDocumentRequest(option.id)}
+                    className="rounded-2xl border border-[#8FBCBB]/15 bg-[#3B4252]/38 p-3 text-left transition hover:border-[#B48EAD]/45 hover:bg-[#B48EAD]/12 disabled:cursor-wait disabled:opacity-60"
+                  >
+                    <p className="text-sm font-semibold text-white">
+                      {isSaving ? 'Salvataggio...' : option.label}
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/55">
+                      {option.hint}
+                    </p>
+                  </button>
+                )
+              })}
+            </div>
+
+            <div className="rounded-2xl border border-[#8FBCBB]/12 bg-[#2E3440]/35 p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/70">
+                    Storico richieste
+                  </p>
+                  <p className="mt-1 text-sm text-[#D8DEE9]/58">
+                    Richieste documentali salvate per questa cartella immobile.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => activeFolderId && loadDocumentRequests(activeFolderId)}
+                  className="rounded-full border border-[#8FBCBB]/25 bg-[#A3BE8C]/10 px-3 py-1.5 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#A3BE8C]/18"
+                >
+                  Aggiorna
+                </button>
+              </div>
+
+              {documentRequestsLoading ? (
+                <p className="text-sm text-[#D8DEE9]/55">Caricamento richieste...</p>
+              ) : documentRequests.length > 0 ? (
+                <div className="space-y-2">
+                  {documentRequests.map((request) => (
+                    <div
+                      key={request.id}
+                      className="flex flex-col gap-1 rounded-2xl border border-[#8FBCBB]/10 bg-[#3B4252]/30 px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-white">{request.title}</p>
+                        <p className="text-xs text-[#D8DEE9]/48">
+                          {request.created_at
+                            ? new Date(request.created_at).toLocaleString('it-IT')
+                            : 'Data non disponibile'}
+                        </p>
+                      </div>
+                      <span className="w-fit rounded-full border border-[#B48EAD]/25 bg-[#B48EAD]/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#E5E9F0]">
+                        {request.status === 'todo' ? 'Da richiedere' : request.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-[#D8DEE9]/55">
+                  Nessuna richiesta salvata per questo immobile.
                 </p>
-              </button>
-            ))}
+              )}
+            </div>
           </div>
         ) : activeAgencyTool.id === 'owner-data' ? (
           <div className="rounded-2xl border border-[#8FBCBB]/15 bg-[#3B4252]/35 p-4">
