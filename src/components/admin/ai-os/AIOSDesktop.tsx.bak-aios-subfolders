@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/client'
 
 type AIOSFileKind = 'image' | 'video' | 'pdf' | 'txt' | 'plan' | 'generic'
 type AIOSFileStatus = 'saved' | 'local' | 'uploading' | 'error'
-type AIOSSection = 'images' | 'docs'
 
 type AIOSFile = {
   id: string
@@ -18,9 +17,6 @@ type AIOSFile = {
   mimeType?: string
   previewUrl?: string
   storagePath?: string
-  folderType?: AIOSSection
-  propertyMediaId?: string
-  isGalleryVisible?: boolean
   uploadProgress?: number
   uploadError?: string
   createdAt?: string
@@ -58,27 +54,6 @@ type AIOSQuotaStatus = {
 
 const AI_OS_MAX_TOTAL_BYTES = 838860800
 const AI_OS_WARN_TOTAL_BYTES = 681574400
-
-const AI_OS_SECTIONS: Array<{
-  id: AIOSSection
-  label: string
-  icon: string
-  description: string
-}> = [
-  {
-    id: 'images',
-    label: 'Immagini',
-    icon: '🖼️',
-    description: 'Foto visibili anche nella galleria immobile',
-  },
-  {
-    id: 'docs',
-    label: 'Docs e planimetrie',
-    icon: '📐',
-    description: 'Documenti, PDF, planimetrie e note TXT',
-  },
-]
-
 
 const desktopFolders = [
   {
@@ -241,12 +216,10 @@ function normalizeFileFromApi(file: AIOSFile): AIOSFile {
 
 function uploadFileWithProgress({
   propertyId,
-  folderType,
   file,
   onProgress,
 }: {
   propertyId: string
-  folderType: AIOSSection
   file: File
   onProgress: (progress: number) => void
 }) {
@@ -289,7 +262,6 @@ function uploadFileWithProgress({
           },
           body: JSON.stringify({
             propertyId,
-            folderType,
             fileName: file.name,
             mimeType: file.type || '',
             sizeBytes: file.size,
@@ -307,7 +279,7 @@ function uploadFileWithProgress({
 
         const upload = preparePayload?.upload
 
-        if (!upload?.path || !upload?.token || !upload?.bucket) {
+        if (!upload?.path || !upload?.token) {
           throw new Error('Signed upload URL non valido')
         }
 
@@ -317,7 +289,7 @@ function uploadFileWithProgress({
         const supabase = createClient()
 
         const { error: uploadError } = await supabase.storage
-          .from(upload.bucket)
+          .from('ai-os')
           .uploadToSignedUrl(upload.path, upload.token, file, {
             contentType: file.type || undefined,
             upsert: false,
@@ -337,12 +309,10 @@ function uploadFileWithProgress({
           },
           body: JSON.stringify({
             propertyId,
-            folderType,
             fileName: file.name,
             mimeType: file.type || '',
             sizeBytes: file.size,
             storagePath: upload.path,
-            storageBucket: upload.bucket,
           }),
         })
 
@@ -371,7 +341,6 @@ export default function AIOSDesktop() {
   const [folders, setFolders] = useState<AIOSFolder[]>([])
   const [foldersLoading, setFoldersLoading] = useState(true)
   const [activeFolderId, setActiveFolderId] = useState<string>('')
-  const [activeSection, setActiveSection] = useState<AIOSSection>('images')
   const [desktopWindowOpen, setDesktopWindowOpen] = useState(true)
   const [selectedTxtId, setSelectedTxtId] = useState<string | null>(null)
   const [txtDraft, setTxtDraft] = useState('')
@@ -435,10 +404,10 @@ export default function AIOSDesktop() {
     }
   }
 
-  async function loadFilesForFolder(propertyId: string, section: AIOSSection = activeSection) {
+  async function loadFilesForFolder(propertyId: string) {
     try {
       const response = await fetch(
-        `/api/admin/ai-os/files?propertyId=${encodeURIComponent(propertyId)}&folderType=${encodeURIComponent(section)}`,
+        `/api/admin/ai-os/files?propertyId=${encodeURIComponent(propertyId)}`,
         { cache: 'no-store' },
       )
 
@@ -492,12 +461,12 @@ export default function AIOSDesktop() {
       const firstFolderId = nextFolders[0]?.id ?? ''
       setActiveFolderId((current) => {
         if (current && nextFolders.some((folder) => folder.id === current)) {
-          void loadFilesForFolder(current, activeSection)
+          void loadFilesForFolder(current)
           return current
         }
 
         if (firstFolderId) {
-          void loadFilesForFolder(firstFolderId, activeSection)
+          void loadFilesForFolder(firstFolderId)
         }
 
         return firstFolderId
@@ -614,7 +583,6 @@ export default function AIOSDesktop() {
 
       void uploadFileWithProgress({
         propertyId: activeFolderId,
-        folderType: activeSection,
         file,
         onProgress: (progress) => {
           updateFileInFolder(activeFolderId, tempId, (currentFile) => ({
@@ -803,7 +771,6 @@ export default function AIOSDesktop() {
         },
         body: JSON.stringify({
           propertyId: activeFolderId,
-          folderType: 'docs',
           fileName,
           content: '',
         }),
@@ -816,8 +783,6 @@ export default function AIOSDesktop() {
       }
 
       const createdFile = normalizeFileFromApi(payload.file)
-
-      setActiveSection('docs')
 
       setFolders((currentFolders) =>
         currentFolders.map((folder) =>
@@ -855,20 +820,19 @@ export default function AIOSDesktop() {
     }
 
     setNotice('Aggiornamento cartella AI-OS in corso...')
-    void loadFilesForFolder(activeFolderId, activeSection)
+    void loadFilesForFolder(activeFolderId)
     void loadQuota()
   }
 
   const selectFolder = (folder: AIOSFolder, mobile = false) => {
     setActiveFolderId(folder.id)
-    setActiveSection('images')
     setSelectedTxtId(null)
     setTxtDraft('')
     setDesktopWindowOpen(true)
     setMobileFolderOpen(mobile)
     setStartOpen(false)
     setNotice(`Cartella aperta: ${folder.name}`)
-    void loadFilesForFolder(folder.id, 'images')
+    void loadFilesForFolder(folder.id)
   }
 
   const handlePreviewWheel = (event: WheelEvent<HTMLDivElement>) => {
@@ -938,51 +902,6 @@ export default function AIOSDesktop() {
     setPreviewDrag(null)
   }
 
-  const renderSectionSwitcher = (mobile = false) => {
-    return (
-      <div
-        className={`mb-4 grid gap-3 ${
-          mobile ? 'grid-cols-1' : 'grid-cols-2'
-        }`}
-      >
-        {AI_OS_SECTIONS.map((section) => {
-          const isActive = activeSection === section.id
-
-          return (
-            <button
-              key={section.id}
-              type="button"
-              onClick={() => {
-                setActiveSection(section.id)
-                setSelectedTxtId(null)
-                setTxtDraft('')
-                if (activeFolderId) {
-                  setNotice(`Apertura cartella ${section.label}...`)
-                  void loadFilesForFolder(activeFolderId, section.id)
-                }
-              }}
-              className={`rounded-3xl border px-4 py-4 text-left transition ${
-                isActive
-                  ? 'border-violet-300/55 bg-violet-400/15 text-white shadow-[0_0_26px_rgba(167,139,250,0.14)]'
-                  : 'border-emerald-300/10 bg-black/24 text-emerald-100 hover:border-violet-300/35 hover:bg-violet-400/10'
-              }`}
-            >
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">{section.icon}</span>
-                <div className="min-w-0">
-                  <p className="font-semibold">{section.label}</p>
-                  <p className="mt-1 text-xs leading-5 text-emerald-100/55">
-                    {section.description}
-                  </p>
-                </div>
-              </div>
-            </button>
-          )
-        })}
-      </div>
-    )
-  }
-
   const renderFileCard = (file: AIOSFile, mobile = false) => {
     const isUploading = file.status === 'uploading'
     const isError = file.status === 'error'
@@ -1041,12 +960,6 @@ export default function AIOSDesktop() {
                   style={{ width: `${progress}%` }}
                 />
               </div>
-            ) : null}
-
-            {file.isGalleryVisible ? (
-              <span className="mt-2 inline-flex rounded-full border border-violet-300/25 bg-violet-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-100">
-                Visibile in immobile
-              </span>
             ) : null}
 
             {isError ? (
@@ -1201,8 +1114,6 @@ export default function AIOSDesktop() {
             </header>
 
             <div className="min-h-0 flex-1 overflow-auto rounded-[28px] border border-emerald-300/15 bg-black/30 p-3 backdrop-blur-2xl">
-              {renderSectionSwitcher(true)}
-
               <div
                 onDrop={handleDrop}
                 onDragOver={(event) => event.preventDefault()}
@@ -1212,7 +1123,7 @@ export default function AIOSDesktop() {
                   Carica contenuti nella cartella
                 </p>
                 <p className="mt-1 text-xs leading-5 text-emerald-100/55">
-                  Da mobile i file vengono salvati nella sotto-cartella scelta. Le immagini finiscono anche nella galleria immobile senza duplicazione.
+                  Da mobile foto, video e file vengono salvati su Supabase, con controllo quota prima dell’upload.
                 </p>
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
@@ -1451,8 +1362,6 @@ export default function AIOSDesktop() {
                     </div>
                   </div>
 
-                  {renderSectionSwitcher()}
-
                   <div
                     onDrop={handleDrop}
                     onDragOver={(event) => event.preventDefault()}
@@ -1463,7 +1372,7 @@ export default function AIOSDesktop() {
                         Trascina qui foto, video, planimetrie o documenti
                       </p>
                       <p className="mt-1 text-xs text-emerald-100/60">
-                        Upload reale: immagini e planimetrie vengono collegate anche all’immobile senza duplicare il file.
+                        Upload reale su Supabase Storage con controllo quota.
                       </p>
 
                       <div className="mt-4 flex flex-wrap gap-2">

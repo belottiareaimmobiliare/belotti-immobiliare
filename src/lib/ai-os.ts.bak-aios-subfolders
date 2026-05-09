@@ -1,8 +1,6 @@
 import type { AdminProfile } from '@/lib/admin-auth'
 
 export type AIOSFileKind = 'image' | 'video' | 'pdf' | 'txt' | 'plan' | 'generic'
-export type AIOSFolderType = 'images' | 'docs'
-
 
 export function canUseAIOS(profile: AdminProfile) {
   return (
@@ -96,9 +94,6 @@ export function mapAIOSFileRecord(
     mimeType: record.mime_type ? String(record.mime_type) : undefined,
     storagePath: record.storage_path ? String(record.storage_path) : undefined,
     previewUrl: signedUrl ?? undefined,
-    folderType: record.folder_type ? String(record.folder_type) : undefined,
-    propertyMediaId: record.property_media_id ? String(record.property_media_id) : undefined,
-    isGalleryVisible: Boolean(record.is_gallery_visible),
     createdAt: record.created_at ? String(record.created_at) : undefined,
     updatedAt: record.updated_at ? String(record.updated_at) : undefined,
   }
@@ -108,51 +103,4 @@ export function jsonError(error: unknown, fallback = 'Errore interno') {
   if (error instanceof Error) return error.message
   if (typeof error === 'string') return error
   return fallback
-}
-
-
-export function normalizeAIOSFolderType(value: unknown): AIOSFolderType {
-  return value === 'images' ? 'images' : 'docs'
-}
-
-export function chooseAIOSStorageBucket(input: {
-  folderType: AIOSFolderType
-  fileKind: AIOSFileKind
-}) {
-  if (input.folderType === 'images' && input.fileKind === 'image') {
-    return 'property-media'
-  }
-
-  if (
-    input.folderType === 'docs' &&
-    (input.fileKind === 'pdf' || input.fileKind === 'image')
-  ) {
-    return 'property-plans'
-  }
-
-  return 'ai-os'
-}
-
-export function shouldCreatePropertyMedia(input: {
-  folderType: AIOSFolderType
-  fileKind: AIOSFileKind
-  storageBucket: string
-}) {
-  if (
-    input.folderType === 'images' &&
-    input.fileKind === 'image' &&
-    input.storageBucket === 'property-media'
-  ) {
-    return 'image' as const
-  }
-
-  if (
-    input.folderType === 'docs' &&
-    (input.fileKind === 'pdf' || input.fileKind === 'image') &&
-    input.storageBucket === 'property-plans'
-  ) {
-    return 'plan' as const
-  }
-
-  return null
 }

@@ -1,14 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdminProfile } from '@/lib/admin-auth'
 import { createServiceClient } from '@/lib/supabase/service'
-import {
-  canUseAIOS,
-  chooseAIOSStorageBucket,
-  getAIOSFileKind,
-  jsonError,
-  normalizeAIOSFolderType,
-  safeFileName,
-} from '@/lib/ai-os'
+import { canUseAIOS, getAIOSFileKind, jsonError, safeFileName } from '@/lib/ai-os'
 
 export async function POST(request: Request) {
   try {
@@ -24,7 +17,6 @@ export async function POST(request: Request) {
     const fileName = String(body?.fileName ?? '').trim()
     const mimeType = String(body?.mimeType ?? '').trim()
     const sizeBytes = Number(body?.sizeBytes ?? 0)
-    const folderType = normalizeAIOSFolderType(body?.folderType)
 
     if (!propertyId || !fileName || !Number.isFinite(sizeBytes) || sizeBytes <= 0) {
       return NextResponse.json(
@@ -53,17 +45,12 @@ export async function POST(request: Request) {
 
     const cleanName = safeFileName(fileName)
     const kind = getAIOSFileKind(fileName, mimeType)
-    const storageBucket = chooseAIOSStorageBucket({
-      folderType,
-      fileKind: kind,
-    })
-
     const storagePath = `properties/${propertyId}/${Date.now()}-${Math.random()
       .toString(36)
       .slice(2)}-${cleanName}`
 
     const { data, error } = await supabase.storage
-      .from(storageBucket)
+      .from('ai-os')
       .createSignedUploadUrl(storagePath)
 
     if (error || !data) {
@@ -78,12 +65,11 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       upload: {
-        bucket: storageBucket,
+        bucket: 'ai-os',
         path: storagePath,
         token: data.token,
         signedUrl: data.signedUrl,
         kind,
-        folderType,
       },
     })
   } catch (error) {

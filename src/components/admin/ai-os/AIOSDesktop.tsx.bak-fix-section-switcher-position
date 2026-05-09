@@ -1203,6 +1203,8 @@ export default function AIOSDesktop() {
             <div className="min-h-0 flex-1 overflow-auto rounded-[28px] border border-emerald-300/15 bg-black/30 p-3 backdrop-blur-2xl">
               {renderSectionSwitcher(true)}
 
+                  {renderSectionSwitcher()}
+
               <div
                 onDrop={handleDrop}
                 onDragOver={(event) => event.preventDefault()}
@@ -1450,8 +1452,6 @@ export default function AIOSDesktop() {
                       </button>
                     </div>
                   </div>
-
-                  {renderSectionSwitcher()}
 
                   <div
                     onDrop={handleDrop}
