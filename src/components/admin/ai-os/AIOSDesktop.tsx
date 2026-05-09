@@ -1,18 +1,25 @@
 'use client'
 
-import { ChangeEvent, DragEvent, MouseEvent, useMemo, useState } from 'react'
+import { ChangeEvent, DragEvent, MouseEvent, useEffect, useMemo, useState } from 'react'
 
 type AIOSFileKind = 'image' | 'video' | 'pdf' | 'txt' | 'plan' | 'generic'
+type AIOSFileStatus = 'saved' | 'local' | 'uploading' | 'error'
 
 type AIOSFile = {
   id: string
   name: string
   kind: AIOSFileKind
   size?: string
+  sizeBytes?: number
   content?: string
-  status?: 'saved' | 'local'
+  status?: AIOSFileStatus
   mimeType?: string
   previewUrl?: string
+  storagePath?: string
+  uploadProgress?: number
+  uploadError?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 type AIOSFolder = {
@@ -31,66 +38,20 @@ type AIOSContextMenu = {
   fileName: string
 } | null
 
-const initialFolders: AIOSFolder[] = [
-  {
-    id: 'immobile-001',
-    name: 'Trilocale Bergamo Centro',
-    propertyRef: 'AI-001',
-    address: 'Bergamo - Via Locatelli',
-    owner: 'Admin',
-    files: [
-      {
-        id: 'txt-001',
-        name: 'note-fotografo.txt',
-        kind: 'txt',
-        size: '2 KB',
-        status: 'saved',
-        content:
-          'Note sopralluogo:\n- fotografare soggiorno con luce naturale\n- fare video ingresso > zona giorno > terrazzo\n- controllare che le planimetrie siano leggibili',
-      },
-      {
-        id: 'img-001',
-        name: 'copertina-demo.jpg',
-        kind: 'image',
-        size: '1.8 MB',
-        status: 'saved',
-      },
-      {
-        id: 'plan-001',
-        name: 'planimetria-demo.pdf',
-        kind: 'plan',
-        size: '860 KB',
-        status: 'saved',
-      },
-    ],
-  },
-  {
-    id: 'immobile-002',
-    name: 'Villa con giardino',
-    propertyRef: 'AI-002',
-    address: 'Bergamo provincia',
-    owner: 'Agente',
-    files: [
-      {
-        id: 'txt-002',
-        name: 'istruzioni-video.txt',
-        kind: 'txt',
-        size: '1 KB',
-        status: 'saved',
-        content:
-          'Video richiesti:\n- esterno cancello e giardino\n- zona giorno\n- camere\n- box\n- vista dal balcone',
-      },
-    ],
-  },
-  {
-    id: 'immobile-003',
-    name: 'Attico panoramico',
-    propertyRef: 'AI-003',
-    address: 'Bergamo alta',
-    owner: 'Agente',
-    files: [],
-  },
-]
+type AIOSQuotaStatus = {
+  total_bytes: number
+  warn_total_bytes: number
+  max_total_bytes: number
+  remaining_total_bytes: number
+  total_files: number
+  max_total_files: number
+  usage_percent: number
+  is_warning: boolean
+  is_blocked: boolean
+}
+
+const AI_OS_MAX_TOTAL_BYTES = 838860800
+const AI_OS_WARN_TOTAL_BYTES = 681574400
 
 const desktopFolders = [
   {
@@ -133,36 +94,29 @@ function formatFileSize(size: number) {
   return `${(size / 1024 / 1024).toFixed(1)} MB`
 }
 
-
-const AI_OS_MAX_TOTAL_BYTES = 838860800
-const AI_OS_WARN_TOTAL_BYTES = 681574400
-
 function bytesToMb(bytes: number) {
   return bytes / 1024 / 1024
 }
 
-function parseFileSizeToBytes(size?: string) {
-  if (!size) return 0
-
-  const normalized = size.trim().replace(',', '.')
-  const match = normalized.match(/^([\d.]+)\s*(B|KB|MB|GB)$/i)
-
-  if (!match) return 0
-
-  const value = Number(match[1])
-  const unit = match[2].toUpperCase()
-
-  if (!Number.isFinite(value)) return 0
-
-  if (unit === 'GB') return value * 1024 * 1024 * 1024
-  if (unit === 'MB') return value * 1024 * 1024
-  if (unit === 'KB') return value * 1024
-
-  return value
-}
-
 function formatQuotaMb(bytes: number) {
   return bytesToMb(bytes).toFixed(1)
+}
+
+function iconForFile(kind: AIOSFileKind) {
+  switch (kind) {
+    case 'image':
+      return '🖼️'
+    case 'video':
+      return '🎥'
+    case 'pdf':
+      return '📄'
+    case 'plan':
+      return '📐'
+    case 'txt':
+      return '📝'
+    default:
+      return '📦'
+  }
 }
 
 function AIOSQuotaBar({
@@ -225,35 +179,91 @@ function AIOSQuotaBar({
   )
 }
 
-
-function iconForFile(kind: AIOSFileKind) {
-  switch (kind) {
-    case 'image':
-      return '🖼️'
-    case 'video':
-      return '🎥'
-    case 'pdf':
-      return '📄'
-    case 'plan':
-      return '📐'
-    case 'txt':
-      return '📝'
-    default:
-      return '📦'
+function normalizeFileFromApi(file: AIOSFile): AIOSFile {
+  return {
+    ...file,
+    status: 'saved',
+    uploadProgress: undefined,
+    uploadError: undefined,
   }
 }
 
+function uploadFileWithProgress({
+  propertyId,
+  file,
+  onProgress,
+}: {
+  propertyId: string
+  file: File
+  onProgress: (progress: number) => void
+}) {
+  return new Promise<AIOSFile>((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    const formData = new FormData()
+
+    formData.append('property_id', propertyId)
+    formData.append('file', file)
+
+    xhr.open('POST', '/api/admin/ai-os/upload')
+    xhr.responseType = 'json'
+
+    xhr.upload.onprogress = (event) => {
+      if (!event.lengthComputable) return
+
+      const progress = Math.max(
+        1,
+        Math.min(98, Math.round((event.loaded / event.total) * 100)),
+      )
+
+      onProgress(progress)
+    }
+
+    xhr.onload = () => {
+      const response =
+        xhr.response ??
+        (() => {
+          try {
+            return JSON.parse(xhr.responseText || '{}')
+          } catch {
+            return null
+          }
+        })()
+
+      if (xhr.status >= 200 && xhr.status < 300 && response?.file) {
+        onProgress(100)
+        resolve(normalizeFileFromApi(response.file))
+        return
+      }
+
+      reject(
+        new Error(
+          response?.error ||
+            `Errore upload AI-OS. HTTP ${xhr.status} ${xhr.statusText}`,
+        ),
+      )
+    }
+
+    xhr.onerror = () => {
+      reject(new Error('Errore di rete durante upload AI-OS'))
+    }
+
+    xhr.send(formData)
+  })
+}
+
 export default function AIOSDesktop() {
-  const [folders, setFolders] = useState<AIOSFolder[]>(initialFolders)
-  const [activeFolderId, setActiveFolderId] = useState<string>(initialFolders[0]?.id ?? '')
+  const [folders, setFolders] = useState<AIOSFolder[]>([])
+  const [foldersLoading, setFoldersLoading] = useState(true)
+  const [activeFolderId, setActiveFolderId] = useState<string>('')
   const [desktopWindowOpen, setDesktopWindowOpen] = useState(true)
   const [selectedTxtId, setSelectedTxtId] = useState<string | null>(null)
   const [txtDraft, setTxtDraft] = useState('')
-  const [notice, setNotice] = useState('AI-OS avviato. Desktop operativo in modalità demo locale.')
+  const [notice, setNotice] = useState('AI-OS avviato. Collegamento Supabase in corso.')
   const [startOpen, setStartOpen] = useState(false)
   const [mobileFolderOpen, setMobileFolderOpen] = useState(false)
   const [previewFile, setPreviewFile] = useState<AIOSFile | null>(null)
   const [contextMenu, setContextMenu] = useState<AIOSContextMenu>(null)
+  const [quotaStatus, setQuotaStatus] = useState<AIOSQuotaStatus | null>(null)
 
   const activeFolder = useMemo(
     () => folders.find((folder) => folder.id === activeFolderId) ?? null,
@@ -265,46 +275,231 @@ export default function AIOSDesktop() {
     return activeFolder.files.find((file) => file.id === selectedTxtId && file.kind === 'txt') ?? null
   }, [activeFolder, selectedTxtId])
 
-  const quotaUsedBytes = useMemo(() => {
+  const localUsedBytes = useMemo(() => {
     return folders.reduce((folderTotal, folder) => {
       const filesTotal = folder.files.reduce((fileTotal, file) => {
-        const fileSize = file.content
-          ? Math.max(parseFileSizeToBytes(file.size), new Blob([file.content]).size)
-          : parseFileSizeToBytes(file.size)
-
-        return fileTotal + fileSize
+        return fileTotal + Number(file.sizeBytes ?? 0)
       }, 0)
 
       return folderTotal + filesTotal
     }, 0)
   }, [folders])
 
-  const addFilesToActiveFolder = (files: File[]) => {
-    if (!activeFolderId || files.length === 0) return
+  const quotaUsedBytes = Number(quotaStatus?.total_bytes ?? localUsedBytes)
+  const quotaMaxBytes = Number(quotaStatus?.max_total_bytes ?? AI_OS_MAX_TOTAL_BYTES)
+  const quotaWarnBytes = Number(quotaStatus?.warn_total_bytes ?? AI_OS_WARN_TOTAL_BYTES)
 
-    const newFiles: AIOSFile[] = files.map((file) => ({
-      id: `${file.name}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      name: file.name,
-      kind: getFileKind(file),
-      size: formatFileSize(file.size),
-      status: 'local',
-      mimeType: file.type || undefined,
-      previewUrl: URL.createObjectURL(file),
-      content: file.name.toLowerCase().endsWith('.txt') ? '' : undefined,
-    }))
+  async function loadQuota() {
+    try {
+      const response = await fetch('/api/admin/ai-os/quota', {
+        cache: 'no-store',
+      })
 
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore quota AI-OS')
+      }
+
+      if (payload?.quota) {
+        setQuotaStatus(payload.quota)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  async function loadFilesForFolder(propertyId: string) {
+    try {
+      const response = await fetch(
+        `/api/admin/ai-os/files?propertyId=${encodeURIComponent(propertyId)}`,
+        { cache: 'no-store' },
+      )
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore caricamento file AI-OS')
+      }
+
+      const files = Array.isArray(payload?.files)
+        ? payload.files.map((file: AIOSFile) => normalizeFileFromApi(file))
+        : []
+
+      setFolders((currentFolders) =>
+        currentFolders.map((folder) =>
+          folder.id === propertyId ? { ...folder, files } : folder,
+        ),
+      )
+
+      setNotice('File AI-OS caricati da Supabase.')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore caricamento file'
+      setNotice(message)
+    }
+  }
+
+  async function loadFolders() {
+    setFoldersLoading(true)
+
+    try {
+      const response = await fetch('/api/admin/ai-os/folders', {
+        cache: 'no-store',
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore caricamento cartelle AI-OS')
+      }
+
+      const nextFolders: AIOSFolder[] = Array.isArray(payload?.folders)
+        ? payload.folders.map((folder: AIOSFolder) => ({
+            ...folder,
+            files: [],
+          }))
+        : []
+
+      setFolders(nextFolders)
+
+      const firstFolderId = nextFolders[0]?.id ?? ''
+      setActiveFolderId((current) => {
+        if (current && nextFolders.some((folder) => folder.id === current)) {
+          void loadFilesForFolder(current)
+          return current
+        }
+
+        if (firstFolderId) {
+          void loadFilesForFolder(firstFolderId)
+        }
+
+        return firstFolderId
+      })
+
+      setNotice(
+        nextFolders.length > 0
+          ? 'Cartelle immobili caricate da Supabase.'
+          : 'Nessun immobile trovato per AI-OS.',
+      )
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore caricamento AI-OS'
+      setNotice(message)
+    } finally {
+      setFoldersLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    void loadFolders()
+    void loadQuota()
+  }, [])
+
+  const updateFileInFolder = (
+    folderId: string,
+    fileId: string,
+    updater: (file: AIOSFile) => AIOSFile,
+  ) => {
     setFolders((currentFolders) =>
       currentFolders.map((folder) =>
-        folder.id === activeFolderId
+        folder.id === folderId
           ? {
               ...folder,
-              files: [...newFiles, ...folder.files],
+              files: folder.files.map((file) =>
+                file.id === fileId ? updater(file) : file,
+              ),
             }
           : folder,
       ),
     )
+  }
 
-    setNotice(`${newFiles.length} file aggiunto/i in "${activeFolder?.name ?? 'cartella'}".`)
+  const replaceFileInFolder = (folderId: string, fileId: string, nextFile: AIOSFile) => {
+    setFolders((currentFolders) =>
+      currentFolders.map((folder) =>
+        folder.id === folderId
+          ? {
+              ...folder,
+              files: folder.files.map((file) =>
+                file.id === fileId ? nextFile : file,
+              ),
+            }
+          : folder,
+      ),
+    )
+  }
+
+  const removeFileFromFolders = (fileId: string) => {
+    setFolders((currentFolders) =>
+      currentFolders.map((folder) => ({
+        ...folder,
+        files: folder.files.filter((file) => file.id !== fileId),
+      })),
+    )
+  }
+
+  const addFilesToActiveFolder = (files: File[]) => {
+    if (!activeFolderId || files.length === 0) return
+
+    files.forEach((file) => {
+      const tempId = `upload-${Date.now()}-${Math.random().toString(16).slice(2)}`
+      const previewUrl = URL.createObjectURL(file)
+
+      const tempFile: AIOSFile = {
+        id: tempId,
+        name: file.name,
+        kind: getFileKind(file),
+        size: formatFileSize(file.size),
+        sizeBytes: file.size,
+        status: 'uploading',
+        mimeType: file.type || undefined,
+        previewUrl,
+        uploadProgress: 1,
+      }
+
+      setFolders((currentFolders) =>
+        currentFolders.map((folder) =>
+          folder.id === activeFolderId
+            ? {
+                ...folder,
+                files: [tempFile, ...folder.files],
+              }
+            : folder,
+        ),
+      )
+
+      setNotice(`Upload avviato: ${file.name}`)
+
+      void uploadFileWithProgress({
+        propertyId: activeFolderId,
+        file,
+        onProgress: (progress) => {
+          updateFileInFolder(activeFolderId, tempId, (currentFile) => ({
+            ...currentFile,
+            uploadProgress: progress,
+          }))
+        },
+      })
+        .then((uploadedFile) => {
+          URL.revokeObjectURL(previewUrl)
+          replaceFileInFolder(activeFolderId, tempId, uploadedFile)
+          setNotice(`Upload completato: ${uploadedFile.name}`)
+          void loadQuota()
+        })
+        .catch((error) => {
+          const message =
+            error instanceof Error ? error.message : 'Errore durante upload file'
+
+          updateFileInFolder(activeFolderId, tempId, (currentFile) => ({
+            ...currentFile,
+            status: 'error',
+            uploadProgress: 100,
+            uploadError: message,
+          }))
+
+          setNotice(message)
+          void loadQuota()
+        })
+    })
   }
 
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
@@ -318,6 +513,8 @@ export default function AIOSDesktop() {
   }
 
   const openTxtEditor = (file: AIOSFile) => {
+    if (file.status === 'uploading') return
+
     setSelectedTxtId(file.id)
     setTxtDraft(file.content ?? '')
     setDesktopWindowOpen(true)
@@ -325,13 +522,18 @@ export default function AIOSDesktop() {
   }
 
   const openFile = (file: AIOSFile) => {
+    if (file.status === 'uploading') {
+      setNotice(`Upload in corso: ${file.name} ${file.uploadProgress ?? 0}%`)
+      return
+    }
+
     if (file.kind === 'txt') {
       openTxtEditor(file)
       return
     }
 
     setPreviewFile(file)
-    setNotice(`Anteprima fullscreen aperta: ${file.name}`)
+    setNotice(`Anteprima file aperta: ${file.name}`)
   }
 
   const openFileContextMenu = (
@@ -352,99 +554,240 @@ export default function AIOSDesktop() {
     })
   }
 
-  const deleteFileById = (fileId: string) => {
+  const deleteFileById = async (fileId: string) => {
     const fileToDelete = folders
       .flatMap((folder) => folder.files)
       .find((file) => file.id === fileId)
 
-    if (fileToDelete?.previewUrl) {
+    if (!fileToDelete) {
+      setContextMenu(null)
+      return
+    }
+
+    if (fileToDelete.previewUrl && fileToDelete.id.startsWith('upload-')) {
       URL.revokeObjectURL(fileToDelete.previewUrl)
     }
 
-    setFolders((currentFolders) =>
-      currentFolders.map((folder) => ({
-        ...folder,
-        files: folder.files.filter((file) => file.id !== fileId),
-      })),
-    )
-
-    if (selectedTxtId === fileId) {
-      setSelectedTxtId(null)
-      setTxtDraft('')
+    if (fileToDelete.id.startsWith('upload-') || fileToDelete.status === 'error') {
+      removeFileFromFolders(fileId)
+      setContextMenu(null)
+      setNotice(`File "${fileToDelete.name}" rimosso dalla lista.`)
+      return
     }
 
-    if (previewFile?.id === fileId) {
-      setPreviewFile(null)
-    }
+    try {
+      const response = await fetch('/api/admin/ai-os/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fileId }),
+      })
 
-    setContextMenu(null)
-    setNotice(
-      fileToDelete
-        ? `File "${fileToDelete.name}" eliminato dalla cartella.`
-        : 'File eliminato.',
-    )
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore eliminazione file AI-OS')
+      }
+
+      removeFileFromFolders(fileId)
+
+      if (selectedTxtId === fileId) {
+        setSelectedTxtId(null)
+        setTxtDraft('')
+      }
+
+      if (previewFile?.id === fileId) {
+        setPreviewFile(null)
+      }
+
+      setNotice(`File "${fileToDelete.name}" eliminato.`)
+      void loadQuota()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore eliminazione file'
+      setNotice(message)
+    } finally {
+      setContextMenu(null)
+    }
   }
 
-  const saveTxtDraft = () => {
+  const saveTxtDraft = async () => {
     if (!activeFolder || !selectedTxt) return
 
-    setFolders((currentFolders) =>
-      currentFolders.map((folder) =>
-        folder.id === activeFolder.id
-          ? {
-              ...folder,
-              files: folder.files.map((file) =>
-                file.id === selectedTxt.id
-                  ? {
-                      ...file,
-                      content: txtDraft,
-                      status: 'saved',
-                      size: `${Math.max(1, Math.ceil(txtDraft.length / 1024))} KB`,
-                    }
-                  : file,
-              ),
-            }
-          : folder,
-      ),
-    )
+    try {
+      const response = await fetch('/api/admin/ai-os/txt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          propertyId: activeFolder.id,
+          fileId: selectedTxt.id,
+          fileName: selectedTxt.name,
+          content: txtDraft,
+        }),
+      })
 
-    setNotice(`File "${selectedTxt.name}" salvato.`)
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore salvataggio TXT')
+      }
+
+      const savedFile = normalizeFileFromApi(payload.file)
+
+      replaceFileInFolder(activeFolder.id, selectedTxt.id, savedFile)
+      setSelectedTxtId(savedFile.id)
+      setNotice(`File "${savedFile.name}" salvato su Supabase.`)
+      void loadQuota()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore salvataggio TXT'
+      setNotice(message)
+    }
   }
 
-  const createTxtFile = () => {
+  const createTxtFile = async () => {
     if (!activeFolderId) return
 
     const fileName = `nuova-nota-${new Date().toISOString().slice(0, 10)}.txt`
-    const newFile: AIOSFile = {
-      id: `txt-${Date.now()}`,
-      name: fileName,
-      kind: 'txt',
-      size: '1 KB',
-      status: 'local',
-      content: '',
+
+    try {
+      const response = await fetch('/api/admin/ai-os/txt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          propertyId: activeFolderId,
+          fileName,
+          content: '',
+        }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore creazione TXT')
+      }
+
+      const createdFile = normalizeFileFromApi(payload.file)
+
+      setFolders((currentFolders) =>
+        currentFolders.map((folder) =>
+          folder.id === activeFolderId
+            ? {
+                ...folder,
+                files: [createdFile, ...folder.files],
+              }
+            : folder,
+        ),
+      )
+
+      setSelectedTxtId(createdFile.id)
+      setTxtDraft(createdFile.content ?? '')
+      setDesktopWindowOpen(true)
+      setNotice(`Creato nuovo file TXT: ${createdFile.name}`)
+      void loadQuota()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore creazione TXT'
+      setNotice(message)
     }
-
-    setFolders((currentFolders) =>
-      currentFolders.map((folder) =>
-        folder.id === activeFolderId
-          ? {
-              ...folder,
-              files: [newFile, ...folder.files],
-            }
-          : folder,
-      ),
-    )
-
-    setSelectedTxtId(newFile.id)
-    setTxtDraft('')
-    setDesktopWindowOpen(true)
-    setNotice(`Creato nuovo file TXT: ${fileName}`)
   }
 
   const openMainFolder = () => {
     setDesktopWindowOpen(true)
     setStartOpen(false)
-    setNotice('Cartella Immobili aperta.')
+    setNotice(activeFolder ? `Cartella aperta: ${activeFolder.name}` : 'Cartelle AI-OS aperte.')
+  }
+
+  const selectFolder = (folder: AIOSFolder, mobile = false) => {
+    setActiveFolderId(folder.id)
+    setSelectedTxtId(null)
+    setTxtDraft('')
+    setDesktopWindowOpen(true)
+    setMobileFolderOpen(mobile)
+    setStartOpen(false)
+    setNotice(`Cartella aperta: ${folder.name}`)
+    void loadFilesForFolder(folder.id)
+  }
+
+  const renderFileCard = (file: AIOSFile, mobile = false) => {
+    const isUploading = file.status === 'uploading'
+    const isError = file.status === 'error'
+    const progress = Math.max(0, Math.min(100, Number(file.uploadProgress ?? 0)))
+
+    return (
+      <button
+        key={file.id}
+        type="button"
+        onClick={() => openFile(file)}
+        onContextMenu={(event) => openFileContextMenu(event, file)}
+        className={`group relative overflow-hidden rounded-2xl border text-left transition active:scale-[0.99] ${
+          mobile ? 'w-full p-3' : 'p-4'
+        } ${
+          isError
+            ? 'border-red-300/45 bg-red-500/10'
+            : selectedTxtId === file.id
+              ? 'border-violet-300/55 bg-violet-400/15'
+              : 'border-emerald-300/10 bg-black/30 hover:border-violet-300/35 hover:bg-violet-400/10'
+        }`}
+      >
+        {isUploading ? (
+          <span
+            className="absolute inset-y-0 left-0 z-0 bg-violet-400/25 shadow-[0_0_22px_rgba(167,139,250,0.45)] transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        ) : null}
+
+        {isUploading ? (
+          <span className="absolute inset-0 z-0 bg-[linear-gradient(90deg,transparent,rgba(167,139,250,0.16),transparent)]" />
+        ) : null}
+
+        <div className="relative z-10 flex items-start gap-3">
+          <span className={mobile ? 'text-2xl' : 'text-3xl'}>{iconForFile(file.kind)}</span>
+
+          <div className="min-w-0 flex-1">
+            <p className={`truncate font-medium text-white ${mobile ? 'text-sm' : ''}`}>
+              {file.name}
+            </p>
+
+            <p className="mt-1 text-xs text-emerald-100/55">
+              {file.size ?? '—'} ·{' '}
+              {isUploading
+                ? `upload ${progress}%`
+                : isError
+                  ? 'errore'
+                  : file.status === 'local'
+                    ? 'locale'
+                    : 'salvato'}
+            </p>
+
+            {isUploading ? (
+              <div className="mt-2 h-1 overflow-hidden rounded-full bg-violet-950/65">
+                <div
+                  className="h-full rounded-full bg-violet-300/80 shadow-[0_0_14px_rgba(196,181,253,0.85)] transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            ) : null}
+
+            {isError ? (
+              <p className="mt-2 line-clamp-2 text-xs text-red-100/80">
+                {file.uploadError ?? 'Upload non riuscito'}
+              </p>
+            ) : file.kind === 'txt' ? (
+              <p className="mt-2 text-xs text-violet-100/80">
+                {mobile ? 'Tocca per modificare' : 'clicca per modificare'}
+              </p>
+            ) : (
+              <p className="mt-2 text-xs text-emerald-100/45">
+                {mobile ? 'Tocca per anteprima fullscreen' : 'clicca per anteprima'}
+              </p>
+            )}
+          </div>
+        </div>
+      </button>
+    )
   }
 
   return (
@@ -453,8 +796,6 @@ export default function AIOSDesktop() {
       <div className="pointer-events-none absolute inset-0 opacity-[0.11] [background-image:linear-gradient(rgba(45,212,191,.55)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,.55)_1px,transparent_1px)] [background-size:42px_42px]" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_18%,rgba(0,0,0,0.35))]" />
 
-      
-      {/* AIOS_MOBILE_MODE_START */}
       <section className="relative z-10 flex h-[calc(100dvh-56px)] flex-col overflow-hidden p-3 md:hidden">
         {!mobileFolderOpen ? (
           <div className="flex min-h-0 flex-1 flex-col">
@@ -472,8 +813,8 @@ export default function AIOSDesktop() {
               <div className="mt-3">
                 <AIOSQuotaBar
                   usedBytes={quotaUsedBytes}
-                  maxBytes={AI_OS_MAX_TOTAL_BYTES}
-                  warnBytes={AI_OS_WARN_TOTAL_BYTES}
+                  maxBytes={quotaMaxBytes}
+                  warnBytes={quotaWarnBytes}
                   compact
                 />
               </div>
@@ -492,38 +833,41 @@ export default function AIOSDesktop() {
                 </span>
               </div>
 
-              <div className="space-y-2">
-                {folders.map((folder) => (
-                  <button
-                    key={folder.id}
-                    type="button"
-                    onClick={() => {
-                      setActiveFolderId(folder.id)
-                      setSelectedTxtId(null)
-                      setTxtDraft('')
-                      setMobileFolderOpen(true)
-                      setStartOpen(false)
-                      setNotice(`Cartella aperta: ${folder.name}`)
-                    }}
-                    className="w-full rounded-2xl border border-emerald-300/12 bg-emerald-950/20 px-4 py-4 text-left transition active:scale-[0.99] hover:border-violet-300/35 hover:bg-violet-400/10"
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-3xl">📁</span>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-base font-semibold text-white">
-                          {folder.name}
-                        </p>
-                        <p className="mt-1 text-xs text-emerald-100/60">
-                          Rif. {folder.propertyRef} · {folder.files.length} file
-                        </p>
-                        <p className="mt-1 truncate text-xs text-emerald-100/45">
-                          {folder.address}
-                        </p>
+              {foldersLoading ? (
+                <div className="rounded-2xl border border-emerald-300/10 bg-emerald-950/20 p-6 text-sm text-emerald-100/70">
+                  Caricamento cartelle AI-OS...
+                </div>
+              ) : folders.length > 0 ? (
+                <div className="space-y-2">
+                  {folders.map((folder) => (
+                    <button
+                      key={folder.id}
+                      type="button"
+                      onClick={() => selectFolder(folder, true)}
+                      className="w-full rounded-2xl border border-emerald-300/12 bg-emerald-950/20 px-4 py-4 text-left transition active:scale-[0.99] hover:border-violet-300/35 hover:bg-violet-400/10"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="text-3xl">📁</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-base font-semibold text-white">
+                            {folder.name}
+                          </p>
+                          <p className="mt-1 text-xs text-emerald-100/60">
+                            Rif. {folder.propertyRef} · {folder.files.length} file
+                          </p>
+                          <p className="mt-1 truncate text-xs text-emerald-100/45">
+                            {folder.address}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-emerald-300/10 bg-black/20 p-6 text-center text-sm text-emerald-100/60">
+                  Nessuna cartella immobile disponibile.
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -561,8 +905,8 @@ export default function AIOSDesktop() {
               <div className="mt-3">
                 <AIOSQuotaBar
                   usedBytes={quotaUsedBytes}
-                  maxBytes={AI_OS_MAX_TOTAL_BYTES}
-                  warnBytes={AI_OS_WARN_TOTAL_BYTES}
+                  maxBytes={quotaMaxBytes}
+                  warnBytes={quotaWarnBytes}
                   compact
                 />
               </div>
@@ -578,7 +922,7 @@ export default function AIOSDesktop() {
                   Carica contenuti nella cartella
                 </p>
                 <p className="mt-1 text-xs leading-5 text-emerald-100/55">
-                  Da mobile puoi fare foto/video direttamente e salvarli nella cartella immobile.
+                  Da mobile foto, video e file vengono salvati su Supabase, con controllo quota prima dell’upload.
                 </p>
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
@@ -621,40 +965,7 @@ export default function AIOSDesktop() {
 
               <div className="mt-4 space-y-2">
                 {activeFolder && activeFolder.files.length > 0 ? (
-                  activeFolder.files.map((file) => (
-                    <button
-                      key={file.id}
-                      type="button"
-                      onContextMenu={(event) => openFileContextMenu(event, file)}
-                      onClick={() => openFile(file)}
-                      className={`w-full rounded-2xl border p-3 text-left transition active:scale-[0.99] ${
-                        selectedTxtId === file.id
-                          ? 'border-violet-300/55 bg-violet-400/15'
-                          : 'border-emerald-300/10 bg-black/25 hover:border-violet-300/35 hover:bg-violet-400/10'
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="text-2xl">{iconForFile(file.kind)}</span>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-white">
-                            {file.name}
-                          </p>
-                          <p className="mt-1 text-xs text-emerald-100/50">
-                            {file.size ?? '—'} · {file.status === 'local' ? 'locale' : 'salvato'}
-                          </p>
-                          {file.kind === 'txt' ? (
-                            <p className="mt-1 text-xs text-violet-100/75">
-                              Tocca per modificare
-                            </p>
-                          ) : (
-                            <p className="mt-1 text-xs text-emerald-100/45">
-                              Tocca per anteprima fullscreen
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                  ))
+                  activeFolder.files.map((file) => renderFileCard(file, true))
                 ) : (
                   <div className="rounded-2xl border border-emerald-300/10 bg-black/20 p-6 text-center">
                     <p className="text-4xl">📂</p>
@@ -697,8 +1008,6 @@ export default function AIOSDesktop() {
           </div>
         )}
       </section>
-      {/* AIOS_MOBILE_MODE_END */}
-
 
       <section className="relative z-10 hidden h-[calc(100dvh-56px)] w-full md:flex">
         <aside className="flex w-[118px] shrink-0 flex-col items-center gap-4 px-3 py-5 md:w-[142px]">
@@ -742,8 +1051,8 @@ export default function AIOSDesktop() {
             <div className="hidden min-w-[320px] md:block">
               <AIOSQuotaBar
                 usedBytes={quotaUsedBytes}
-                maxBytes={AI_OS_MAX_TOTAL_BYTES}
-                warnBytes={AI_OS_WARN_TOTAL_BYTES}
+                maxBytes={quotaMaxBytes}
+                warnBytes={quotaWarnBytes}
               />
             </div>
           </header>
@@ -761,16 +1070,14 @@ export default function AIOSDesktop() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setDesktopWindowOpen(false)}
-                    className="flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 text-sm text-red-100 transition hover:bg-red-500/20"
-                    aria-label="Chiudi finestra"
-                  >
-                    ×
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setDesktopWindowOpen(false)}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 text-sm text-red-100 transition hover:bg-red-500/20"
+                  aria-label="Chiudi finestra"
+                >
+                  ×
+                </button>
               </div>
 
               <div className="grid h-[calc(100%-53px)] grid-cols-1 overflow-hidden lg:grid-cols-[260px_minmax(0,1fr)_390px]">
@@ -787,35 +1094,36 @@ export default function AIOSDesktop() {
                     </span>
                   </div>
 
-                  <div className="space-y-2">
-                    {folders.map((folder) => (
-                      <button
-                        key={folder.id}
-                        type="button"
-                        onClick={() => {
-                          setActiveFolderId(folder.id)
-                          setSelectedTxtId(null)
-                          setTxtDraft('')
-                          setNotice(`Cartella aperta: ${folder.name}`)
-                        }}
-                        className={`w-full rounded-2xl border px-3 py-3 text-left transition ${
-                          activeFolderId === folder.id
-                            ? 'border-emerald-300/35 bg-emerald-400/15 text-white'
-                            : 'border-emerald-300/10 bg-black/20 text-emerald-100 hover:border-violet-300/35 hover:bg-violet-400/10'
-                        }`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <span className="text-2xl">📂</span>
-                          <div className="min-w-0">
-                            <p className="truncate font-medium leading-tight">{folder.name}</p>
-                            <p className="mt-1 text-xs text-emerald-200/65">
-                              Rif. {folder.propertyRef} · {folder.files.length} file
-                            </p>
+                  {foldersLoading ? (
+                    <div className="rounded-2xl border border-emerald-300/10 bg-black/20 p-4 text-sm text-emerald-100/60">
+                      Caricamento...
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {folders.map((folder) => (
+                        <button
+                          key={folder.id}
+                          type="button"
+                          onClick={() => selectFolder(folder)}
+                          className={`w-full rounded-2xl border px-3 py-3 text-left transition ${
+                            activeFolderId === folder.id
+                              ? 'border-emerald-300/35 bg-emerald-400/15 text-white'
+                              : 'border-emerald-300/10 bg-black/20 text-emerald-100 hover:border-violet-300/35 hover:bg-violet-400/10'
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span className="text-2xl">📂</span>
+                            <div className="min-w-0">
+                              <p className="truncate font-medium leading-tight">{folder.name}</p>
+                              <p className="mt-1 text-xs text-emerald-200/65">
+                                Rif. {folder.propertyRef} · {folder.files.length} file
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </aside>
 
                 <section className="min-h-0 overflow-auto p-4">
@@ -853,7 +1161,7 @@ export default function AIOSDesktop() {
                         Trascina qui foto, video, planimetrie o documenti
                       </p>
                       <p className="mt-1 text-xs text-emerald-100/60">
-                        Ora è demo locale. Poi colleghiamo Supabase Storage, ruoli e cartelle reali per immobile.
+                        Upload reale su Supabase Storage con controllo quota.
                       </p>
 
                       <div className="mt-4 flex flex-wrap gap-2">
@@ -888,34 +1196,7 @@ export default function AIOSDesktop() {
 
                     {activeFolder && activeFolder.files.length > 0 ? (
                       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                        {activeFolder.files.map((file) => (
-                          <button
-                            key={file.id}
-                            type="button"
-                            onContextMenu={(event) => openFileContextMenu(event, file)}
-                            onClick={() => openFile(file)}
-                            className={`group rounded-2xl border p-4 text-left transition ${
-                              selectedTxtId === file.id
-                                ? 'border-violet-300/55 bg-violet-400/15'
-                                : 'border-emerald-300/10 bg-black/30 hover:border-violet-300/35 hover:bg-violet-400/10'
-                            }`}
-                          >
-                            <div className="flex items-start gap-3">
-                              <span className="text-3xl">{iconForFile(file.kind)}</span>
-                              <div className="min-w-0">
-                                <p className="truncate font-medium text-white">{file.name}</p>
-                                <p className="mt-1 text-xs text-emerald-100/55">
-                                  {file.size ?? '—'} · {file.status === 'local' ? 'locale' : 'salvato'}
-                                </p>
-                                {file.kind === 'txt' ? (
-                                  <p className="mt-2 text-xs text-violet-100/80">
-                                    clicca per modificare
-                                  </p>
-                                ) : null}
-                              </div>
-                            </div>
-                          </button>
-                        ))}
+                        {activeFolder.files.map((file) => renderFileCard(file))}
                       </div>
                     ) : (
                       <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-emerald-300/10 bg-black/20 text-center">
@@ -965,9 +1246,9 @@ export default function AIOSDesktop() {
                   )}
 
                   <div className="mt-4 rounded-2xl border border-emerald-300/10 bg-emerald-300/5 p-4 text-xs leading-relaxed text-emerald-100/65">
-                    Prossimi collegamenti reali:
+                    Sistema reale:
                     <br />
-                    Supabase Storage, permessi per ruolo, cartelle per immobile, upload automatico da mobile, accesso fotografo con email/password.
+                    Supabase Storage, quote DB, signed URL, TXT nel database.
                   </div>
                 </aside>
               </div>
@@ -975,7 +1256,6 @@ export default function AIOSDesktop() {
           ) : null}
         </div>
       </section>
-
 
       {contextMenu ? (
         <div
@@ -999,7 +1279,9 @@ export default function AIOSDesktop() {
 
             <button
               type="button"
-              onClick={() => deleteFileById(contextMenu.fileId)}
+              onClick={() => {
+                void deleteFileById(contextMenu.fileId)
+              }}
               className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-red-100 transition hover:bg-red-500/18 hover:text-red-50"
             >
               <span>🗑️</span>
@@ -1099,7 +1381,7 @@ export default function AIOSDesktop() {
                 <div className="text-5xl">{iconForFile(previewFile.kind)}</div>
                 <h3 className="mt-4 text-xl font-semibold text-white">{previewFile.name}</h3>
                 <p className="mt-2 text-sm leading-6 text-emerald-100/65">
-                  Questo è un file demo già presente nella cartella. L’anteprima reale sarà disponibile per i file caricati o quando collegheremo Supabase Storage.
+                  Anteprima non disponibile. Ricarica la cartella o riprova.
                 </p>
               </div>
             ) : null}
@@ -1107,9 +1389,6 @@ export default function AIOSDesktop() {
         </section>
       ) : null}
 
-
-
-      
       <footer className="relative z-20 flex h-14 items-center justify-between border-t border-emerald-300/15 bg-black/72 px-3 backdrop-blur-2xl md:hidden">
         <div className="relative">
           {startOpen ? (
@@ -1167,7 +1446,7 @@ export default function AIOSDesktop() {
         </div>
       </footer>
 
-      <footer className="relative z-20 hidden h-14 items-center justify-between md:flex border-t border-emerald-300/15 bg-black/72 px-3 backdrop-blur-2xl">
+      <footer className="relative z-20 hidden h-14 items-center justify-between border-t border-emerald-300/15 bg-black/72 px-3 backdrop-blur-2xl md:flex">
         <div className="relative">
           {startOpen ? (
             <div className="absolute bottom-14 left-0 w-[310px] overflow-hidden rounded-3xl border border-emerald-300/20 bg-slate-950/95 text-emerald-50 shadow-2xl shadow-black/60 backdrop-blur-2xl">
@@ -1222,7 +1501,7 @@ export default function AIOSDesktop() {
         )}
 
         <div className="text-xs text-emerald-100/45">
-          AI-OS demo · desktop mode
+          AI-OS · Supabase Storage
         </div>
       </footer>
     </main>
