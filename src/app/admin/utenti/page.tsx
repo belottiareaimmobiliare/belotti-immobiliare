@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { requireOwner } from '@/lib/admin-auth'
 import UserManagementPanel from '@/components/admin/UserManagementPanel'
+import AdminRoleVisibilitySettings from '@/components/admin/AdminRoleVisibilitySettings'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,6 +25,7 @@ export default async function AdminUsersPage() {
         </div>
       </section>
 
+      <AdminRoleVisibilitySettings />
       <UserManagementPanel />
     </div>
   )

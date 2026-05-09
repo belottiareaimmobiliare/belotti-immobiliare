@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import Sidebar from '@/components/admin/Sidebar'
 import ThemeToggle from '@/components/shared/ThemeToggle'
-import AdminSectionVisibilityToggle from '@/components/admin/AdminSectionVisibilityToggle'
 import AdminHiddenSectionsApplier from '@/components/admin/AdminHiddenSectionsApplier'
 
 type SidebarLink = {
@@ -137,7 +136,7 @@ export default function AdminShell({
           <main className="min-w-0 flex-1 px-4 py-4 md:px-6 md:py-6 xl:px-8 xl:py-8">
             {children}
 
-        {String(profile.role) === 'administrator' ? <AdminSectionVisibilityToggle /> : <AdminHiddenSectionsApplier />}
+        <AdminHiddenSectionsApplier role={String(profile.role)} />
           </main>
         </div>
       </div>

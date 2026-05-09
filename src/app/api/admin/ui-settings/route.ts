@@ -19,6 +19,8 @@ const ALLOWED_SECTION_IDS = new Set([
   'privacy',
 ])
 
+const ALLOWED_ROLES = new Set(['owner', 'secretary', 'agent', 'editor'])
+
 function normalizeHiddenSections(value: unknown) {
   if (!Array.isArray(value)) return []
 
@@ -27,14 +29,33 @@ function normalizeHiddenSections(value: unknown) {
     .filter((item) => ALLOWED_SECTION_IDS.has(item))
 }
 
-export async function GET() {
-  await requireAdminProfile()
+function normalizeHiddenSectionsByRole(value: unknown) {
+  const result: Record<string, string[]> = {
+    owner: [],
+    secretary: [],
+    agent: [],
+    editor: [],
+  }
 
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return result
+  }
+
+  for (const [role, sections] of Object.entries(value as Record<string, unknown>)) {
+    if (!ALLOWED_ROLES.has(role)) continue
+    result[role] = normalizeHiddenSections(sections)
+  }
+
+  return result
+}
+
+export async function GET() {
+  const profile = await requireAdminProfile()
   const service = createServiceClient()
 
   const { data, error } = await service
     .from('admin_ui_settings')
-    .select('hidden_sections')
+    .select('hidden_sections, hidden_sections_by_role')
     .eq('key', SETTINGS_KEY)
     .maybeSingle()
 
@@ -43,13 +64,27 @@ export async function GET() {
 
     return NextResponse.json({
       hiddenSections: [],
+      hiddenSectionsByRole: {
+        owner: [],
+        secretary: [],
+        agent: [],
+        editor: [],
+      },
     })
   }
 
+  const hiddenSectionsByRole = normalizeHiddenSectionsByRole(
+    data?.hidden_sections_by_role,
+  )
+
+  const role = String(profile.role)
+
   return NextResponse.json({
-    hiddenSections: Array.isArray(data?.hidden_sections)
-      ? data.hidden_sections
-      : [],
+    hiddenSections:
+      role === 'administrator'
+        ? []
+        : hiddenSectionsByRole[role] || normalizeHiddenSections(data?.hidden_sections),
+    hiddenSectionsByRole,
   })
 }
 
@@ -57,25 +92,23 @@ export async function POST(request: Request) {
   const profile = await requireAdminProfile()
 
   if (String(profile.role) !== 'administrator') {
-    return NextResponse.json(
-      { error: 'Non autorizzato' },
-      { status: 403 },
-    )
+    return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
   }
 
   const body = await request.json().catch(() => null)
-  const hiddenSections = normalizeHiddenSections(body?.hiddenSections)
+  const hiddenSectionsByRole = normalizeHiddenSectionsByRole(
+    body?.hiddenSectionsByRole,
+  )
 
   const service = createServiceClient()
 
-  const { error } = await service
-    .from('admin_ui_settings')
-    .upsert({
-      key: SETTINGS_KEY,
-      hidden_sections: hiddenSections,
-      updated_at: new Date().toISOString(),
-      updated_by: profile.id,
-    })
+  const { error } = await service.from('admin_ui_settings').upsert({
+    key: SETTINGS_KEY,
+    hidden_sections: [],
+    hidden_sections_by_role: hiddenSectionsByRole,
+    updated_at: new Date().toISOString(),
+    updated_by: profile.id,
+  })
 
   if (error) {
     console.error('Errore salvataggio admin_ui_settings:', error)
@@ -88,6 +121,6 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    hiddenSections,
+    hiddenSectionsByRole,
   })
 }

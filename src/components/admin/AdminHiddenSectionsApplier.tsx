@@ -2,6 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
+type Props = {
+  role: string
+}
+
 type AdminSection = {
   id: string
   hrefs: string[]
@@ -37,15 +41,18 @@ function selectorsFor(section: AdminSection) {
   })
 }
 
-export default function AdminHiddenSectionsApplier() {
+export default function AdminHiddenSectionsApplier({ role }: Props) {
   const [hiddenIds, setHiddenIds] = useState<string[]>([])
 
   useEffect(() => {
+    if (role === 'administrator') {
+      setHiddenIds([])
+      return
+    }
+
     let active = true
 
-    fetch('/api/admin/ui-settings', {
-      cache: 'no-store',
-    })
+    fetch('/api/admin/ui-settings', { cache: 'no-store' })
       .then((response) => response.json())
       .then((data) => {
         if (!active) return
@@ -64,7 +71,7 @@ export default function AdminHiddenSectionsApplier() {
     return () => {
       active = false
     }
-  }, [])
+  }, [role])
 
   const hiddenCss = useMemo(() => {
     const hiddenSet = new Set(hiddenIds)
