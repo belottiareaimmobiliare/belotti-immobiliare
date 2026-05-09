@@ -200,7 +200,7 @@ function uploadFileWithProgress({
 }) {
   return new Promise<AIOSFile>((resolve, reject) => {
     let fakeProgress = 1
-    let progressTimer: number | null = null
+    let progressTimer: ReturnType<typeof window.setInterval> | null = null
 
     const stopProgress = () => {
       if (progressTimer) {

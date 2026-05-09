@@ -1,7 +1,6 @@
 'use client'
 
 import { ChangeEvent, DragEvent, MouseEvent, useEffect, useMemo, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 
 type AIOSFileKind = 'image' | 'video' | 'pdf' | 'txt' | 'plan' | 'generic'
 type AIOSFileStatus = 'saved' | 'local' | 'uploading' | 'error'
@@ -199,116 +198,56 @@ function uploadFileWithProgress({
   onProgress: (progress: number) => void
 }) {
   return new Promise<AIOSFile>((resolve, reject) => {
-    let fakeProgress = 1
-    let progressTimer: number | null = null
+    const xhr = new XMLHttpRequest()
+    const formData = new FormData()
 
-    const stopProgress = () => {
-      if (progressTimer) {
-        window.clearInterval(progressTimer)
-        progressTimer = null
-      }
+    formData.append('property_id', propertyId)
+    formData.append('file', file)
+
+    xhr.open('POST', '/api/admin/ai-os/upload')
+    xhr.responseType = 'json'
+
+    xhr.upload.onprogress = (event) => {
+      if (!event.lengthComputable) return
+
+      const progress = Math.max(
+        1,
+        Math.min(98, Math.round((event.loaded / event.total) * 100)),
+      )
+
+      onProgress(progress)
     }
 
-    const startProgress = () => {
-      stopProgress()
+    xhr.onload = () => {
+      const response =
+        xhr.response ??
+        (() => {
+          try {
+            return JSON.parse(xhr.responseText || '{}')
+          } catch {
+            return null
+          }
+        })()
 
-      progressTimer = window.setInterval(() => {
-        fakeProgress = Math.min(
-          92,
-          fakeProgress + Math.max(1, Math.round((92 - fakeProgress) / 8)),
-        )
-
-        onProgress(fakeProgress)
-
-        if (fakeProgress >= 92) {
-          stopProgress()
-        }
-      }, 280)
-    }
-
-    async function runUpload() {
-      try {
-        onProgress(1)
-
-        const prepareResponse = await fetch('/api/admin/ai-os/prepare-upload', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            propertyId,
-            fileName: file.name,
-            mimeType: file.type || '',
-            sizeBytes: file.size,
-          }),
-        })
-
-        const preparePayload = await prepareResponse.json().catch(() => null)
-
-        if (!prepareResponse.ok) {
-          throw new Error(
-            preparePayload?.error ||
-              `Errore preparazione upload AI-OS. HTTP ${prepareResponse.status}`,
-          )
-        }
-
-        const upload = preparePayload?.upload
-
-        if (!upload?.path || !upload?.token) {
-          throw new Error('Signed upload URL non valido')
-        }
-
-        onProgress(5)
-        startProgress()
-
-        const supabase = createClient()
-
-        const { error: uploadError } = await supabase.storage
-          .from('ai-os')
-          .uploadToSignedUrl(upload.path, upload.token, file, {
-            contentType: file.type || undefined,
-            upsert: false,
-          })
-
-        if (uploadError) {
-          throw new Error(uploadError.message || 'Errore upload Supabase Storage')
-        }
-
-        stopProgress()
-        onProgress(96)
-
-        const completeResponse = await fetch('/api/admin/ai-os/complete-upload', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            propertyId,
-            fileName: file.name,
-            mimeType: file.type || '',
-            sizeBytes: file.size,
-            storagePath: upload.path,
-          }),
-        })
-
-        const completePayload = await completeResponse.json().catch(() => null)
-
-        if (!completeResponse.ok || !completePayload?.file) {
-          throw new Error(
-            completePayload?.error ||
-              `Errore completamento upload AI-OS. HTTP ${completeResponse.status}`,
-          )
-        }
-
+      if (xhr.status >= 200 && xhr.status < 300 && response?.file) {
         onProgress(100)
-        resolve(normalizeFileFromApi(completePayload.file))
-      } catch (error) {
-        stopProgress()
-        reject(error)
+        resolve(normalizeFileFromApi(response.file))
+        return
       }
+
+      reject(
+        new Error(
+          response?.error ||
+            `Errore upload AI-OS. HTTP ${xhr.status} ${xhr.statusText}`,
+        ),
+      )
     }
 
-    void runUpload()
+    xhr.onerror = () => {
+      reject(new Error('Errore di rete durante upload AI-OS'))
+    }
+
+    xhr.send(formData)
   })
 }
 
