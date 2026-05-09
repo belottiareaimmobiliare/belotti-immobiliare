@@ -40,6 +40,15 @@ export async function POST(request: Request) {
     const supabase = createServiceClient()
     const kind = getAIOSFileKind(fileName, mimeType)
 
+    if (folderType === 'images' && kind !== 'image' && kind !== 'video') {
+      await supabase.storage.from(storageBucket).remove([storagePath])
+
+      return NextResponse.json(
+        { error: 'Nella cartella Immagini puoi caricare solo immagini o video' },
+        { status: 400 },
+      )
+    }
+
     const propertyMediaType = shouldCreatePropertyMedia({
       folderType,
       fileKind: kind,

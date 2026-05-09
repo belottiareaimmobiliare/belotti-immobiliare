@@ -53,6 +53,14 @@ export async function POST(request: Request) {
 
     const cleanName = safeFileName(fileName)
     const kind = getAIOSFileKind(fileName, mimeType)
+
+    if (folderType === 'images' && kind !== 'image' && kind !== 'video') {
+      return NextResponse.json(
+        { error: 'Nella cartella Immagini puoi caricare solo immagini o video' },
+        { status: 400 },
+      )
+    }
+
     const storageBucket = chooseAIOSStorageBucket({
       folderType,
       fileKind: kind,

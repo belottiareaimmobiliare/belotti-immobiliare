@@ -26,6 +26,13 @@ export async function POST(request: Request) {
     const content = String(body?.content ?? '')
     const folderType = normalizeAIOSFolderType(body?.folderType)
 
+    if (folderType === 'images') {
+      return NextResponse.json(
+        { error: 'Nella cartella Immagini non puoi creare file TXT' },
+        { status: 400 },
+      )
+    }
+
     if (!propertyId && !fileId) {
       return NextResponse.json(
         { error: 'propertyId o fileId mancanti' },

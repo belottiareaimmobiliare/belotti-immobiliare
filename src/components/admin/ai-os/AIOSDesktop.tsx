@@ -60,28 +60,22 @@ const AI_OS_MAX_TOTAL_BYTES = 838860800
 const AI_OS_WARN_TOTAL_BYTES = 681574400
 
 const AI_OS_SECTIONS: Array<{
-  id: AIOSSection
+  id: Exclude<AIOSSection, 'root'>
   label: string
   icon: string
   description: string
 }> = [
   {
-    id: 'root',
-    label: 'Root cartella immobile',
-    icon: '📁',
-    description: 'File sparsi dell’immobile, non collegati alla galleria',
+    id: 'images',
+    label: 'Immagini',
+    icon: '🖼️',
+    description: 'Solo foto e video. Le foto sono visibili anche nella galleria immobile.',
   },
   {
     id: 'docs',
     label: 'Docs e planimetrie',
     icon: '📐',
-    description: 'Documenti, PDF, planimetrie e note TXT',
-  },
-  {
-    id: 'images',
-    label: 'Immagini',
-    icon: '🖼️',
-    description: 'Foto visibili anche nella galleria immobile',
+    description: 'Documenti, PDF, planimetrie, immagini, video e note TXT.',
   },
 ]
 
@@ -119,6 +113,18 @@ function getFileKind(file: File): AIOSFileKind {
   if (file.type === 'application/pdf') return 'pdf'
   if (file.name.toLowerCase().endsWith('.txt')) return 'txt'
   return 'generic'
+}
+
+function canUploadFileInSection(file: File, section: AIOSSection) {
+  if (section !== 'images') return true
+
+  return file.type.startsWith('image/') || file.type.startsWith('video/')
+}
+
+function getUploadAccept(section: AIOSSection) {
+  if (section === 'images') return 'image/*,video/*'
+
+  return undefined
 }
 
 function formatFileSize(size: number) {
@@ -588,7 +594,22 @@ export default function AIOSDesktop() {
   const addFilesToActiveFolder = (files: File[]) => {
     if (!activeFolderId || files.length === 0) return
 
-    files.forEach((file) => {
+    const uploadableFiles = files.filter((file) =>
+      canUploadFileInSection(file, activeSection),
+    )
+    const rejectedFilesCount = files.length - uploadableFiles.length
+
+    if (rejectedFilesCount > 0) {
+      setNotice(
+        activeSection === 'images'
+          ? `${rejectedFilesCount} file ignorato/i: nella cartella Immagini puoi caricare solo immagini o video.`
+          : `${rejectedFilesCount} file ignorato/i.`,
+      )
+    }
+
+    if (uploadableFiles.length === 0) return
+
+    uploadableFiles.forEach((file) => {
       const tempId = `upload-${Date.now()}-${Math.random().toString(16).slice(2)}`
       const previewUrl = URL.createObjectURL(file)
 
@@ -799,6 +820,11 @@ export default function AIOSDesktop() {
   const createTxtFile = async () => {
     if (!activeFolderId) return
 
+    if (activeSection === 'images') {
+      setNotice('Nella cartella Immagini puoi caricare solo immagini o video.')
+      return
+    }
+
     const fileName = `nuova-nota-${new Date().toISOString().slice(0, 10)}.txt`
 
     try {
@@ -942,93 +968,123 @@ export default function AIOSDesktop() {
     setPreviewDrag(null)
   }
 
-  const renderSectionSwitcher = (mobile = false) => {
-    const currentSectionMeta =
-      AI_OS_SECTIONS.find((section) => section.id === activeSection) ?? AI_OS_SECTIONS[0]
+  const getSectionLabel = (sectionId: AIOSSection) => {
+    if (sectionId === 'root') return ''
 
+    return AI_OS_SECTIONS.find((section) => section.id === sectionId)?.label ?? ''
+  }
+
+  const getActivePath = () => {
+    const folderName = activeFolder?.name ?? 'Immobile'
+    const sectionLabel = getSectionLabel(activeSection)
+
+    return `x:/${folderName}/${sectionLabel ? `${sectionLabel}/` : ''}`
+  }
+
+  const renderPathBar = (mobile = false) => {
     return (
-      <div className="mb-4 space-y-4">
-        <div className="rounded-3xl border border-emerald-300/12 bg-black/24 px-4 py-3 backdrop-blur-xl">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-emerald-200/55">
-            Root cartella immobile
-          </p>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-white">
-            <span className="rounded-full border border-emerald-300/12 bg-emerald-400/8 px-3 py-1 text-emerald-100/85">
-              📁 Cartella immobile
-            </span>
-            <span className="text-emerald-100/35">/</span>
-            <span className="rounded-full border border-violet-300/20 bg-violet-400/10 px-3 py-1 text-violet-100">
-              {currentSectionMeta.icon} {currentSectionMeta.label}
-            </span>
+      <div
+        className={`mb-4 rounded-2xl border border-emerald-300/15 bg-black/35 px-4 py-3 font-mono text-emerald-100 shadow-[inset_0_0_22px_rgba(16,185,129,0.06)] ${
+          mobile ? 'text-[11px]' : 'text-xs'
+        }`}
+      >
+        <div className="mb-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-emerald-300/70">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_12px_rgba(110,231,183,0.8)]" />
+          Percorso
+        </div>
+        <div className="truncate text-emerald-50">{getActivePath()}</div>
+      </div>
+    )
+  }
+
+  const openSubFolder = (section: Exclude<AIOSSection, 'root'>) => {
+    setActiveSection(section)
+    setSelectedTxtId(null)
+    setTxtDraft('')
+
+    if (activeFolderId) {
+      setNotice(`Apertura ${getSectionLabel(section)}...`)
+      void loadFilesForFolder(activeFolderId, section)
+    }
+  }
+
+  const openRootFolder = () => {
+    setActiveSection('root')
+    setSelectedTxtId(null)
+    setTxtDraft('')
+
+    if (activeFolderId) {
+      setNotice('Apertura root cartella immobile...')
+      void loadFilesForFolder(activeFolderId, 'root')
+    }
+  }
+
+  const renderSectionSwitcher = (mobile = false) => {
+    if (activeSection !== 'root') {
+      const sectionLabel = getSectionLabel(activeSection)
+
+      return (
+        <div className="mb-4 rounded-3xl border border-violet-300/20 bg-violet-950/18 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs uppercase tracking-[0.28em] text-violet-200/75">
+                Sotto-cartella aperta
+              </p>
+              <h3 className="mt-1 truncate text-lg font-semibold text-white">
+                {activeSection === 'images' ? '🖼️' : '📐'} {sectionLabel}
+              </h3>
+              <p className="mt-1 text-xs leading-5 text-emerald-100/55">
+                {activeSection === 'images'
+                  ? 'Qui puoi caricare solo immagini e video.'
+                  : 'Qui puoi caricare TXT, immagini, video, PDF e documenti.'}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={openRootFolder}
+              className="rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-400/18"
+            >
+              ← Torna alla root
+            </button>
           </div>
         </div>
+      )
+    }
 
-        <div className={mobile ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-2 gap-4'}>
-          {AI_OS_SECTIONS.map((section) => {
-            const isActive = activeSection === section.id
+    return (
+      <div className="mb-4 rounded-3xl border border-emerald-300/15 bg-black/24 p-4">
+        <div className="mb-4">
+          <p className="text-xs uppercase tracking-[0.28em] text-emerald-300/70">
+            Root cartella immobile
+          </p>
+          <h3 className="mt-1 text-lg font-semibold text-white">
+            📁 {activeFolder?.name ?? 'Cartella immobile'}
+          </h3>
+          <p className="mt-1 text-xs leading-5 text-emerald-100/55">
+            Puoi caricare file sparsi direttamente qui, oppure aprire una sotto-cartella.
+          </p>
+        </div>
 
-            return (
-              <button
-                key={section.id}
-                type="button"
-                onClick={() => {
-                  setActiveSection(section.id)
-                  setSelectedTxtId(null)
-                  setTxtDraft('')
-                  if (activeFolderId) {
-                    setNotice(`Apertura cartella ${section.label}...`)
-                    void loadFilesForFolder(activeFolderId, section.id)
-                  }
-                }}
-                className={`group relative overflow-hidden rounded-[28px] border p-4 text-left transition duration-200 ${
-                  isActive
-                    ? 'border-violet-300/45 bg-violet-400/12 shadow-[0_0_30px_rgba(167,139,250,0.16)]'
-                    : 'border-emerald-300/10 bg-black/22 hover:border-violet-300/28 hover:bg-violet-400/8'
-                }`}
-              >
-                <div
-                  className={`pointer-events-none absolute inset-x-0 top-0 h-12 ${
-                    isActive ? 'bg-violet-300/8' : 'bg-emerald-300/4'
-                  }`}
-                />
-
-                <div className="relative">
-                  <div className="mb-3">
-                    <div
-                      className={`inline-flex h-14 w-16 items-end justify-center rounded-t-[18px] rounded-b-[14px] border px-3 pb-2 text-3xl shadow-lg transition ${
-                        isActive
-                          ? 'border-violet-300/40 bg-gradient-to-b from-violet-300/30 to-violet-500/18 text-violet-50 shadow-violet-950/30'
-                          : 'border-emerald-300/15 bg-gradient-to-b from-emerald-200/14 to-emerald-500/8 text-emerald-100 shadow-black/25 group-hover:border-violet-300/25 group-hover:text-violet-100'
-                      }`}
-                    >
-                      📁
-                    </div>
-                  </div>
-
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p
-                        className={`text-base font-semibold ${
-                          isActive ? 'text-white' : 'text-emerald-50'
-                        }`}
-                      >
-                        {section.label}
-                      </p>
-                      <p className="mt-1 text-xs leading-5 text-emerald-100/55">
-                        {section.description}
-                      </p>
-                    </div>
-
-                    {isActive ? (
-                      <span className="shrink-0 rounded-full border border-violet-300/28 bg-violet-400/16 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-100">
-                        Aperta
-                      </span>
-                    ) : null}
-                  </div>
+        <div className={`grid gap-3 ${mobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+          {AI_OS_SECTIONS.map((section) => (
+            <button
+              key={section.id}
+              type="button"
+              onClick={() => openSubFolder(section.id)}
+              className="rounded-3xl border border-violet-300/20 bg-violet-400/10 px-4 py-4 text-left transition hover:border-violet-300/45 hover:bg-violet-400/18 active:scale-[0.99]"
+            >
+              <div className="flex items-start gap-3">
+                <span className="text-3xl">{section.icon}</span>
+                <div className="min-w-0">
+                  <p className="font-semibold text-white">{section.label}</p>
+                  <p className="mt-1 text-xs leading-5 text-emerald-100/58">
+                    {section.description}
+                  </p>
                 </div>
-              </button>
-            )
-          })}
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     )
@@ -1252,6 +1308,8 @@ export default function AIOSDesktop() {
             </header>
 
             <div className="min-h-0 flex-1 overflow-auto rounded-[28px] border border-emerald-300/15 bg-black/30 p-3 backdrop-blur-2xl">
+              {renderPathBar(true)}
+
               {renderSectionSwitcher(true)}
 
               <div
@@ -1260,22 +1318,24 @@ export default function AIOSDesktop() {
                 className="rounded-3xl border border-dashed border-emerald-300/20 bg-emerald-950/15 p-3"
               >
                 <p className="text-sm font-semibold text-white">
-                  Carica contenuti nella cartella
+                  {activeSection === 'images' ? 'Carica immagini o video' : 'Carica contenuti nella cartella'}
                 </p>
                 <p className="mt-1 text-xs leading-5 text-emerald-100/55">
-                  Da mobile i file vengono salvati nella sotto-cartella scelta. Le immagini finiscono anche nella galleria immobile senza duplicazione.
+                  {activeSection === 'images' ? 'Accetta solo immagini e video. Le immagini saranno visibili anche nella galleria immobile.' : activeSection === 'docs' ? 'Accetta TXT, immagini, video, PDF e documenti. PDF e immagini possono comparire nelle planimetrie.' : 'Qui puoi caricare file sparsi nella root dell’immobile.'}
                 </p>
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   <label className="flex cursor-pointer items-center justify-center rounded-2xl bg-emerald-300 px-3 py-3 text-sm font-semibold text-slate-950 transition active:scale-[0.98]">
                     File
-                    <input type="file" multiple className="hidden" onChange={handleFileInput} />
+                    <input type="file" multiple accept={getUploadAccept(activeSection)} className="hidden" onChange={handleFileInput} />
                   </label>
 
                   <button
                     type="button"
                     onClick={createTxtFile}
-                    className="rounded-2xl border border-emerald-300/25 bg-emerald-400/10 px-3 py-3 text-sm font-semibold text-emerald-100 transition active:scale-[0.98]"
+                    className={`rounded-2xl border border-emerald-300/25 bg-emerald-400/10 px-3 py-3 text-sm font-semibold text-emerald-100 transition active:scale-[0.98] ${
+                      activeSection === 'images' ? 'hidden' : ''
+                    }`}
                   >
                     Nuovo TXT
                   </button>
@@ -1495,12 +1555,16 @@ export default function AIOSDesktop() {
                       <button
                         type="button"
                         onClick={createTxtFile}
-                        className="rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-100 transition hover:bg-emerald-400/18"
+                        className={`rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-100 transition hover:bg-emerald-400/18 ${
+                          activeSection === 'images' ? 'hidden' : ''
+                        }`}
                       >
                         + Nuovo TXT
                       </button>
                     </div>
                   </div>
+
+                  {renderPathBar()}
 
                   {renderSectionSwitcher()}
 
@@ -1514,13 +1578,13 @@ export default function AIOSDesktop() {
                         Trascina qui foto, video, planimetrie o documenti
                       </p>
                       <p className="mt-1 text-xs text-emerald-100/60">
-                        Upload reale: immagini e planimetrie vengono collegate anche all’immobile senza duplicare il file.
+                        {activeSection === 'images' ? 'Solo immagini e video. Le immagini sono collegate anche alla galleria immobile.' : activeSection === 'docs' ? 'TXT, immagini, video, PDF e documenti. PDF e immagini possono comparire nelle planimetrie.' : 'Root della cartella: carica qui file sparsi non collegati alla galleria.'}
                       </p>
 
                       <div className="mt-4 flex flex-wrap gap-2">
                         <label className="cursor-pointer rounded-full bg-emerald-300 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-200">
                           Carica file
-                          <input type="file" multiple className="hidden" onChange={handleFileInput} />
+                          <input type="file" multiple accept={getUploadAccept(activeSection)} className="hidden" onChange={handleFileInput} />
                         </label>
 
                         <label className="cursor-pointer rounded-full border border-emerald-300/30 bg-black/30 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/10">
