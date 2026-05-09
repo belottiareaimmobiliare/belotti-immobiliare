@@ -1,7 +1,14 @@
 'use client'
 
 import { ChangeEvent, DragEvent, MouseEvent, WheelEvent, useEffect, useMemo, useState } from 'react'
+import { JetBrains_Mono } from 'next/font/google'
 import { createClient } from '@/lib/supabase/client'
+
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+})
 
 type AIOSFileKind = 'image' | 'video' | 'pdf' | 'txt' | 'plan' | 'generic'
 type AIOSFileStatus = 'saved' | 'local' | 'uploading' | 'error'
@@ -199,10 +206,10 @@ function AIOSQuotaBar({
 
   return (
     <div
-      className={`rounded-2xl border bg-black/35 backdrop-blur-2xl ${
+      className={`rounded-2xl border bg-[#2E3440]/35 backdrop-blur-2xl ${
         compact
-          ? 'border-emerald-300/15 px-3 py-2'
-          : 'border-emerald-300/20 px-4 py-3 shadow-2xl shadow-black/25'
+          ? 'border-[#8FBCBB]/15 px-3 py-2'
+          : 'border-[#8FBCBB]/20 px-4 py-3 shadow-2xl shadow-black/25'
       }`}
     >
       <div className="mb-1.5 flex items-center justify-between gap-3">
@@ -210,30 +217,30 @@ function AIOSQuotaBar({
           <span
             className={`h-2 w-2 rounded-full ${
               isBlocked
-                ? 'bg-red-400 shadow-[0_0_14px_rgba(248,113,113,0.9)]'
+                ? 'bg-[#BF616A] shadow-[0_0_14px_rgba(248,113,113,0.9)]'
                 : isWarning
-                  ? 'bg-orange-300 shadow-[0_0_14px_rgba(253,186,116,0.9)]'
-                  : 'bg-emerald-300 shadow-[0_0_14px_rgba(110,231,183,0.9)]'
+                  ? 'bg-[#D08770] shadow-[0_0_14px_rgba(253,186,116,0.9)]'
+                  : 'bg-[#A3BE8C] shadow-[0_0_14px_rgba(110,231,183,0.9)]'
             }`}
           />
-          <span className="text-[10px] font-semibold uppercase tracking-[0.26em] text-emerald-200/80">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.26em] text-[#88C0D0]/80">
             Quota
           </span>
         </div>
 
-        <span className="font-mono text-[11px] font-semibold text-emerald-50">
+        <span className="font-mono text-[11px] font-semibold text-[#ECEFF4]">
           {formatQuotaMb(usedBytes)} MB / {formatQuotaMb(maxBytes)} MB
         </span>
       </div>
 
-      <div className="h-1.5 overflow-hidden rounded-full border border-emerald-300/10 bg-emerald-950/70">
+      <div className="h-1.5 overflow-hidden rounded-full border border-[#8FBCBB]/10 bg-[#2E3440]/70">
         <div
           className={`h-full rounded-full transition-all duration-500 ${
             isBlocked
-              ? 'bg-red-400 shadow-[0_0_18px_rgba(248,113,113,0.85)]'
+              ? 'bg-[#BF616A] shadow-[0_0_18px_rgba(248,113,113,0.85)]'
               : isWarning
-                ? 'bg-orange-300 shadow-[0_0_18px_rgba(253,186,116,0.85)]'
-                : 'bg-emerald-300 shadow-[0_0_18px_rgba(110,231,183,0.85)]'
+                ? 'bg-[#D08770] shadow-[0_0_18px_rgba(253,186,116,0.85)]'
+                : 'bg-[#A3BE8C] shadow-[0_0_18px_rgba(110,231,183,0.85)]'
           }`}
           style={{ width: `${percent}%` }}
         />
@@ -984,15 +991,15 @@ export default function AIOSDesktop() {
   const renderPathBar = (mobile = false) => {
     return (
       <div
-        className={`mb-4 rounded-2xl border border-emerald-300/15 bg-black/35 px-4 py-3 font-mono text-emerald-100 shadow-[inset_0_0_22px_rgba(16,185,129,0.06)] ${
+        className={`mb-4 rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/35 px-4 py-3 font-mono text-[#D8DEE9] shadow-[inset_0_0_22px_rgba(16,185,129,0.06)] ${
           mobile ? 'text-[11px]' : 'text-xs'
         }`}
       >
-        <div className="mb-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-emerald-300/70">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_12px_rgba(110,231,183,0.8)]" />
+        <div className="mb-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-[#8FBCBB]/70">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#A3BE8C] shadow-[0_0_12px_rgba(110,231,183,0.8)]" />
           Percorso
         </div>
-        <div className="truncate text-emerald-50">{getActivePath()}</div>
+        <div className="truncate text-[#ECEFF4]">{getActivePath()}</div>
       </div>
     )
   }
@@ -1024,16 +1031,16 @@ export default function AIOSDesktop() {
       const sectionLabel = getSectionLabel(activeSection)
 
       return (
-        <div className="mb-4 rounded-3xl border border-violet-300/20 bg-violet-950/18 p-4">
+        <div className="mb-4 rounded-3xl border border-[#B48EAD]/20 bg-[#3B4252]/18 p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="text-xs uppercase tracking-[0.28em] text-violet-200/75">
+              <p className="text-xs uppercase tracking-[0.28em] text-[#B48EAD]/75">
                 Sotto-cartella aperta
               </p>
               <h3 className="mt-1 truncate text-lg font-semibold text-white">
                 {activeSection === 'images' ? '🖼️' : '📐'} {sectionLabel}
               </h3>
-              <p className="mt-1 text-xs leading-5 text-emerald-100/55">
+              <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/55">
                 {activeSection === 'images'
                   ? 'Qui puoi caricare solo immagini e video.'
                   : 'Qui puoi caricare TXT, immagini, video, PDF e documenti.'}
@@ -1043,7 +1050,7 @@ export default function AIOSDesktop() {
             <button
               type="button"
               onClick={openRootFolder}
-              className="rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-400/18"
+              className="rounded-full border border-[#8FBCBB]/25 bg-[#A3BE8C]/10 px-4 py-2 text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/18"
             >
               ← Torna alla root
             </button>
@@ -1053,36 +1060,39 @@ export default function AIOSDesktop() {
     }
 
     return (
-      <div className="mb-4 rounded-3xl border border-emerald-300/15 bg-black/24 p-4">
-        <div className="mb-4">
-          <p className="text-xs uppercase tracking-[0.28em] text-emerald-300/70">
+      <div className="mb-4 rounded-3xl border border-[#4C566A]/55 bg-[#3B4252]/42 p-4 shadow-[0_18px_60px_rgba(46,52,64,0.32)]">
+        <div className="mb-5">
+          <p className="text-xs uppercase tracking-[0.28em] text-[#8FBCBB]/80">
             Root cartella immobile
           </p>
-          <h3 className="mt-1 text-lg font-semibold text-white">
+          <h3 className="mt-1 text-lg font-semibold text-[#ECEFF4]">
             📁 {activeFolder?.name ?? 'Cartella immobile'}
           </h3>
-          <p className="mt-1 text-xs leading-5 text-emerald-100/55">
+          <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/58">
             Puoi caricare file sparsi direttamente qui, oppure aprire una sotto-cartella.
           </p>
         </div>
 
-        <div className={`grid gap-3 ${mobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+        <div className={`flex flex-wrap ${mobile ? 'gap-5' : 'gap-6'}`}>
           {AI_OS_SECTIONS.map((section) => (
             <button
               key={section.id}
               type="button"
               onClick={() => openSubFolder(section.id)}
-              className="rounded-3xl border border-violet-300/20 bg-violet-400/10 px-4 py-4 text-left transition hover:border-violet-300/45 hover:bg-violet-400/18 active:scale-[0.99]"
+              title={section.description}
+              className="group flex w-[88px] flex-col items-center gap-2 rounded-2xl border border-transparent p-2 text-center transition hover:border-[#B48EAD]/45 hover:bg-[#434C5E]/60 active:scale-[0.98]"
             >
-              <div className="flex items-start gap-3">
-                <span className="text-3xl">{section.icon}</span>
-                <div className="min-w-0">
-                  <p className="font-semibold text-white">{section.label}</p>
-                  <p className="mt-1 text-xs leading-5 text-emerald-100/58">
-                    {section.description}
-                  </p>
-                </div>
-              </div>
+              <span className="relative flex h-12 w-12 shrink-0 items-end justify-center">
+                <span className="absolute left-1 top-1 h-3 w-6 rounded-t-md bg-[#5E81AC] transition group-hover:bg-[#B48EAD]" />
+                <span className="absolute bottom-0 h-9 w-12 rounded-lg border border-[#ECEFF4]/10 bg-[#81A1C1] shadow-[0_8px_22px_rgba(46,52,64,0.35)] transition group-hover:bg-[#B48EAD]" />
+                <span className="relative z-10 pb-1 text-[15px] font-bold text-[#2E3440]">
+                  {section.id === 'images' ? '●' : '▤'}
+                </span>
+              </span>
+
+              <span className="line-clamp-2 min-h-[28px] text-[11px] font-semibold leading-3 text-[#ECEFF4]">
+                {section.label}
+              </span>
             </button>
           ))}
         </div>
@@ -1105,15 +1115,15 @@ export default function AIOSDesktop() {
           mobile ? 'w-full p-3' : 'p-4'
         } ${
           isError
-            ? 'border-red-300/45 bg-red-500/10'
+            ? 'border-[#BF616A]/45 bg-[#BF616A]/10'
             : selectedTxtId === file.id
-              ? 'border-violet-300/55 bg-violet-400/15'
-              : 'border-emerald-300/10 bg-black/30 hover:border-violet-300/35 hover:bg-violet-400/10'
+              ? 'border-[#B48EAD]/55 bg-[#B48EAD]/15'
+              : 'border-[#8FBCBB]/10 bg-[#2E3440]/30 hover:border-[#B48EAD]/35 hover:bg-[#B48EAD]/10'
         }`}
       >
         {isUploading ? (
           <span
-            className="absolute inset-y-0 left-0 z-0 bg-violet-400/25 shadow-[0_0_22px_rgba(167,139,250,0.45)] transition-all duration-300"
+            className="absolute inset-y-0 left-0 z-0 bg-[#B48EAD]/25 shadow-[0_0_22px_rgba(167,139,250,0.45)] transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         ) : null}
@@ -1130,7 +1140,7 @@ export default function AIOSDesktop() {
               {file.name}
             </p>
 
-            <p className="mt-1 text-xs text-emerald-100/55">
+            <p className="mt-1 text-xs text-[#D8DEE9]/55">
               {file.size ?? '—'} ·{' '}
               {isUploading
                 ? `upload ${progress}%`
@@ -1142,7 +1152,7 @@ export default function AIOSDesktop() {
             </p>
 
             {isUploading ? (
-              <div className="mt-2 h-1 overflow-hidden rounded-full bg-violet-950/65">
+              <div className="mt-2 h-1 overflow-hidden rounded-full bg-[#3B4252]/65">
                 <div
                   className="h-full rounded-full bg-violet-300/80 shadow-[0_0_14px_rgba(196,181,253,0.85)] transition-all duration-300"
                   style={{ width: `${progress}%` }}
@@ -1151,21 +1161,21 @@ export default function AIOSDesktop() {
             ) : null}
 
             {file.isGalleryVisible ? (
-              <span className="mt-2 inline-flex rounded-full border border-violet-300/25 bg-violet-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-100">
+              <span className="mt-2 inline-flex rounded-full border border-[#B48EAD]/25 bg-[#B48EAD]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#E5E9F0]">
                 Visibile in immobile
               </span>
             ) : null}
 
             {isError ? (
-              <p className="mt-2 line-clamp-2 text-xs text-red-100/80">
+              <p className="mt-2 line-clamp-2 text-xs text-[#BF616A]/80">
                 {file.uploadError ?? 'Upload non riuscito'}
               </p>
             ) : file.kind === 'txt' ? (
-              <p className="mt-2 text-xs text-violet-100/80">
+              <p className="mt-2 text-xs text-[#E5E9F0]/80">
                 {mobile ? 'Tocca per modificare' : 'clicca per modificare'}
               </p>
             ) : (
-              <p className="mt-2 text-xs text-emerald-100/45">
+              <p className="mt-2 text-xs text-[#D8DEE9]/45">
                 {mobile ? 'Tocca per anteprima fullscreen' : 'clicca per anteprima'}
               </p>
             )}
@@ -1176,22 +1186,22 @@ export default function AIOSDesktop() {
   }
 
   return (
-    <main className="fixed inset-0 z-[9999] h-dvh w-screen overflow-hidden bg-[#030712] text-emerald-100">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(16,185,129,0.26),transparent_34%),radial-gradient(circle_at_76%_76%,rgba(124,58,237,0.18),transparent_32%),linear-gradient(135deg,#03130f_0%,#030712_48%,#090312_100%)]" />
-      <div className="pointer-events-none absolute inset-0 opacity-[0.11] [background-image:linear-gradient(rgba(45,212,191,.55)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,.55)_1px,transparent_1px)] [background-size:42px_42px]" />
+    <main className={`${jetBrainsMono.className} aios-nord fixed inset-0 z-[9999] h-dvh w-screen overflow-hidden bg-[#2E3440] text-[#D8DEE9] antialiased`}>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(136,192,208,0.18),transparent_34%),radial-gradient(circle_at_76%_76%,rgba(180,142,173,0.22),transparent_32%),radial-gradient(circle_at_88%_18%,rgba(191,97,106,0.10),transparent_26%),linear-gradient(135deg,#2E3440_0%,#3B4252_48%,#2E3440_100%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.10] [background-image:linear-gradient(rgba(143,188,187,.42)_1px,transparent_1px),linear-gradient(90deg,rgba(143,188,187,.42)_1px,transparent_1px)] [background-size:42px_42px]" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_18%,rgba(0,0,0,0.35))]" />
 
       <section className="relative z-10 flex h-[calc(100dvh-56px)] flex-col overflow-hidden p-3 md:hidden">
         {!mobileFolderOpen ? (
           <div className="flex min-h-0 flex-1 flex-col">
             <header className="mb-4 shrink-0">
-              <p className="text-xs uppercase tracking-[0.42em] text-emerald-300/80">
+              <p className="text-xs uppercase tracking-[0.42em] text-[#8FBCBB]/80">
                 Area Immobiliare
               </p>
               <h1 className="mt-1 text-2xl font-semibold text-white">
                 AI-OS Mobile
               </h1>
-              <p className="mt-2 text-sm leading-6 text-emerald-100/65">
+              <p className="mt-2 text-sm leading-6 text-[#D8DEE9]/65">
                 Seleziona una cartella immobile per caricare foto, video, documenti o note.
               </p>
 
@@ -1205,21 +1215,21 @@ export default function AIOSDesktop() {
               </div>
             </header>
 
-            <div className="min-h-0 flex-1 overflow-auto rounded-[28px] border border-emerald-300/15 bg-black/30 p-3 backdrop-blur-2xl">
+            <div className="min-h-0 flex-1 overflow-auto rounded-[28px] border border-[#8FBCBB]/15 bg-[#2E3440]/30 p-3 backdrop-blur-2xl">
               <div className="mb-3 flex items-center justify-between px-1">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/70">
+                  <p className="text-xs uppercase tracking-[0.3em] text-[#8FBCBB]/70">
                     Cartelle
                   </p>
                   <h2 className="text-lg font-semibold text-white">Immobili</h2>
                 </div>
-                <span className="rounded-full bg-emerald-300/15 px-3 py-1 text-xs text-emerald-100">
+                <span className="rounded-full bg-[#A3BE8C]/15 px-3 py-1 text-xs text-[#D8DEE9]">
                   {folders.length}
                 </span>
               </div>
 
               {foldersLoading ? (
-                <div className="rounded-2xl border border-emerald-300/10 bg-emerald-950/20 p-6 text-sm text-emerald-100/70">
+                <div className="rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/20 p-6 text-sm text-[#D8DEE9]/70">
                   Caricamento cartelle AI-OS...
                 </div>
               ) : folders.length > 0 ? (
@@ -1229,7 +1239,7 @@ export default function AIOSDesktop() {
                       key={folder.id}
                       type="button"
                       onClick={() => selectFolder(folder, true)}
-                      className="w-full rounded-2xl border border-emerald-300/12 bg-emerald-950/20 px-4 py-4 text-left transition active:scale-[0.99] hover:border-violet-300/35 hover:bg-violet-400/10"
+                      className="w-full rounded-2xl border border-[#8FBCBB]/12 bg-[#2E3440]/20 px-4 py-4 text-left transition active:scale-[0.99] hover:border-[#B48EAD]/35 hover:bg-[#B48EAD]/10"
                     >
                       <div className="flex items-start gap-3">
                         <span className="text-3xl">📁</span>
@@ -1237,10 +1247,10 @@ export default function AIOSDesktop() {
                           <p className="truncate text-base font-semibold text-white">
                             {folder.name}
                           </p>
-                          <p className="mt-1 text-xs text-emerald-100/60">
+                          <p className="mt-1 text-xs text-[#D8DEE9]/60">
                             Rif. {folder.propertyRef} · {folder.fileCount ?? folder.files.length} file
                           </p>
-                          <p className="mt-1 truncate text-xs text-emerald-100/45">
+                          <p className="mt-1 truncate text-xs text-[#D8DEE9]/45">
                             {folder.address}
                           </p>
                         </div>
@@ -1249,7 +1259,7 @@ export default function AIOSDesktop() {
                   ))}
                 </div>
               ) : (
-                <div className="rounded-2xl border border-emerald-300/10 bg-black/20 p-6 text-center text-sm text-emerald-100/60">
+                <div className="rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/20 p-6 text-center text-sm text-[#D8DEE9]/60">
                   Nessuna cartella immobile disponibile.
                 </div>
               )}
@@ -1257,17 +1267,17 @@ export default function AIOSDesktop() {
           </div>
         ) : (
           <div className="flex min-h-0 flex-1 flex-col">
-            <header className="mb-3 shrink-0 rounded-[24px] border border-emerald-300/15 bg-black/30 p-4 backdrop-blur-2xl">
+            <header className="mb-3 shrink-0 rounded-[24px] border border-[#8FBCBB]/15 bg-[#2E3440]/30 p-4 backdrop-blur-2xl">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/70">
+                  <p className="text-xs uppercase tracking-[0.3em] text-[#8FBCBB]/70">
                     Cartella aperta
                   </p>
                   <h1 className="mt-1 truncate text-xl font-semibold text-white">
                     {activeFolder?.name ?? 'Cartella'}
                   </h1>
                   {activeFolder ? (
-                    <p className="mt-1 truncate text-xs text-emerald-100/55">
+                    <p className="mt-1 truncate text-xs text-[#D8DEE9]/55">
                       Rif. {activeFolder.propertyRef} · {activeFolder.address}
                     </p>
                   ) : null}
@@ -1277,7 +1287,7 @@ export default function AIOSDesktop() {
                   <button
                     type="button"
                     onClick={refreshActiveFolder}
-                    className="rounded-full border border-violet-300/25 bg-violet-400/10 px-3 py-2 text-xs font-semibold text-violet-100 transition active:scale-[0.98] hover:bg-violet-400/18"
+                    className="rounded-full border border-[#B48EAD]/25 bg-[#B48EAD]/10 px-3 py-2 text-xs font-semibold text-[#E5E9F0] transition active:scale-[0.98] hover:bg-[#B48EAD]/18"
                   >
                     Aggiorna
                   </button>
@@ -1290,7 +1300,7 @@ export default function AIOSDesktop() {
                       setTxtDraft('')
                       setNotice('Lista cartelle aperta.')
                     }}
-                    className="rounded-full border border-emerald-300/20 px-3 py-2 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-300/10"
+                    className="rounded-full border border-[#8FBCBB]/20 px-3 py-2 text-xs font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/10"
                   >
                     Chiudi cartella
                   </button>
@@ -1307,7 +1317,7 @@ export default function AIOSDesktop() {
               </div>
             </header>
 
-            <div className="min-h-0 flex-1 overflow-auto rounded-[28px] border border-emerald-300/15 bg-black/30 p-3 backdrop-blur-2xl">
+            <div className="min-h-0 flex-1 overflow-auto rounded-[28px] border border-[#8FBCBB]/15 bg-[#2E3440]/30 p-3 backdrop-blur-2xl">
               {renderPathBar(true)}
 
               {renderSectionSwitcher(true)}
@@ -1315,17 +1325,17 @@ export default function AIOSDesktop() {
               <div
                 onDrop={handleDrop}
                 onDragOver={(event) => event.preventDefault()}
-                className="rounded-3xl border border-dashed border-emerald-300/20 bg-emerald-950/15 p-3"
+                className="rounded-3xl border border-dashed border-[#8FBCBB]/20 bg-[#2E3440]/15 p-3"
               >
                 <p className="text-sm font-semibold text-white">
                   {activeSection === 'images' ? 'Carica immagini o video' : 'Carica contenuti nella cartella'}
                 </p>
-                <p className="mt-1 text-xs leading-5 text-emerald-100/55">
+                <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/55">
                   {activeSection === 'images' ? 'Accetta solo immagini e video. Le immagini saranno visibili anche nella galleria immobile.' : activeSection === 'docs' ? 'Accetta TXT, immagini, video, PDF e documenti. PDF e immagini possono comparire nelle planimetrie.' : 'Qui puoi caricare file sparsi nella root dell’immobile.'}
                 </p>
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
-                  <label className="flex cursor-pointer items-center justify-center rounded-2xl bg-emerald-300 px-3 py-3 text-sm font-semibold text-slate-950 transition active:scale-[0.98]">
+                  <label className="flex cursor-pointer items-center justify-center rounded-2xl bg-[#A3BE8C] px-3 py-3 text-sm font-semibold text-[#2E3440] transition active:scale-[0.98]">
                     File
                     <input type="file" multiple accept={getUploadAccept(activeSection)} className="hidden" onChange={handleFileInput} />
                   </label>
@@ -1333,14 +1343,14 @@ export default function AIOSDesktop() {
                   <button
                     type="button"
                     onClick={createTxtFile}
-                    className={`rounded-2xl border border-emerald-300/25 bg-emerald-400/10 px-3 py-3 text-sm font-semibold text-emerald-100 transition active:scale-[0.98] ${
+                    className={`rounded-2xl border border-[#8FBCBB]/25 bg-[#A3BE8C]/10 px-3 py-3 text-sm font-semibold text-[#D8DEE9] transition active:scale-[0.98] ${
                       activeSection === 'images' ? 'hidden' : ''
                     }`}
                   >
                     Nuovo TXT
                   </button>
 
-                  <label className="flex cursor-pointer items-center justify-center rounded-2xl border border-emerald-300/25 bg-black/30 px-3 py-3 text-sm font-semibold text-emerald-100 transition active:scale-[0.98]">
+                  <label className="flex cursor-pointer items-center justify-center rounded-2xl border border-[#8FBCBB]/25 bg-[#2E3440]/30 px-3 py-3 text-sm font-semibold text-[#D8DEE9] transition active:scale-[0.98]">
                     Fotocamera
                     <input
                       type="file"
@@ -1351,7 +1361,7 @@ export default function AIOSDesktop() {
                     />
                   </label>
 
-                  <label className="flex cursor-pointer items-center justify-center rounded-2xl border border-emerald-300/25 bg-black/30 px-3 py-3 text-sm font-semibold text-emerald-100 transition active:scale-[0.98]">
+                  <label className="flex cursor-pointer items-center justify-center rounded-2xl border border-[#8FBCBB]/25 bg-[#2E3440]/30 px-3 py-3 text-sm font-semibold text-[#D8DEE9] transition active:scale-[0.98]">
                     Video
                     <input
                       type="file"
@@ -1368,10 +1378,10 @@ export default function AIOSDesktop() {
                 {activeFolder && activeFolder.files.length > 0 ? (
                   activeFolder.files.map((file) => renderFileCard(file, true))
                 ) : (
-                  <div className="rounded-2xl border border-emerald-300/10 bg-black/20 p-6 text-center">
+                  <div className="rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/20 p-6 text-center">
                     <p className="text-4xl">📂</p>
                     <p className="mt-3 text-sm font-semibold text-white">Cartella vuota</p>
-                    <p className="mt-1 text-xs text-emerald-100/55">
+                    <p className="mt-1 text-xs text-[#D8DEE9]/55">
                       Carica una foto, un video, un documento o crea una nota TXT.
                     </p>
                   </div>
@@ -1379,9 +1389,9 @@ export default function AIOSDesktop() {
               </div>
 
               {selectedTxt ? (
-                <div className="mt-4 rounded-3xl border border-violet-300/25 bg-violet-950/20 p-3">
+                <div className="mt-4 rounded-3xl border border-[#B48EAD]/25 bg-[#3B4252]/20 p-3">
                   <div className="mb-3">
-                    <p className="text-xs uppercase tracking-[0.25em] text-violet-200/75">
+                    <p className="text-xs uppercase tracking-[0.25em] text-[#B48EAD]/75">
                       Editor TXT
                     </p>
                     <h3 className="truncate text-base font-semibold text-white">
@@ -1392,14 +1402,14 @@ export default function AIOSDesktop() {
                   <textarea
                     value={txtDraft}
                     onChange={(event) => setTxtDraft(event.target.value)}
-                    className="min-h-[240px] w-full resize-y rounded-2xl border border-violet-300/20 bg-slate-950/80 p-4 font-mono text-sm text-emerald-100 outline-none placeholder:text-emerald-100/30 focus:border-violet-300/60"
+                    className="min-h-[240px] w-full resize-y rounded-2xl border border-[#B48EAD]/20 bg-[#2E3440]/80 p-4 font-mono text-sm text-[#D8DEE9] outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
                     placeholder="Scrivi o modifica la nota..."
                   />
 
                   <button
                     type="button"
                     onClick={saveTxtDraft}
-                    className="mt-3 w-full rounded-2xl bg-emerald-300 px-4 py-3 text-sm font-semibold text-slate-950 transition active:scale-[0.98]"
+                    className="mt-3 w-full rounded-2xl bg-[#A3BE8C] px-4 py-3 text-sm font-semibold text-[#2E3440] transition active:scale-[0.98]"
                   >
                     Salva TXT
                   </button>
@@ -1415,10 +1425,10 @@ export default function AIOSDesktop() {
           <button
             type="button"
             onClick={openMainFolder}
-            className="group flex w-full flex-col items-center gap-2 rounded-2xl border border-emerald-300/0 px-2 py-3 text-center transition hover:border-emerald-300/25 hover:bg-emerald-300/10"
+            className="group flex w-full flex-col items-center gap-2 rounded-2xl border border-[#8FBCBB]/0 px-2 py-3 text-center transition hover:border-[#8FBCBB]/25 hover:bg-[#A3BE8C]/10"
           >
             <span className="text-4xl drop-shadow-[0_0_16px_rgba(16,185,129,0.55)]">📁</span>
-            <span className="text-xs font-semibold text-emerald-50">Immobili</span>
+            <span className="text-xs font-semibold text-[#ECEFF4]">Immobili</span>
           </button>
 
           {desktopFolders.slice(1).map((item) => (
@@ -1430,10 +1440,10 @@ export default function AIOSDesktop() {
                 setStartOpen(false)
                 setNotice(`${item.label}: area demo, collegamento reale da costruire.`)
               }}
-              className="group flex w-full flex-col items-center gap-2 rounded-2xl border border-emerald-300/0 px-2 py-3 text-center transition hover:border-violet-300/30 hover:bg-violet-400/10"
+              className="group flex w-full flex-col items-center gap-2 rounded-2xl border border-[#8FBCBB]/0 px-2 py-3 text-center transition hover:border-[#B48EAD]/30 hover:bg-[#B48EAD]/10"
             >
               <span className="text-3xl">{item.icon}</span>
-              <span className="text-xs font-semibold text-emerald-50/90">{item.label}</span>
+              <span className="text-xs font-semibold text-[#ECEFF4]/90">{item.label}</span>
             </button>
           ))}
         </aside>
@@ -1441,7 +1451,7 @@ export default function AIOSDesktop() {
         <div className="relative min-w-0 flex-1 p-3 md:p-5">
           <header className="mb-4 flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.48em] text-emerald-300/80">
+              <p className="text-xs uppercase tracking-[0.48em] text-[#8FBCBB]/80">
                 Area Immobiliare
               </p>
               <h1 className="text-2xl font-semibold text-white md:text-3xl">
@@ -1459,22 +1469,22 @@ export default function AIOSDesktop() {
           </header>
 
           {desktopWindowOpen ? (
-            <section className="h-[calc(100dvh-142px)] overflow-hidden rounded-[28px] border border-emerald-300/15 bg-black/38 shadow-2xl shadow-black/45 backdrop-blur-2xl">
-              <div className="flex items-center justify-between border-b border-emerald-300/15 bg-black/35 px-4 py-3">
+            <section className="h-[calc(100dvh-142px)] overflow-hidden rounded-[28px] border border-[#8FBCBB]/15 bg-[#2E3440]/38 shadow-2xl shadow-black/45 backdrop-blur-2xl">
+              <div className="flex items-center justify-between border-b border-[#8FBCBB]/15 bg-[#2E3440]/35 px-4 py-3">
                 <div className="flex min-w-0 items-center gap-3">
                   <span className="text-xl">📁</span>
                   <div className="min-w-0">
                     <h2 className="truncate text-sm font-semibold text-white md:text-base">
                       Cartella Immobili
                     </h2>
-                    <p className="truncate text-xs text-emerald-100/55">{notice}</p>
+                    <p className="truncate text-xs text-[#D8DEE9]/55">{notice}</p>
                   </div>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setDesktopWindowOpen(false)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 text-sm text-red-100 transition hover:bg-red-500/20"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-[#BF616A]/25 text-sm text-[#BF616A] transition hover:bg-[#BF616A]/20"
                   aria-label="Chiudi finestra"
                 >
                   ×
@@ -1482,21 +1492,21 @@ export default function AIOSDesktop() {
               </div>
 
               <div className="grid h-[calc(100%-53px)] grid-cols-1 overflow-hidden lg:grid-cols-[260px_minmax(0,1fr)_390px]">
-                <aside className="border-b border-emerald-300/10 bg-emerald-950/18 p-4 lg:border-b-0 lg:border-r">
+                <aside className="border-b border-[#8FBCBB]/10 bg-[#2E3440]/18 p-4 lg:border-b-0 lg:border-r">
                   <div className="mb-4 flex items-center justify-between">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.34em] text-emerald-300/70">
+                      <p className="text-xs uppercase tracking-[0.34em] text-[#8FBCBB]/70">
                         Cartelle
                       </p>
                       <h3 className="text-lg font-semibold text-white">Immobili</h3>
                     </div>
-                    <span className="rounded-full bg-emerald-300/15 px-3 py-1 text-xs text-emerald-200">
+                    <span className="rounded-full bg-[#A3BE8C]/15 px-3 py-1 text-xs text-[#88C0D0]">
                       {folders.length}
                     </span>
                   </div>
 
                   {foldersLoading ? (
-                    <div className="rounded-2xl border border-emerald-300/10 bg-black/20 p-4 text-sm text-emerald-100/60">
+                    <div className="rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/20 p-4 text-sm text-[#D8DEE9]/60">
                       Caricamento...
                     </div>
                   ) : (
@@ -1508,15 +1518,15 @@ export default function AIOSDesktop() {
                           onClick={() => selectFolder(folder)}
                           className={`w-full rounded-2xl border px-3 py-3 text-left transition ${
                             activeFolderId === folder.id
-                              ? 'border-emerald-300/35 bg-emerald-400/15 text-white'
-                              : 'border-emerald-300/10 bg-black/20 text-emerald-100 hover:border-violet-300/35 hover:bg-violet-400/10'
+                              ? 'border-[#8FBCBB]/35 bg-[#A3BE8C]/15 text-white'
+                              : 'border-[#8FBCBB]/10 bg-[#2E3440]/20 text-[#D8DEE9] hover:border-[#B48EAD]/35 hover:bg-[#B48EAD]/10'
                           }`}
                         >
                           <div className="flex items-start gap-3">
                             <span className="text-2xl">📂</span>
                             <div className="min-w-0">
                               <p className="truncate font-medium leading-tight">{folder.name}</p>
-                              <p className="mt-1 text-xs text-emerald-200/65">
+                              <p className="mt-1 text-xs text-[#88C0D0]/65">
                                 Rif. {folder.propertyRef} · {folder.fileCount ?? folder.files.length} file
                               </p>
                             </div>
@@ -1530,14 +1540,14 @@ export default function AIOSDesktop() {
                 <section className="min-h-0 overflow-auto p-4">
                   <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.32em] text-emerald-300/70">
+                      <p className="text-xs uppercase tracking-[0.32em] text-[#8FBCBB]/70">
                         Finestra aperta
                       </p>
                       <h2 className="text-2xl font-semibold text-white">
                         {activeFolder?.name ?? 'Nessuna cartella'}
                       </h2>
                       {activeFolder ? (
-                        <p className="mt-1 text-sm text-emerald-100/65">
+                        <p className="mt-1 text-sm text-[#D8DEE9]/65">
                           {activeFolder.address} · Proprietario: {activeFolder.owner}
                         </p>
                       ) : null}
@@ -1547,7 +1557,7 @@ export default function AIOSDesktop() {
                       <button
                         type="button"
                         onClick={refreshActiveFolder}
-                        className="rounded-full border border-violet-300/25 bg-violet-400/10 px-4 py-2 text-sm font-medium text-violet-100 transition hover:bg-violet-400/18"
+                        className="rounded-full border border-[#B48EAD]/25 bg-[#B48EAD]/10 px-4 py-2 text-sm font-medium text-[#E5E9F0] transition hover:bg-[#B48EAD]/18"
                       >
                         Aggiorna
                       </button>
@@ -1555,7 +1565,7 @@ export default function AIOSDesktop() {
                       <button
                         type="button"
                         onClick={createTxtFile}
-                        className={`rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-100 transition hover:bg-emerald-400/18 ${
+                        className={`rounded-full border border-[#8FBCBB]/25 bg-[#A3BE8C]/10 px-4 py-2 text-sm font-medium text-[#D8DEE9] transition hover:bg-[#A3BE8C]/18 ${
                           activeSection === 'images' ? 'hidden' : ''
                         }`}
                       >
@@ -1571,23 +1581,23 @@ export default function AIOSDesktop() {
                   <div
                     onDrop={handleDrop}
                     onDragOver={(event) => event.preventDefault()}
-                    className="min-h-[520px] rounded-3xl border border-dashed border-emerald-300/25 bg-black/22 p-4"
+                    className="min-h-[520px] rounded-3xl border border-dashed border-[#8FBCBB]/25 bg-[#2E3440]/22 p-4"
                   >
-                    <div className="mb-4 rounded-2xl border border-emerald-300/10 bg-black/35 p-4">
+                    <div className="mb-4 rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/35 p-4">
                       <p className="text-sm font-medium text-white">
                         Trascina qui foto, video, planimetrie o documenti
                       </p>
-                      <p className="mt-1 text-xs text-emerald-100/60">
+                      <p className="mt-1 text-xs text-[#D8DEE9]/60">
                         {activeSection === 'images' ? 'Solo immagini e video. Le immagini sono collegate anche alla galleria immobile.' : activeSection === 'docs' ? 'TXT, immagini, video, PDF e documenti. PDF e immagini possono comparire nelle planimetrie.' : 'Root della cartella: carica qui file sparsi non collegati alla galleria.'}
                       </p>
 
                       <div className="mt-4 flex flex-wrap gap-2">
-                        <label className="cursor-pointer rounded-full bg-emerald-300 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-200">
+                        <label className="cursor-pointer rounded-full bg-[#A3BE8C] px-4 py-2 text-sm font-semibold text-[#2E3440] transition hover:bg-[#A3BE8C]/85">
                           Carica file
                           <input type="file" multiple accept={getUploadAccept(activeSection)} className="hidden" onChange={handleFileInput} />
                         </label>
 
-                        <label className="cursor-pointer rounded-full border border-emerald-300/30 bg-black/30 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/10">
+                        <label className="cursor-pointer rounded-full border border-[#8FBCBB]/30 bg-[#2E3440]/30 px-4 py-2 text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/10">
                           Fotocamera
                           <input
                             type="file"
@@ -1598,7 +1608,7 @@ export default function AIOSDesktop() {
                           />
                         </label>
 
-                        <label className="cursor-pointer rounded-full border border-emerald-300/30 bg-black/30 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/10">
+                        <label className="cursor-pointer rounded-full border border-[#8FBCBB]/30 bg-[#2E3440]/30 px-4 py-2 text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/10">
                           Video
                           <input
                             type="file"
@@ -1616,11 +1626,11 @@ export default function AIOSDesktop() {
                         {activeFolder.files.map((file) => renderFileCard(file))}
                       </div>
                     ) : (
-                      <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-emerald-300/10 bg-black/20 text-center">
+                      <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/20 text-center">
                         <div>
                           <p className="text-4xl">📂</p>
                           <p className="mt-3 font-medium text-white">Cartella vuota</p>
-                          <p className="mt-1 text-sm text-emerald-100/55">
+                          <p className="mt-1 text-sm text-[#D8DEE9]/55">
                             Carica o trascina qui i primi file.
                           </p>
                         </div>
@@ -1629,9 +1639,9 @@ export default function AIOSDesktop() {
                   </div>
                 </section>
 
-                <aside className="min-h-0 overflow-auto border-t border-emerald-300/10 bg-black/20 p-4 lg:border-l lg:border-t-0">
+                <aside className="min-h-0 overflow-auto border-t border-[#8FBCBB]/10 bg-[#2E3440]/20 p-4 lg:border-l lg:border-t-0">
                   <div className="mb-4">
-                    <p className="text-xs uppercase tracking-[0.32em] text-emerald-300/70">
+                    <p className="text-xs uppercase tracking-[0.32em] text-[#8FBCBB]/70">
                       Editor TXT
                     </p>
                     <h3 className="truncate text-lg font-semibold text-white">
@@ -1644,25 +1654,25 @@ export default function AIOSDesktop() {
                       <textarea
                         value={txtDraft}
                         onChange={(event) => setTxtDraft(event.target.value)}
-                        className="min-h-[330px] w-full resize-none rounded-2xl border border-emerald-300/15 bg-slate-950/80 p-4 font-mono text-sm text-emerald-100 outline-none transition placeholder:text-emerald-100/30 focus:border-violet-300/60"
+                        className="min-h-[330px] w-full resize-none rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/80 p-4 font-mono text-sm text-[#D8DEE9] outline-none transition placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
                         placeholder="Scrivi le note del fotografo..."
                       />
 
                       <button
                         type="button"
                         onClick={saveTxtDraft}
-                        className="w-full rounded-2xl bg-emerald-300 px-4 py-3 font-semibold text-slate-950 transition hover:bg-emerald-200"
+                        className="w-full rounded-2xl bg-[#A3BE8C] px-4 py-3 font-semibold text-[#2E3440] transition hover:bg-[#A3BE8C]/85"
                       >
                         Salva TXT
                       </button>
                     </div>
                   ) : (
-                    <div className="rounded-2xl border border-emerald-300/10 bg-black/25 p-4 text-sm text-emerald-100/60">
+                    <div className="rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/25 p-4 text-sm text-[#D8DEE9]/60">
                       Apri un file `.txt` dalla cartella per modificarlo.
                     </div>
                   )}
 
-                  <div className="mt-4 rounded-2xl border border-emerald-300/10 bg-emerald-300/5 p-4 text-xs leading-relaxed text-emerald-100/65">
+                  <div className="mt-4 rounded-2xl border border-[#8FBCBB]/10 bg-[#A3BE8C]/5 p-4 text-xs leading-relaxed text-[#D8DEE9]/65">
                     Sistema reale:
                     <br />
                     Supabase Storage, quote DB, signed URL, TXT nel database.
@@ -1684,12 +1694,12 @@ export default function AIOSDesktop() {
           }}
         >
           <div
-            className="fixed w-[240px] overflow-hidden rounded-2xl border border-emerald-300/15 bg-slate-950/95 p-2 text-sm text-white shadow-2xl shadow-black/60 backdrop-blur-2xl"
+            className="fixed w-[240px] overflow-hidden rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/95 p-2 text-sm text-white shadow-2xl shadow-black/60 backdrop-blur-2xl"
             style={{ left: contextMenu.x, top: contextMenu.y }}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="border-b border-emerald-300/10 px-3 py-2">
-              <p className="truncate text-xs font-semibold text-emerald-100/75">
+            <div className="border-b border-[#8FBCBB]/10 px-3 py-2">
+              <p className="truncate text-xs font-semibold text-[#D8DEE9]/75">
                 {contextMenu.fileName}
               </p>
             </div>
@@ -1699,7 +1709,7 @@ export default function AIOSDesktop() {
               onClick={() => {
                 void deleteFileById(contextMenu.fileId)
               }}
-              className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-red-100 transition hover:bg-red-500/18 hover:text-red-50"
+              className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#BF616A] transition hover:bg-[#BF616A]/18 hover:text-red-50"
             >
               <span>🗑️</span>
               <span>Elimina file</span>
@@ -1708,7 +1718,7 @@ export default function AIOSDesktop() {
             <button
               type="button"
               onClick={() => setContextMenu(null)}
-              className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-emerald-100/75 transition hover:bg-emerald-300/10 hover:text-emerald-50"
+              className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#D8DEE9]/75 transition hover:bg-[#A3BE8C]/10 hover:text-[#ECEFF4]"
             >
               <span>↩️</span>
               <span>Annulla</span>
@@ -1718,10 +1728,10 @@ export default function AIOSDesktop() {
       ) : null}
 
       {previewFile ? (
-        <section className="fixed inset-0 z-[10020] flex flex-col bg-black/96 text-white">
-          <header className="flex h-16 shrink-0 items-center justify-between border-b border-emerald-300/15 bg-black/80 px-4 backdrop-blur-2xl">
+        <section className="fixed inset-0 z-[10020] flex flex-col bg-[#2E3440]/96 text-white">
+          <header className="flex h-16 shrink-0 items-center justify-between border-b border-[#8FBCBB]/15 bg-[#2E3440]/80 px-4 backdrop-blur-2xl">
             <div className="min-w-0">
-              <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/70">
+              <p className="text-xs uppercase tracking-[0.35em] text-[#8FBCBB]/70">
                 Anteprima file
               </p>
               <h2 className="truncate text-sm font-semibold text-white md:text-base">
@@ -1730,7 +1740,7 @@ export default function AIOSDesktop() {
             </div>
 
             <div className="flex shrink-0 items-center gap-2">
-              <div className="flex items-center overflow-hidden rounded-full border border-violet-300/25 bg-violet-950/35 text-xs font-semibold text-violet-50 shadow-[0_0_18px_rgba(124,58,237,0.16)]">
+              <div className="flex items-center overflow-hidden rounded-full border border-[#B48EAD]/25 bg-[#3B4252]/35 text-xs font-semibold text-[#ECEFF4] shadow-[0_0_18px_rgba(124,58,237,0.16)]">
                 <button
                   type="button"
                   onClick={() =>
@@ -1738,13 +1748,13 @@ export default function AIOSDesktop() {
                       Math.max(0.5, Number((value - 0.25).toFixed(2))),
                     )
                   }
-                  className="px-3 py-2 transition hover:bg-violet-400/20"
+                  className="px-3 py-2 transition hover:bg-[#B48EAD]/20"
                   aria-label="Riduci zoom"
                 >
                   −
                 </button>
 
-                <span className="min-w-[58px] border-x border-violet-300/15 px-3 py-2 text-center font-mono">
+                <span className="min-w-[58px] border-x border-[#B48EAD]/15 px-3 py-2 text-center font-mono">
                   {Math.round(previewZoom * 100)}%
                 </span>
 
@@ -1755,7 +1765,7 @@ export default function AIOSDesktop() {
                       Math.min(3, Number((value + 0.25).toFixed(2))),
                     )
                   }
-                  className="px-3 py-2 transition hover:bg-violet-400/20"
+                  className="px-3 py-2 transition hover:bg-[#B48EAD]/20"
                   aria-label="Aumenta zoom"
                 >
                   +
@@ -1765,7 +1775,7 @@ export default function AIOSDesktop() {
               <button
                 type="button"
                 onClick={resetPreviewZoom}
-                className="hidden rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-2 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-400/18 sm:inline-flex"
+                className="hidden rounded-full border border-[#8FBCBB]/20 bg-[#A3BE8C]/10 px-3 py-2 text-xs font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/18 sm:inline-flex"
               >
                 Reset
               </button>
@@ -1773,7 +1783,7 @@ export default function AIOSDesktop() {
               <button
                 type="button"
                 onClick={() => setPreviewFile(null)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-red-300/30 text-xl text-red-100 transition hover:bg-red-500/20"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-[#BF616A]/30 text-xl text-[#BF616A] transition hover:bg-[#BF616A]/20"
                 aria-label="Chiudi anteprima"
               >
                 ×
@@ -1823,7 +1833,7 @@ export default function AIOSDesktop() {
               previewFile.kind === 'plan' ||
               previewFile.mimeType === 'application/pdf') ? (
               <div
-                className={`h-full w-full overflow-hidden rounded-2xl border border-emerald-300/15 bg-white ${
+                className={`h-full w-full overflow-hidden rounded-2xl border border-[#8FBCBB]/15 bg-white ${
                   previewZoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-zoom-in'
                 }`}
                 onMouseDown={startPreviewDrag}
@@ -1849,12 +1859,12 @@ export default function AIOSDesktop() {
             previewFile.kind !== 'plan' &&
             previewFile.mimeType !== 'application/pdf' &&
             isGoogleDocsPreviewable(previewFile) ? (
-              <div className="w-full max-w-2xl rounded-3xl border border-violet-300/25 bg-slate-950/90 p-6 text-center shadow-2xl shadow-black/60 backdrop-blur-2xl">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl border border-violet-300/25 bg-violet-400/10 text-4xl shadow-[0_0_28px_rgba(167,139,250,0.22)]">
+              <div className="w-full max-w-2xl rounded-3xl border border-[#B48EAD]/25 bg-[#2E3440]/90 p-6 text-center shadow-2xl shadow-black/60 backdrop-blur-2xl">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl border border-[#B48EAD]/25 bg-[#B48EAD]/10 text-4xl shadow-[0_0_28px_rgba(167,139,250,0.22)]">
                   📦
                 </div>
 
-                <p className="mt-5 text-xs uppercase tracking-[0.34em] text-violet-200/75">
+                <p className="mt-5 text-xs uppercase tracking-[0.34em] text-[#B48EAD]/75">
                   Documento Office
                 </p>
 
@@ -1862,7 +1872,7 @@ export default function AIOSDesktop() {
                   {previewFile.name}
                 </h3>
 
-                <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-emerald-100/65">
+                <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#D8DEE9]/65">
                   Google Docs Viewer può bloccare l’anteprima quando viene incorporato dentro AI-OS.
                   Aprilo in una nuova scheda oppure scarica/apri il file originale tramite link temporaneo sicuro.
                 </p>
@@ -1872,7 +1882,7 @@ export default function AIOSDesktop() {
                     href={getGoogleDocsViewerUrl(previewFile.previewUrl)}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center rounded-2xl border border-violet-300/30 bg-violet-400/15 px-5 py-3 text-sm font-semibold text-violet-50 transition hover:bg-violet-400/25"
+                    className="inline-flex items-center justify-center rounded-2xl border border-[#B48EAD]/30 bg-[#B48EAD]/15 px-5 py-3 text-sm font-semibold text-[#ECEFF4] transition hover:bg-[#B48EAD]/25"
                   >
                     Apri con Google Docs
                   </a>
@@ -1881,13 +1891,13 @@ export default function AIOSDesktop() {
                     href={previewFile.previewUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center rounded-2xl bg-emerald-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-200"
+                    className="inline-flex items-center justify-center rounded-2xl bg-[#A3BE8C] px-5 py-3 text-sm font-semibold text-[#2E3440] transition hover:bg-[#A3BE8C]/85"
                   >
                     Apri / scarica originale
                   </a>
                 </div>
 
-                <p className="mt-4 text-xs leading-5 text-emerald-100/40">
+                <p className="mt-4 text-xs leading-5 text-[#D8DEE9]/40">
                   Il link originale è una signed URL temporanea di Supabase: resta privato e non pubblico fisso.
                 </p>
               </div>
@@ -1900,10 +1910,10 @@ export default function AIOSDesktop() {
             previewFile.kind !== 'plan' &&
             previewFile.mimeType !== 'application/pdf' &&
             !isGoogleDocsPreviewable(previewFile) ? (
-              <div className="w-full max-w-xl rounded-3xl border border-emerald-300/20 bg-emerald-950/25 p-6 text-center shadow-2xl shadow-black/50">
+              <div className="w-full max-w-xl rounded-3xl border border-[#8FBCBB]/20 bg-[#2E3440]/25 p-6 text-center shadow-2xl shadow-black/50">
                 <div className="text-5xl">{iconForFile(previewFile.kind)}</div>
                 <h3 className="mt-4 text-xl font-semibold text-white">{previewFile.name}</h3>
-                <p className="mt-2 text-sm leading-6 text-emerald-100/65">
+                <p className="mt-2 text-sm leading-6 text-[#D8DEE9]/65">
                   Questo tipo di documento potrebbe non essere visualizzabile direttamente dal browser.
                   Puoi aprirlo o scaricarlo tramite il file originale.
                 </p>
@@ -1912,7 +1922,7 @@ export default function AIOSDesktop() {
                   href={previewFile.previewUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-5 inline-flex rounded-2xl bg-emerald-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-200"
+                  className="mt-5 inline-flex rounded-2xl bg-[#A3BE8C] px-5 py-3 text-sm font-semibold text-[#2E3440] transition hover:bg-[#A3BE8C]/85"
                 >
                   Apri documento
                 </a>
@@ -1920,10 +1930,10 @@ export default function AIOSDesktop() {
             ) : null}
 
             {!previewFile.previewUrl ? (
-              <div className="w-full max-w-xl rounded-3xl border border-emerald-300/20 bg-emerald-950/25 p-6 text-center shadow-2xl shadow-black/50">
+              <div className="w-full max-w-xl rounded-3xl border border-[#8FBCBB]/20 bg-[#2E3440]/25 p-6 text-center shadow-2xl shadow-black/50">
                 <div className="text-5xl">{iconForFile(previewFile.kind)}</div>
                 <h3 className="mt-4 text-xl font-semibold text-white">{previewFile.name}</h3>
-                <p className="mt-2 text-sm leading-6 text-emerald-100/65">
+                <p className="mt-2 text-sm leading-6 text-[#D8DEE9]/65">
                   Anteprima non disponibile. Ricarica la cartella o riprova.
                 </p>
               </div>
@@ -1932,16 +1942,16 @@ export default function AIOSDesktop() {
         </section>
       ) : null}
 
-      <footer className="relative z-20 flex h-14 items-center justify-between border-t border-emerald-300/15 bg-black/72 px-3 backdrop-blur-2xl md:hidden">
+      <footer className="relative z-20 flex h-14 items-center justify-between border-t border-[#8FBCBB]/15 bg-[#2E3440]/72 px-3 backdrop-blur-2xl md:hidden">
         <div className="relative">
           {startOpen ? (
-            <div className="absolute bottom-14 left-0 w-[290px] overflow-hidden rounded-3xl border border-emerald-300/20 bg-slate-950/95 text-emerald-50 shadow-2xl shadow-black/60 backdrop-blur-2xl">
-              <div className="border-b border-emerald-300/10 p-4">
-                <p className="text-xs uppercase tracking-[0.32em] text-emerald-300/70">
+            <div className="absolute bottom-14 left-0 w-[290px] overflow-hidden rounded-3xl border border-[#8FBCBB]/20 bg-[#2E3440]/95 text-[#ECEFF4] shadow-2xl shadow-black/60 backdrop-blur-2xl">
+              <div className="border-b border-[#8FBCBB]/10 p-4">
+                <p className="text-xs uppercase tracking-[0.32em] text-[#8FBCBB]/70">
                   Account
                 </p>
                 <p className="mt-2 font-semibold text-white">Omar Martalò</p>
-                <p className="text-xs text-emerald-100/55">Administrator</p>
+                <p className="text-xs text-[#D8DEE9]/55">Administrator</p>
               </div>
 
               <div className="space-y-2 p-3">
@@ -1953,7 +1963,7 @@ export default function AIOSDesktop() {
                     setTxtDraft('')
                     setStartOpen(false)
                   }}
-                  className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/10"
+                  className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/10"
                 >
                   Lista cartelle
                 </button>
@@ -1963,7 +1973,7 @@ export default function AIOSDesktop() {
                   onClick={() => {
                     window.location.href = '/admin'
                   }}
-                  className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/10"
+                  className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/10"
                 >
                   Chiudi AI-OS e torna alla Dashboard
                 </button>
@@ -1974,13 +1984,13 @@ export default function AIOSDesktop() {
           <button
             type="button"
             onClick={() => setStartOpen((value) => !value)}
-            className="rounded-2xl border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-400/18"
+            className="rounded-2xl border border-[#8FBCBB]/25 bg-[#A3BE8C]/10 px-4 py-2 text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/18"
           >
             Start
           </button>
         </div>
 
-        <div className="min-w-0 flex-1 px-3 text-right text-xs font-medium text-emerald-100/55">
+        <div className="min-w-0 flex-1 px-3 text-right text-xs font-medium text-[#D8DEE9]/55">
           {mobileFolderOpen && activeFolder ? (
             <span className="block truncate">📁 {activeFolder.name}</span>
           ) : (
@@ -1989,21 +1999,21 @@ export default function AIOSDesktop() {
         </div>
       </footer>
 
-      <footer className="relative z-20 hidden h-14 items-center justify-between border-t border-emerald-300/15 bg-black/72 px-3 backdrop-blur-2xl md:flex">
+      <footer className="relative z-20 hidden h-14 items-center justify-between border-t border-[#8FBCBB]/15 bg-[#2E3440]/72 px-3 backdrop-blur-2xl md:flex">
         <div className="relative">
           {startOpen ? (
-            <div className="absolute bottom-14 left-0 w-[310px] overflow-hidden rounded-3xl border border-emerald-300/20 bg-slate-950/95 text-emerald-50 shadow-2xl shadow-black/60 backdrop-blur-2xl">
-              <div className="border-b border-emerald-300/10 p-4">
-                <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/70">Account</p>
+            <div className="absolute bottom-14 left-0 w-[310px] overflow-hidden rounded-3xl border border-[#8FBCBB]/20 bg-[#2E3440]/95 text-[#ECEFF4] shadow-2xl shadow-black/60 backdrop-blur-2xl">
+              <div className="border-b border-[#8FBCBB]/10 p-4">
+                <p className="text-xs uppercase tracking-[0.35em] text-[#8FBCBB]/70">Account</p>
                 <p className="mt-2 font-semibold text-white">Omar Martalò</p>
-                <p className="text-xs text-emerald-100/55">Administrator</p>
+                <p className="text-xs text-[#D8DEE9]/55">Administrator</p>
               </div>
 
               <div className="space-y-2 p-3">
                 <button
                   type="button"
                   onClick={openMainFolder}
-                  className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/10"
+                  className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/10"
                 >
                   Apri cartella Immobili
                 </button>
@@ -2013,7 +2023,7 @@ export default function AIOSDesktop() {
                   onClick={() => {
                     window.location.href = '/admin'
                   }}
-                  className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/10"
+                  className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/10"
                 >
                   Chiudi AI-OS e torna alla Dashboard
                 </button>
@@ -2024,7 +2034,7 @@ export default function AIOSDesktop() {
           <button
             type="button"
             onClick={() => setStartOpen((value) => !value)}
-            className="rounded-2xl border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-400/18"
+            className="rounded-2xl border border-[#8FBCBB]/25 bg-[#A3BE8C]/10 px-4 py-2 text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/18"
           >
             Start
           </button>
@@ -2034,7 +2044,7 @@ export default function AIOSDesktop() {
           <button
             type="button"
             onClick={openMainFolder}
-            className="hidden max-w-[360px] truncate rounded-xl border border-emerald-300/30 bg-emerald-400/10 px-4 py-2 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-400/18 md:block"
+            className="hidden max-w-[360px] truncate rounded-xl border border-[#8FBCBB]/30 bg-[#A3BE8C]/10 px-4 py-2 text-xs font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/18 md:block"
             title={activeFolder.name}
           >
             📁 {activeFolder.name}
@@ -2043,7 +2053,7 @@ export default function AIOSDesktop() {
           <div className="hidden md:block" />
         )}
 
-        <div className="text-xs text-emerald-100/45">
+        <div className="text-xs text-[#D8DEE9]/45">
           AI-OS · Supabase Storage
         </div>
       </footer>
