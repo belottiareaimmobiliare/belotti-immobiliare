@@ -70,40 +70,6 @@ type AIOSContextMenu = {
   fileName: string
 } | null
 
-type AIOSPropertyOwner = {
-  id: string
-  property_id: string
-  owner_type: string
-  role: string
-  full_name: string
-  email?: string | null
-  phone?: string | null
-  tax_code?: string | null
-  vat_number?: string | null
-  address?: string | null
-  city?: string | null
-  province?: string | null
-  notes?: string | null
-  is_primary: boolean
-  created_at?: string
-  updated_at?: string
-}
-
-type AIOSPropertyOwnerForm = {
-  ownerType: string
-  role: string
-  fullName: string
-  email: string
-  phone: string
-  taxCode: string
-  vatNumber: string
-  address: string
-  city: string
-  province: string
-  notes: string
-  isPrimary: boolean
-}
-
 type AIOSDocumentRequest = {
   id: string
   property_id: string
@@ -308,37 +274,6 @@ function getUploadAccept(section: AIOSSection) {
   if (section === 'images') return 'image/*,video/*'
 
   return undefined
-}
-
-function createEmptyOwnerForm(): AIOSPropertyOwnerForm {
-  return {
-    ownerType: 'person',
-    role: 'owner',
-    fullName: '',
-    email: '',
-    phone: '',
-    taxCode: '',
-    vatNumber: '',
-    address: '',
-    city: '',
-    province: '',
-    notes: '',
-    isPrimary: false,
-  }
-}
-
-function ownerRoleLabel(role: string) {
-  if (role === 'owner') return 'Proprietario'
-  if (role === 'co_owner') return 'Comproprietario'
-  if (role === 'seller') return 'Venditore'
-  if (role === 'landlord') return 'Locatore'
-  if (role === 'company_representative') return 'Referente società'
-  return role || 'Proprietario'
-}
-
-function ownerTypeLabel(type: string) {
-  if (type === 'company') return 'Società'
-  return 'Persona fisica'
 }
 
 function labelForDocumentRequestStatus(status: string) {
@@ -636,12 +571,6 @@ export default function AIOSDesktop() {
   const [documentRequestsLoading, setDocumentRequestsLoading] = useState(false)
   const [documentRequestSaving, setDocumentRequestSaving] = useState<string | null>(null)
   const [documentRequestUpdating, setDocumentRequestUpdating] = useState<string | null>(null)
-  const [propertyOwners, setPropertyOwners] = useState<AIOSPropertyOwner[]>([])
-  const [propertyOwnersLoading, setPropertyOwnersLoading] = useState(false)
-  const [propertyOwnerSaving, setPropertyOwnerSaving] = useState(false)
-  const [propertyOwnerUpdating, setPropertyOwnerUpdating] = useState<string | null>(null)
-  const [editingOwnerId, setEditingOwnerId] = useState<string | null>(null)
-  const [ownerForm, setOwnerForm] = useState<AIOSPropertyOwnerForm>(() => createEmptyOwnerForm())
 
   const activeFolder = useMemo(
     () => folders.find((folder) => folder.id === activeFolderId) ?? null,
@@ -719,160 +648,6 @@ export default function AIOSDesktop() {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Errore caricamento file'
       setNotice(message)
-    }
-  }
-
-  async function loadPropertyOwners(propertyId: string) {
-    if (!propertyId) return
-
-    setPropertyOwnersLoading(true)
-
-    try {
-      const response = await fetch(
-        `/api/admin/ai-os/property-owners?propertyId=${encodeURIComponent(propertyId)}`,
-        { cache: 'no-store' },
-      )
-
-      const payload = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Errore caricamento proprietari')
-      }
-
-      setPropertyOwners(Array.isArray(payload?.owners) ? payload.owners : [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Errore caricamento proprietari'
-      setNotice(message)
-    } finally {
-      setPropertyOwnersLoading(false)
-    }
-  }
-
-  function startNewOwnerForm() {
-    setEditingOwnerId(null)
-    setOwnerForm(createEmptyOwnerForm())
-    setNotice('Nuovo proprietario pronto per la compilazione.')
-  }
-
-  function startEditOwnerForm(owner: AIOSPropertyOwner) {
-    setEditingOwnerId(owner.id)
-    setOwnerForm({
-      ownerType: owner.owner_type || 'person',
-      role: owner.role || 'owner',
-      fullName: owner.full_name || '',
-      email: owner.email || '',
-      phone: owner.phone || '',
-      taxCode: owner.tax_code || '',
-      vatNumber: owner.vat_number || '',
-      address: owner.address || '',
-      city: owner.city || '',
-      province: owner.province || '',
-      notes: owner.notes || '',
-      isPrimary: Boolean(owner.is_primary),
-    })
-    setNotice(`Modifica proprietario: ${owner.full_name}`)
-  }
-
-  function updateOwnerFormField<K extends keyof AIOSPropertyOwnerForm>(
-    field: K,
-    value: AIOSPropertyOwnerForm[K],
-  ) {
-    setOwnerForm((current) => ({
-      ...current,
-      [field]: value,
-    }))
-  }
-
-  async function savePropertyOwner() {
-    if (!activeFolderId) {
-      setNotice('Seleziona prima una cartella immobile.')
-      return
-    }
-
-    if (!ownerForm.fullName.trim()) {
-      setNotice('Nome proprietario obbligatorio.')
-      return
-    }
-
-    setPropertyOwnerSaving(true)
-
-    try {
-      const response = await fetch('/api/admin/ai-os/property-owners', {
-        method: editingOwnerId ? 'PATCH' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ownerId: editingOwnerId,
-          propertyId: activeFolderId,
-          ...ownerForm,
-        }),
-      })
-
-      const payload = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Errore salvataggio proprietario')
-      }
-
-      if (payload?.owner) {
-        setPropertyOwners((current) => {
-          if (editingOwnerId) {
-            return current.map((item) => (item.id === editingOwnerId ? payload.owner : item))
-          }
-
-          return [payload.owner, ...current]
-        })
-      }
-
-      setEditingOwnerId(null)
-      setOwnerForm(createEmptyOwnerForm())
-      setNotice(`Proprietario salvato: ${payload?.owner?.full_name ?? ownerForm.fullName}`)
-      void loadPropertyOwners(activeFolderId)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Errore salvataggio proprietario'
-      setNotice(message)
-    } finally {
-      setPropertyOwnerSaving(false)
-    }
-  }
-
-  async function deletePropertyOwner(ownerId: string) {
-    if (!activeFolderId) return
-
-    setPropertyOwnerUpdating(ownerId)
-
-    try {
-      const response = await fetch('/api/admin/ai-os/property-owners', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ownerId,
-          propertyId: activeFolderId,
-        }),
-      })
-
-      const payload = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Errore eliminazione proprietario')
-      }
-
-      setPropertyOwners((current) => current.filter((item) => item.id !== ownerId))
-
-      if (editingOwnerId === ownerId) {
-        setEditingOwnerId(null)
-        setOwnerForm(createEmptyOwnerForm())
-      }
-
-      setNotice('Proprietario eliminato.')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Errore eliminazione proprietario'
-      setNotice(message)
-    } finally {
-      setPropertyOwnerUpdating(null)
     }
   }
 
@@ -1036,14 +811,12 @@ export default function AIOSDesktop() {
         if (current && nextFolders.some((folder) => folder.id === current)) {
           void loadFilesForFolder(current, activeSection)
           void loadDocumentRequests(current)
-          void loadPropertyOwners(current)
           return current
         }
 
         if (firstFolderId) {
           void loadFilesForFolder(firstFolderId, activeSection)
           void loadDocumentRequests(firstFolderId)
-          void loadPropertyOwners(firstFolderId)
         }
 
         return firstFolderId
@@ -1421,7 +1194,6 @@ export default function AIOSDesktop() {
     setNotice('Aggiornamento cartella AI-OS in corso...')
     void loadFilesForFolder(activeFolderId, activeSection)
     void loadDocumentRequests(activeFolderId)
-    void loadPropertyOwners(activeFolderId)
     void loadQuota()
   }
 
@@ -1436,7 +1208,6 @@ export default function AIOSDesktop() {
     setNotice(`Cartella aperta: ${folder.name}`)
     void loadFilesForFolder(folder.id, 'root')
     void loadDocumentRequests(folder.id)
-    void loadPropertyOwners(folder.id)
   }
 
   const handlePreviewWheel = (event: WheelEvent<HTMLDivElement>) => {
@@ -1721,249 +1492,27 @@ export default function AIOSDesktop() {
             </div>
           </div>
         ) : activeAgencyTool.id === 'owner-data' ? (
-          <div className="space-y-4">
-            <div className="rounded-2xl border border-[#8FBCBB]/15 bg-[#3B4252]/35 p-4">
-              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/70">
-                    Proprietari collegati
-                  </p>
-                  <p className="mt-1 text-sm text-[#D8DEE9]/58">
-                    Proprietario, comproprietari, società o referenti collegati al fascicolo immobile.
-                  </p>
-                </div>
-
+          <div className="rounded-2xl border border-[#8FBCBB]/15 bg-[#3B4252]/35 p-4">
+            <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/70">
+              Proprietario collegato
+            </p>
+            <p className="mt-2 text-lg font-semibold text-white">
+              {activeFolder?.owner || 'Proprietario da completare'}
+            </p>
+            <p className="mt-2 text-xs leading-5 text-[#D8DEE9]/60">
+              Qui metteremo anagrafica, recapiti, codice fiscale, ruolo, note riservate e comproprietari.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {['Modifica anagrafica', 'Aggiungi comproprietario', 'Collega società'].map((action) => (
                 <button
+                  key={action}
                   type="button"
-                  onClick={startNewOwnerForm}
-                  className="rounded-full border border-[#A3BE8C]/25 bg-[#A3BE8C]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#A3BE8C]/18"
+                  onClick={() => setNotice(`${action}: funzione pronta per il prossimo step database.`)}
+                  className="rounded-full border border-[#8FBCBB]/25 bg-[#A3BE8C]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#A3BE8C]/18"
                 >
-                  + Aggiungi proprietario
+                  {action}
                 </button>
-              </div>
-
-              {propertyOwnersLoading ? (
-                <p className="text-sm text-[#D8DEE9]/55">Caricamento proprietari...</p>
-              ) : propertyOwners.length > 0 ? (
-                <div className="grid gap-3">
-                  {propertyOwners.map((owner) => {
-                    const isUpdating = propertyOwnerUpdating === owner.id
-
-                    return (
-                      <div
-                        key={owner.id}
-                        className="rounded-2xl border border-[#8FBCBB]/12 bg-[#2E3440]/38 p-3"
-                      >
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div className="min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <p className="text-base font-semibold text-white">
-                                {owner.full_name}
-                              </p>
-                              {owner.is_primary ? (
-                                <span className="rounded-full border border-[#A3BE8C]/25 bg-[#A3BE8C]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#A3BE8C]">
-                                  principale
-                                </span>
-                              ) : null}
-                            </div>
-
-                            <p className="mt-1 text-xs text-[#D8DEE9]/52">
-                              {ownerRoleLabel(owner.role)} · {ownerTypeLabel(owner.owner_type)}
-                            </p>
-
-                            <div className="mt-2 grid gap-1 text-xs text-[#D8DEE9]/62 sm:grid-cols-2">
-                              {owner.phone ? <p>📞 {owner.phone}</p> : null}
-                              {owner.email ? <p>✉️ {owner.email}</p> : null}
-                              {owner.tax_code ? <p>CF: {owner.tax_code}</p> : null}
-                              {owner.vat_number ? <p>P.IVA: {owner.vat_number}</p> : null}
-                              {owner.address ? <p className="sm:col-span-2">📍 {owner.address}</p> : null}
-                              {owner.notes ? <p className="sm:col-span-2">📝 {owner.notes}</p> : null}
-                            </div>
-                          </div>
-
-                          <div className="flex flex-wrap gap-2">
-                            <button
-                              type="button"
-                              disabled={isUpdating}
-                              onClick={() => startEditOwnerForm(owner)}
-                              className="rounded-full border border-[#B48EAD]/25 bg-[#B48EAD]/10 px-3 py-1.5 text-[11px] font-semibold text-[#E5E9F0] transition hover:bg-[#B48EAD]/18 disabled:cursor-wait disabled:opacity-50"
-                            >
-                              Modifica
-                            </button>
-
-                            <button
-                              type="button"
-                              disabled={isUpdating}
-                              onClick={() => deletePropertyOwner(owner.id)}
-                              className="rounded-full border border-[#BF616A]/25 bg-[#BF616A]/10 px-3 py-1.5 text-[11px] font-semibold text-[#BF616A] transition hover:bg-[#BF616A]/18 disabled:cursor-wait disabled:opacity-50"
-                            >
-                              Elimina
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/30 p-4 text-sm text-[#D8DEE9]/58">
-                  Nessun proprietario salvato. Puoi aggiungere il primo proprietario del fascicolo.
-                </div>
-              )}
-            </div>
-
-            <div className="rounded-2xl border border-[#B48EAD]/18 bg-[#3B4252]/35 p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-[#B48EAD]/75">
-                {editingOwnerId ? 'Modifica proprietario' : 'Nuovo proprietario'}
-              </p>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <label className="text-xs font-semibold text-[#D8DEE9]/70">
-                  Tipo soggetto
-                  <select
-                    value={ownerForm.ownerType}
-                    onChange={(event) => updateOwnerFormField('ownerType', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/80 px-3 py-2 text-sm text-white outline-none focus:border-[#B48EAD]/60"
-                  >
-                    <option value="person">Persona fisica</option>
-                    <option value="company">Società</option>
-                  </select>
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70">
-                  Ruolo
-                  <select
-                    value={ownerForm.role}
-                    onChange={(event) => updateOwnerFormField('role', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/80 px-3 py-2 text-sm text-white outline-none focus:border-[#B48EAD]/60"
-                  >
-                    <option value="owner">Proprietario</option>
-                    <option value="co_owner">Comproprietario</option>
-                    <option value="seller">Venditore</option>
-                    <option value="landlord">Locatore</option>
-                    <option value="company_representative">Referente società</option>
-                  </select>
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70 sm:col-span-2">
-                  Nome / Ragione sociale *
-                  <input
-                    value={ownerForm.fullName}
-                    onChange={(event) => updateOwnerFormField('fullName', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/80 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                    placeholder="Mario Rossi oppure Immobiliare Esempio SRL"
-                  />
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70">
-                  Telefono
-                  <input
-                    value={ownerForm.phone}
-                    onChange={(event) => updateOwnerFormField('phone', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/80 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                    placeholder="+39 ..."
-                  />
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70">
-                  Email
-                  <input
-                    value={ownerForm.email}
-                    onChange={(event) => updateOwnerFormField('email', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/80 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                    placeholder="nome@email.it"
-                  />
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70">
-                  Codice fiscale
-                  <input
-                    value={ownerForm.taxCode}
-                    onChange={(event) => updateOwnerFormField('taxCode', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/80 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                    placeholder="RSSMRA..."
-                  />
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70">
-                  P.IVA
-                  <input
-                    value={ownerForm.vatNumber}
-                    onChange={(event) => updateOwnerFormField('vatNumber', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/80 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                    placeholder="01234567890"
-                  />
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70 sm:col-span-2">
-                  Indirizzo
-                  <input
-                    value={ownerForm.address}
-                    onChange={(event) => updateOwnerFormField('address', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/80 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                    placeholder="Via, numero civico, comune"
-                  />
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70">
-                  Città
-                  <input
-                    value={ownerForm.city}
-                    onChange={(event) => updateOwnerFormField('city', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/80 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                    placeholder="Bergamo"
-                  />
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70">
-                  Provincia
-                  <input
-                    value={ownerForm.province}
-                    onChange={(event) => updateOwnerFormField('province', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/80 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                    placeholder="BG"
-                  />
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70 sm:col-span-2">
-                  Note riservate
-                  <textarea
-                    value={ownerForm.notes}
-                    onChange={(event) => updateOwnerFormField('notes', event.target.value)}
-                    className="mt-1 min-h-[86px] w-full resize-none rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/80 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                    placeholder="Note interne non visibili sul sito..."
-                  />
-                </label>
-
-                <label className="flex items-center gap-3 rounded-2xl border border-[#8FBCBB]/12 bg-[#2E3440]/35 px-3 py-2 text-xs font-semibold text-[#D8DEE9]/70 sm:col-span-2">
-                  <input
-                    type="checkbox"
-                    checked={ownerForm.isPrimary}
-                    onChange={(event) => updateOwnerFormField('isPrimary', event.target.checked)}
-                    className="h-4 w-4 accent-[#A3BE8C]"
-                  />
-                  Imposta come proprietario principale
-                </label>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  disabled={propertyOwnerSaving}
-                  onClick={savePropertyOwner}
-                  className="rounded-full bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#2E3440] transition hover:bg-[#A3BE8C]/85 disabled:cursor-wait disabled:opacity-60"
-                >
-                  {propertyOwnerSaving ? 'Salvataggio...' : editingOwnerId ? 'Salva modifiche' : 'Salva proprietario'}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={startNewOwnerForm}
-                  className="rounded-full border border-[#D8DEE9]/15 bg-[#2E3440]/40 px-4 py-2 text-xs font-semibold text-[#D8DEE9]/70 transition hover:bg-[#D8DEE9]/10"
-                >
-                  Pulisci form
-                </button>
-              </div>
+              ))}
             </div>
           </div>
         ) : activeAgencyTool.id === 'checklist' ? (
