@@ -204,9 +204,9 @@ function SidebarContent({
       <nav className="space-y-2">
           <a
             href="/admin/ai-os"
-            className="group flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-50/70 px-4 py-3 text-sm font-semibold text-emerald-900 shadow-sm transition duration-200 hover:border-emerald-600/40 hover:bg-emerald-100 hover:text-emerald-950 dark:border-emerald-400/30 dark:bg-emerald-950/35 dark:text-emerald-100 dark:hover:border-emerald-300/50 dark:hover:bg-emerald-900/60 dark:hover:text-emerald-50"
+            className="group flex items-center gap-3 rounded-2xl border border-amber-400/80 bg-slate-950 px-4 py-3 text-sm font-semibold text-white shadow-[0_0_0_1px_rgba(245,158,11,0.22),0_10px_24px_rgba(15,23,42,0.18)] transition duration-200 hover:border-violet-400/80 hover:bg-violet-100 hover:text-violet-950 hover:shadow-[0_0_0_1px_rgba(124,58,237,0.35),0_12px_28px_rgba(124,58,237,0.18)] dark:border-amber-300/80 dark:bg-black dark:text-white dark:shadow-[0_0_18px_rgba(245,158,11,0.18)] dark:hover:border-violet-300/80 dark:hover:bg-violet-500/20 dark:hover:text-violet-50"
           >
-            <span className="text-lg opacity-80 transition group-hover:opacity-100">🖥️</span>
+            <span className="text-lg drop-shadow-[0_0_6px_rgba(255,255,255,0.45)]">🖥️</span>
             <span>AI-OS</span>
           </a>
 
