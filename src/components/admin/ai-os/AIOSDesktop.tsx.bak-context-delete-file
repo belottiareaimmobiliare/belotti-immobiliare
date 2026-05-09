@@ -1,6 +1,6 @@
 'use client'
 
-import { ChangeEvent, DragEvent, MouseEvent, useMemo, useState } from 'react'
+import { ChangeEvent, DragEvent, useMemo, useState } from 'react'
 
 type AIOSFileKind = 'image' | 'video' | 'pdf' | 'txt' | 'plan' | 'generic'
 
@@ -23,13 +23,6 @@ type AIOSFolder = {
   owner: string
   files: AIOSFile[]
 }
-
-type AIOSContextMenu = {
-  x: number
-  y: number
-  fileId: string
-  fileName: string
-} | null
 
 const initialFolders: AIOSFolder[] = [
   {
@@ -160,7 +153,6 @@ export default function AIOSDesktop() {
   const [startOpen, setStartOpen] = useState(false)
   const [mobileFolderOpen, setMobileFolderOpen] = useState(false)
   const [previewFile, setPreviewFile] = useState<AIOSFile | null>(null)
-  const [contextMenu, setContextMenu] = useState<AIOSContextMenu>(null)
 
   const activeFolder = useMemo(
     () => folders.find((folder) => folder.id === activeFolderId) ?? null,
@@ -225,57 +217,6 @@ export default function AIOSDesktop() {
 
     setPreviewFile(file)
     setNotice(`Anteprima fullscreen aperta: ${file.name}`)
-  }
-
-  const openFileContextMenu = (
-    event: MouseEvent<HTMLButtonElement>,
-    file: AIOSFile,
-  ) => {
-    event.preventDefault()
-    event.stopPropagation()
-
-    const menuWidth = 240
-    const menuHeight = 132
-
-    setContextMenu({
-      x: Math.max(8, Math.min(event.clientX, window.innerWidth - menuWidth - 8)),
-      y: Math.max(8, Math.min(event.clientY, window.innerHeight - menuHeight - 8)),
-      fileId: file.id,
-      fileName: file.name,
-    })
-  }
-
-  const deleteFileById = (fileId: string) => {
-    const fileToDelete = folders
-      .flatMap((folder) => folder.files)
-      .find((file) => file.id === fileId)
-
-    if (fileToDelete?.previewUrl) {
-      URL.revokeObjectURL(fileToDelete.previewUrl)
-    }
-
-    setFolders((currentFolders) =>
-      currentFolders.map((folder) => ({
-        ...folder,
-        files: folder.files.filter((file) => file.id !== fileId),
-      })),
-    )
-
-    if (selectedTxtId === fileId) {
-      setSelectedTxtId(null)
-      setTxtDraft('')
-    }
-
-    if (previewFile?.id === fileId) {
-      setPreviewFile(null)
-    }
-
-    setContextMenu(null)
-    setNotice(
-      fileToDelete
-        ? `File "${fileToDelete.name}" eliminato dalla cartella.`
-        : 'File eliminato.',
-    )
   }
 
   const saveTxtDraft = () => {
@@ -500,7 +441,6 @@ export default function AIOSDesktop() {
                     <button
                       key={file.id}
                       type="button"
-                      onContextMenu={(event) => openFileContextMenu(event, file)}
                       onClick={() => openFile(file)}
                       className={`w-full rounded-2xl border p-3 text-left transition active:scale-[0.99] ${
                         selectedTxtId === file.id
@@ -763,7 +703,6 @@ export default function AIOSDesktop() {
                           <button
                             key={file.id}
                             type="button"
-                            onContextMenu={(event) => openFileContextMenu(event, file)}
                             onClick={() => openFile(file)}
                             className={`group rounded-2xl border p-4 text-left transition ${
                               selectedTxtId === file.id
@@ -846,48 +785,6 @@ export default function AIOSDesktop() {
           ) : null}
         </div>
       </section>
-
-
-      {contextMenu ? (
-        <div
-          className="fixed inset-0 z-[10015]"
-          onClick={() => setContextMenu(null)}
-          onContextMenu={(event) => {
-            event.preventDefault()
-            setContextMenu(null)
-          }}
-        >
-          <div
-            className="fixed w-[240px] overflow-hidden rounded-2xl border border-emerald-300/15 bg-slate-950/95 p-2 text-sm text-white shadow-2xl shadow-black/60 backdrop-blur-2xl"
-            style={{ left: contextMenu.x, top: contextMenu.y }}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="border-b border-emerald-300/10 px-3 py-2">
-              <p className="truncate text-xs font-semibold text-emerald-100/75">
-                {contextMenu.fileName}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => deleteFileById(contextMenu.fileId)}
-              className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-red-100 transition hover:bg-red-500/18 hover:text-red-50"
-            >
-              <span>🗑️</span>
-              <span>Elimina file</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setContextMenu(null)}
-              className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-emerald-100/75 transition hover:bg-emerald-300/10 hover:text-emerald-50"
-            >
-              <span>↩️</span>
-              <span>Annulla</span>
-            </button>
-          </div>
-        </div>
-      ) : null}
 
       {previewFile ? (
         <section className="fixed inset-0 z-[10020] flex flex-col bg-black/96 text-white">
