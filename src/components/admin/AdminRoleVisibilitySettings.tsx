@@ -165,17 +165,6 @@ export default function AdminRoleVisibilitySettings() {
     })
   }
 
-  function applySecretaryPreset() {
-    save({
-      ...settings,
-      secretary: ['kpi', 'exports', 'logs', 'privacy', 'autori', 'utenti'],
-    })
-  }
-
-  function showEverything() {
-    save(emptySettings())
-  }
-
   return (
     <section className="mt-8 rounded-[28px] border border-[var(--site-border)] bg-[var(--site-surface)] p-5 shadow-xl shadow-black/5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -190,26 +179,6 @@ export default function AdminRoleVisibilitySettings() {
             Tu vedi sempre tutto. Da qui scegli quali sezioni nascondere agli altri ruoli admin.
             Utile per tenere pulito il gestionale della segretaria o per futuri siti immobiliari.
           </p>
-        </div>
-
-        <div className="grid gap-2 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={applySecretaryPreset}
-            disabled={isPending}
-            className="rounded-full border border-[var(--site-border)] bg-[var(--site-surface-strong)] px-4 py-3 text-sm font-semibold text-[var(--site-text-soft)] transition hover:bg-[#eef2f7] hover:text-black disabled:opacity-60"
-          >
-            Preset segretaria
-          </button>
-
-          <button
-            type="button"
-            onClick={showEverything}
-            disabled={isPending}
-            className="rounded-full bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-[#eef2f7] disabled:opacity-60"
-          >
-            Mostra tutto
-          </button>
         </div>
       </div>
 
