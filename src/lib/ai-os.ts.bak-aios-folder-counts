@@ -70,7 +70,6 @@ export function mapPropertyToAIOSFolder(property: Record<string, unknown>) {
     propertyRef: referenceCode || id.slice(0, 8),
     address: location || 'Posizione non indicata',
     owner: 'Area Immobiliare',
-    fileCount: 0,
     files: [],
   }
 }

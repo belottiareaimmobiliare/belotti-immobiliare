@@ -29,7 +29,6 @@ type AIOSFolder = {
   propertyRef: string
   address: string
   owner: string
-  fileCount?: number
   files: AIOSFile[]
 }
 
@@ -399,7 +398,7 @@ export default function AIOSDesktop() {
 
       setFolders((currentFolders) =>
         currentFolders.map((folder) =>
-          folder.id === propertyId ? { ...folder, files, fileCount: files.length } : folder,
+          folder.id === propertyId ? { ...folder, files } : folder,
         ),
       )
 
@@ -427,7 +426,6 @@ export default function AIOSDesktop() {
       const nextFolders: AIOSFolder[] = Array.isArray(payload?.folders)
         ? payload.folders.map((folder: AIOSFolder) => ({
             ...folder,
-            fileCount: Number(folder.fileCount ?? folder.files?.length ?? 0),
             files: [],
           }))
         : []
@@ -509,18 +507,10 @@ export default function AIOSDesktop() {
 
   const removeFileFromFolders = (fileId: string) => {
     setFolders((currentFolders) =>
-      currentFolders.map((folder) => {
-        const hadFile = folder.files.some((file) => file.id === fileId)
-        const nextFiles = folder.files.filter((file) => file.id !== fileId)
-
-        return {
-          ...folder,
-          files: nextFiles,
-          fileCount: hadFile
-            ? Math.max(0, Number(folder.fileCount ?? folder.files.length) - 1)
-            : Number(folder.fileCount ?? folder.files.length),
-        }
-      }),
+      currentFolders.map((folder) => ({
+        ...folder,
+        files: folder.files.filter((file) => file.id !== fileId),
+      })),
     )
   }
 
@@ -549,7 +539,6 @@ export default function AIOSDesktop() {
             ? {
                 ...folder,
                 files: [tempFile, ...folder.files],
-                fileCount: Math.max(folder.files.length + 1, Number(folder.fileCount ?? 0) + 1),
               }
             : folder,
         ),
@@ -766,7 +755,6 @@ export default function AIOSDesktop() {
             ? {
                 ...folder,
                 files: [createdFile, ...folder.files],
-                fileCount: Math.max(folder.files.length + 1, Number(folder.fileCount ?? 0) + 1),
               }
             : folder,
         ),
@@ -1020,7 +1008,7 @@ export default function AIOSDesktop() {
                             {folder.name}
                           </p>
                           <p className="mt-1 text-xs text-emerald-100/60">
-                            Rif. {folder.propertyRef} · {folder.fileCount ?? folder.files.length} file
+                            Rif. {folder.propertyRef} · {folder.files.length} file
                           </p>
                           <p className="mt-1 truncate text-xs text-emerald-100/45">
                             {folder.address}
@@ -1293,7 +1281,7 @@ export default function AIOSDesktop() {
                             <div className="min-w-0">
                               <p className="truncate font-medium leading-tight">{folder.name}</p>
                               <p className="mt-1 text-xs text-emerald-200/65">
-                                Rif. {folder.propertyRef} · {folder.fileCount ?? folder.files.length} file
+                                Rif. {folder.propertyRef} · {folder.files.length} file
                               </p>
                             </div>
                           </div>

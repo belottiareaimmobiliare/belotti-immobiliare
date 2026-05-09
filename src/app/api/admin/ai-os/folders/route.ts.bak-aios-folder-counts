@@ -23,40 +23,8 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const propertyIds = (data ?? [])
-      .map((property) => String(property.id ?? ''))
-      .filter(Boolean)
-
-    const fileCounts = new Map<string, number>()
-
-    if (propertyIds.length > 0) {
-      const { data: filesCountData, error: filesCountError } = await supabase
-        .from('ai_os_files')
-        .select('property_id')
-        .eq('is_deleted', false)
-        .in('property_id', propertyIds)
-        .limit(10000)
-
-      if (filesCountError) {
-        console.error('AI-OS folder file counts error:', filesCountError)
-      } else {
-        for (const file of filesCountData ?? []) {
-          const propertyId = String(file.property_id ?? '')
-          if (!propertyId) continue
-          fileCounts.set(propertyId, (fileCounts.get(propertyId) ?? 0) + 1)
-        }
-      }
-    }
-
     const folders = (data ?? [])
-      .map((property) => {
-        const folder = mapPropertyToAIOSFolder(property as Record<string, unknown>)
-
-        return {
-          ...folder,
-          fileCount: fileCounts.get(folder.id) ?? 0,
-        }
-      })
+      .map((property) => mapPropertyToAIOSFolder(property as Record<string, unknown>))
       .filter((folder) => folder.id)
       .sort((a, b) => a.name.localeCompare(b.name, 'it'))
 
