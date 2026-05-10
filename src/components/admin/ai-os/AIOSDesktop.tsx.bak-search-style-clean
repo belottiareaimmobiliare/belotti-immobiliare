@@ -3697,34 +3697,18 @@ export default function AIOSDesktop() {
                   </div>
                 </div>
 
-                <div className="ml-5 mr-auto hidden w-[min(520px,38vw)] md:block">
-                  <div className="flex h-10 items-center gap-3 rounded-full border border-[#8FBCBB]/35 bg-[#202632]/84 px-3 shadow-[0_0_18px_rgba(143,188,187,0.10)] transition focus-within:border-[#A3BE8C]/75 focus-within:bg-[#1B202B]/95 focus-within:shadow-[0_0_24px_rgba(163,190,140,0.18)]">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#A3BE8C]/35 bg-[#A3BE8C]/12 text-[11px] font-bold text-[#A3BE8C]">
-                      ⌕
+                <div className="ml-6 mr-auto hidden w-[min(560px,42vw)] md:block">
+                  <label className="relative block">
+                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold uppercase tracking-[0.16em] text-[#A3BE8C]/80">
+                      Ricerca immobile
                     </span>
-
                     <input
                       value={folderSearchQuery}
                       onChange={(event) => setFolderSearchQuery(event.target.value)}
-                      className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#E5E9F0] outline-none placeholder:text-[#D8DEE9]/38"
-                      placeholder="Titolo o codice immobile..."
+                      className="h-9 w-full rounded-full border border-[#A3BE8C]/60 bg-[#202632]/90 pl-36 pr-4 text-sm font-semibold text-[#E5E9F0] outline-none shadow-[0_0_18px_rgba(163,190,140,0.14)] transition placeholder:text-[#A3BE8C]/45 focus:border-[#A3BE8C] focus:bg-[#1B202B] focus:shadow-[0_0_24px_rgba(163,190,140,0.22)]"
+                      placeholder="inserisci titolo o codice immobile..."
                     />
-
-                    {folderSearchQuery.trim() ? (
-                      <button
-                        type="button"
-                        onClick={() => setFolderSearchQuery('')}
-                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#BF616A]/30 bg-[#BF616A]/12 text-sm font-bold leading-none text-[#FFCCD2] transition hover:bg-[#BF616A]/28 hover:text-white"
-                        aria-label="Svuota ricerca"
-                      >
-                        ×
-                      </button>
-                    ) : (
-                      <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.16em] text-[#8FBCBB]/50">
-                        min 3
-                      </span>
-                    )}
-                  </div>
+                  </label>
                 </div>
 
                 <button
