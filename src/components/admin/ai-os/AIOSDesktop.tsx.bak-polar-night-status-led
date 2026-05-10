@@ -461,58 +461,6 @@ function classForDocumentRequestStatus(status: string) {
   return 'border-[#B48EAD]/25 bg-[#B48EAD]/10 text-[#E5E9F0]'
 }
 
-type AIOSFolderVisualState = 'off' | 'blue' | 'green' | 'yellow' | 'red'
-
-function folderLedClass(state: AIOSFolderVisualState) {
-  if (state === 'green') return 'bg-[#A3BE8C] shadow-[0_0_14px_rgba(163,190,140,0.82)]'
-  if (state === 'yellow') return 'bg-[#EBCB8B] shadow-[0_0_14px_rgba(235,203,139,0.82)]'
-  if (state === 'red') return 'bg-[#BF616A] shadow-[0_0_14px_rgba(191,97,106,0.82)]'
-  if (state === 'blue') return 'bg-[#88C0D0] shadow-[0_0_14px_rgba(136,192,208,0.80)]'
-  return 'bg-[#4C566A] shadow-none'
-}
-
-function folderCardClass(state: AIOSFolderVisualState, isActive: boolean) {
-  if (state === 'green') {
-    return isActive
-      ? 'border-[#A3BE8C]/45 bg-[#263528]/76 text-white shadow-[inset_0_0_0_1px_rgba(163,190,140,0.10),0_0_22px_rgba(163,190,140,0.10)]'
-      : 'border-[#A3BE8C]/20 bg-[#222B28]/56 text-[#D8DEE9] hover:border-[#A3BE8C]/38 hover:bg-[#263528]/72'
-  }
-
-  if (state === 'yellow') {
-    return isActive
-      ? 'border-[#EBCB8B]/48 bg-[#343023]/76 text-white shadow-[inset_0_0_0_1px_rgba(235,203,139,0.10),0_0_22px_rgba(235,203,139,0.10)]'
-      : 'border-[#EBCB8B]/20 bg-[#2D2A22]/56 text-[#D8DEE9] hover:border-[#EBCB8B]/38 hover:bg-[#343023]/72'
-  }
-
-  if (state === 'red') {
-    return isActive
-      ? 'border-[#BF616A]/50 bg-[#33252A]/78 text-white shadow-[inset_0_0_0_1px_rgba(191,97,106,0.10),0_0_22px_rgba(191,97,106,0.10)]'
-      : 'border-[#BF616A]/22 bg-[#2D252B]/56 text-[#D8DEE9] hover:border-[#BF616A]/40 hover:bg-[#33252A]/72'
-  }
-
-  if (state === 'blue') {
-    return isActive
-      ? 'border-[#88C0D0]/45 bg-[#243241]/78 text-white shadow-[inset_0_0_0_1px_rgba(136,192,208,0.10),0_0_22px_rgba(136,192,208,0.10)]'
-      : 'border-[#88C0D0]/18 bg-[#222B37]/56 text-[#D8DEE9] hover:border-[#88C0D0]/36 hover:bg-[#243241]/72'
-  }
-
-  return isActive
-    ? 'border-[#8FBCBB]/35 bg-[#29313D]/78 text-white shadow-[inset_0_0_0_1px_rgba(143,188,187,0.08)]'
-    : 'border-[#4C566A]/42 bg-[#202632]/62 text-[#D8DEE9] hover:border-[#8FBCBB]/28 hover:bg-[#252D3A]/78'
-}
-
-function agencyToolLedClass(toolId: AIOSAgencyToolId) {
-  if (toolId === 'checklist') return 'bg-[#A3BE8C] shadow-[0_0_12px_rgba(163,190,140,0.80)]'
-  if (toolId === 'visure' || toolId === 'owner-docs' || toolId === 'visit') {
-    return 'bg-[#EBCB8B] shadow-[0_0_12px_rgba(235,203,139,0.78)]'
-  }
-  if (toolId === 'owner-data' || toolId === 'mandate' || toolId === 'showcase' || toolId === 'social') {
-    return 'bg-[#88C0D0] shadow-[0_0_12px_rgba(136,192,208,0.75)]'
-  }
-
-  return 'bg-[#4C566A]'
-}
-
 function formatFileSize(size: number) {
   if (size < 1024) return `${size} B`
   if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`
@@ -821,53 +769,6 @@ export default function AIOSDesktop() {
     () => AI_OS_AGENCY_TOOLS.find((tool) => tool.id === activeAgencyToolId) ?? null,
     [activeAgencyToolId],
   )
-
-  const getFolderVisualState = (folder: AIOSFolder): AIOSFolderVisualState => {
-    const isSelectedFolder = folder.id === activeFolderId
-
-    if (!isSelectedFolder) {
-      const count = Number(folder.fileCount ?? folder.files.length ?? 0)
-
-      if (count >= 3) return 'blue'
-      if (count > 0) return 'blue'
-
-      return 'off'
-    }
-
-    const hasRedSignals =
-      documentRequests.some((request) => request.status === 'cancelled') ||
-      propertyMandates.some((mandate) => mandate.status === 'expired')
-
-    if (hasRedSignals) return 'red'
-
-    const hasWaitingSignals =
-      documentRequests.some((request) => request.status === 'todo' || request.status === 'working') ||
-      ownerDocuments.some((document) => document.status === 'missing' || document.status === 'received') ||
-      checklistItems.some((item) => item.is_done === false)
-
-    if (hasWaitingSignals) return 'yellow'
-
-    const completedChecklistCount = checklistItems.filter((item) => item.is_done).length
-    const hasStrongData =
-      propertyOwners.length > 0 &&
-      completedChecklistCount >= AI_OS_CHECKLIST_ITEMS.length &&
-      ownerDocuments.length > 0 &&
-      ownerDocuments.every((document) => document.status === 'verified' || document.status === 'not_needed')
-
-    if (hasStrongData) return 'green'
-
-    const hasSomeData =
-      propertyOwners.length > 0 ||
-      ownerDocuments.length > 0 ||
-      documentRequests.length > 0 ||
-      propertyMandates.length > 0 ||
-      checklistItems.length > 0 ||
-      Number(folder.fileCount ?? folder.files.length ?? 0) > 0
-
-    if (hasSomeData) return 'blue'
-
-    return 'off'
-  }
 
   const selectedTxt = useMemo(() => {
     if (!activeFolder || !selectedTxtId) return null
@@ -2055,7 +1956,7 @@ export default function AIOSDesktop() {
   const renderPathBar = (mobile = false) => {
     return (
       <div
-        className={`mb-4 rounded-2xl border border-[#8FBCBB]/15 bg-[#202632]/78 px-4 py-3 font-mono text-[#D8DEE9] shadow-[inset_0_0_22px_rgba(16,185,129,0.06)] ${
+        className={`mb-4 rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/35 px-4 py-3 font-mono text-[#D8DEE9] shadow-[inset_0_0_22px_rgba(16,185,129,0.06)] ${
           mobile ? 'text-[11px]' : 'text-xs'
         }`}
       >
@@ -2145,7 +2046,7 @@ export default function AIOSDesktop() {
                     type="button"
                     disabled={Boolean(documentRequestSaving)}
                     onClick={() => createDocumentRequest(option.id)}
-                    className="rounded-2xl border border-[#8FBCBB]/15 bg-[#252B36]/82 p-3 text-left transition hover:border-[#B48EAD]/45 hover:bg-[#B48EAD]/12 disabled:cursor-wait disabled:opacity-60"
+                    className="rounded-2xl border border-[#8FBCBB]/15 bg-[#3B4252]/38 p-3 text-left transition hover:border-[#B48EAD]/45 hover:bg-[#B48EAD]/12 disabled:cursor-wait disabled:opacity-60"
                   >
                     <p className="text-sm font-semibold text-white">
                       {isSaving ? 'Salvataggio...' : option.label}
@@ -2158,7 +2059,7 @@ export default function AIOSDesktop() {
               })}
             </div>
 
-            <div className="rounded-2xl border border-[#8FBCBB]/12 bg-[#242B38]/78 p-4">
+            <div className="rounded-2xl border border-[#8FBCBB]/12 bg-[#2E3440]/35 p-4">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/70">
@@ -2255,7 +2156,7 @@ export default function AIOSDesktop() {
           </div>
         ) : activeAgencyTool.id === 'owner-data' ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[#8FBCBB]/15 bg-[#242B38]/82 p-4">
+            <div className="rounded-2xl border border-[#8FBCBB]/15 bg-[#3B4252]/35 p-4">
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/70">
@@ -2345,7 +2246,7 @@ export default function AIOSDesktop() {
               )}
             </div>
 
-            <div className="rounded-2xl border border-[#B48EAD]/18 bg-[#242B38]/82 p-4">
+            <div className="rounded-2xl border border-[#B48EAD]/18 bg-[#3B4252]/35 p-4">
               <p className="text-xs uppercase tracking-[0.24em] text-[#B48EAD]/75">
                 {editingOwnerId ? 'Modifica proprietario' : 'Nuovo proprietario'}
               </p>
@@ -2484,7 +2385,7 @@ export default function AIOSDesktop() {
                   type="button"
                   disabled={propertyOwnerSaving}
                   onClick={savePropertyOwner}
-                  className="rounded-full bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/85 disabled:cursor-wait disabled:opacity-60"
+                  className="rounded-full bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#2E3440] transition hover:bg-[#A3BE8C]/85 disabled:cursor-wait disabled:opacity-60"
                 >
                   {propertyOwnerSaving ? 'Salvataggio...' : editingOwnerId ? 'Salva modifiche' : 'Salva proprietario'}
                 </button>
@@ -2501,7 +2402,7 @@ export default function AIOSDesktop() {
           </div>
         ) : activeAgencyTool.id === 'checklist' ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[#8FBCBB]/12 bg-[#242B38]/78 p-4">
+            <div className="rounded-2xl border border-[#8FBCBB]/12 bg-[#2E3440]/35 p-4">
               <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/70">
@@ -2561,7 +2462,7 @@ export default function AIOSDesktop() {
           </div>
         ) : activeAgencyTool.id === 'mandate' ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[#8FBCBB]/15 bg-[#242B38]/82 p-4">
+            <div className="rounded-2xl border border-[#8FBCBB]/15 bg-[#3B4252]/35 p-4">
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/70">
@@ -2649,7 +2550,7 @@ export default function AIOSDesktop() {
               )}
             </div>
 
-            <div className="rounded-2xl border border-[#B48EAD]/18 bg-[#242B38]/82 p-4">
+            <div className="rounded-2xl border border-[#B48EAD]/18 bg-[#3B4252]/35 p-4">
               <p className="text-xs uppercase tracking-[0.24em] text-[#B48EAD]/75">
                 {editingMandateId ? 'Modifica incarico' : 'Nuovo incarico'}
               </p>
@@ -2775,7 +2676,7 @@ export default function AIOSDesktop() {
                   type="button"
                   disabled={propertyMandateSaving}
                   onClick={savePropertyMandate}
-                  className="rounded-full bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/85 disabled:cursor-wait disabled:opacity-60"
+                  className="rounded-full bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#2E3440] transition hover:bg-[#A3BE8C]/85 disabled:cursor-wait disabled:opacity-60"
                 >
                   {propertyMandateSaving ? 'Salvataggio...' : editingMandateId ? 'Salva modifiche' : 'Salva incarico'}
                 </button>
@@ -2792,7 +2693,7 @@ export default function AIOSDesktop() {
           </div>
         ) : activeAgencyTool.id === 'owner-docs' ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[#8FBCBB]/12 bg-[#242B38]/78 p-4">
+            <div className="rounded-2xl border border-[#8FBCBB]/12 bg-[#2E3440]/35 p-4">
               <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/70">
@@ -2824,7 +2725,7 @@ export default function AIOSDesktop() {
                     return (
                       <div
                         key={document.id}
-                        className="rounded-2xl border border-[#8FBCBB]/12 bg-[#242B38]/76 p-3"
+                        className="rounded-2xl border border-[#8FBCBB]/12 bg-[#3B4252]/30 p-3"
                       >
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                           <div>
@@ -2883,7 +2784,7 @@ export default function AIOSDesktop() {
               )}
             </div>
 
-            <div className="rounded-2xl border border-[#B48EAD]/15 bg-[#242B38]/76 p-4">
+            <div className="rounded-2xl border border-[#B48EAD]/15 bg-[#3B4252]/30 p-4">
               <p className="text-sm font-semibold text-white">Dove caricare i file</p>
               <p className="mt-2 text-xs leading-5 text-[#D8DEE9]/60">
                 I PDF o le immagini dei documenti possono essere caricati nella sotto-cartella “Docs e planimetrie”.
@@ -2892,14 +2793,14 @@ export default function AIOSDesktop() {
               <button
                 type="button"
                 onClick={() => openSubFolder('docs')}
-                className="mt-4 rounded-full bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/85"
+                className="mt-4 rounded-full bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#2E3440] transition hover:bg-[#A3BE8C]/85"
               >
                 Apri Docs e planimetrie
               </button>
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl border border-[#8FBCBB]/15 bg-[#242B38]/82 p-4">
+          <div className="rounded-2xl border border-[#8FBCBB]/15 bg-[#3B4252]/35 p-4">
             <p className="text-sm font-semibold text-white">
               {activeAgencyTool.primaryAction}
             </p>
@@ -2912,7 +2813,7 @@ export default function AIOSDesktop() {
               onClick={() =>
                 setNotice(`${activeAgencyTool.label}: azione pronta per collegamento database/API.`)
               }
-              className="mt-4 rounded-full bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/85"
+              className="mt-4 rounded-full bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#2E3440] transition hover:bg-[#A3BE8C]/85"
             >
               {activeAgencyTool.primaryAction}
             </button>
@@ -2957,7 +2858,7 @@ export default function AIOSDesktop() {
 
     return (
       <>
-        <div className="mb-4 rounded-3xl border border-[#4C566A]/55 bg-[#252B36]/82 p-4 shadow-[0_18px_60px_rgba(46,52,64,0.32)]">
+        <div className="mb-4 rounded-3xl border border-[#4C566A]/55 bg-[#3B4252]/42 p-4 shadow-[0_18px_60px_rgba(46,52,64,0.32)]">
         <div className="mb-5">
           <p className="text-xs uppercase tracking-[0.28em] text-[#8FBCBB]/80">
             Root cartella immobile
@@ -2980,9 +2881,9 @@ export default function AIOSDesktop() {
               className="group flex w-[88px] flex-col items-center gap-2 rounded-2xl border border-transparent p-2 text-center transition hover:border-[#B48EAD]/45 hover:bg-[#434C5E]/60 active:scale-[0.98]"
             >
               <span className="relative flex h-12 w-12 shrink-0 items-end justify-center">
-                <span className="absolute left-1 top-1 h-3 w-6 rounded-t-md bg-[#1F2632] transition group-hover:bg-[#344153]" />
-                <span className="absolute bottom-0 h-9 w-12 rounded-lg border border-[#ECEFF4]/10 bg-[#2B3544] shadow-[0_8px_22px_rgba(0,0,0,0.34)] transition group-hover:bg-[#3D4A5F]" />
-                <span className="relative z-10 pb-1 text-[15px] font-bold text-[#D8DEE9]">
+                <span className="absolute left-1 top-1 h-3 w-6 rounded-t-md bg-[#263140] transition group-hover:bg-[#415266]" />
+                <span className="absolute bottom-0 h-9 w-12 rounded-lg border border-[#ECEFF4]/10 bg-[#3A485C] shadow-[0_8px_22px_rgba(46,52,64,0.40)] transition group-hover:bg-[#516177]" />
+                <span className="relative z-10 pb-1 text-[15px] font-bold text-[#2E3440]">
                   {section.id === 'images' ? '●' : '▤'}
                 </span>
               </span>
@@ -3019,19 +2920,16 @@ export default function AIOSDesktop() {
                 className={`group rounded-2xl border p-3 text-left transition active:scale-[0.99] ${
                   activeAgencyToolId === tool.id
                     ? 'border-[#B48EAD]/55 bg-[#B48EAD]/16 shadow-[0_0_28px_rgba(180,142,173,0.16)]'
-                    : 'border-[#8FBCBB]/12 bg-[#202632]/76 hover:border-[#B48EAD]/38 hover:bg-[#B48EAD]/10'
+                    : 'border-[#8FBCBB]/12 bg-[#2E3440]/28 hover:border-[#B48EAD]/38 hover:bg-[#B48EAD]/10'
                 }`}
               >
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">{tool.icon}</span>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${agencyToolLedClass(tool.id)}`} />
-                      <p className="text-sm font-semibold leading-tight text-white">
-                        {tool.label}
-                      </p>
-                    </div>
-                    <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-[#D8DEE9]/62">
+                    <p className="text-sm font-semibold leading-tight text-white">
+                      {tool.label}
+                    </p>
+                    <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-[#D8DEE9]/55">
                       {tool.status}
                     </p>
                   </div>
@@ -3065,7 +2963,7 @@ export default function AIOSDesktop() {
             ? 'border-[#BF616A]/45 bg-[#BF616A]/10'
             : selectedTxtId === file.id
               ? 'border-[#B48EAD]/55 bg-[#B48EAD]/15'
-              : 'border-[#8FBCBB]/10 bg-[#202632]/72 hover:border-[#B48EAD]/35 hover:bg-[#B48EAD]/10'
+              : 'border-[#8FBCBB]/10 bg-[#2E3440]/30 hover:border-[#B48EAD]/35 hover:bg-[#B48EAD]/10'
         }`}
       >
         {isUploading ? (
@@ -3282,7 +3180,7 @@ export default function AIOSDesktop() {
                 </p>
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
-                  <label className="flex cursor-pointer items-center justify-center rounded-2xl bg-[#A3BE8C] px-3 py-3 text-sm font-semibold text-[#D8DEE9] transition active:scale-[0.98]">
+                  <label className="flex cursor-pointer items-center justify-center rounded-2xl bg-[#A3BE8C] px-3 py-3 text-sm font-semibold text-[#2E3440] transition active:scale-[0.98]">
                     File
                     <input type="file" multiple accept={getUploadAccept(activeSection)} className="hidden" onChange={handleFileInput} />
                   </label>
@@ -3356,7 +3254,7 @@ export default function AIOSDesktop() {
                   <button
                     type="button"
                     onClick={saveTxtDraft}
-                    className="mt-3 w-full rounded-2xl bg-[#A3BE8C] px-4 py-3 text-sm font-semibold text-[#D8DEE9] transition active:scale-[0.98]"
+                    className="mt-3 w-full rounded-2xl bg-[#A3BE8C] px-4 py-3 text-sm font-semibold text-[#2E3440] transition active:scale-[0.98]"
                   >
                     Salva TXT
                   </button>
@@ -3416,8 +3314,8 @@ export default function AIOSDesktop() {
           </header>
 
           {desktopWindowOpen ? (
-            <section className="h-[calc(100dvh-142px)] overflow-hidden rounded-[28px] border border-[#8FBCBB]/15 bg-[#202632]/88 shadow-2xl shadow-black/55 backdrop-blur-2xl">
-              <div className="flex items-center justify-between border-b border-[#8FBCBB]/15 bg-[#202632]/78 px-4 py-3">
+            <section className="h-[calc(100dvh-142px)] overflow-hidden rounded-[28px] border border-[#8FBCBB]/15 bg-[#2E3440]/38 shadow-2xl shadow-black/45 backdrop-blur-2xl">
+              <div className="flex items-center justify-between border-b border-[#8FBCBB]/15 bg-[#2E3440]/35 px-4 py-3">
                 <div className="flex min-w-0 items-center gap-3">
                   <span className="text-xl">📁</span>
                   <div className="min-w-0">
@@ -3439,7 +3337,7 @@ export default function AIOSDesktop() {
               </div>
 
               <div className="grid h-[calc(100%-53px)] grid-cols-1 overflow-hidden lg:grid-cols-[260px_minmax(0,1fr)_390px]">
-                <aside className="border-b border-[#8FBCBB]/10 bg-[#1F2530]/72 p-4 lg:border-b-0 lg:border-r">
+                <aside className="border-b border-[#8FBCBB]/10 bg-[#2E3440]/18 p-4 lg:border-b-0 lg:border-r">
                   <div className="mb-4 flex items-center justify-between">
                     <div>
                       <p className="text-xs uppercase tracking-[0.34em] text-[#8FBCBB]/70">
@@ -3453,37 +3351,33 @@ export default function AIOSDesktop() {
                   </div>
 
                   {foldersLoading ? (
-                    <div className="rounded-2xl border border-[#8FBCBB]/10 bg-[#1E2430]/74 p-4 text-sm text-[#D8DEE9]/60">
+                    <div className="rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/20 p-4 text-sm text-[#D8DEE9]/60">
                       Caricamento...
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      {folders.map((folder) => {
-                        const visualState = getFolderVisualState(folder)
-                        const isActiveFolder = activeFolderId === folder.id
-
-                        return (
-                          <button
-                            key={folder.id}
-                            type="button"
-                            onClick={() => selectFolder(folder)}
-                            className={`w-full rounded-2xl border px-3 py-3 text-left transition ${folderCardClass(visualState, isActiveFolder)}`}
-                          >
-                            <div className="flex items-start gap-3">
-                              <span className="relative flex h-7 w-7 shrink-0 items-center justify-center">
-                                <span className={`absolute -right-0.5 top-0 h-2.5 w-2.5 rounded-full ring-2 ring-[#202632] ${folderLedClass(visualState)}`} />
-                                <span className="text-2xl">📂</span>
-                              </span>
-                              <div className="min-w-0">
-                                <p className="truncate font-medium leading-tight">{folder.name}</p>
-                                <p className="mt-1 text-xs text-[#88C0D0]/72">
-                                  Rif. {folder.propertyRef} · {folder.fileCount ?? folder.files.length} file
-                                </p>
-                              </div>
+                      {folders.map((folder) => (
+                        <button
+                          key={folder.id}
+                          type="button"
+                          onClick={() => selectFolder(folder)}
+                          className={`w-full rounded-2xl border px-3 py-3 text-left transition ${
+                            activeFolderId === folder.id
+                              ? 'border-[#8FBCBB]/35 bg-[#A3BE8C]/15 text-white'
+                              : 'border-[#8FBCBB]/10 bg-[#2E3440]/20 text-[#D8DEE9] hover:border-[#B48EAD]/35 hover:bg-[#B48EAD]/10'
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span className="text-2xl">📂</span>
+                            <div className="min-w-0">
+                              <p className="truncate font-medium leading-tight">{folder.name}</p>
+                              <p className="mt-1 text-xs text-[#88C0D0]/65">
+                                Rif. {folder.propertyRef} · {folder.fileCount ?? folder.files.length} file
+                              </p>
                             </div>
-                          </button>
-                        )
-                      })}
+                          </div>
+                        </button>
+                      ))}
                     </div>
                   )}
                 </aside>
@@ -3532,9 +3426,9 @@ export default function AIOSDesktop() {
                   <div
                     onDrop={handleDrop}
                     onDragOver={(event) => event.preventDefault()}
-                    className="min-h-[520px] rounded-3xl border border-dashed border-[#8FBCBB]/25 bg-[#1F2530]/72 p-4"
+                    className="min-h-[520px] rounded-3xl border border-dashed border-[#8FBCBB]/25 bg-[#2E3440]/22 p-4"
                   >
-                    <div className="mb-4 rounded-2xl border border-[#8FBCBB]/10 bg-[#242B38]/78 p-4">
+                    <div className="mb-4 rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/35 p-4">
                       <p className="text-sm font-medium text-white">
                         Trascina qui foto, video, planimetrie o documenti
                       </p>
@@ -3543,7 +3437,7 @@ export default function AIOSDesktop() {
                       </p>
 
                       <div className="mt-4 flex flex-wrap gap-2">
-                        <label className="cursor-pointer rounded-full bg-[#A3BE8C] px-4 py-2 text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/85">
+                        <label className="cursor-pointer rounded-full bg-[#A3BE8C] px-4 py-2 text-sm font-semibold text-[#2E3440] transition hover:bg-[#A3BE8C]/85">
                           Carica file
                           <input type="file" multiple accept={getUploadAccept(activeSection)} className="hidden" onChange={handleFileInput} />
                         </label>
@@ -3590,7 +3484,7 @@ export default function AIOSDesktop() {
                   </div>
                 </section>
 
-                <aside className="min-h-0 overflow-auto border-t border-[#8FBCBB]/10 bg-[#1E2430]/74 p-4 lg:border-l lg:border-t-0">
+                <aside className="min-h-0 overflow-auto border-t border-[#8FBCBB]/10 bg-[#2E3440]/20 p-4 lg:border-l lg:border-t-0">
                   <div className="mb-4">
                     <p className="text-xs uppercase tracking-[0.32em] text-[#8FBCBB]/70">
                       Editor TXT
@@ -3612,7 +3506,7 @@ export default function AIOSDesktop() {
                       <button
                         type="button"
                         onClick={saveTxtDraft}
-                        className="w-full rounded-2xl bg-[#A3BE8C] px-4 py-3 font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/85"
+                        className="w-full rounded-2xl bg-[#A3BE8C] px-4 py-3 font-semibold text-[#2E3440] transition hover:bg-[#A3BE8C]/85"
                       >
                         Salva TXT
                       </button>
@@ -3842,7 +3736,7 @@ export default function AIOSDesktop() {
                     href={previewFile.previewUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center rounded-2xl bg-[#A3BE8C] px-5 py-3 text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/85"
+                    className="inline-flex items-center justify-center rounded-2xl bg-[#A3BE8C] px-5 py-3 text-sm font-semibold text-[#2E3440] transition hover:bg-[#A3BE8C]/85"
                   >
                     Apri / scarica originale
                   </a>
@@ -3873,7 +3767,7 @@ export default function AIOSDesktop() {
                   href={previewFile.previewUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-5 inline-flex rounded-2xl bg-[#A3BE8C] px-5 py-3 text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/85"
+                  className="mt-5 inline-flex rounded-2xl bg-[#A3BE8C] px-5 py-3 text-sm font-semibold text-[#2E3440] transition hover:bg-[#A3BE8C]/85"
                 >
                   Apri documento
                 </a>
