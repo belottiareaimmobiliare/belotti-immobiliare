@@ -180,9 +180,6 @@ type AIOSQuotaStatus = {
   is_blocked: boolean
 }
 
-const AI_OS_LARGE_FILE_THRESHOLD_BYTES = 50 * 1024 * 1024
-const AI_OS_VIDEO_TARGET_BYTES = 45 * 1024 * 1024
-
 const AI_OS_MAX_TOTAL_BYTES = 838860800
 const AI_OS_WARN_TOTAL_BYTES = 681574400
 
@@ -780,8 +777,6 @@ export default function AIOSDesktop() {
   const [startOpen, setStartOpen] = useState(false)
   const [mobileFolderOpen, setMobileFolderOpen] = useState(false)
   const [previewFile, setPreviewFile] = useState<AIOSFile | null>(null)
-  const [largeFileQueue, setLargeFileQueue] = useState<File[]>([])
-  const [largeFileDecisionOpen, setLargeFileDecisionOpen] = useState(false)
   const [previewZoom, setPreviewZoom] = useState(1)
   const [previewOrigin, setPreviewOrigin] = useState('center center')
   const [previewPan, setPreviewPan] = useState({ x: 0, y: 0 })
@@ -1721,8 +1716,23 @@ export default function AIOSDesktop() {
     )
   }
 
-  const uploadFilesToActiveFolder = (uploadableFiles: File[]) => {
-    if (!activeFolderId || uploadableFiles.length === 0) return
+  const addFilesToActiveFolder = (files: File[]) => {
+    if (!activeFolderId || files.length === 0) return
+
+    const uploadableFiles = files.filter((file) =>
+      canUploadFileInSection(file, activeSection),
+    )
+    const rejectedFilesCount = files.length - uploadableFiles.length
+
+    if (rejectedFilesCount > 0) {
+      setNotice(
+        activeSection === 'images'
+          ? `${rejectedFilesCount} file ignorato/i: nella cartella Immagini puoi caricare solo immagini o video.`
+          : `${rejectedFilesCount} file ignorato/i.`,
+      )
+    }
+
+    if (uploadableFiles.length === 0) return
 
     uploadableFiles.forEach((file) => {
       const tempId = `upload-${Date.now()}-${Math.random().toString(16).slice(2)}`
@@ -1786,67 +1796,6 @@ export default function AIOSDesktop() {
           void loadQuota()
         })
     })
-  }
-
-  const addFilesToActiveFolder = (files: File[]) => {
-    if (!activeFolderId || files.length === 0) return
-
-    const sectionAllowedFiles = files.filter((file) =>
-      canUploadFileInSection(file, activeSection),
-    )
-
-    const rejectedFilesCount = files.length - sectionAllowedFiles.length
-
-    if (rejectedFilesCount > 0) {
-      setNotice(
-        activeSection === 'images'
-          ? `${rejectedFilesCount} file ignorato/i: nella cartella Immagini puoi caricare solo immagini o video.`
-          : `${rejectedFilesCount} file ignorato/i.`,
-      )
-    }
-
-    if (sectionAllowedFiles.length === 0) return
-
-    const largeFiles = sectionAllowedFiles.filter((file) => file.size > AI_OS_LARGE_FILE_THRESHOLD_BYTES)
-    const normalFiles = sectionAllowedFiles.filter((file) => file.size <= AI_OS_LARGE_FILE_THRESHOLD_BYTES)
-
-    if (normalFiles.length > 0) {
-      uploadFilesToActiveFolder(normalFiles)
-    }
-
-    if (largeFiles.length > 0) {
-      setLargeFileQueue(largeFiles)
-      setLargeFileDecisionOpen(true)
-      setNotice(
-        `${largeFiles.length} file sopra 50 MB: scegli se ridurli o archiviarli su Google Drive.`,
-      )
-    }
-  }
-
-  const closeLargeFileDecision = () => {
-    setLargeFileDecisionOpen(false)
-    setLargeFileQueue([])
-    setNotice('Upload file grande annullato.')
-  }
-
-  const sendLargeFilesToDriveArchive = () => {
-    setLargeFileDecisionOpen(false)
-    setNotice(
-      'Carica il file grande nella cartella Google Drive archivio dell’immobile. Supabase resta per file ottimizzati e pubblicabili.',
-    )
-  }
-
-  const reduceLargeVideos = () => {
-    const videoFiles = largeFileQueue.filter((file) => file.type.startsWith('video/'))
-
-    if (videoFiles.length === 0) {
-      setNotice('Riduzione disponibile solo per video. Per questo file usa Google Drive archivio.')
-      return
-    }
-
-    setNotice(
-      `Riduzione video pronta come prossimo step: target ${formatFileSize(AI_OS_VIDEO_TARGET_BYTES)} usando compressione browser open-source.`,
-    )
   }
 
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
@@ -3749,72 +3698,6 @@ export default function AIOSDesktop() {
           ) : null}
         </div>
       </section>
-
-      {largeFileDecisionOpen ? (
-        <div className="fixed inset-0 z-[10080] flex items-center justify-center bg-black/62 p-4 backdrop-blur-md">
-          <div className="w-full max-w-xl rounded-[28px] border border-[#EBCB8B]/25 bg-[#202632]/96 p-5 shadow-2xl shadow-black/60">
-            <div className="flex items-start gap-3">
-              <span className="text-3xl">⚠️</span>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs uppercase tracking-[0.28em] text-[#EBCB8B]/80">
-                  File grande rilevato
-                </p>
-                <h3 className="mt-1 text-xl font-semibold text-white">
-                  Upload sopra 50 MB
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-[#D8DEE9]/68">
-                  AI-OS usa Supabase per i file pubblicabili e Google Drive come archivio free per video/documenti pesanti.
-                  Puoi provare a ridurre i video oppure spostarli nella cartella Drive dell’immobile.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 rounded-2xl border border-[#8FBCBB]/12 bg-[#2E3440]/48 p-3">
-              <p className="text-xs uppercase tracking-[0.22em] text-[#8FBCBB]/70">
-                File in attesa
-              </p>
-              <div className="mt-2 space-y-2">
-                {largeFileQueue.map((file) => (
-                  <div
-                    key={`${file.name}-${file.size}`}
-                    className="flex items-center justify-between gap-3 rounded-xl bg-[#202632]/80 px-3 py-2 text-xs"
-                  >
-                    <span className="min-w-0 truncate text-[#E5E9F0]">{file.name}</span>
-                    <span className="shrink-0 text-[#EBCB8B]">{formatFileSize(file.size)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-2 sm:grid-cols-3">
-              <button
-                type="button"
-                onClick={reduceLargeVideos}
-                className="rounded-2xl border border-[#A3BE8C]/25 bg-[#A3BE8C]/12 px-4 py-3 text-sm font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/18"
-              >
-                Riduci video
-              </button>
-
-              <button
-                type="button"
-                onClick={sendLargeFilesToDriveArchive}
-                className="rounded-2xl border border-[#88C0D0]/25 bg-[#88C0D0]/12 px-4 py-3 text-sm font-bold text-[#88C0D0] transition hover:bg-[#88C0D0]/18"
-              >
-                Usa Google Drive
-              </button>
-
-              <button
-                type="button"
-                onClick={closeLargeFileDecision}
-                className="rounded-2xl border border-[#BF616A]/25 bg-[#BF616A]/12 px-4 py-3 text-sm font-bold text-[#BF616A] transition hover:bg-[#BF616A]/18"
-              >
-                Annulla
-              </button>
-            </div>
-
-          </div>
-        </div>
-      ) : null}
 
       {contextMenu ? (
         <div
