@@ -96,7 +96,7 @@ export function mapAIOSFileRecord(
     status: 'saved' as const,
     mimeType: record.mime_type ? String(record.mime_type) : undefined,
     storagePath: record.storage_path ? String(record.storage_path) : undefined,
-    previewUrl: signedUrl ?? undefined,
+    previewUrl: signedUrl ?? (record.external_url ? String(record.external_url) : undefined),
     folderType: record.folder_type ? String(record.folder_type) : undefined,
     propertyMediaId: record.property_media_id ? String(record.property_media_id) : undefined,
     isGalleryVisible: Boolean(record.is_gallery_visible),

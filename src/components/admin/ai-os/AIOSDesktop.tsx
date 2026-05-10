@@ -788,6 +788,7 @@ export default function AIOSDesktop() {
   } | null>(null)
   const [contextMenu, setContextMenu] = useState<AIOSContextMenu>(null)
   const [quotaStatus, setQuotaStatus] = useState<AIOSQuotaStatus | null>(null)
+  const [mediaSyncing, setMediaSyncing] = useState(false)
   const [activeAgencyToolId, setActiveAgencyToolId] = useState<AIOSAgencyToolId | null>(null)
   const [documentRequests, setDocumentRequests] = useState<AIOSDocumentRequest[]>([])
   const [documentRequestsLoading, setDocumentRequestsLoading] = useState(false)
@@ -908,8 +909,71 @@ export default function AIOSDesktop() {
     }
   }
 
+  async function syncPropertyMediaForFolder(propertyId: string, silent = false) {
+    if (!propertyId) return 0
+
+    if (!silent) {
+      setMediaSyncing(true)
+    }
+
+    try {
+      const response = await fetch('/api/admin/ai-os/sync-property-media', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ propertyId }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore sincronizzazione media immobile')
+      }
+
+      const created = Number(payload?.created ?? 0)
+
+      if (!silent) {
+        setNotice(
+          created > 0
+            ? `Sincronizzati ${created} media immobile in AI-OS.`
+            : 'Media immobile già sincronizzati in AI-OS.',
+        )
+      }
+
+      return created
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore sincronizzazione media immobile'
+
+      if (!silent) {
+        setNotice(message)
+      }
+
+      return 0
+    } finally {
+      if (!silent) {
+        setMediaSyncing(false)
+      }
+    }
+  }
+
+  async function syncActiveFolderMedia() {
+    if (!activeFolderId) {
+      setNotice('Seleziona prima una cartella immobile.')
+      return
+    }
+
+    await syncPropertyMediaForFolder(activeFolderId, false)
+    await loadFilesForFolder(activeFolderId, activeSection)
+    void loadQuota()
+  }
+
   async function loadFilesForFolder(propertyId: string, section: AIOSSection = activeSection) {
     try {
+      if (section === 'images' || section === 'docs') {
+        await syncPropertyMediaForFolder(propertyId, true)
+      }
+
       const response = await fetch(
         `/api/admin/ai-os/files?propertyId=${encodeURIComponent(propertyId)}&folderType=${encodeURIComponent(section)}`,
         { cache: 'no-store' },
@@ -3511,6 +3575,15 @@ export default function AIOSDesktop() {
                         className="rounded-full border border-[#B48EAD]/25 bg-[#B48EAD]/10 px-4 py-2 text-sm font-medium text-[#E5E9F0] transition hover:bg-[#B48EAD]/18"
                       >
                         Aggiorna
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={mediaSyncing || !activeFolderId}
+                        onClick={syncActiveFolderMedia}
+                        className="rounded-full border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-4 py-2 text-sm font-medium text-[#E5E9F0] transition hover:bg-[#88C0D0]/18 disabled:cursor-wait disabled:opacity-55"
+                      >
+                        {mediaSyncing ? 'Sync...' : 'Sincronizza media'}
                       </button>
 
                       <button
