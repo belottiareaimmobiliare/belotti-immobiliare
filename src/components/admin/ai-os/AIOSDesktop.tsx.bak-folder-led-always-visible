@@ -480,57 +480,41 @@ function classForDocumentRequestStatus(status: string) {
 type AIOSFolderVisualState = 'off' | 'blue' | 'green' | 'yellow' | 'red'
 
 function folderLedClass(state: AIOSFolderVisualState) {
-  if (state === 'green') return 'bg-[#A3BE8C] shadow-[0_0_18px_rgba(163,190,140,0.95)] ring-[#A3BE8C]/45'
-  if (state === 'yellow') return 'bg-[#EBCB8B] shadow-[0_0_18px_rgba(235,203,139,0.95)] ring-[#EBCB8B]/45'
-  if (state === 'red') return 'bg-[#BF616A] shadow-[0_0_18px_rgba(191,97,106,0.95)] ring-[#BF616A]/45'
-  if (state === 'blue') return 'bg-[#88C0D0] shadow-[0_0_18px_rgba(136,192,208,0.90)] ring-[#88C0D0]/45'
-  return 'bg-[#5A6372] shadow-[0_0_10px_rgba(216,222,233,0.22)] ring-[#6B7484]/35'
+  if (state === 'green') return 'bg-[#A3BE8C] shadow-[0_0_14px_rgba(163,190,140,0.82)]'
+  if (state === 'yellow') return 'bg-[#EBCB8B] shadow-[0_0_14px_rgba(235,203,139,0.82)]'
+  if (state === 'red') return 'bg-[#BF616A] shadow-[0_0_14px_rgba(191,97,106,0.82)]'
+  if (state === 'blue') return 'bg-[#88C0D0] shadow-[0_0_14px_rgba(136,192,208,0.80)]'
+  return 'bg-[#4C566A] shadow-none'
 }
 
 function folderCardClass(state: AIOSFolderVisualState, isActive: boolean) {
   if (state === 'green') {
     return isActive
-      ? 'border-[#A3BE8C]/70 bg-[#263528]/88 text-white shadow-[inset_4px_0_0_rgba(163,190,140,0.95),0_0_26px_rgba(163,190,140,0.18)]'
-      : 'border-[#A3BE8C]/46 bg-[#222B28]/78 text-[#D8DEE9] shadow-[inset_4px_0_0_rgba(163,190,140,0.88),0_0_18px_rgba(163,190,140,0.10)] hover:border-[#A3BE8C]/70 hover:bg-[#263528]/92'
+      ? 'border-[#A3BE8C]/45 bg-[#263528]/76 text-white shadow-[inset_0_0_0_1px_rgba(163,190,140,0.10),0_0_22px_rgba(163,190,140,0.10)]'
+      : 'border-[#A3BE8C]/20 bg-[#222B28]/56 text-[#D8DEE9] hover:border-[#A3BE8C]/38 hover:bg-[#263528]/72'
   }
 
   if (state === 'yellow') {
     return isActive
-      ? 'border-[#EBCB8B]/76 bg-[#343023]/90 text-white shadow-[inset_4px_0_0_rgba(235,203,139,0.98),0_0_28px_rgba(235,203,139,0.20)]'
-      : 'border-[#EBCB8B]/54 bg-[#2D2A22]/82 text-[#D8DEE9] shadow-[inset_4px_0_0_rgba(235,203,139,0.90),0_0_18px_rgba(235,203,139,0.12)] hover:border-[#EBCB8B]/78 hover:bg-[#343023]/92'
+      ? 'border-[#EBCB8B]/48 bg-[#343023]/76 text-white shadow-[inset_0_0_0_1px_rgba(235,203,139,0.10),0_0_22px_rgba(235,203,139,0.10)]'
+      : 'border-[#EBCB8B]/20 bg-[#2D2A22]/56 text-[#D8DEE9] hover:border-[#EBCB8B]/38 hover:bg-[#343023]/72'
   }
 
   if (state === 'red') {
     return isActive
-      ? 'border-[#BF616A]/78 bg-[#33252A]/90 text-white shadow-[inset_4px_0_0_rgba(191,97,106,0.98),0_0_28px_rgba(191,97,106,0.20)]'
-      : 'border-[#BF616A]/54 bg-[#2D252B]/82 text-[#D8DEE9] shadow-[inset_4px_0_0_rgba(191,97,106,0.90),0_0_18px_rgba(191,97,106,0.12)] hover:border-[#BF616A]/78 hover:bg-[#33252A]/92'
+      ? 'border-[#BF616A]/50 bg-[#33252A]/78 text-white shadow-[inset_0_0_0_1px_rgba(191,97,106,0.10),0_0_22px_rgba(191,97,106,0.10)]'
+      : 'border-[#BF616A]/22 bg-[#2D252B]/56 text-[#D8DEE9] hover:border-[#BF616A]/40 hover:bg-[#33252A]/72'
   }
 
   if (state === 'blue') {
     return isActive
-      ? 'border-[#88C0D0]/72 bg-[#243241]/90 text-white shadow-[inset_4px_0_0_rgba(136,192,208,0.95),0_0_26px_rgba(136,192,208,0.18)]'
-      : 'border-[#88C0D0]/46 bg-[#222B37]/80 text-[#D8DEE9] shadow-[inset_4px_0_0_rgba(136,192,208,0.86),0_0_18px_rgba(136,192,208,0.10)] hover:border-[#88C0D0]/72 hover:bg-[#243241]/92'
+      ? 'border-[#88C0D0]/45 bg-[#243241]/78 text-white shadow-[inset_0_0_0_1px_rgba(136,192,208,0.10),0_0_22px_rgba(136,192,208,0.10)]'
+      : 'border-[#88C0D0]/18 bg-[#222B37]/56 text-[#D8DEE9] hover:border-[#88C0D0]/36 hover:bg-[#243241]/72'
   }
 
   return isActive
-    ? 'border-[#6B7484]/62 bg-[#29313D]/88 text-white shadow-[inset_4px_0_0_rgba(107,116,132,0.75),0_0_18px_rgba(216,222,233,0.06)]'
-    : 'border-[#4C566A]/54 bg-[#202632]/78 text-[#D8DEE9] shadow-[inset_4px_0_0_rgba(76,86,106,0.65)] hover:border-[#8FBCBB]/42 hover:bg-[#252D3A]/88'
-}
-
-function folderStateLabel(state: AIOSFolderVisualState) {
-  if (state === 'green') return 'OK'
-  if (state === 'yellow') return 'ATTESA'
-  if (state === 'red') return 'CRITICO'
-  if (state === 'blue') return 'POPOLATA'
-  return 'VUOTA'
-}
-
-function folderStateTextClass(state: AIOSFolderVisualState) {
-  if (state === 'green') return 'text-[#A3BE8C]'
-  if (state === 'yellow') return 'text-[#EBCB8B]'
-  if (state === 'red') return 'text-[#BF616A]'
-  if (state === 'blue') return 'text-[#88C0D0]'
-  return 'text-[#8A95A6]'
+    ? 'border-[#8FBCBB]/35 bg-[#29313D]/78 text-white shadow-[inset_0_0_0_1px_rgba(143,188,187,0.08)]'
+    : 'border-[#4C566A]/42 bg-[#202632]/62 text-[#D8DEE9] hover:border-[#8FBCBB]/28 hover:bg-[#252D3A]/78'
 }
 
 function agencyToolLedClass(toolId: AIOSAgencyToolId) {
@@ -1650,7 +1634,7 @@ export default function AIOSDesktop() {
 
       setNotice(
         nextFolders.length > 0
-          ? 'Check fascicoli completato: LED cartelle aggiornati.'
+          ? 'Cartelle immobili caricate da Supabase.'
           : 'Nessun immobile trovato per AI-OS.',
       )
     } catch (error) {
@@ -3311,18 +3295,13 @@ export default function AIOSDesktop() {
                       >
                         <div className="flex items-start gap-3">
                           <span className="relative flex h-8 w-8 shrink-0 items-center justify-center">
-                            <span className={`absolute -right-1 top-0 h-3.5 w-3.5 rounded-full ring-2 ring-[#202632] ${folderLedClass(visualState)}`} />
+                            <span className={`absolute -right-0.5 top-0 h-2.5 w-2.5 rounded-full ring-2 ring-[#202632] ${folderLedClass(visualState)}`} />
                             <span className="text-3xl">📁</span>
                           </span>
                           <div className="min-w-0 flex-1">
-                            <div className="flex min-w-0 items-center justify-between gap-2">
-                              <p className="truncate text-base font-semibold text-white">
-                                {folder.name}
-                              </p>
-                              <span className={`shrink-0 text-[9px] font-bold uppercase tracking-[0.14em] ${folderStateTextClass(visualState)}`}>
-                                {folderStateLabel(visualState)}
-                              </span>
-                            </div>
+                            <p className="truncate text-base font-semibold text-white">
+                              {folder.name}
+                            </p>
                             <p className="mt-1 text-xs text-[#D8DEE9]/60">
                               Rif. {folder.propertyRef} · {folder.fileCount ?? folder.files.length} file
                             </p>
@@ -3605,22 +3584,17 @@ export default function AIOSDesktop() {
                             className={`w-full rounded-2xl border px-3 py-3 text-left transition ${folderCardClass(visualState, isActiveFolder)}`}
                           >
                             <div className="flex items-start gap-3">
-                              <span className="relative flex h-8 w-8 shrink-0 items-center justify-center">
-                                <span className={`absolute -right-1 top-0 h-3.5 w-3.5 rounded-full ring-2 ring-[#202632] ${folderLedClass(visualState)}`} />
+                              <span className="relative flex h-7 w-7 shrink-0 items-center justify-center">
+                                <span className={`absolute -right-0.5 top-0 h-2.5 w-2.5 rounded-full ring-2 ring-[#202632] ${folderLedClass(visualState)}`} />
                                 <span className="text-2xl">📂</span>
                               </span>
-                              <div className="min-w-0 flex-1">
-                                <div className="flex min-w-0 items-center justify-between gap-2">
-                                  <p className="truncate font-medium leading-tight">{folder.name}</p>
-                                  <span className={`shrink-0 text-[9px] font-bold uppercase tracking-[0.14em] ${folderStateTextClass(visualState)}`}>
-                                    {folderStateLabel(visualState)}
-                                  </span>
-                                </div>
+                              <div className="min-w-0">
+                                <p className="truncate font-medium leading-tight">{folder.name}</p>
                                 <p className="mt-1 text-xs text-[#88C0D0]/72">
                                   Rif. {folder.propertyRef} · {folder.fileCount ?? folder.files.length} file
                                 </p>
                                 {folder.visualReason ? (
-                                  <p className="mt-1 line-clamp-1 text-[11px] text-[#D8DEE9]/56">
+                                  <p className="mt-1 line-clamp-1 text-[11px] text-[#D8DEE9]/48">
                                     {folder.visualReason}
                                   </p>
                                 ) : null}
