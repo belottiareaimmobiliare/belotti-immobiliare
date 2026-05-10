@@ -800,7 +800,6 @@ function uploadFileWithProgress({
 export default function AIOSDesktop() {
   const [folders, setFolders] = useState<AIOSFolder[]>([])
   const [foldersLoading, setFoldersLoading] = useState(true)
-  const [folderSearchQuery, setFolderSearchQuery] = useState('')
   const [activeFolderId, setActiveFolderId] = useState<string>('')
   const [activeSection, setActiveSection] = useState<AIOSSection>('root')
   const [desktopWindowOpen, setDesktopWindowOpen] = useState(true)
@@ -852,24 +851,6 @@ export default function AIOSDesktop() {
     () => folders.find((folder) => folder.id === activeFolderId) ?? null,
     [folders, activeFolderId],
   )
-
-  const filteredFolders = useMemo(() => {
-    const query = folderSearchQuery.trim().toLowerCase()
-
-    if (!query) return folders
-
-    return folders.filter((folder) => {
-      return [
-        folder.name,
-        folder.propertyRef,
-        folder.address,
-        folder.owner,
-        folder.visualReason,
-      ]
-        .filter(Boolean)
-        .some((value) => String(value).toLowerCase().includes(query))
-    })
-  }, [folders, folderSearchQuery])
 
   const activeAgencyTool = useMemo(
     () => AI_OS_AGENCY_TOOLS.find((tool) => tool.id === activeAgencyToolId) ?? null,
@@ -3318,7 +3299,7 @@ export default function AIOSDesktop() {
                 </div>
               ) : folders.length > 0 ? (
                 <div className="space-y-2">
-                  {filteredFolders.map((folder) => {
+                  {folders.map((folder) => {
                     const visualState = getFolderVisualState(folder)
 
                     return (
@@ -3582,31 +3563,17 @@ export default function AIOSDesktop() {
                   </div>
                 </div>
 
-                <div className="mx-4 hidden min-w-[260px] max-w-[520px] flex-1 md:block">
-                  <label className="relative block">
-                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xs text-[#A3BE8C]/75">
-                      Cerca
-                    </span>
-                    <input
-                      value={folderSearchQuery}
-                      onChange={(event) => setFolderSearchQuery(event.target.value)}
-                      className="h-9 w-full rounded-full border border-[#A3BE8C]/55 bg-[#202632]/88 pl-16 pr-4 text-sm font-semibold text-[#E5E9F0] outline-none shadow-[0_0_18px_rgba(163,190,140,0.12)] transition placeholder:text-[#A3BE8C]/45 focus:border-[#A3BE8C] focus:bg-[#1B202B] focus:shadow-[0_0_24px_rgba(163,190,140,0.20)]"
-                      placeholder="immobile, rif., comune..."
-                    />
-                  </label>
-                </div>
-
                 <button
                   type="button"
                   onClick={() => setDesktopWindowOpen(false)}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[#BF616A]/65 bg-[#BF616A]/14 text-2xl font-bold leading-none text-[#FFCCD2] shadow-[0_0_18px_rgba(191,97,106,0.20)] transition hover:bg-[#BF616A]/34 hover:text-white"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-[#BF616A]/55 bg-[#BF616A]/12 text-sm font-bold text-[#FFCCD2] shadow-[0_0_16px_rgba(191,97,106,0.16)] transition hover:bg-[#BF616A]/32 hover:text-white"
                   aria-label="Chiudi finestra"
                 >
                   ×
                 </button>
               </div>
 
-              <div className="grid h-[calc(100%-53px)] grid-cols-1 overflow-hidden lg:grid-cols-[320px_minmax(0,1fr)_390px]">
+              <div className="grid h-[calc(100%-53px)] grid-cols-1 overflow-hidden lg:grid-cols-[260px_minmax(0,1fr)_390px]">
                 <aside className="border-b border-[#8FBCBB]/10 bg-[#1F2530]/72 p-4 lg:border-b-0 lg:border-r flex min-h-0 flex-col overflow-hidden">
                   <div className="mb-4 flex items-center justify-between">
                     <div>
@@ -3616,7 +3583,7 @@ export default function AIOSDesktop() {
                       <h3 className="text-lg font-semibold text-white">Immobili</h3>
                     </div>
                     <span className="rounded-full bg-[#A3BE8C]/15 px-3 py-1 text-xs text-[#88C0D0]">
-                      {folderSearchQuery.trim() ? `${filteredFolders.length}/${folders.length}` : folders.length}
+                      {folders.length}
                     </span>
                   </div>
 
@@ -3664,12 +3631,6 @@ export default function AIOSDesktop() {
                       })}
                     </div>
                   )}
-
-                  {!foldersLoading && folders.length > 0 && filteredFolders.length === 0 ? (
-                    <div className="mt-3 rounded-2xl border border-[#EBCB8B]/20 bg-[#EBCB8B]/8 p-3 text-xs leading-5 text-[#EBCB8B]">
-                      Nessun immobile trovato con questa ricerca.
-                    </div>
-                  ) : null}
                 </aside>
 
                 <section className="min-h-0 overflow-auto p-4">
