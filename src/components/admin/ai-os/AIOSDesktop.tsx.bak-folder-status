@@ -60,19 +60,6 @@ type AIOSFolder = {
   address: string
   owner: string
   fileCount?: number
-  visualState?: AIOSFolderVisualState
-  visualReason?: string
-  statusStats?: {
-    fileCount?: number
-    ownerCount?: number
-    mandateCount?: number
-    mandateActiveCount?: number
-    checklistDoneCount?: number
-    checklistExpectedCount?: number
-    ownerDocsGoodCount?: number
-    ownerDocsExpectedCount?: number
-    driveCount?: number
-  }
   files: AIOSFile[]
 }
 
@@ -842,19 +829,48 @@ export default function AIOSDesktop() {
   )
 
   const getFolderVisualState = (folder: AIOSFolder): AIOSFolderVisualState => {
-    if (
-      folder.visualState === 'off' ||
-      folder.visualState === 'blue' ||
-      folder.visualState === 'green' ||
-      folder.visualState === 'yellow' ||
-      folder.visualState === 'red'
-    ) {
-      return folder.visualState
+    const isSelectedFolder = folder.id === activeFolderId
+
+    if (!isSelectedFolder) {
+      const count = Number(folder.fileCount ?? folder.files.length ?? 0)
+
+      if (count >= 3) return 'blue'
+      if (count > 0) return 'blue'
+
+      return 'off'
     }
 
-    const count = Number(folder.fileCount ?? folder.files.length ?? 0)
+    const hasRedSignals =
+      documentRequests.some((request) => request.status === 'cancelled') ||
+      propertyMandates.some((mandate) => mandate.status === 'expired')
 
-    if (count > 0) return 'blue'
+    if (hasRedSignals) return 'red'
+
+    const hasWaitingSignals =
+      documentRequests.some((request) => request.status === 'todo' || request.status === 'working') ||
+      ownerDocuments.some((document) => document.status === 'missing' || document.status === 'received') ||
+      checklistItems.some((item) => item.is_done === false)
+
+    if (hasWaitingSignals) return 'yellow'
+
+    const completedChecklistCount = checklistItems.filter((item) => item.is_done).length
+    const hasStrongData =
+      propertyOwners.length > 0 &&
+      completedChecklistCount >= AI_OS_CHECKLIST_ITEMS.length &&
+      ownerDocuments.length > 0 &&
+      ownerDocuments.every((document) => document.status === 'verified' || document.status === 'not_needed')
+
+    if (hasStrongData) return 'green'
+
+    const hasSomeData =
+      propertyOwners.length > 0 ||
+      ownerDocuments.length > 0 ||
+      documentRequests.length > 0 ||
+      propertyMandates.length > 0 ||
+      checklistItems.length > 0 ||
+      Number(folder.fileCount ?? folder.files.length ?? 0) > 0
+
+    if (hasSomeData) return 'blue'
 
     return 'off'
   }
@@ -1599,9 +1615,6 @@ export default function AIOSDesktop() {
         ? payload.folders.map((folder: AIOSFolder) => ({
             ...folder,
             fileCount: Number(folder.fileCount ?? folder.files?.length ?? 0),
-            visualState: folder.visualState,
-            visualReason: folder.visualReason,
-            statusStats: folder.statusStats,
             files: [],
           }))
         : []
@@ -3283,41 +3296,29 @@ export default function AIOSDesktop() {
                 </div>
               ) : folders.length > 0 ? (
                 <div className="space-y-2">
-                  {folders.map((folder) => {
-                    const visualState = getFolderVisualState(folder)
-
-                    return (
-                      <button
-                        key={folder.id}
-                        type="button"
-                        onClick={() => selectFolder(folder, true)}
-                        className={`w-full rounded-2xl border px-4 py-4 text-left transition active:scale-[0.99] ${folderCardClass(visualState, activeFolderId === folder.id)}`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <span className="relative flex h-8 w-8 shrink-0 items-center justify-center">
-                            <span className={`absolute -right-0.5 top-0 h-2.5 w-2.5 rounded-full ring-2 ring-[#202632] ${folderLedClass(visualState)}`} />
-                            <span className="text-3xl">📁</span>
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-base font-semibold text-white">
-                              {folder.name}
-                            </p>
-                            <p className="mt-1 text-xs text-[#D8DEE9]/60">
-                              Rif. {folder.propertyRef} · {folder.fileCount ?? folder.files.length} file
-                            </p>
-                            <p className="mt-1 truncate text-xs text-[#D8DEE9]/45">
-                              {folder.address}
-                            </p>
-                            {folder.visualReason ? (
-                              <p className="mt-1 line-clamp-1 text-[11px] text-[#D8DEE9]/48">
-                                {folder.visualReason}
-                              </p>
-                            ) : null}
-                          </div>
+                  {folders.map((folder) => (
+                    <button
+                      key={folder.id}
+                      type="button"
+                      onClick={() => selectFolder(folder, true)}
+                      className="w-full rounded-2xl border border-[#8FBCBB]/12 bg-[#2E3440]/20 px-4 py-4 text-left transition active:scale-[0.99] hover:border-[#B48EAD]/35 hover:bg-[#B48EAD]/10"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="text-3xl">📁</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-base font-semibold text-white">
+                            {folder.name}
+                          </p>
+                          <p className="mt-1 text-xs text-[#D8DEE9]/60">
+                            Rif. {folder.propertyRef} · {folder.fileCount ?? folder.files.length} file
+                          </p>
+                          <p className="mt-1 truncate text-xs text-[#D8DEE9]/45">
+                            {folder.address}
+                          </p>
                         </div>
-                      </button>
-                    )
-                  })}
+                      </div>
+                    </button>
+                  ))}
                 </div>
               ) : (
                 <div className="rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/20 p-6 text-center text-sm text-[#D8DEE9]/60">
@@ -3593,11 +3594,6 @@ export default function AIOSDesktop() {
                                 <p className="mt-1 text-xs text-[#88C0D0]/72">
                                   Rif. {folder.propertyRef} · {folder.fileCount ?? folder.files.length} file
                                 </p>
-                                {folder.visualReason ? (
-                                  <p className="mt-1 line-clamp-1 text-[11px] text-[#D8DEE9]/48">
-                                    {folder.visualReason}
-                                  </p>
-                                ) : null}
                               </div>
                             </div>
                           </button>
