@@ -38,64 +38,6 @@ function extractDriveFolderId(value: string) {
   return null
 }
 
-function buildPropertyDriveFolderName(property: Record<string, unknown>) {
-  const id = String(property.id ?? '')
-  const title = String(property.title ?? '').trim()
-  const referenceCode = String(property.reference_code ?? '').trim()
-  const comune = String(property.comune ?? '').trim()
-  const propertyType = String(property.property_type ?? '').trim()
-
-  const fallbackName = [propertyType, comune].filter(Boolean).join(' ') || `Immobile ${id.slice(0, 8)}`
-  const rawName = `${referenceCode || id.slice(0, 8)} - ${title || fallbackName}`
-
-  return rawName
-    .replace(/[^a-zA-Z0-9À-ÿ ._-]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 150)
-}
-
-async function ensurePropertyDriveFolderPlaceholders(supabase: ReturnType<typeof createServiceClient>) {
-  const { data: properties, error: propertiesError } = await supabase
-    .from('properties')
-    .select('id, title, reference_code, comune, property_type')
-    .limit(1000)
-
-  if (propertiesError) {
-    console.error('AI-OS drive settings properties preload error:', propertiesError)
-    return { created: 0, error: propertiesError.message }
-  }
-
-  const rows = (properties ?? [])
-    .map((property) => ({
-      property_id: property.id,
-      folder_name: buildPropertyDriveFolderName(property as Record<string, unknown>),
-      drive_folder_url: null,
-      drive_folder_id: null,
-      sync_status: 'pending_creation',
-      notes: 'Cartella Drive preconfigurata automaticamente da AI-OS. Creare la cartella dentro la Drive root e incollare qui il link.',
-    }))
-    .filter((row) => row.property_id)
-
-  if (rows.length === 0) {
-    return { created: 0, error: null }
-  }
-
-  const { error: upsertError } = await supabase
-    .from('property_drive_folders')
-    .upsert(rows, {
-      onConflict: 'property_id',
-      ignoreDuplicates: true,
-    })
-
-  if (upsertError) {
-    console.error('AI-OS drive settings placeholders upsert error:', upsertError)
-    return { created: 0, error: upsertError.message }
-  }
-
-  return { created: rows.length, error: null }
-}
-
 function normalizeDriveFolderUrl(value: string | null) {
   if (!value) return null
 
@@ -189,15 +131,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const placeholders = await ensurePropertyDriveFolderPlaceholders(supabase)
-
-    return NextResponse.json({
-      settings: data,
-      propertyDriveFolders: {
-        configured: placeholders.created,
-        error: placeholders.error,
-      },
-    })
+    return NextResponse.json({ settings: data })
   } catch (error) {
     console.error('AI-OS drive settings POST exception:', error)
 

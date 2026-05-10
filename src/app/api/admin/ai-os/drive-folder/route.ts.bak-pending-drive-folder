@@ -109,8 +109,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'propertyId mancante' }, { status: 400 })
     }
 
-    const driveFolderUrl = rawUrl ? normalizeDriveFolderUrl(rawUrl) : null
-    const driveFolderId = driveFolderUrl ? extractDriveFolderId(driveFolderUrl) : null
+    if (!rawUrl) {
+      return NextResponse.json({ error: 'Link cartella Drive obbligatorio' }, { status: 400 })
+    }
+
+    const driveFolderUrl = normalizeDriveFolderUrl(rawUrl)
+    const driveFolderId = extractDriveFolderId(driveFolderUrl)
 
     const supabase = createServiceClient()
 

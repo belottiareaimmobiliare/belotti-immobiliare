@@ -78,7 +78,7 @@ type AIOSDriveFolder = {
   id: string
   property_id: string
   folder_name?: string | null
-  drive_folder_url?: string | null
+  drive_folder_url: string
   drive_folder_id?: string | null
   sync_status: string
   notes?: string | null
@@ -446,7 +446,7 @@ function createEmptyDriveFolderForm(): AIOSDriveFolderForm {
   return {
     folderName: '',
     driveFolderUrl: '',
-    syncStatus: 'pending_creation',
+    syncStatus: 'linked',
     notes: '',
   }
 }
@@ -507,14 +507,13 @@ function ownerTypeLabel(type: string) {
 }
 
 function labelForDriveSyncStatus(status: string) {
-  if (status === 'pending_creation') return 'Da creare'
+  if (status === 'manual_archive') return 'Archivio manuale'
   if (status === 'ready_to_import') return 'Pronto per import'
   if (status === 'synced') return 'Sync OK'
   return 'Collegato'
 }
 
 function classForDriveSyncStatus(status: string) {
-  if (status === 'pending_creation') return 'border-[#EBCB8B]/35 bg-[#EBCB8B]/12 text-[#EBCB8B]'
   if (status === 'ready_to_import') return 'border-[#EBCB8B]/35 bg-[#EBCB8B]/12 text-[#EBCB8B]'
   if (status === 'synced') return 'border-[#A3BE8C]/30 bg-[#A3BE8C]/12 text-[#A3BE8C]'
   return 'border-[#88C0D0]/30 bg-[#88C0D0]/12 text-[#88C0D0]'
@@ -1785,6 +1784,11 @@ export default function AIOSDesktop() {
       return
     }
 
+    if (!driveFolderForm.driveFolderUrl.trim()) {
+      setNotice('Inserisci il link della cartella Google Drive dell’immobile.')
+      return
+    }
+
     setDriveFolderSaving(true)
 
     try {
@@ -1811,7 +1815,7 @@ export default function AIOSDesktop() {
         setDriveFolderForm({
           folderName: payload.driveFolder.folder_name || buildSuggestedDriveFolderName(activeFolder),
           driveFolderUrl: payload.driveFolder.drive_folder_url || '',
-          syncStatus: payload.driveFolder.sync_status || 'pending_creation',
+          syncStatus: payload.driveFolder.sync_status || 'linked',
           notes: payload.driveFolder.notes || '',
         })
       }
@@ -1888,7 +1892,7 @@ export default function AIOSDesktop() {
       }
 
       setDriveSettings(payload?.settings ?? null)
-      setNotice(`Impostazioni Google Drive salvate. Cartelle immobili preconfigurate automaticamente.`)
+      setNotice('Impostazioni Google Drive salvate.')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Errore salvataggio impostazioni Drive'
       setNotice(message)
@@ -3411,26 +3415,18 @@ export default function AIOSDesktop() {
                   <p className="mt-2 text-sm font-semibold text-white">
                     {driveFolder.folder_name || activeFolder?.name || 'Cartella Drive immobile'}
                   </p>
-                  {driveFolder.drive_folder_url ? (
-                    <>
-                      <p className="mt-2 break-all text-xs leading-5 text-[#D8DEE9]/52">
-                        {driveFolder.drive_folder_url}
-                      </p>
+                  <p className="mt-2 break-all text-xs leading-5 text-[#D8DEE9]/52">
+                    {driveFolder.drive_folder_url}
+                  </p>
 
-                      <a
-                        href={driveFolder.drive_folder_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-4 inline-flex rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.22)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
-                      >
-                        Apri Drive immobile
-                      </a>
-                    </>
-                  ) : (
-                    <p className="mt-2 text-xs leading-5 text-[#EBCB8B]/80">
-                      Cartella preconfigurata. Crea questa cartella dentro la Drive root, poi incolla qui il link.
-                    </p>
-                  )}
+                  <a
+                    href={driveFolder.drive_folder_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-4 inline-flex rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.22)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
+                  >
+                    Apri Drive immobile
+                  </a>
                 </div>
               ) : (
                 <div className="mt-4 rounded-2xl border border-[#EBCB8B]/18 bg-[#EBCB8B]/8 p-4 text-sm text-[#D8DEE9]/62">
@@ -3472,7 +3468,6 @@ export default function AIOSDesktop() {
                     onChange={(event) => updateDriveFolderFormField('syncStatus', event.target.value)}
                     className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#202632]/90 px-3 py-2 text-sm text-white outline-none focus:border-[#B48EAD]/60"
                   >
-                    <option value="pending_creation">Da creare</option>
                     <option value="linked">Collegato</option>
                     <option value="manual_archive">Archivio manuale</option>
                     <option value="ready_to_import">Pronto per import</option>
