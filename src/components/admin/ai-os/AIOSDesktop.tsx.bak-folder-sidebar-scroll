@@ -3574,7 +3574,7 @@ export default function AIOSDesktop() {
               </div>
 
               <div className="grid h-[calc(100%-53px)] grid-cols-1 overflow-hidden lg:grid-cols-[260px_minmax(0,1fr)_390px]">
-                <aside className="border-b border-[#8FBCBB]/10 bg-[#1F2530]/72 p-4 lg:border-b-0 lg:border-r flex min-h-0 flex-col overflow-hidden">
+                <aside className="border-b border-[#8FBCBB]/10 bg-[#1F2530]/72 p-4 lg:border-b-0 lg:border-r">
                   <div className="mb-4 flex items-center justify-between">
                     <div>
                       <p className="text-xs uppercase tracking-[0.34em] text-[#8FBCBB]/70">
@@ -3592,7 +3592,7 @@ export default function AIOSDesktop() {
                       Caricamento...
                     </div>
                   ) : (
-                    <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 pb-6 [scrollbar-color:rgba(143,188,187,0.45)_rgba(32,38,50,0.55)] [scrollbar-width:thin]">
+                    <div className="space-y-2">
                       {folders.map((folder) => {
                         const visualState = getFolderVisualState(folder)
                         const isActiveFolder = activeFolderId === folder.id
