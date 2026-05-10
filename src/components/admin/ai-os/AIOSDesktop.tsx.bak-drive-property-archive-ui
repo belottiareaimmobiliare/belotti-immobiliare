@@ -22,7 +22,6 @@ type AIOSAgencyToolId =
   | 'showcase'
   | 'social'
   | 'visit'
-  | 'drive'
 
 type AIOSAgencyTool = {
   id: AIOSAgencyToolId
@@ -71,26 +70,6 @@ type AIOSDriveSettingsForm = {
   driveRootName: string
   driveRootUrl: string
   largeFileThresholdMb: string
-  notes: string
-}
-
-type AIOSDriveFolder = {
-  id: string
-  property_id: string
-  folder_name?: string | null
-  drive_folder_url: string
-  drive_folder_id?: string | null
-  sync_status: string
-  notes?: string | null
-  last_sync_at?: string | null
-  created_at?: string
-  updated_at?: string
-}
-
-type AIOSDriveFolderForm = {
-  folderName: string
-  driveFolderUrl: string
-  syncStatus: string
   notes: string
 }
 
@@ -326,14 +305,6 @@ const AI_OS_AGENCY_TOOLS: AIOSAgencyTool[] = [
     status: 'Agenda agenzia',
     primaryAction: 'Nuova visita',
   },
-  {
-    id: 'drive',
-    label: 'Drive archivio',
-    icon: '☁️',
-    description: 'Collega la cartella Google Drive dell’immobile per video pesanti, originali e documenti grandi.',
-    status: 'Archivio esterno free',
-    primaryAction: 'Collega Drive',
-  },
 ]
 
 const AI_OS_VISURA_OPTIONS = [
@@ -442,15 +413,6 @@ function getUploadAccept(section: AIOSSection) {
   return undefined
 }
 
-function createEmptyDriveFolderForm(): AIOSDriveFolderForm {
-  return {
-    folderName: '',
-    driveFolderUrl: '',
-    syncStatus: 'linked',
-    notes: '',
-  }
-}
-
 function createEmptyDriveSettingsForm(): AIOSDriveSettingsForm {
   return {
     driveRootName: 'Belotti AI-OS / Archivio Immobili',
@@ -504,19 +466,6 @@ function ownerRoleLabel(role: string) {
 function ownerTypeLabel(type: string) {
   if (type === 'company') return 'Società'
   return 'Persona fisica'
-}
-
-function labelForDriveSyncStatus(status: string) {
-  if (status === 'manual_archive') return 'Archivio manuale'
-  if (status === 'ready_to_import') return 'Pronto per import'
-  if (status === 'synced') return 'Sync OK'
-  return 'Collegato'
-}
-
-function classForDriveSyncStatus(status: string) {
-  if (status === 'ready_to_import') return 'border-[#EBCB8B]/35 bg-[#EBCB8B]/12 text-[#EBCB8B]'
-  if (status === 'synced') return 'border-[#A3BE8C]/30 bg-[#A3BE8C]/12 text-[#A3BE8C]'
-  return 'border-[#88C0D0]/30 bg-[#88C0D0]/12 text-[#88C0D0]'
 }
 
 function labelForMandateStatus(status: string) {
@@ -621,7 +570,7 @@ function folderStateTextClass(state: AIOSFolderVisualState) {
 
 function agencyToolLedClass(toolId: AIOSAgencyToolId) {
   if (toolId === 'checklist') return 'bg-[#A3BE8C] shadow-[0_0_12px_rgba(163,190,140,0.80)]'
-  if (toolId === 'visure' || toolId === 'owner-docs' || toolId === 'visit' || toolId === 'drive') {
+  if (toolId === 'visure' || toolId === 'owner-docs' || toolId === 'visit') {
     return 'bg-[#EBCB8B] shadow-[0_0_12px_rgba(235,203,139,0.78)]'
   }
   if (toolId === 'owner-data' || toolId === 'mandate' || toolId === 'showcase' || toolId === 'social') {
@@ -914,10 +863,6 @@ export default function AIOSDesktop() {
   const [driveSettingsSaving, setDriveSettingsSaving] = useState(false)
   const [driveSettingsOpen, setDriveSettingsOpen] = useState(false)
   const [driveSettingsForm, setDriveSettingsForm] = useState<AIOSDriveSettingsForm>(() => createEmptyDriveSettingsForm())
-  const [driveFolder, setDriveFolder] = useState<AIOSDriveFolder | null>(null)
-  const [driveFolderLoading, setDriveFolderLoading] = useState(false)
-  const [driveFolderSaving, setDriveFolderSaving] = useState(false)
-  const [driveFolderForm, setDriveFolderForm] = useState<AIOSDriveFolderForm>(() => createEmptyDriveFolderForm())
   const [mediaSyncing, setMediaSyncing] = useState(false)
   const [activeAgencyToolId, setActiveAgencyToolId] = useState<AIOSAgencyToolId | null>(null)
   const [documentRequests, setDocumentRequests] = useState<AIOSDocumentRequest[]>([])
@@ -1705,131 +1650,6 @@ export default function AIOSDesktop() {
     }
   }
 
-  function buildSuggestedDriveFolderName(folder: AIOSFolder | null) {
-    if (!folder) return 'AI-OS - Nuovo immobile'
-
-    const safeName = folder.name
-      .replace(/[^a-zA-Z0-9À-ÿ ._-]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-
-    return `${folder.propertyRef} - ${safeName}`.trim()
-  }
-
-  async function copySuggestedDriveFolderName() {
-    const value = driveFolderForm.folderName || buildSuggestedDriveFolderName(activeFolder)
-
-    try {
-      await navigator.clipboard.writeText(value)
-      setNotice(`Nome cartella copiato: ${value}`)
-    } catch {
-      setNotice(value)
-    }
-  }
-
-  async function loadDriveFolder(propertyId: string) {
-    if (!propertyId) return
-
-    setDriveFolderLoading(true)
-
-    try {
-      const response = await fetch(
-        `/api/admin/ai-os/drive-folder?propertyId=${encodeURIComponent(propertyId)}`,
-        { cache: 'no-store' },
-      )
-
-      const payload = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Errore caricamento cartella Drive immobile')
-      }
-
-      const nextDriveFolder = payload?.driveFolder ?? null
-      setDriveFolder(nextDriveFolder)
-
-      if (nextDriveFolder) {
-        setDriveFolderForm({
-          folderName: nextDriveFolder.folder_name || buildSuggestedDriveFolderName(activeFolder),
-          driveFolderUrl: nextDriveFolder.drive_folder_url || '',
-          syncStatus: nextDriveFolder.sync_status || 'linked',
-          notes: nextDriveFolder.notes || '',
-        })
-      } else {
-        setDriveFolderForm({
-          ...createEmptyDriveFolderForm(),
-          folderName: buildSuggestedDriveFolderName(activeFolder),
-        })
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Errore caricamento cartella Drive immobile'
-      setNotice(message)
-    } finally {
-      setDriveFolderLoading(false)
-    }
-  }
-
-  function updateDriveFolderFormField<K extends keyof AIOSDriveFolderForm>(
-    field: K,
-    value: AIOSDriveFolderForm[K],
-  ) {
-    setDriveFolderForm((current) => ({
-      ...current,
-      [field]: value,
-    }))
-  }
-
-  async function saveDriveFolder() {
-    if (!activeFolderId) {
-      setNotice('Seleziona prima una cartella immobile.')
-      return
-    }
-
-    if (!driveFolderForm.driveFolderUrl.trim()) {
-      setNotice('Inserisci il link della cartella Google Drive dell’immobile.')
-      return
-    }
-
-    setDriveFolderSaving(true)
-
-    try {
-      const response = await fetch('/api/admin/ai-os/drive-folder', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          propertyId: activeFolderId,
-          ...driveFolderForm,
-        }),
-      })
-
-      const payload = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Errore salvataggio cartella Drive immobile')
-      }
-
-      setDriveFolder(payload?.driveFolder ?? null)
-
-      if (payload?.driveFolder) {
-        setDriveFolderForm({
-          folderName: payload.driveFolder.folder_name || buildSuggestedDriveFolderName(activeFolder),
-          driveFolderUrl: payload.driveFolder.drive_folder_url || '',
-          syncStatus: payload.driveFolder.sync_status || 'linked',
-          notes: payload.driveFolder.notes || '',
-        })
-      }
-
-      setNotice('Cartella Drive immobile collegata al fascicolo.')
-      void loadFolders()
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Errore salvataggio cartella Drive immobile'
-      setNotice(message)
-    } finally {
-      setDriveFolderSaving(false)
-    }
-  }
-
   async function loadDriveSettings() {
     setDriveSettingsLoading(true)
 
@@ -1978,13 +1798,6 @@ export default function AIOSDesktop() {
     void loadQuota()
     void loadDriveSettings()
   }, [])
-
-  useEffect(() => {
-    if (activeAgencyToolId === 'drive' && activeFolderId) {
-      void loadDriveSettings()
-      void loadDriveFolder(activeFolderId)
-    }
-  }, [activeAgencyToolId, activeFolderId])
 
   useEffect(() => {
     setPreviewZoom(1)
@@ -3335,178 +3148,6 @@ export default function AIOSDesktop() {
               >
                 Apri Docs e planimetrie
               </button>
-            </div>
-          </div>
-        ) : activeAgencyTool.id === 'drive' ? (
-          <div className="space-y-4">
-            <div className="rounded-2xl border border-[#88C0D0]/24 bg-[#242B38]/86 p-4 shadow-[0_0_24px_rgba(136,192,208,0.07)]">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.24em] text-[#88C0D0]/75">
-                    Drive archivio immobile
-                  </p>
-                  <p className="mt-1 text-sm leading-6 text-[#D8DEE9]/62">
-                    Collega la cartella Drive specifica di questo immobile. Qui vanno originali, video pesanti,
-                    documenti sopra soglia e materiale non pubblicato sul sito.
-                  </p>
-                </div>
-
-                {driveFolder ? (
-                  <span className={`w-fit rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${classForDriveSyncStatus(driveFolder.sync_status)}`}>
-                    {labelForDriveSyncStatus(driveFolder.sync_status)}
-                  </span>
-                ) : null}
-              </div>
-
-              <div className="mt-4 grid gap-3 lg:grid-cols-2">
-                <div className="rounded-2xl border border-[#8FBCBB]/16 bg-[#202632]/74 p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-[#8FBCBB]/70">
-                    Drive root progetto
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-white">
-                    {driveSettings?.drive_root_name || 'Belotti AI-OS / Archivio Immobili'}
-                  </p>
-
-                  {driveSettings?.drive_root_url ? (
-                    <a
-                      href={driveSettings.drive_root_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-4 inline-flex rounded-full border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#88C0D0]/18"
-                    >
-                      Apri Drive root
-                    </a>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={openDriveSettingsPanel}
-                      className="mt-4 rounded-full border border-[#EBCB8B]/25 bg-[#EBCB8B]/10 px-4 py-2 text-xs font-semibold text-[#EBCB8B] transition hover:bg-[#EBCB8B]/18"
-                    >
-                      Imposta Drive root
-                    </button>
-                  )}
-                </div>
-
-                <div className="rounded-2xl border border-[#B48EAD]/18 bg-[#202632]/74 p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-[#B48EAD]/72">
-                    Nome cartella consigliato
-                  </p>
-                  <p className="mt-2 break-words text-sm font-semibold text-white">
-                    {driveFolderForm.folderName || buildSuggestedDriveFolderName(activeFolder)}
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={copySuggestedDriveFolderName}
-                    className="mt-4 rounded-full border border-[#B48EAD]/25 bg-[#B48EAD]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#B48EAD]/18"
-                  >
-                    Copia nome cartella
-                  </button>
-                </div>
-              </div>
-
-              {driveFolderLoading ? (
-                <p className="mt-4 text-sm text-[#D8DEE9]/55">Caricamento cartella Drive immobile...</p>
-              ) : driveFolder ? (
-                <div className="mt-4 rounded-2xl border border-[#A3BE8C]/18 bg-[#202632]/72 p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-[#A3BE8C]/72">
-                    Cartella collegata
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-white">
-                    {driveFolder.folder_name || activeFolder?.name || 'Cartella Drive immobile'}
-                  </p>
-                  <p className="mt-2 break-all text-xs leading-5 text-[#D8DEE9]/52">
-                    {driveFolder.drive_folder_url}
-                  </p>
-
-                  <a
-                    href={driveFolder.drive_folder_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-4 inline-flex rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.22)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
-                  >
-                    Apri Drive immobile
-                  </a>
-                </div>
-              ) : (
-                <div className="mt-4 rounded-2xl border border-[#EBCB8B]/18 bg-[#EBCB8B]/8 p-4 text-sm text-[#D8DEE9]/62">
-                  Nessuna cartella Drive collegata a questo immobile.
-                </div>
-              )}
-            </div>
-
-            <div className="rounded-2xl border border-[#B48EAD]/26 bg-[#242B38]/88 p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-[#B48EAD]/75">
-                Collega / modifica Drive immobile
-              </p>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <label className="text-xs font-semibold text-[#D8DEE9]/70 sm:col-span-2">
-                  Nome cartella
-                  <input
-                    value={driveFolderForm.folderName}
-                    onChange={(event) => updateDriveFolderFormField('folderName', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#202632]/90 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                    placeholder={buildSuggestedDriveFolderName(activeFolder)}
-                  />
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70 sm:col-span-2">
-                  Link cartella Google Drive immobile *
-                  <input
-                    value={driveFolderForm.driveFolderUrl}
-                    onChange={(event) => updateDriveFolderFormField('driveFolderUrl', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#202632]/90 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                    placeholder="https://drive.google.com/drive/folders/..."
-                  />
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70">
-                  Stato archivio
-                  <select
-                    value={driveFolderForm.syncStatus}
-                    onChange={(event) => updateDriveFolderFormField('syncStatus', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#202632]/90 px-3 py-2 text-sm text-white outline-none focus:border-[#B48EAD]/60"
-                  >
-                    <option value="linked">Collegato</option>
-                    <option value="manual_archive">Archivio manuale</option>
-                    <option value="ready_to_import">Pronto per import</option>
-                    <option value="synced">Sync OK</option>
-                  </select>
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70 sm:col-span-2">
-                  Note archivio
-                  <textarea
-                    value={driveFolderForm.notes}
-                    onChange={(event) => updateDriveFolderFormField('notes', event.target.value)}
-                    className="mt-1 min-h-[86px] w-full resize-none rounded-2xl border border-[#8FBCBB]/15 bg-[#202632]/90 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                    placeholder="Esempio: qui teniamo video originali, scatti grezzi, documenti pesanti..."
-                  />
-                </label>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  disabled={driveFolderSaving}
-                  onClick={saveDriveFolder}
-                  className="rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.22)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75 disabled:cursor-wait disabled:opacity-60"
-                >
-                  {driveFolderSaving ? 'Salvataggio...' : 'Salva Drive immobile'}
-                </button>
-
-                {driveFolderForm.driveFolderUrl.trim() ? (
-                  <a
-                    href={driveFolderForm.driveFolderUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-full border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#88C0D0]/18"
-                  >
-                    Apri link inserito
-                  </a>
-                ) : null}
-              </div>
             </div>
           </div>
         ) : (
