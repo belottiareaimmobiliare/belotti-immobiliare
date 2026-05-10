@@ -4016,14 +4016,9 @@ export default function AIOSDesktop() {
               key={item.id}
               type="button"
               onClick={() => {
-                if (item.id === 'drive-settings') {
-                  openDriveSettingsPanel()
-                  return
-                }
-
-                setDriveSettingsOpen(false)
                 setDesktopWindowOpen(true)
                 setStartOpen(false)
+                setNotice(`${item.label}: area demo, collegamento reale da costruire.`)
               }}
               className="group flex w-full flex-col items-center gap-2 rounded-2xl border border-[#8FBCBB]/0 px-2 py-3 text-center transition hover:border-[#B48EAD]/30 hover:bg-[#B48EAD]/10"
             >
