@@ -53,26 +53,6 @@ type AIOSFile = {
   updatedAt?: string
 }
 
-type AIOSDriveSettings = {
-  id: string
-  singleton_key: string
-  drive_root_name?: string | null
-  drive_root_url?: string | null
-  drive_root_folder_id?: string | null
-  large_file_threshold_mb: number
-  storage_strategy: string
-  notes?: string | null
-  created_at?: string
-  updated_at?: string
-}
-
-type AIOSDriveSettingsForm = {
-  driveRootName: string
-  driveRootUrl: string
-  largeFileThresholdMb: string
-  notes: string
-}
-
 type AIOSFolder = {
   id: string
   name: string
@@ -385,12 +365,6 @@ const desktopFolders = [
     icon: '⚙️',
     hint: 'Solo admin',
   },
-  {
-    id: 'drive-settings',
-    label: 'Drive',
-    icon: '☁️',
-    hint: 'Archivio free',
-  },
 ]
 
 function getFileKind(file: File): AIOSFileKind {
@@ -411,15 +385,6 @@ function getUploadAccept(section: AIOSSection) {
   if (section === 'images') return 'image/*,video/*'
 
   return undefined
-}
-
-function createEmptyDriveSettingsForm(): AIOSDriveSettingsForm {
-  return {
-    driveRootName: 'Belotti AI-OS / Archivio Immobili',
-    driveRootUrl: '',
-    largeFileThresholdMb: '50',
-    notes: 'Drive viene usato come archivio free per video e documenti pesanti. Supabase resta lo storage ufficiale per galleria pubblica e file sito.',
-  }
 }
 
 function createEmptyMandateForm(prefillOwnerName = ''): AIOSPropertyMandateForm {
@@ -858,11 +823,6 @@ export default function AIOSDesktop() {
   } | null>(null)
   const [contextMenu, setContextMenu] = useState<AIOSContextMenu>(null)
   const [quotaStatus, setQuotaStatus] = useState<AIOSQuotaStatus | null>(null)
-  const [driveSettings, setDriveSettings] = useState<AIOSDriveSettings | null>(null)
-  const [driveSettingsLoading, setDriveSettingsLoading] = useState(false)
-  const [driveSettingsSaving, setDriveSettingsSaving] = useState(false)
-  const [driveSettingsOpen, setDriveSettingsOpen] = useState(false)
-  const [driveSettingsForm, setDriveSettingsForm] = useState<AIOSDriveSettingsForm>(() => createEmptyDriveSettingsForm())
   const [mediaSyncing, setMediaSyncing] = useState(false)
   const [activeAgencyToolId, setActiveAgencyToolId] = useState<AIOSAgencyToolId | null>(null)
   const [documentRequests, setDocumentRequests] = useState<AIOSDocumentRequest[]>([])
@@ -1656,85 +1616,6 @@ export default function AIOSDesktop() {
     }
   }
 
-  async function loadDriveSettings() {
-    setDriveSettingsLoading(true)
-
-    try {
-      const response = await fetch('/api/admin/ai-os/drive-settings', {
-        cache: 'no-store',
-      })
-
-      const payload = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Errore caricamento impostazioni Drive')
-      }
-
-      const settings = payload?.settings ?? null
-      setDriveSettings(settings)
-
-      if (settings) {
-        setDriveSettingsForm({
-          driveRootName: settings.drive_root_name || 'Belotti AI-OS / Archivio Immobili',
-          driveRootUrl: settings.drive_root_url || '',
-          largeFileThresholdMb: String(settings.large_file_threshold_mb || 50),
-          notes: settings.notes || '',
-        })
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Errore caricamento impostazioni Drive'
-      setNotice(message)
-    } finally {
-      setDriveSettingsLoading(false)
-    }
-  }
-
-  function updateDriveSettingsFormField<K extends keyof AIOSDriveSettingsForm>(
-    field: K,
-    value: AIOSDriveSettingsForm[K],
-  ) {
-    setDriveSettingsForm((current) => ({
-      ...current,
-      [field]: value,
-    }))
-  }
-
-  async function saveDriveSettings() {
-    setDriveSettingsSaving(true)
-
-    try {
-      const response = await fetch('/api/admin/ai-os/drive-settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(driveSettingsForm),
-      })
-
-      const payload = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Errore salvataggio impostazioni Drive')
-      }
-
-      setDriveSettings(payload?.settings ?? null)
-      setNotice('Impostazioni Google Drive salvate.')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Errore salvataggio impostazioni Drive'
-      setNotice(message)
-    } finally {
-      setDriveSettingsSaving(false)
-    }
-  }
-
-  function openDriveSettingsPanel() {
-    setDriveSettingsOpen(true)
-    setStartOpen(false)
-    setDesktopWindowOpen(true)
-    setNotice('Impostazioni Drive archivio aperte.')
-    void loadDriveSettings()
-  }
-
   async function loadFolders() {
     setFoldersLoading(true)
 
@@ -1802,7 +1683,6 @@ export default function AIOSDesktop() {
   useEffect(() => {
     void loadFolders()
     void loadQuota()
-    void loadDriveSettings()
   }, [])
 
   useEffect(() => {
@@ -2214,7 +2094,6 @@ export default function AIOSDesktop() {
 
   const selectFolder = (folder: AIOSFolder, mobile = false) => {
     setActiveFolderId(folder.id)
-    setDriveSettingsOpen(false)
     setActiveSection('root')
     setSelectedTxtId(null)
     setTxtDraft('')
@@ -3697,7 +3576,7 @@ export default function AIOSDesktop() {
                   <span className="text-xl">📁</span>
                   <div className="min-w-0">
                     <h2 className="truncate text-sm font-semibold text-white md:text-base">
-                      {driveSettingsOpen ? 'Impostazioni Drive' : 'Cartella Immobili'}
+                      Cartella Immobili
                     </h2>
                     <p className="truncate text-xs text-[#D8DEE9]/55">{notice}</p>
                   </div>
@@ -3794,139 +3673,6 @@ export default function AIOSDesktop() {
                 </aside>
 
                 <section className="min-h-0 overflow-auto p-4">
-                  {driveSettingsOpen ? (
-                    <div className="rounded-[28px] border border-[#88C0D0]/24 bg-[#202632]/86 p-5 shadow-[0_0_34px_rgba(136,192,208,0.08)]">
-                      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                          <p className="text-xs uppercase tracking-[0.32em] text-[#88C0D0]/75">
-                            AI-OS Drive globale
-                          </p>
-                          <h2 className="mt-1 text-2xl font-semibold text-white">
-                            Cartella Google Drive di progetto
-                          </h2>
-                          <p className="mt-2 max-w-3xl text-sm leading-6 text-[#D8DEE9]/62">
-                            Qui imposti la cartella Drive principale da usare come archivio free per video pesanti,
-                            documenti grandi e originali non pubblicati. Non modifica login, OTP, QR o accessi fotografi.
-                          </p>
-                        </div>
-
-                        {driveSettings?.drive_root_url ? (
-                          <a
-                            href={driveSettings.drive_root_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="rounded-full border border-[#88C0D0]/35 bg-[#88C0D0]/12 px-4 py-2 text-xs font-bold text-[#88C0D0] transition hover:bg-[#88C0D0]/20"
-                          >
-                            Apri Drive root
-                          </a>
-                        ) : null}
-                      </div>
-
-                      {driveSettingsLoading ? (
-                        <div className="rounded-2xl border border-[#8FBCBB]/14 bg-[#242B38]/70 p-4 text-sm text-[#D8DEE9]/62">
-                          Caricamento impostazioni Drive...
-                        </div>
-                      ) : (
-                        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-                          <div className="rounded-2xl border border-[#B48EAD]/22 bg-[#242B38]/86 p-4">
-                            <p className="text-xs uppercase tracking-[0.24em] text-[#B48EAD]/75">
-                              Configurazione
-                            </p>
-
-                            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                              <label className="text-xs font-semibold text-[#D8DEE9]/70 sm:col-span-2">
-                                Nome cartella Drive root
-                                <input
-                                  value={driveSettingsForm.driveRootName}
-                                  onChange={(event) => updateDriveSettingsFormField('driveRootName', event.target.value)}
-                                  className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#202632]/90 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                                  placeholder="Belotti AI-OS / Archivio Immobili"
-                                />
-                              </label>
-
-                              <label className="text-xs font-semibold text-[#D8DEE9]/70 sm:col-span-2">
-                                Link cartella Google Drive root
-                                <input
-                                  value={driveSettingsForm.driveRootUrl}
-                                  onChange={(event) => updateDriveSettingsFormField('driveRootUrl', event.target.value)}
-                                  className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#202632]/90 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                                  placeholder="https://drive.google.com/drive/folders/..."
-                                />
-                              </label>
-
-                              <label className="text-xs font-semibold text-[#D8DEE9]/70">
-                                Soglia file grandi MB
-                                <input
-                                  type="number"
-                                  min="1"
-                                  value={driveSettingsForm.largeFileThresholdMb}
-                                  onChange={(event) => updateDriveSettingsFormField('largeFileThresholdMb', event.target.value)}
-                                  className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#202632]/90 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                                  placeholder="50"
-                                />
-                              </label>
-
-                              <label className="text-xs font-semibold text-[#D8DEE9]/70 sm:col-span-2">
-                                Note operative
-                                <textarea
-                                  value={driveSettingsForm.notes}
-                                  onChange={(event) => updateDriveSettingsFormField('notes', event.target.value)}
-                                  className="mt-1 min-h-[110px] w-full resize-none rounded-2xl border border-[#8FBCBB]/15 bg-[#202632]/90 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                                  placeholder="Strategia archivio, regole per fotografi, video pesanti..."
-                                />
-                              </label>
-                            </div>
-
-                            <div className="mt-4 flex flex-wrap gap-2">
-                              <button
-                                type="button"
-                                disabled={driveSettingsSaving}
-                                onClick={saveDriveSettings}
-                                className="rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.22)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75 disabled:cursor-wait disabled:opacity-60"
-                              >
-                                {driveSettingsSaving ? 'Salvataggio...' : 'Salva impostazioni Drive'}
-                              </button>
-
-                              {driveSettingsForm.driveRootUrl.trim() ? (
-                                <a
-                                  href={driveSettingsForm.driveRootUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="rounded-full border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#88C0D0]/18"
-                                >
-                                  Apri link inserito
-                                </a>
-                              ) : null}
-                            </div>
-                          </div>
-
-                          <aside className="rounded-2xl border border-[#8FBCBB]/18 bg-[#242B38]/82 p-4">
-                            <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/75">
-                              Regola storage
-                            </p>
-
-                            <div className="mt-4 space-y-3 text-sm leading-6 text-[#D8DEE9]/66">
-                              <p>
-                                <span className="font-bold text-[#A3BE8C]">Supabase</span> resta per immagini ottimizzate,
-                                planimetrie pubbliche e file necessari al sito.
-                              </p>
-                              <p>
-                                <span className="font-bold text-[#88C0D0]">Google Drive</span> resta archivio free per originali,
-                                video pesanti e documenti oltre soglia.
-                              </p>
-                              <p>
-                                Soglia attuale: <span className="font-bold text-[#EBCB8B]">{driveSettingsForm.largeFileThresholdMb || '50'} MB</span>.
-                              </p>
-                              <p className="text-xs text-[#D8DEE9]/46">
-                                Questa impostazione non tocca OAuth admin, QR login, OTP o accessi fotografi.
-                              </p>
-                            </div>
-                          </aside>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                  <>
                   <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <p className="text-xs uppercase tracking-[0.32em] text-[#8FBCBB]/70">
@@ -4026,8 +3772,6 @@ export default function AIOSDesktop() {
                       </div>
                     )}
                   </div>
-                  </>
-                  )}
                 </section>
 
                 <aside className="min-h-0 overflow-auto border-t border-[#8FBCBB]/10 bg-[#1E2430]/74 p-4 lg:border-l lg:border-t-0">
