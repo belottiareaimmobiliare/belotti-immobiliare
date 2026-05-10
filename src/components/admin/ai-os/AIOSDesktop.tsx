@@ -3579,15 +3579,6 @@ export default function AIOSDesktop() {
 
                       <button
                         type="button"
-                        disabled={mediaSyncing || !activeFolderId}
-                        onClick={syncActiveFolderMedia}
-                        className="rounded-full border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-4 py-2 text-sm font-medium text-[#E5E9F0] transition hover:bg-[#88C0D0]/18 disabled:cursor-wait disabled:opacity-55"
-                      >
-                        {mediaSyncing ? 'Sync...' : 'Sincronizza media'}
-                      </button>
-
-                      <button
-                        type="button"
                         onClick={createTxtFile}
                         className={`rounded-full border border-[#8FBCBB]/25 bg-[#A3BE8C]/10 px-4 py-2 text-sm font-medium text-[#D8DEE9] transition hover:bg-[#A3BE8C]/18 ${
                           activeSection === 'images' ? 'hidden' : ''

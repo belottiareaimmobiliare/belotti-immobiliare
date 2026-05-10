@@ -111,7 +111,7 @@ export async function POST(request: Request) {
 
     const { data: inserted, error: insertError } = await supabase
       .from('ai_os_files')
-      .insert({
+      .upsert({
         property_id: propertyId,
         file_name: fileName,
         file_kind: kind,
@@ -124,6 +124,8 @@ export async function POST(request: Request) {
         property_media_id: propertyMediaId,
         is_gallery_visible: isGalleryVisible,
         is_deleted: false,
+      }, {
+        onConflict: 'property_media_id',
       })
       .select('*')
       .single()
