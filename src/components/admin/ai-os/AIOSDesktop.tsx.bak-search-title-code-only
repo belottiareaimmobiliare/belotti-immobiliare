@@ -899,7 +899,13 @@ export default function AIOSDesktop() {
     if (query.length < 3) return folders
 
     return folders.filter((folder) => {
-      return [folder.name, folder.propertyRef]
+      return [
+        folder.name,
+        folder.propertyRef,
+        folder.address,
+        folder.owner,
+        folder.visualReason,
+      ]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(query))
     })
@@ -3700,13 +3706,13 @@ export default function AIOSDesktop() {
                 <div className="ml-6 mr-auto hidden w-[min(560px,42vw)] md:block">
                   <label className="relative block">
                     <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold uppercase tracking-[0.16em] text-[#A3BE8C]/80">
-                      Ricerca immobile
+                      Cerca immobile
                     </span>
                     <input
                       value={folderSearchQuery}
                       onChange={(event) => setFolderSearchQuery(event.target.value)}
                       className="h-9 w-full rounded-full border border-[#A3BE8C]/60 bg-[#202632]/90 pl-36 pr-4 text-sm font-semibold text-[#E5E9F0] outline-none shadow-[0_0_18px_rgba(163,190,140,0.14)] transition placeholder:text-[#A3BE8C]/45 focus:border-[#A3BE8C] focus:bg-[#1B202B] focus:shadow-[0_0_24px_rgba(163,190,140,0.22)]"
-                      placeholder="inserisci titolo o codice immobile..."
+                      placeholder="min. 3 lettere, rif., comune..."
                     />
                   </label>
                 </div>
@@ -3741,7 +3747,7 @@ export default function AIOSDesktop() {
                     </div>
                   ) : (
                     <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 pb-6 [scrollbar-color:rgba(143,188,187,0.45)_rgba(32,38,50,0.55)] [scrollbar-width:thin]">
-                      {filteredFolders.map((folder) => {
+                      {folders.map((folder) => {
                         const visualState = getFolderVisualState(folder)
                         const isActiveFolder = activeFolderId === folder.id
 
@@ -3782,7 +3788,7 @@ export default function AIOSDesktop() {
 
                   {!foldersLoading && folderSearchQuery.trim().length >= 3 && folders.length > 0 && filteredFolders.length === 0 ? (
                     <div className="mt-3 rounded-2xl border border-[#EBCB8B]/20 bg-[#EBCB8B]/8 p-3 text-xs leading-5 text-[#EBCB8B]">
-                      Nessun immobile trovato per titolo o codice inserito.
+                      Nessun immobile trovato con questa ricerca.
                     </div>
                   ) : null}
                 </aside>
