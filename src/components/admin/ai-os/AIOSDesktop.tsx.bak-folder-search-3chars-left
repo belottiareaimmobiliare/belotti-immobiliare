@@ -856,7 +856,7 @@ export default function AIOSDesktop() {
   const filteredFolders = useMemo(() => {
     const query = folderSearchQuery.trim().toLowerCase()
 
-    if (query.length < 3) return folders
+    if (!query) return folders
 
     return folders.filter((folder) => {
       return [
@@ -3582,16 +3582,16 @@ export default function AIOSDesktop() {
                   </div>
                 </div>
 
-                <div className="ml-6 mr-auto hidden w-[min(560px,42vw)] md:block">
+                <div className="mx-4 hidden min-w-[260px] max-w-[520px] flex-1 md:block">
                   <label className="relative block">
-                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold uppercase tracking-[0.16em] text-[#A3BE8C]/80">
-                      Cerca immobile
+                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xs text-[#A3BE8C]/75">
+                      Cerca
                     </span>
                     <input
                       value={folderSearchQuery}
                       onChange={(event) => setFolderSearchQuery(event.target.value)}
-                      className="h-9 w-full rounded-full border border-[#A3BE8C]/60 bg-[#202632]/90 pl-36 pr-4 text-sm font-semibold text-[#E5E9F0] outline-none shadow-[0_0_18px_rgba(163,190,140,0.14)] transition placeholder:text-[#A3BE8C]/45 focus:border-[#A3BE8C] focus:bg-[#1B202B] focus:shadow-[0_0_24px_rgba(163,190,140,0.22)]"
-                      placeholder="min. 3 lettere, rif., comune..."
+                      className="h-9 w-full rounded-full border border-[#A3BE8C]/55 bg-[#202632]/88 pl-16 pr-4 text-sm font-semibold text-[#E5E9F0] outline-none shadow-[0_0_18px_rgba(163,190,140,0.12)] transition placeholder:text-[#A3BE8C]/45 focus:border-[#A3BE8C] focus:bg-[#1B202B] focus:shadow-[0_0_24px_rgba(163,190,140,0.20)]"
+                      placeholder="immobile, rif., comune..."
                     />
                   </label>
                 </div>
@@ -3616,7 +3616,7 @@ export default function AIOSDesktop() {
                       <h3 className="text-lg font-semibold text-white">Immobili</h3>
                     </div>
                     <span className="rounded-full bg-[#A3BE8C]/15 px-3 py-1 text-xs text-[#88C0D0]">
-                      {folderSearchQuery.trim().length >= 3 ? `${filteredFolders.length}/${folders.length}` : folders.length}
+                      {folderSearchQuery.trim() ? `${filteredFolders.length}/${folders.length}` : folders.length}
                     </span>
                   </div>
 
@@ -3665,7 +3665,7 @@ export default function AIOSDesktop() {
                     </div>
                   )}
 
-                  {!foldersLoading && folderSearchQuery.trim().length >= 3 && folders.length > 0 && filteredFolders.length === 0 ? (
+                  {!foldersLoading && folders.length > 0 && filteredFolders.length === 0 ? (
                     <div className="mt-3 rounded-2xl border border-[#EBCB8B]/20 bg-[#EBCB8B]/8 p-3 text-xs leading-5 text-[#EBCB8B]">
                       Nessun immobile trovato con questa ricerca.
                     </div>
