@@ -94,6 +94,28 @@ type AIOSDriveFolderForm = {
   notes: string
 }
 
+
+type AIOSDriveExplorerFolder = {
+  id: string
+  name: string
+  url: string
+}
+
+type AIOSDriveExplorerFile = {
+  id: string
+  name: string
+  url: string
+  mimeType?: string
+  size?: number
+  updatedAt?: string
+}
+
+type AIOSDriveExplorerData = {
+  folder: AIOSDriveExplorerFolder | null
+  folders: AIOSDriveExplorerFolder[]
+  files: AIOSDriveExplorerFile[]
+}
+
 type AIOSFolder = {
   id: string
   name: string
@@ -920,6 +942,9 @@ export default function AIOSDesktop() {
   const [driveFolderLoading, setDriveFolderLoading] = useState(false)
   const [driveFolderSaving, setDriveFolderSaving] = useState(false)
   const [driveFolderForm, setDriveFolderForm] = useState<AIOSDriveFolderForm>(() => createEmptyDriveFolderForm())
+  const [driveExplorer, setDriveExplorer] = useState<AIOSDriveExplorerData | null>(null)
+  const [driveExplorerLoading, setDriveExplorerLoading] = useState(false)
+  const [driveExplorerError, setDriveExplorerError] = useState('')
   const [mediaSyncing, setMediaSyncing] = useState(false)
   const [activeAgencyToolId, setActiveAgencyToolId] = useState<AIOSAgencyToolId | null>(null)
   const [documentRequests, setDocumentRequests] = useState<AIOSDocumentRequest[]>([])
@@ -1770,6 +1795,46 @@ export default function AIOSDesktop() {
     }
   }
 
+  async function loadDriveExplorer(folderId?: string | null) {
+    const targetFolderId = String(folderId || driveFolder?.drive_folder_id || '').trim()
+
+    if (!targetFolderId) {
+      setDriveExplorer(null)
+      setDriveExplorerError('Cartella Drive immobile non ancora collegata.')
+      return
+    }
+
+    setDriveExplorerLoading(true)
+    setDriveExplorerError('')
+
+    try {
+      const response = await fetch(
+        `/api/admin/ai-os/drive-explorer?folderId=${encodeURIComponent(targetFolderId)}`,
+        { cache: 'no-store' },
+      )
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore lettura Drive immobile')
+      }
+
+      setDriveExplorer({
+        folder: payload?.folder ?? null,
+        folders: Array.isArray(payload?.folders) ? payload.folders : [],
+        files: Array.isArray(payload?.files) ? payload.files : [],
+      })
+
+      setNotice('Drive immobile aggiornato dentro AI-OS.')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore lettura Drive immobile'
+      setDriveExplorerError(message)
+      setNotice(message)
+    } finally {
+      setDriveExplorerLoading(false)
+    }
+  }
+
   function updateDriveFolderFormField<K extends keyof AIOSDriveFolderForm>(
     field: K,
     value: AIOSDriveFolderForm[K],
@@ -2012,6 +2077,12 @@ export default function AIOSDesktop() {
       void loadDriveFolder(activeFolderId)
     }
   }, [activeAgencyToolId, activeFolderId])
+
+  useEffect(() => {
+    if (activeAgencyToolId === 'drive' && driveFolder?.drive_folder_id) {
+      void loadDriveExplorer(driveFolder.drive_folder_id)
+    }
+  }, [activeAgencyToolId, driveFolder?.drive_folder_id])
 
   useEffect(() => {
     setPreviewZoom(1)
@@ -3508,6 +3579,120 @@ export default function AIOSDesktop() {
                   </button>
                 </div>
               </div>
+
+              {driveFolder?.drive_folder_id ? (
+                <div className="mt-4 rounded-2xl border border-[#88C0D0]/20 bg-[#202632]/72 p-4">
+                  <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.22em] text-[#88C0D0]/75">
+                        AI-OS Drive Explorer
+                      </p>
+                      <p className="mt-1 text-sm leading-6 text-[#D8DEE9]/60">
+                        Vista limitata alla cartella Drive di questo immobile e alle sue sottocartelle. Nessuna navigazione verso la root agenzia.
+                      </p>
+                      {driveExplorer?.folder ? (
+                        <p className="mt-2 text-xs text-[#D8DEE9]/45">
+                          Cartella aperta: {driveExplorer.folder.name}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => loadDriveExplorer(driveFolder.drive_folder_id)}
+                        className="rounded-full border border-[#8FBCBB]/25 bg-[#8FBCBB]/10 px-3 py-1.5 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#8FBCBB]/18"
+                      >
+                        Torna cartella immobile
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => loadDriveExplorer(driveExplorer?.folder?.id || driveFolder.drive_folder_id)}
+                        className="rounded-full border border-[#B48EAD]/25 bg-[#B48EAD]/10 px-3 py-1.5 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#B48EAD]/18"
+                      >
+                        Aggiorna Drive
+                      </button>
+                    </div>
+                  </div>
+
+                  {driveExplorerLoading ? (
+                    <div className="rounded-2xl border border-[#8FBCBB]/12 bg-[#242B38]/80 p-4 text-sm text-[#D8DEE9]/58">
+                      Lettura Drive immobile...
+                    </div>
+                  ) : driveExplorerError ? (
+                    <div className="rounded-2xl border border-[#BF616A]/25 bg-[#BF616A]/10 p-4 text-sm text-[#BF616A]">
+                      {driveExplorerError}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div>
+                        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-[#8FBCBB]/68">
+                          Sottocartelle
+                        </p>
+
+                        {driveExplorer?.folders?.length ? (
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {driveExplorer.folders.map((folder) => (
+                              <button
+                                key={folder.id}
+                                type="button"
+                                onClick={() => loadDriveExplorer(folder.id)}
+                                className="rounded-2xl border border-[#88C0D0]/18 bg-[#242B38]/84 p-3 text-left transition hover:border-[#88C0D0]/42 hover:bg-[#88C0D0]/10"
+                              >
+                                <p className="text-sm font-semibold text-white">📁 {folder.name}</p>
+                                <p className="mt-1 text-xs text-[#D8DEE9]/45">
+                                  Apri dentro AI-OS
+                                </p>
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="rounded-2xl border border-[#8FBCBB]/10 bg-[#242B38]/55 p-3 text-sm text-[#D8DEE9]/50">
+                            Nessuna sottocartella presente.
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-[#B48EAD]/72">
+                          File
+                        </p>
+
+                        {driveExplorer?.files?.length ? (
+                          <div className="grid gap-2">
+                            {driveExplorer.files.map((file) => (
+                              <a
+                                key={file.id}
+                                href={file.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center justify-between gap-3 rounded-2xl border border-[#8FBCBB]/12 bg-[#242B38]/76 p-3 transition hover:border-[#B48EAD]/35 hover:bg-[#B48EAD]/10"
+                              >
+                                <div className="min-w-0">
+                                  <p className="truncate text-sm font-semibold text-white">
+                                    {file.mimeType?.startsWith('video/') ? '🎥' : file.mimeType?.startsWith('image/') ? '🖼️' : '📄'} {file.name}
+                                  </p>
+                                  <p className="mt-1 text-xs text-[#D8DEE9]/45">
+                                    {file.size ? formatFileSize(Number(file.size)) : 'dimensione non disponibile'}
+                                  </p>
+                                </div>
+                                <span className="shrink-0 text-xs font-semibold text-[#88C0D0]">
+                                  Apri
+                                </span>
+                              </a>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="rounded-2xl border border-[#8FBCBB]/10 bg-[#242B38]/55 p-3 text-sm text-[#D8DEE9]/50">
+                            Nessun file presente in questa cartella.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : null}
 
               {driveFolderLoading ? (
                 <p className="mt-4 text-sm text-[#D8DEE9]/55">Caricamento cartella Drive immobile...</p>
