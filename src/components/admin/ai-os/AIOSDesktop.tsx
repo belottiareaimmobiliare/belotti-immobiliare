@@ -4890,7 +4890,7 @@ export default function AIOSDesktop() {
                         {activeFolder.files.map((file) => renderFileCard(file))}
                       </div>
                     ) : (
-                      <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/20 text-center">
+                      <div className={`${String(activeAgencyToolId) === "drive" ? "hidden" : ""} flex min-h-[300px] items-center justify-center rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/20 text-center`}>
                         <div>
                           <p className="text-4xl">📂</p>
                           <p className="mt-3 font-medium text-white">Cartella vuota</p>
