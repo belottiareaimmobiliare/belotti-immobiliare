@@ -8,6 +8,7 @@ const MAX_DRIVE_EXPLORER_UPLOAD_BYTES = 4 * 1024 * 1024
 async function callDriveScript(input: {
   action: string
   folderId: string
+  folderName?: string
   fileName?: string
   mimeType?: string
   base64Data?: string
@@ -28,6 +29,7 @@ async function callDriveScript(input: {
       token,
       action: input.action,
       folderId: input.folderId,
+      folderName: input.folderName,
       fileName: input.fileName,
       mimeType: input.mimeType,
       base64Data: input.base64Data,
@@ -44,7 +46,7 @@ async function callDriveScript(input: {
   }
 
   if (!response.ok || !payload?.ok) {
-    throw new Error(payload?.error || 'Errore lettura Drive')
+    throw new Error(payload?.error || 'Errore Drive')
   }
 
   return payload
@@ -63,7 +65,6 @@ export async function GET(request: Request) {
     const folderIdParam = searchParams.get('folderId')?.trim()
 
     const supabase = createServiceClient()
-
     let folderId = folderIdParam || ''
 
     if (!folderId && propertyId) {
@@ -109,7 +110,6 @@ export async function GET(request: Request) {
   }
 }
 
-
 export async function POST(request: Request) {
   try {
     const profile = await requireAdminProfile()
@@ -119,13 +119,43 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json().catch(() => null)
-
+    const action = String(body?.action ?? 'uploadFile').trim()
     const folderId = String(body?.folderId ?? '').trim()
+
+    if (!folderId) {
+      return NextResponse.json(
+        { error: 'folderId mancante' },
+        { status: 400 },
+      )
+    }
+
+    if (action === 'createSubfolder') {
+      const folderName = String(body?.folderName ?? '').trim()
+
+      if (!folderName) {
+        return NextResponse.json(
+          { error: 'Nome sottocartella mancante' },
+          { status: 400 },
+        )
+      }
+
+      const payload = await callDriveScript({
+        action: 'createSubfolder',
+        folderId,
+        folderName,
+      })
+
+      return NextResponse.json({
+        ok: true,
+        folder: payload.folder ?? null,
+      })
+    }
+
     const fileName = String(body?.fileName ?? '').trim()
     const mimeType = String(body?.mimeType ?? 'application/octet-stream').trim()
     const base64Data = String(body?.base64Data ?? '').trim()
 
-    if (!folderId || !fileName || !base64Data) {
+    if (!fileName || !base64Data) {
       return NextResponse.json(
         { error: 'Dati upload Drive mancanti' },
         { status: 400 },
@@ -158,7 +188,7 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     return NextResponse.json(
-      { error: jsonError(error, 'Errore upload file su Drive') },
+      { error: jsonError(error, 'Errore operazione Drive') },
       { status: 500 },
     )
   }

@@ -964,6 +964,9 @@ export default function AIOSDesktop() {
   const [driveExplorerError, setDriveExplorerError] = useState('')
   const [driveExplorerUploading, setDriveExplorerUploading] = useState(false)
   const [driveExplorerUploadMessage, setDriveExplorerUploadMessage] = useState('')
+  const [driveExplorerPreviewFile, setDriveExplorerPreviewFile] = useState<AIOSDriveExplorerFile | null>(null)
+  const [driveExplorerNewFolderName, setDriveExplorerNewFolderName] = useState('')
+  const [driveExplorerCreatingFolder, setDriveExplorerCreatingFolder] = useState(false)
   const [mediaSyncing, setMediaSyncing] = useState(false)
   const [activeAgencyToolId, setActiveAgencyToolId] = useState<AIOSAgencyToolId | null>(null)
   const [documentRequests, setDocumentRequests] = useState<AIOSDocumentRequest[]>([])
@@ -1921,6 +1924,57 @@ export default function AIOSDesktop() {
       setNotice(message)
     } finally {
       setDriveExplorerUploading(false)
+    }
+  }
+
+  function driveFilePreviewUrl(file: AIOSDriveExplorerFile | null) {
+    if (!file?.id) return ''
+    return `https://drive.google.com/file/d/${file.id}/preview`
+  }
+
+  async function createDriveExplorerSubfolder() {
+    const targetFolderId = String(driveExplorer?.folder?.id || driveFolder?.drive_folder_id || '').trim()
+    const folderName = driveExplorerNewFolderName.trim()
+
+    if (!targetFolderId) {
+      setNotice('Cartella Drive non disponibile.')
+      return
+    }
+
+    if (!folderName) {
+      setNotice('Inserisci il nome della sottocartella.')
+      return
+    }
+
+    setDriveExplorerCreatingFolder(true)
+
+    try {
+      const response = await fetch('/api/admin/ai-os/drive-explorer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'createSubfolder',
+          folderId: targetFolderId,
+          folderName,
+        }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore creazione sottocartella Drive')
+      }
+
+      setDriveExplorerNewFolderName('')
+      setNotice(`Sottocartella Drive pronta: ${payload?.folder?.name || folderName}`)
+      void loadDriveExplorer(targetFolderId)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore creazione sottocartella Drive'
+      setNotice(message)
+    } finally {
+      setDriveExplorerCreatingFolder(false)
     }
   }
 
@@ -3603,356 +3657,297 @@ export default function AIOSDesktop() {
           </div>
         ) : activeAgencyTool.id === 'drive' ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[#88C0D0]/24 bg-[#242B38]/86 p-4 shadow-[0_0_24px_rgba(136,192,208,0.07)]">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="rounded-2xl border border-[#88C0D0]/24 bg-[#202632]/88 p-4 shadow-[0_0_24px_rgba(136,192,208,0.07)]">
+              <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.24em] text-[#88C0D0]/75">
-                    Drive archivio immobile
+                    AI-OS Drive Folder
                   </p>
-                  <p className="mt-1 text-sm leading-6 text-[#D8DEE9]/62">
-                    Collega la cartella Drive specifica di questo immobile. Qui vanno originali, video pesanti,
-                    documenti sopra soglia e materiale non pubblicato sul sito.
+                  <h4 className="mt-1 text-lg font-semibold text-white">
+                    ☁️ {driveExplorer?.folder?.name || driveFolder?.folder_name || activeFolder?.name || 'Drive immobile'}
+                  </h4>
+                  <p className="mt-1 max-w-3xl text-sm leading-6 text-[#D8DEE9]/60">
+                    Vista limitata alla cartella Drive di questo immobile. Puoi aprire sottocartelle,
+                    trascinare file, creare cartelle e vedere anteprime senza navigare verso la root agenzia.
                   </p>
                 </div>
 
-                {driveFolder ? (
-                  <span className={`w-fit rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${classForDriveSyncStatus(driveFolder.sync_status)}`}>
-                    {labelForDriveSyncStatus(driveFolder.sync_status)}
-                  </span>
-                ) : null}
-              </div>
-
-              <div className="mt-4 grid gap-3 lg:grid-cols-2">
-                <div className="rounded-2xl border border-[#8FBCBB]/16 bg-[#202632]/74 p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-[#8FBCBB]/70">
-                    Drive root progetto
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-white">
-                    {driveSettings?.drive_root_name || 'Belotti AI-OS / Archivio Immobili'}
-                  </p>
-
-                  {driveSettings?.drive_root_url ? (
-                    <a
-                      href={driveSettings.drive_root_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-4 inline-flex rounded-full border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#88C0D0]/18"
-                    >
-                      Apri Drive root
-                    </a>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={openDriveSettingsPanel}
-                      className="mt-4 rounded-full border border-[#EBCB8B]/25 bg-[#EBCB8B]/10 px-4 py-2 text-xs font-semibold text-[#EBCB8B] transition hover:bg-[#EBCB8B]/18"
-                    >
-                      Imposta Drive root
-                    </button>
-                  )}
-                </div>
-
-                <div className="rounded-2xl border border-[#B48EAD]/18 bg-[#202632]/74 p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-[#B48EAD]/72">
-                    Nome cartella consigliato
-                  </p>
-                  <p className="mt-2 break-words text-sm font-semibold text-white">
-                    {driveFolderForm.folderName || buildSuggestedDriveFolderName(activeFolder)}
-                  </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => driveFolder?.drive_folder_id && loadDriveExplorer(driveFolder.drive_folder_id)}
+                    className="rounded-full border border-[#8FBCBB]/25 bg-[#8FBCBB]/10 px-3 py-1.5 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#8FBCBB]/18"
+                  >
+                    Cartella immobile
+                  </button>
 
                   <button
                     type="button"
-                    onClick={copySuggestedDriveFolderName}
-                    className="mt-4 rounded-full border border-[#B48EAD]/25 bg-[#B48EAD]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#B48EAD]/18"
+                    onClick={() => loadDriveExplorer(driveExplorer?.folder?.id || driveFolder?.drive_folder_id)}
+                    className="rounded-full border border-[#B48EAD]/25 bg-[#B48EAD]/10 px-3 py-1.5 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#B48EAD]/18"
                   >
-                    Copia nome cartella
+                    Aggiorna
                   </button>
+
+                  {driveExplorer?.folder?.url ? (
+                    <a
+                      href={driveExplorer.folder.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-full border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-3 py-1.5 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#88C0D0]/18"
+                    >
+                      Apri in Drive
+                    </a>
+                  ) : null}
                 </div>
               </div>
 
-              {driveFolder?.drive_folder_id ? (
-                <div className="mt-4 rounded-2xl border border-[#88C0D0]/20 bg-[#202632]/72 p-4">
-                  <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.22em] text-[#88C0D0]/75">
-                        AI-OS Drive Explorer
-                      </p>
-                      <p className="mt-1 text-sm leading-6 text-[#D8DEE9]/60">
-                        Vista limitata alla cartella Drive di questo immobile e alle sue sottocartelle. Nessuna navigazione verso la root agenzia.
-                      </p>
-                      {driveExplorer?.folder ? (
-                        <p className="mt-2 text-xs text-[#D8DEE9]/45">
-                          Cartella aperta: {driveExplorer.folder.name}
-                        </p>
-                      ) : null}
-                    </div>
+              {driveFolderLoading ? (
+                <div className="rounded-3xl border border-[#8FBCBB]/12 bg-[#242B38]/75 p-5 text-sm text-[#D8DEE9]/58">
+                  Caricamento cartella Drive immobile...
+                </div>
+              ) : driveFolder?.drive_folder_id ? (
+                <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_390px]">
+                  <div className="min-w-0">
+                    <div
+                      onDrop={(event) => {
+                        event.preventDefault()
+                        void uploadFilesToDriveExplorerFolder(
+                          driveExplorer?.folder?.id || driveFolder.drive_folder_id,
+                          Array.from(event.dataTransfer.files),
+                        )
+                      }}
+                      onDragOver={(event) => event.preventDefault()}
+                      className="rounded-[28px] border border-dashed border-[#88C0D0]/36 bg-[#1B202B]/78 p-4 shadow-[inset_0_0_28px_rgba(0,0,0,0.20)] transition hover:border-[#A3BE8C]/60 hover:bg-[#1F2A24]/55"
+                    >
+                      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-white">
+                            Trascina qui file o cartelle operative
+                          </p>
+                          <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/55">
+                            I file piccoli vengono caricati da AI-OS. Per video/file pesanti si apre la cartella Drive corrente.
+                          </p>
+                        </div>
 
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => loadDriveExplorer(driveFolder.drive_folder_id)}
-                        className="rounded-full border border-[#8FBCBB]/25 bg-[#8FBCBB]/10 px-3 py-1.5 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#8FBCBB]/18"
-                      >
-                        Torna cartella immobile
-                      </button>
+                        <label className="cursor-pointer rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.18)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75">
+                          Carica file
+                          <input
+                            type="file"
+                            multiple
+                            className="hidden"
+                            onChange={(event) => {
+                              void uploadFilesToDriveExplorerFolder(
+                                driveExplorer?.folder?.id || driveFolder.drive_folder_id,
+                                Array.from(event.target.files ?? []),
+                              )
+                              event.currentTarget.value = ''
+                            }}
+                          />
+                        </label>
+                      </div>
 
-                      <button
-                        type="button"
-                        onClick={() => loadDriveExplorer(driveExplorer?.folder?.id || driveFolder.drive_folder_id)}
-                        className="rounded-full border border-[#B48EAD]/25 bg-[#B48EAD]/10 px-3 py-1.5 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#B48EAD]/18"
-                      >
-                        Aggiorna Drive
-                      </button>
-                    </div>
-                  </div>
-
-                  <div
-                    onDrop={(event) => {
-                      event.preventDefault()
-                      void uploadFilesToDriveExplorerFolder(
-                        driveExplorer?.folder?.id || driveFolder.drive_folder_id,
-                        Array.from(event.dataTransfer.files),
-                      )
-                    }}
-                    onDragOver={(event) => event.preventDefault()}
-                    className="mb-4 rounded-2xl border border-dashed border-[#88C0D0]/34 bg-[#1B202B]/72 p-4 transition hover:border-[#A3BE8C]/55 hover:bg-[#1F2A24]/62"
-                  >
-                    <p className="text-sm font-semibold text-white">
-                      Trascina qui i file per caricarli nella cartella Drive aperta
-                    </p>
-                    <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/55">
-                      Upload diretto AI-OS per file piccoli. Per video/file pesanti si apre la cartella Drive corretta.
-                    </p>
-
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <label className="cursor-pointer rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.18)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75">
-                        Carica su Drive
+                      <div className="mb-4 flex flex-col gap-2 rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/75 p-3 sm:flex-row sm:items-center">
                         <input
-                          type="file"
-                          multiple
-                          className="hidden"
-                          onChange={(event) => {
-                            void uploadFilesToDriveExplorerFolder(
-                              driveExplorer?.folder?.id || driveFolder.drive_folder_id,
-                              Array.from(event.target.files ?? []),
-                            )
-                            event.currentTarget.value = ''
-                          }}
+                          value={driveExplorerNewFolderName}
+                          onChange={(event) => setDriveExplorerNewFolderName(event.target.value)}
+                          className="min-w-0 flex-1 rounded-2xl border border-[#8FBCBB]/15 bg-[#151A23]/80 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
+                          placeholder="Nome nuova sottocartella..."
                         />
-                      </label>
 
-                      {driveExplorer?.folder?.url ? (
-                        <a
-                          href={driveExplorer.folder.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="rounded-full border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#88C0D0]/18"
+                        <button
+                          type="button"
+                          disabled={driveExplorerCreatingFolder}
+                          onClick={createDriveExplorerSubfolder}
+                          className="rounded-full border border-[#88C0D0]/35 bg-[#88C0D0]/12 px-4 py-2 text-xs font-bold text-[#88C0D0] transition hover:bg-[#88C0D0]/20 disabled:cursor-wait disabled:opacity-60"
                         >
-                          Apri cartella corrente
-                        </a>
-                      ) : null}
+                          {driveExplorerCreatingFolder ? 'Creazione...' : '+ Crea sottocartella'}
+                        </button>
+                      </div>
 
                       {driveExplorerUploading ? (
-                        <span className="text-xs font-semibold text-[#EBCB8B]">
+                        <div className="mb-4 rounded-2xl border border-[#EBCB8B]/25 bg-[#EBCB8B]/10 p-3 text-xs font-semibold text-[#EBCB8B]">
                           Upload in corso...
-                        </span>
+                        </div>
+                      ) : driveExplorerUploadMessage ? (
+                        <div className="mb-4 rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/70 p-3 text-xs leading-5 text-[#D8DEE9]/58">
+                          {driveExplorerUploadMessage}
+                        </div>
+                      ) : null}
+
+                      {driveExplorerLoading ? (
+                        <div className="rounded-2xl border border-[#8FBCBB]/12 bg-[#242B38]/80 p-5 text-sm text-[#D8DEE9]/58">
+                          Lettura Drive immobile...
+                        </div>
+                      ) : driveExplorerError ? (
+                        <div className="rounded-2xl border border-[#BF616A]/25 bg-[#BF616A]/10 p-5 text-sm text-[#BF616A]">
+                          {driveExplorerError}
+                        </div>
+                      ) : (
+                        <div className="min-h-[280px] rounded-3xl border border-[#8FBCBB]/10 bg-[#151A23]/42 p-4">
+                          {driveExplorer?.folders?.length || driveExplorer?.files?.length ? (
+                            <div className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+                              {driveExplorer?.folders?.map((folder) => (
+                                <button
+                                  key={folder.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setDriveExplorerPreviewFile(null)
+                                    void loadDriveExplorer(folder.id)
+                                  }}
+                                  className="group flex min-h-[120px] flex-col items-center justify-center rounded-3xl border border-[#88C0D0]/18 bg-[#202632]/82 p-4 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12"
+                                >
+                                  <span className="relative mb-3 flex h-14 w-16 items-end justify-center">
+                                    <span className="absolute left-1 top-1 h-4 w-8 rounded-t-md bg-[#344153] transition group-hover:bg-[#48627A]" />
+                                    <span className="absolute bottom-0 h-11 w-16 rounded-xl border border-[#ECEFF4]/10 bg-[#2B3544] shadow-[0_10px_24px_rgba(0,0,0,0.30)] transition group-hover:bg-[#3D4A5F]" />
+                                    <span className="relative z-10 pb-2 text-lg">📁</span>
+                                  </span>
+                                  <span className="line-clamp-2 text-sm font-semibold text-white">
+                                    {folder.name}
+                                  </span>
+                                </button>
+                              ))}
+
+                              {driveExplorer?.files?.map((file) => (
+                                <button
+                                  key={file.id}
+                                  type="button"
+                                  onClick={() => setDriveExplorerPreviewFile(file)}
+                                  className="group flex min-h-[120px] flex-col items-center justify-center rounded-3xl border border-[#8FBCBB]/12 bg-[#202632]/70 p-4 text-center transition hover:border-[#B48EAD]/45 hover:bg-[#B48EAD]/10"
+                                >
+                                  <span className="mb-3 text-4xl">
+                                    {file.mimeType?.startsWith('video/') ? '🎥' : file.mimeType?.startsWith('image/') ? '🖼️' : file.mimeType === 'application/pdf' ? '📕' : '📄'}
+                                  </span>
+                                  <span className="line-clamp-2 text-sm font-semibold text-white">
+                                    {file.name}
+                                  </span>
+                                  <span className="mt-1 text-xs text-[#D8DEE9]/45">
+                                    {file.size ? formatFileSize(Number(file.size)) : '—'}
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="flex min-h-[260px] items-center justify-center rounded-3xl border border-dashed border-[#8FBCBB]/18 bg-[#202632]/52 text-center">
+                              <div>
+                                <p className="text-5xl">📂</p>
+                                <p className="mt-3 text-sm font-semibold text-white">Cartella vuota</p>
+                                <p className="mt-1 text-xs text-[#D8DEE9]/50">
+                                  Trascina file qui dentro oppure crea una sottocartella.
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <aside className="rounded-[28px] border border-[#8FBCBB]/16 bg-[#151A23]/64 p-4">
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/70">
+                          Anteprima
+                        </p>
+                        <h5 className="mt-1 line-clamp-1 text-sm font-semibold text-white">
+                          {driveExplorerPreviewFile?.name || 'Nessun file selezionato'}
+                        </h5>
+                      </div>
+
+                      {driveExplorerPreviewFile ? (
+                        <button
+                          type="button"
+                          onClick={() => setDriveExplorerPreviewFile(null)}
+                          className="rounded-full border border-[#BF616A]/25 bg-[#BF616A]/10 px-3 py-1 text-xs font-semibold text-[#FFCCD2] transition hover:bg-[#BF616A]/20"
+                        >
+                          Chiudi
+                        </button>
                       ) : null}
                     </div>
 
-                    {driveExplorerUploadMessage ? (
-                      <p className="mt-3 text-xs leading-5 text-[#D8DEE9]/58">
-                        {driveExplorerUploadMessage}
-                      </p>
-                    ) : null}
-                  </div>
+                    {driveExplorerPreviewFile ? (
+                      <div className="space-y-3">
+                        <div className="overflow-hidden rounded-2xl border border-[#8FBCBB]/12 bg-black/20">
+                          <iframe
+                            title={driveExplorerPreviewFile.name}
+                            src={driveFilePreviewUrl(driveExplorerPreviewFile)}
+                            className="h-[360px] w-full bg-[#202632]"
+                            allow="autoplay"
+                          />
+                        </div>
 
-                  {driveExplorerLoading ? (
-                    <div className="rounded-2xl border border-[#8FBCBB]/12 bg-[#242B38]/80 p-4 text-sm text-[#D8DEE9]/58">
-                      Lettura Drive immobile...
-                    </div>
-                  ) : driveExplorerError ? (
-                    <div className="rounded-2xl border border-[#BF616A]/25 bg-[#BF616A]/10 p-4 text-sm text-[#BF616A]">
-                      {driveExplorerError}
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div>
-                        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-[#8FBCBB]/68">
-                          Sottocartelle
-                        </p>
-
-                        {driveExplorer?.folders?.length ? (
-                          <div className="grid gap-2 sm:grid-cols-2">
-                            {driveExplorer.folders.map((folder) => (
-                              <button
-                                key={folder.id}
-                                type="button"
-                                onClick={() => loadDriveExplorer(folder.id)}
-                                className="rounded-2xl border border-[#88C0D0]/18 bg-[#242B38]/84 p-3 text-left transition hover:border-[#88C0D0]/42 hover:bg-[#88C0D0]/10"
-                              >
-                                <p className="text-sm font-semibold text-white">📁 {folder.name}</p>
-                                <p className="mt-1 text-xs text-[#D8DEE9]/45">
-                                  Apri dentro AI-OS
-                                </p>
-                              </button>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="rounded-2xl border border-[#8FBCBB]/10 bg-[#242B38]/55 p-3 text-sm text-[#D8DEE9]/50">
-                            Nessuna sottocartella presente.
-                          </p>
-                        )}
+                        <a
+                          href={driveExplorerPreviewFile.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex rounded-full border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#88C0D0]/18"
+                        >
+                          Apri file in Drive
+                        </a>
                       </div>
-
-                      <div>
-                        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-[#B48EAD]/72">
-                          File
-                        </p>
-
-                        {driveExplorer?.files?.length ? (
-                          <div className="grid gap-2">
-                            {driveExplorer.files.map((file) => (
-                              <a
-                                key={file.id}
-                                href={file.url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="flex items-center justify-between gap-3 rounded-2xl border border-[#8FBCBB]/12 bg-[#242B38]/76 p-3 transition hover:border-[#B48EAD]/35 hover:bg-[#B48EAD]/10"
-                              >
-                                <div className="min-w-0">
-                                  <p className="truncate text-sm font-semibold text-white">
-                                    {file.mimeType?.startsWith('video/') ? '🎥' : file.mimeType?.startsWith('image/') ? '🖼️' : '📄'} {file.name}
-                                  </p>
-                                  <p className="mt-1 text-xs text-[#D8DEE9]/45">
-                                    {file.size ? formatFileSize(Number(file.size)) : 'dimensione non disponibile'}
-                                  </p>
-                                </div>
-                                <span className="shrink-0 text-xs font-semibold text-[#88C0D0]">
-                                  Apri
-                                </span>
-                              </a>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="rounded-2xl border border-[#8FBCBB]/10 bg-[#242B38]/55 p-3 text-sm text-[#D8DEE9]/50">
-                            Nessun file presente in questa cartella.
+                    ) : (
+                      <div className="flex min-h-[360px] items-center justify-center rounded-2xl border border-dashed border-[#8FBCBB]/14 bg-[#202632]/42 text-center">
+                        <div>
+                          <p className="text-4xl">👁️</p>
+                          <p className="mt-3 text-sm font-semibold text-white">Seleziona un file</p>
+                          <p className="mt-1 text-xs text-[#D8DEE9]/45">
+                            L’anteprima resta dentro AI-OS quando Drive lo permette.
                           </p>
-                        )}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              ) : null}
-
-              {driveFolderLoading ? (
-                <p className="mt-4 text-sm text-[#D8DEE9]/55">Caricamento cartella Drive immobile...</p>
-              ) : driveFolder ? (
-                <div className="mt-4 rounded-2xl border border-[#A3BE8C]/18 bg-[#202632]/72 p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-[#A3BE8C]/72">
-                    Cartella collegata
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-white">
-                    {driveFolder.folder_name || activeFolder?.name || 'Cartella Drive immobile'}
-                  </p>
-                  {driveFolder.drive_folder_url ? (
-                    <>
-                      <p className="mt-2 break-all text-xs leading-5 text-[#D8DEE9]/52">
-                        {driveFolder.drive_folder_url}
-                      </p>
-
-                      <a
-                        href={driveFolder.drive_folder_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-4 inline-flex rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.22)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
-                      >
-                        Apri Drive immobile
-                      </a>
-                    </>
-                  ) : (
-                    <p className="mt-2 text-xs leading-5 text-[#EBCB8B]/80">
-                      Cartella preconfigurata. Crea questa cartella dentro la Drive root, poi incolla qui il link.
-                    </p>
-                  )}
+                    )}
+                  </aside>
                 </div>
               ) : (
-                <div className="mt-4 rounded-2xl border border-[#EBCB8B]/18 bg-[#EBCB8B]/8 p-4 text-sm text-[#D8DEE9]/62">
-                  Nessuna cartella Drive collegata a questo immobile.
+                <div className="rounded-3xl border border-[#EBCB8B]/20 bg-[#EBCB8B]/10 p-5 text-sm text-[#D8DEE9]/65">
+                  Cartella Drive immobile non pronta. Usa la nuvoletta Drive globale per creare/sistemare le cartelle immobili.
+                  <button
+                    type="button"
+                    onClick={createMissingDriveFolders}
+                    className="mt-4 block rounded-full border border-[#88C0D0]/35 bg-[#88C0D0]/12 px-4 py-2 text-xs font-bold text-[#88C0D0] transition hover:bg-[#88C0D0]/20"
+                  >
+                    Crea/sistema cartelle immobili
+                  </button>
                 </div>
               )}
             </div>
 
-            <div className="rounded-2xl border border-[#B48EAD]/26 bg-[#242B38]/88 p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-[#B48EAD]/75">
-                Collega / modifica Drive immobile
-              </p>
+            <div className="grid gap-3 lg:grid-cols-2">
+              <div className="rounded-2xl border border-[#8FBCBB]/16 bg-[#202632]/74 p-4">
+                <p className="text-xs uppercase tracking-[0.22em] text-[#8FBCBB]/70">
+                  Drive root progetto
+                </p>
+                <p className="mt-2 text-sm font-semibold text-white">
+                  {driveSettings?.drive_root_name || 'Belotti AI-OS / Archivio Immobili'}
+                </p>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <label className="text-xs font-semibold text-[#D8DEE9]/70 sm:col-span-2">
-                  Nome cartella
-                  <input
-                    value={driveFolderForm.folderName}
-                    onChange={(event) => updateDriveFolderFormField('folderName', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#202632]/90 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                    placeholder={buildSuggestedDriveFolderName(activeFolder)}
-                  />
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70 sm:col-span-2">
-                  Link cartella Google Drive immobile *
-                  <input
-                    value={driveFolderForm.driveFolderUrl}
-                    onChange={(event) => updateDriveFolderFormField('driveFolderUrl', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#202632]/90 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                    placeholder="https://drive.google.com/drive/folders/..."
-                  />
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70">
-                  Stato archivio
-                  <select
-                    value={driveFolderForm.syncStatus}
-                    onChange={(event) => updateDriveFolderFormField('syncStatus', event.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-[#8FBCBB]/15 bg-[#202632]/90 px-3 py-2 text-sm text-white outline-none focus:border-[#B48EAD]/60"
-                  >
-                    <option value="pending_creation">Da creare</option>
-                    <option value="linked">Collegato</option>
-                    <option value="manual_archive">Archivio manuale</option>
-                    <option value="ready_to_import">Pronto per import</option>
-                    <option value="synced">Sync OK</option>
-                  </select>
-                </label>
-
-                <label className="text-xs font-semibold text-[#D8DEE9]/70 sm:col-span-2">
-                  Note archivio
-                  <textarea
-                    value={driveFolderForm.notes}
-                    onChange={(event) => updateDriveFolderFormField('notes', event.target.value)}
-                    className="mt-1 min-h-[86px] w-full resize-none rounded-2xl border border-[#8FBCBB]/15 bg-[#202632]/90 px-3 py-2 text-sm text-white outline-none placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                    placeholder="Esempio: qui teniamo video originali, scatti grezzi, documenti pesanti..."
-                  />
-                </label>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  disabled={driveFolderSaving}
-                  onClick={saveDriveFolder}
-                  className="rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.22)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75 disabled:cursor-wait disabled:opacity-60"
-                >
-                  {driveFolderSaving ? 'Salvataggio...' : 'Salva Drive immobile'}
-                </button>
-
-                {driveFolderForm.driveFolderUrl.trim() ? (
+                {driveSettings?.drive_root_url ? (
                   <a
-                    href={driveFolderForm.driveFolderUrl}
+                    href={driveSettings.drive_root_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-full border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#88C0D0]/18"
+                    className="mt-4 inline-flex rounded-full border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#88C0D0]/18"
                   >
-                    Apri link inserito
+                    Apri Drive root
                   </a>
                 ) : null}
+              </div>
+
+              <div className="rounded-2xl border border-[#B48EAD]/18 bg-[#202632]/74 p-4">
+                <p className="text-xs uppercase tracking-[0.22em] text-[#B48EAD]/72">
+                  Nome cartella consigliato
+                </p>
+                <p className="mt-2 break-words text-sm font-semibold text-white">
+                  {driveFolder?.folder_name || driveFolderForm.folderName || buildSuggestedDriveFolderName(activeFolder)}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={copySuggestedDriveFolderName}
+                  className="mt-4 rounded-full border border-[#B48EAD]/25 bg-[#B48EAD]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#B48EAD]/18"
+                >
+                  Copia nome cartella
+                </button>
               </div>
             </div>
           </div>
