@@ -660,6 +660,23 @@ function formatFileSize(size: number) {
   return `${(size / 1024 / 1024).toFixed(1)} MB`
 }
 
+
+function readFileAsBase64(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      const result = String(reader.result || '')
+      const commaIndex = result.indexOf(',')
+
+      resolve(commaIndex >= 0 ? result.slice(commaIndex + 1) : result)
+    }
+
+    reader.onerror = () => reject(reader.error || new Error('Errore lettura file'))
+    reader.readAsDataURL(file)
+  })
+}
+
 function bytesToMb(bytes: number) {
   return bytes / 1024 / 1024
 }
@@ -945,6 +962,8 @@ export default function AIOSDesktop() {
   const [driveExplorer, setDriveExplorer] = useState<AIOSDriveExplorerData | null>(null)
   const [driveExplorerLoading, setDriveExplorerLoading] = useState(false)
   const [driveExplorerError, setDriveExplorerError] = useState('')
+  const [driveExplorerUploading, setDriveExplorerUploading] = useState(false)
+  const [driveExplorerUploadMessage, setDriveExplorerUploadMessage] = useState('')
   const [mediaSyncing, setMediaSyncing] = useState(false)
   const [activeAgencyToolId, setActiveAgencyToolId] = useState<AIOSAgencyToolId | null>(null)
   const [documentRequests, setDocumentRequests] = useState<AIOSDocumentRequest[]>([])
@@ -1832,6 +1851,76 @@ export default function AIOSDesktop() {
       setNotice(message)
     } finally {
       setDriveExplorerLoading(false)
+    }
+  }
+
+  async function uploadFilesToDriveExplorerFolder(
+    folderId: string | null | undefined,
+    files: File[],
+  ) {
+    const targetFolderId = String(folderId || '').trim()
+
+    if (!targetFolderId) {
+      setDriveExplorerUploadMessage('Cartella Drive non disponibile.')
+      return
+    }
+
+    if (files.length === 0) return
+
+    const directUploadLimitBytes = 4 * 1024 * 1024
+    const tooLargeFiles = files.filter((file) => file.size > directUploadLimitBytes)
+    const uploadableFiles = files.filter((file) => file.size <= directUploadLimitBytes)
+
+    if (tooLargeFiles.length > 0) {
+      const folderUrl = driveExplorer?.folder?.url || driveFolder?.drive_folder_url || ''
+
+      setNotice(
+        `${tooLargeFiles.length} file troppo grande/i per upload diretto AI-OS: apri Drive e caricali nella cartella corrente.`,
+      )
+
+      if (folderUrl) {
+        window.open(folderUrl, '_blank', 'noopener,noreferrer')
+      }
+    }
+
+    if (uploadableFiles.length === 0) return
+
+    setDriveExplorerUploading(true)
+    setDriveExplorerUploadMessage(`Upload Drive in corso: ${uploadableFiles.length} file...`)
+
+    try {
+      for (const file of uploadableFiles) {
+        const base64Data = await readFileAsBase64(file)
+
+        const response = await fetch('/api/admin/ai-os/drive-explorer', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            folderId: targetFolderId,
+            fileName: file.name,
+            mimeType: file.type || 'application/octet-stream',
+            base64Data,
+          }),
+        })
+
+        const payload = await response.json().catch(() => null)
+
+        if (!response.ok) {
+          throw new Error(payload?.error || `Errore upload Drive: ${file.name}`)
+        }
+      }
+
+      setDriveExplorerUploadMessage(`Upload completato: ${uploadableFiles.length} file.`)
+      setNotice(`Drive immobile aggiornato: ${uploadableFiles.length} file caricato/i.`)
+      void loadDriveExplorer(targetFolderId)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore upload su Drive'
+      setDriveExplorerUploadMessage(message)
+      setNotice(message)
+    } finally {
+      setDriveExplorerUploading(false)
     }
   }
 
@@ -3614,6 +3703,66 @@ export default function AIOSDesktop() {
                         Aggiorna Drive
                       </button>
                     </div>
+                  </div>
+
+                  <div
+                    onDrop={(event) => {
+                      event.preventDefault()
+                      void uploadFilesToDriveExplorerFolder(
+                        driveExplorer?.folder?.id || driveFolder.drive_folder_id,
+                        Array.from(event.dataTransfer.files),
+                      )
+                    }}
+                    onDragOver={(event) => event.preventDefault()}
+                    className="mb-4 rounded-2xl border border-dashed border-[#88C0D0]/34 bg-[#1B202B]/72 p-4 transition hover:border-[#A3BE8C]/55 hover:bg-[#1F2A24]/62"
+                  >
+                    <p className="text-sm font-semibold text-white">
+                      Trascina qui i file per caricarli nella cartella Drive aperta
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/55">
+                      Upload diretto AI-OS per file piccoli. Per video/file pesanti si apre la cartella Drive corretta.
+                    </p>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <label className="cursor-pointer rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.18)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75">
+                        Carica su Drive
+                        <input
+                          type="file"
+                          multiple
+                          className="hidden"
+                          onChange={(event) => {
+                            void uploadFilesToDriveExplorerFolder(
+                              driveExplorer?.folder?.id || driveFolder.drive_folder_id,
+                              Array.from(event.target.files ?? []),
+                            )
+                            event.currentTarget.value = ''
+                          }}
+                        />
+                      </label>
+
+                      {driveExplorer?.folder?.url ? (
+                        <a
+                          href={driveExplorer.folder.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-full border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#88C0D0]/18"
+                        >
+                          Apri cartella corrente
+                        </a>
+                      ) : null}
+
+                      {driveExplorerUploading ? (
+                        <span className="text-xs font-semibold text-[#EBCB8B]">
+                          Upload in corso...
+                        </span>
+                      ) : null}
+                    </div>
+
+                    {driveExplorerUploadMessage ? (
+                      <p className="mt-3 text-xs leading-5 text-[#D8DEE9]/58">
+                        {driveExplorerUploadMessage}
+                      </p>
+                    ) : null}
                   </div>
 
                   {driveExplorerLoading ? (

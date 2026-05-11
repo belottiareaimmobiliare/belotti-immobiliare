@@ -3,9 +3,14 @@ import { requireAdminProfile } from '@/lib/admin-auth'
 import { createServiceClient } from '@/lib/supabase/service'
 import { canUseAIOS, jsonError } from '@/lib/ai-os'
 
+const MAX_DRIVE_EXPLORER_UPLOAD_BYTES = 4 * 1024 * 1024
+
 async function callDriveScript(input: {
   action: string
   folderId: string
+  fileName?: string
+  mimeType?: string
+  base64Data?: string
 }) {
   const scriptUrl = process.env.AIOS_DRIVE_APP_SCRIPT_URL
   const token = process.env.AIOS_DRIVE_APP_SCRIPT_TOKEN
@@ -23,6 +28,9 @@ async function callDriveScript(input: {
       token,
       action: input.action,
       folderId: input.folderId,
+      fileName: input.fileName,
+      mimeType: input.mimeType,
+      base64Data: input.base64Data,
     }),
   })
 
@@ -96,6 +104,61 @@ export async function GET(request: Request) {
   } catch (error) {
     return NextResponse.json(
       { error: jsonError(error, 'Errore lettura Drive immobile') },
+      { status: 500 },
+    )
+  }
+}
+
+
+export async function POST(request: Request) {
+  try {
+    const profile = await requireAdminProfile()
+
+    if (!canUseAIOS(profile)) {
+      return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
+    }
+
+    const body = await request.json().catch(() => null)
+
+    const folderId = String(body?.folderId ?? '').trim()
+    const fileName = String(body?.fileName ?? '').trim()
+    const mimeType = String(body?.mimeType ?? 'application/octet-stream').trim()
+    const base64Data = String(body?.base64Data ?? '').trim()
+
+    if (!folderId || !fileName || !base64Data) {
+      return NextResponse.json(
+        { error: 'Dati upload Drive mancanti' },
+        { status: 400 },
+      )
+    }
+
+    const sizeBytes = Buffer.byteLength(base64Data, 'base64')
+
+    if (sizeBytes > MAX_DRIVE_EXPLORER_UPLOAD_BYTES) {
+      return NextResponse.json(
+        {
+          error:
+            'File troppo grande per upload diretto AI-OS. Apri la cartella Drive e caricalo lì.',
+        },
+        { status: 413 },
+      )
+    }
+
+    const payload = await callDriveScript({
+      action: 'uploadFile',
+      folderId,
+      fileName,
+      mimeType,
+      base64Data,
+    })
+
+    return NextResponse.json({
+      ok: true,
+      file: payload.file ?? null,
+    })
+  } catch (error) {
+    return NextResponse.json(
+      { error: jsonError(error, 'Errore upload file su Drive') },
       { status: 500 },
     )
   }
