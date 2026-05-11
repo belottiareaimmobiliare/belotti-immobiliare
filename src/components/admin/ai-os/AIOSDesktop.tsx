@@ -752,13 +752,7 @@ function AIOSQuotaBar({
       <div className="mb-1.5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <span
-            className={`h-2 w-2 rounded-full ${
-              isBlocked
-                ? 'bg-[#BF616A] shadow-[0_0_14px_rgba(248,113,113,0.9)]'
-                : isWarning
-                  ? 'bg-[#D08770] shadow-[0_0_14px_rgba(253,186,116,0.9)]'
-                  : 'bg-[#A3BE8C] shadow-[0_0_14px_rgba(110,231,183,0.9)]'
-            }`}
+            className={`h-2 w-2 rounded-full ${ isBlocked ? 'bg-[#BF616A] shadow-[0_0_14px_rgba(248,113,113,0.9)]' : isWarning ? 'bg-[#D08770] shadow-[0_0_14px_rgba(253,186,116,0.9)]' : 'border border-[#A3BE8C]/55 bg-[#A3BE8C] shadow-[0_0_14px_rgba(110,231,183,0.9)]' } hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75`}
           />
           <span className="text-[10px] font-semibold uppercase tracking-[0.26em] text-[#88C0D0]/80">
             Quota
@@ -772,13 +766,7 @@ function AIOSQuotaBar({
 
       <div className="h-1.5 overflow-hidden rounded-full border border-[#8FBCBB]/10 bg-[#2E3440]/70">
         <div
-          className={`h-full rounded-full transition-all duration-500 ${
-            isBlocked
-              ? 'bg-[#BF616A] shadow-[0_0_18px_rgba(248,113,113,0.85)]'
-              : isWarning
-                ? 'bg-[#D08770] shadow-[0_0_18px_rgba(253,186,116,0.85)]'
-                : 'bg-[#A3BE8C] shadow-[0_0_18px_rgba(110,231,183,0.85)]'
-          }`}
+          className={`h-full rounded-full transition-all duration-500 ${ isBlocked ? 'bg-[#BF616A] shadow-[0_0_18px_rgba(248,113,113,0.85)]' : isWarning ? 'bg-[#D08770] shadow-[0_0_18px_rgba(253,186,116,0.85)]' : 'border border-[#A3BE8C]/55 bg-[#A3BE8C] shadow-[0_0_18px_rgba(110,231,183,0.85)]' } hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75`}
           style={{ width: `${percent}%` }}
         />
       </div>
@@ -2872,7 +2860,7 @@ export default function AIOSDesktop() {
         }`}
       >
         <div className="mb-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-[#8FBCBB]/70">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#A3BE8C] shadow-[0_0_12px_rgba(110,231,183,0.8)]" />
+          <span className="h-1.5 w-1.5 rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] shadow-[0_0_12px_rgba(110,231,183,0.8)] hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75" />
           Percorso
         </div>
         <div className="truncate text-[#ECEFF4]">{getActivePath()}</div>
@@ -3770,11 +3758,7 @@ export default function AIOSDesktop() {
                         key={size}
                         type="button"
                         onClick={() => setDriveExplorerIconSize(size as 24 | 32 | 48)}
-                        className={`rounded-full px-2 py-1 text-[10px] font-bold transition ${
-                          driveExplorerIconSize === size
-                            ? 'bg-[#A3BE8C] text-[#1F2A24]'
-                            : 'text-[#D8DEE9]/55 hover:bg-[#8FBCBB]/10 hover:text-white'
-                        }`}
+                        className={`rounded-full px-2 py-1 text-[10px] font-bold transition ${ driveExplorerIconSize === size ? 'border border-[#A3BE8C]/55 bg-[#A3BE8C] text-[#1F2A24]' : 'text-[#1F2A24]/55 hover:bg-[#8FBCBB]/10 ' } hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75`}
                       >
                         {size}
                       </button>
@@ -4455,7 +4439,7 @@ export default function AIOSDesktop() {
                 </p>
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
-                  <label className="flex cursor-pointer items-center justify-center rounded-2xl bg-[#A3BE8C] px-3 py-3 text-sm font-semibold text-[#D8DEE9] transition active:scale-[0.98]">
+                  <label className="flex cursor-pointer items-center justify-center rounded-2xl border border-[#A3BE8C]/55 bg-[#A3BE8C] px-3 py-3 text-sm font-semibold text-[#1F2A24] transition active:scale-[0.98] hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75">
                     File
                     <input type="file" multiple accept={getUploadAccept(activeSection)} className="hidden" onChange={handleFileInput} />
                   </label>
@@ -4529,7 +4513,7 @@ export default function AIOSDesktop() {
                   <button
                     type="button"
                     onClick={saveTxtDraft}
-                    className="mt-3 w-full rounded-2xl bg-[#A3BE8C] px-4 py-3 text-sm font-semibold text-[#D8DEE9] transition active:scale-[0.98]"
+                    className="mt-3 w-full rounded-2xl border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-3 text-sm font-semibold text-[#1F2A24] transition active:scale-[0.98] hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
                   >
                     Salva TXT
                   </button>
