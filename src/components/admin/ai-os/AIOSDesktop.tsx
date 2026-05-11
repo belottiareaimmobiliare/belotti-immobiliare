@@ -3799,7 +3799,7 @@ export default function AIOSDesktop() {
                         )
                       }}
                       onDragOver={(event) => event.preventDefault()}
-                      className="rounded-[28px] border border-dashed border-[#88C0D0]/36 bg-[#1B202B]/78 p-4 shadow-[inset_0_0_28px_rgba(0,0,0,0.20)] transition hover:border-[#A3BE8C]/60 hover:bg-[#1F2A24]/55"
+                      className="flex min-h-[620px] flex-col rounded-[28px] border border-dashed border-[#88C0D0]/36 bg-[#1B202B]/78 p-4 shadow-[inset_0_0_28px_rgba(0,0,0,0.20)] transition hover:border-[#A3BE8C]/60 hover:bg-[#1F2A24]/55"
                     >
                       <div className="mb-4 rounded-2xl border border-[#8FBCBB]/12 bg-[#151A23]/72 px-3 py-2">
                         <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8FBCBB]/65">
@@ -3874,7 +3874,7 @@ export default function AIOSDesktop() {
                           {driveExplorerError}
                         </div>
                       ) : (
-                        <div className="min-h-[280px] rounded-3xl border border-[#8FBCBB]/10 bg-[#151A23]/42 p-4">
+                        <div className="min-h-[500px] flex-1 rounded-3xl border border-[#8FBCBB]/10 bg-[#151A23]/42 p-4">
                           {driveExplorer?.folders?.length || driveExplorer?.files?.length ? (
                             <div className="grid gap-3 sm:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8">
                               {driveExplorer?.folders?.map((folder) => (
@@ -3913,12 +3913,12 @@ export default function AIOSDesktop() {
                               ))}
                             </div>
                           ) : (
-                            <div className="flex min-h-[260px] items-center justify-center rounded-3xl border border-dashed border-[#8FBCBB]/18 bg-[#202632]/52 text-center">
+                            <div className="flex min-h-[500px] items-center justify-center rounded-3xl border border-dashed border-[#8FBCBB]/18 bg-[#202632]/52 text-center">
                               <div>
                                 <p className="text-5xl">📂</p>
                                 <p className="mt-3 text-sm font-semibold text-white">Cartella vuota</p>
                                 <p className="mt-1 text-xs text-[#D8DEE9]/50">
-                                  Trascina file qui dentro oppure crea una sottocartella.
+                                  Trascina qui file, foto, video o documenti oppure crea una sottocartella.
                                 </p>
                               </div>
                             </div>
