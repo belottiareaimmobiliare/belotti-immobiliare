@@ -913,7 +913,6 @@ export default function AIOSDesktop() {
   const [driveSettings, setDriveSettings] = useState<AIOSDriveSettings | null>(null)
   const [driveSettingsLoading, setDriveSettingsLoading] = useState(false)
   const [driveSettingsSaving, setDriveSettingsSaving] = useState(false)
-  const [driveFoldersCreating, setDriveFoldersCreating] = useState(false)
   const [driveSettingsOpen, setDriveSettingsOpen] = useState(false)
   const [driveSettingsForm, setDriveSettingsForm] = useState<AIOSDriveSettingsForm>(() => createEmptyDriveSettingsForm())
   const [driveFolder, setDriveFolder] = useState<AIOSDriveFolder | null>(null)
@@ -1868,36 +1867,6 @@ export default function AIOSDesktop() {
       ...current,
       [field]: value,
     }))
-  }
-
-  async function createMissingDriveFolders() {
-    setDriveFoldersCreating(true)
-
-    try {
-      const response = await fetch('/api/admin/ai-os/drive-folders/create-missing', {
-        method: 'POST',
-      })
-
-      const payload = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Errore creazione cartelle Drive immobili')
-      }
-
-      setNotice(
-        `Drive: ${payload.created || 0} cartelle create, ${payload.alreadyLinked || 0} già collegate, ${payload.failed || 0} errori.`,
-      )
-
-      void loadFolders()
-      if (activeFolderId) {
-        void loadDriveFolder(activeFolderId)
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Errore creazione cartelle Drive immobili'
-      setNotice(message)
-    } finally {
-      setDriveFoldersCreating(false)
-    }
   }
 
   async function saveDriveSettings() {
@@ -4295,15 +4264,6 @@ export default function AIOSDesktop() {
                                 className="rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.22)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75 disabled:cursor-wait disabled:opacity-60"
                               >
                                 {driveSettingsSaving ? 'Salvataggio...' : 'Salva impostazioni Drive'}
-                              </button>
-
-                              <button
-                                type="button"
-                                disabled={driveFoldersCreating}
-                                onClick={createMissingDriveFolders}
-                                className="rounded-full border border-[#88C0D0]/35 bg-[#88C0D0]/12 px-4 py-2 text-xs font-bold text-[#88C0D0] transition hover:bg-[#88C0D0]/20 disabled:cursor-wait disabled:opacity-60"
-                              >
-                                {driveFoldersCreating ? 'Creazione cartelle...' : 'Crea cartelle immobili in Drive'}
                               </button>
 
                               {driveSettingsForm.driveRootUrl.trim() ? (
