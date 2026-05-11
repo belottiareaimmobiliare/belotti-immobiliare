@@ -4060,7 +4060,11 @@ export default function AIOSDesktop() {
 
     return (
       <>
-        <div className="mb-4 rounded-3xl border border-[#8FBCBB]/22 bg-[#252B36]/88 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.36)]">
+        <div
+          onDrop={handleDrop}
+          onDragOver={(event) => event.preventDefault()}
+          className="mb-4 rounded-3xl border border-dashed border-[#8FBCBB]/28 bg-[#252B36]/88 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.36)] transition hover:border-[#A3BE8C]/45"
+        >
         <div className="mb-5">
           <p className="text-xs uppercase tracking-[0.28em] text-[#8FBCBB]/80">
             Root cartella immobile
@@ -4069,32 +4073,76 @@ export default function AIOSDesktop() {
             📁 {activeFolder?.name ?? 'Cartella immobile'}
           </h3>
           <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/58">
-            Puoi caricare file sparsi direttamente qui, oppure aprire una sotto-cartella.
+            Apri una sotto-cartella oppure trascina qui file, foto, video e documenti.
           </p>
         </div>
 
-        <div className={`flex flex-wrap ${mobile ? 'gap-5' : 'gap-6'}`}>
+        <div className={`grid gap-4 ${mobile ? 'grid-cols-2' : 'sm:grid-cols-2'}`}>
           {AI_OS_SECTIONS.map((section) => (
             <button
               key={section.id}
               type="button"
               onClick={() => openSubFolder(section.id)}
               title={section.description}
-              className="group flex w-[88px] flex-col items-center gap-2 rounded-2xl border border-transparent p-2 text-center transition hover:border-[#B48EAD]/45 hover:bg-[#434C5E]/60 active:scale-[0.98]"
+              className="group flex min-h-[150px] w-full flex-col items-center justify-center gap-3 rounded-3xl border border-[#8FBCBB]/16 bg-[#202632]/70 p-4 text-center transition hover:border-[#B48EAD]/55 hover:bg-[#434C5E]/60 active:scale-[0.98]"
             >
-              <span className="relative flex h-12 w-12 shrink-0 items-end justify-center">
-                <span className="absolute left-1 top-1 h-3 w-6 rounded-t-md bg-[#1F2632] transition group-hover:bg-[#344153]" />
-                <span className="absolute bottom-0 h-9 w-12 rounded-lg border border-[#ECEFF4]/10 bg-[#2B3544] shadow-[0_8px_22px_rgba(0,0,0,0.34)] transition group-hover:bg-[#3D4A5F]" />
-                <span className="relative z-10 pb-1 text-[15px] font-bold text-[#D8DEE9]">
+              <span className="relative flex h-20 w-24 shrink-0 items-end justify-center">
+                <span className="absolute left-2 top-2 h-6 w-12 rounded-t-lg bg-[#1F2632] transition group-hover:bg-[#344153]" />
+                <span className="absolute bottom-0 h-14 w-24 rounded-2xl border border-[#ECEFF4]/10 bg-[#2B3544] shadow-[0_12px_28px_rgba(0,0,0,0.36)] transition group-hover:bg-[#3D4A5F]" />
+                <span className="relative z-10 pb-4 text-2xl font-bold text-[#D8DEE9]">
                   {section.id === 'images' ? '●' : '▤'}
                 </span>
               </span>
 
-              <span className="line-clamp-2 min-h-[28px] text-[11px] font-semibold leading-3 text-[#ECEFF4]">
+              <span className="line-clamp-2 min-h-[34px] text-sm font-bold leading-4 text-[#ECEFF4]">
                 {section.label}
               </span>
             </button>
           ))}
+        </div>
+
+        <div className="mt-5 rounded-3xl border border-[#8FBCBB]/16 bg-[#1B202B]/62 p-4">
+          <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/70">
+            Caricamento rapido nella root immobile
+          </p>
+          <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/55">
+            Trascina file in questa area oppure usa i pulsanti rapidi. Per organizzare meglio, apri prima Immagini o Docs e planimetrie.
+          </p>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <label className="cursor-pointer rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.18)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75">
+              Carica file
+              <input
+                type="file"
+                multiple
+                accept={getUploadAccept(activeSection)}
+                className="hidden"
+                onChange={handleFileInput}
+              />
+            </label>
+
+            <label className="cursor-pointer rounded-full border border-[#8FBCBB]/28 bg-[#202632]/86 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#8FBCBB]/12">
+              Fotocamera
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handleFileInput}
+              />
+            </label>
+
+            <label className="cursor-pointer rounded-full border border-[#8FBCBB]/28 bg-[#202632]/86 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#8FBCBB]/12">
+              Video
+              <input
+                type="file"
+                accept="video/*"
+                capture="environment"
+                className="hidden"
+                onChange={handleFileInput}
+              />
+            </label>
+          </div>
         </div>
 
         <div className={`mt-5 border-t border-[#8FBCBB]/12 pt-5 ${String(activeAgencyToolId) === "drive" ? "pb-1" : ""}`}>
@@ -4847,7 +4895,7 @@ export default function AIOSDesktop() {
                     onDragOver={(event) => event.preventDefault()}
                     className="min-h-[520px] rounded-3xl border border-dashed border-[#8FBCBB]/25 bg-[#1F2530]/72 p-4"
                   >
-                    <div className={`${String(activeAgencyToolId) === "drive" ? "hidden" : ""} mb-4 rounded-2xl border border-[#8FBCBB]/10 bg-[#242B38]/78 p-4`}>
+                    <div className={`${activeSection === "root" ? "hidden" : ""} ${String(activeAgencyToolId) === "drive" ? "hidden" : ""} mb-4 rounded-2xl border border-[#8FBCBB]/10 bg-[#242B38]/78 p-4`}>
                       <p className="text-sm font-medium text-white">
                         Trascina qui foto, video, planimetrie o documenti
                       </p>
@@ -4891,7 +4939,7 @@ export default function AIOSDesktop() {
                       </div>
                     ) : (
                       <div className={`${String(activeAgencyToolId) === "drive" ? "hidden" : ""} flex min-h-[300px] items-center justify-center rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/20 text-center`}>
-                        <div>
+                        <div className={`${activeSection === "root" ? "hidden" : ""}`}>
                           <p className="text-4xl">📂</p>
                           <p className="mt-3 font-medium text-white">Cartella vuota</p>
                           <p className="mt-1 text-sm text-[#D8DEE9]/55">
