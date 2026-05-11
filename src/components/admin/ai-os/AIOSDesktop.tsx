@@ -4049,96 +4049,91 @@ export default function AIOSDesktop() {
           onDragOver={(event) => event.preventDefault()}
           className="mb-4 rounded-3xl border border-dashed border-[#8FBCBB]/28 bg-[#252B36]/88 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.36)] transition hover:border-[#A3BE8C]/45"
         >
-        <div className="mb-5">
-          <p className="text-xs uppercase tracking-[0.28em] text-[#8FBCBB]/80">
-            Root cartella immobile
-          </p>
-          <h3 className="mt-1 text-lg font-semibold text-[#ECEFF4]">
-            📁 {activeFolder?.name ?? 'Cartella immobile'}
-          </h3>
-          <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/58">
-            Apri una sotto-cartella oppure trascina qui file, foto, video e documenti.
-          </p>
-        </div>
+          <div className="mb-4 rounded-2xl border border-[#8FBCBB]/12 bg-[#151A23]/72 px-3 py-2">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8FBCBB]/65">
+              Percorso AI-OS
+            </p>
+            <p className="mt-1 truncate text-xs font-semibold text-[#D8DEE9]/72">
+              📁 {activeFolder?.name || 'Cartella immobile'} /
+            </p>
+          </div>
 
-        <div className="mb-4 rounded-2xl border border-[#8FBCBB]/12 bg-[#151A23]/72 px-3 py-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8FBCBB]/65">
-            Percorso AI-OS
-          </p>
-          <p className="mt-1 truncate text-xs font-semibold text-[#D8DEE9]/72">
-            📁 {activeFolder?.name || 'Cartella immobile'} /
-          </p>
-        </div>
+          <div className="mb-4 rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/56 p-3">
+            <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/70">
+              Azioni rapide nella cartella aperta
+            </p>
+            <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/55">
+              Trascina file nella cartella aperta oppure usa i pulsanti rapidi.
+            </p>
 
-        <div className={`${activeSection === "root" ? "hidden" : ""} min-h-[320px] rounded-[28px] border border-dashed border-[#8FBCBB]/18 bg-[#151A23]/42 p-4 grid content-start gap-3 ${mobile ? 'grid-cols-2' : 'sm:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8'}`}>
-          {AI_OS_SECTIONS.map((section) => (
-            <button
-              key={section.id}
-              type="button"
-              onClick={() => openSubFolder(section.id)}
-              title={section.description}
-              className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-3 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12 active:scale-[0.98]"
-            >
-              <span className="mb-2 text-4xl">
-                📁
-              </span>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <label className="cursor-pointer rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.18)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75">
+                Carica file
+                <input
+                  type="file"
+                  multiple
+                  accept={getUploadAccept(activeSection)}
+                  className="hidden"
+                  onChange={handleFileInput}
+                />
+              </label>
 
-              <span className="line-clamp-2 text-xs font-bold leading-4 text-[#ECEFF4]">
-                {section.label}
-              </span>
-            </button>
-          ))}
+              <label className="cursor-pointer rounded-full border border-[#8FBCBB]/28 bg-[#202632]/86 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#8FBCBB]/12">
+                Fotocamera
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={handleFileInput}
+                />
+              </label>
 
-          {activeFolder && activeFolder.files.length > 0 ? (
-            activeFolder.files.map((file) => renderFileCard(file, mobile))
-          ) : null}
-        </div>
+              <label className="cursor-pointer rounded-full border border-[#8FBCBB]/28 bg-[#202632]/86 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#8FBCBB]/12">
+                Video
+                <input
+                  type="file"
+                  accept="video/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={handleFileInput}
+                />
+              </label>
 
-        <div className="mt-4 rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/56 p-3">
-          <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/70">
-            Azioni rapide nella cartella aperta
-          </p>
-          <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/55">
-            Trascina file nella cartella aperta oppure usa i pulsanti rapidi.
-          </p>
+              <button
+                type="button"
+                onClick={createTxtFile}
+                className="rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.18)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
+              >
+                + Nuovo TXT
+              </button>
+            </div>
+          </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <label className="cursor-pointer rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.18)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75">
-              Carica file
-              <input
-                type="file"
-                multiple
-                accept={getUploadAccept(activeSection)}
-                className="hidden"
-                onChange={handleFileInput}
-              />
-            </label>
+          <div className={`min-h-[420px] rounded-[28px] border border-dashed border-[#8FBCBB]/18 bg-[#151A23]/42 p-4 grid content-start gap-3 ${mobile ? 'grid-cols-2' : 'sm:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8'}`}>
+            {AI_OS_SECTIONS.map((section) => (
+              <button
+                key={section.id}
+                type="button"
+                onClick={() => openSubFolder(section.id)}
+                title={section.description}
+                className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-3 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12 active:scale-[0.98]"
+              >
+                <span className="mb-2 text-4xl">📁</span>
 
-            <label className="cursor-pointer rounded-full border border-[#8FBCBB]/28 bg-[#202632]/86 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#8FBCBB]/12">
-              Fotocamera
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={handleFileInput}
-              />
-            </label>
+                <span className="line-clamp-2 text-xs font-bold leading-4 text-[#ECEFF4]">
+                  {section.label}
+                </span>
+              </button>
+            ))}
 
-            <label className="cursor-pointer rounded-full border border-[#8FBCBB]/28 bg-[#202632]/86 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#8FBCBB]/12">
-              Video
-              <input
-                type="file"
-                accept="video/*"
-                capture="environment"
-                className="hidden"
-                onChange={handleFileInput}
-              />
-            </label>
+            {activeFolder && activeFolder.files.length > 0
+              ? activeFolder.files.map((file) => renderFileCard(file, mobile))
+              : null}
           </div>
         </div>
 
-        <div className={`mt-5 border-t border-[#8FBCBB]/12 pt-5 ${String(activeAgencyToolId) === "drive" ? "pb-1" : ""}`}>
+        <div className="mb-4 rounded-3xl border border-[#8FBCBB]/22 bg-[#252B36]/88 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.28)]">
           <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.28em] text-[#B48EAD]/78">
@@ -4153,8 +4148,8 @@ export default function AIOSDesktop() {
             </p>
           </div>
 
-          <div className={`grid gap-2 ${String(activeAgencyToolId) === 'drive' ? 'max-w-[360px] grid-cols-1' : mobile ? 'grid-cols-1' : 'sm:grid-cols-2 xl:grid-cols-4'}`}>
-            {(String(activeAgencyToolId) === 'drive' ? AI_OS_AGENCY_TOOLS.filter((tool) => tool.id === 'drive') : AI_OS_AGENCY_TOOLS).map((tool) => (
+          <div className={`grid gap-2 ${mobile ? 'grid-cols-1' : 'sm:grid-cols-2 xl:grid-cols-4'}`}>
+            {AI_OS_AGENCY_TOOLS.map((tool) => (
               <button
                 key={tool.id}
                 type="button"
@@ -4184,8 +4179,6 @@ export default function AIOSDesktop() {
             ))}
           </div>
         </div>
-        </div>
-
         {renderAgencyToolDetails()}
       </>
     )
@@ -4883,7 +4876,7 @@ export default function AIOSDesktop() {
 
                   {renderSectionSwitcher()}
 
-                  <div
+                  <div hidden={activeSection === 'root'}
                     onDrop={handleDrop}
                     onDragOver={(event) => event.preventDefault()}
                     className="min-h-[520px] rounded-3xl border border-dashed border-[#8FBCBB]/25 bg-[#1F2530]/72 p-4"
@@ -4896,7 +4889,7 @@ export default function AIOSDesktop() {
                         {activeSection === 'images' ? 'Solo immagini e video. Le immagini sono collegate anche alla galleria immobile.' : activeSection === 'docs' ? 'TXT, immagini, video, PDF e documenti. PDF e immagini possono comparire nelle planimetrie.' : 'Root della cartella: carica qui file sparsi non collegati alla galleria.'}
                       </p>
 
-                      <div className="mt-4 flex flex-wrap gap-2">
+                      <div hidden={activeSection === 'root'} className="mt-4 flex flex-wrap gap-2">
                         <label className="cursor-pointer rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-sm font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.24)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75">
                           Carica file
                           <input type="file" multiple accept={getUploadAccept(activeSection)} className="hidden" onChange={handleFileInput} />
