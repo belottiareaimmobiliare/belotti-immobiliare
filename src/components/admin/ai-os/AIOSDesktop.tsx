@@ -956,6 +956,7 @@ export default function AIOSDesktop() {
   const [driveExplorerNewFolderName, setDriveExplorerNewFolderName] = useState('')
   const [driveExplorerCreatingFolder, setDriveExplorerCreatingFolder] = useState(false)
   const [driveExplorerIconSize, setDriveExplorerIconSize] = useState<24 | 32 | 48>(48)
+  const [fileMoveUpdating, setFileMoveUpdating] = useState('')
   const [driveExplorerHistory, setDriveExplorerHistory] = useState<string[]>([])
   const [mediaSyncing, setMediaSyncing] = useState(false)
   const [activeAgencyToolId, setActiveAgencyToolId] = useState<AIOSAgencyToolId | null>(null)
@@ -2568,7 +2569,7 @@ export default function AIOSDesktop() {
   }
 
   const openFileContextMenu = (
-    event: MouseEvent<HTMLButtonElement>,
+    event: MouseEvent<HTMLElement>,
     file: AIOSFile,
   ) => {
     event.preventDefault()
@@ -4184,18 +4185,73 @@ export default function AIOSDesktop() {
     )
   }
 
+  function moveTargetLabel(section: AIOSSection) {
+    if (section === 'images') return 'Immagini'
+    if (section === 'docs') return 'Docs e planimetrie'
+    return 'Root'
+  }
+
+  function availableMoveTargets() {
+    return (['root', 'images', 'docs'] as AIOSSection[]).filter((section) => section !== activeSection)
+  }
+
+  async function moveFileToSection(file: AIOSFile, targetSection: AIOSSection) {
+    if (!file?.id) return
+
+    setFileMoveUpdating(file.id)
+
+    try {
+      const response = await fetch('/api/admin/ai-os/move-file', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fileId: file.id,
+          targetSection,
+        }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore spostamento file')
+      }
+
+      setNotice(`File spostato in ${moveTargetLabel(targetSection)}.`)
+
+      if (activeFolderId) {
+        void loadFilesForFolder(activeFolderId, activeSection)
+      }
+
+      void loadFolders()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore spostamento file'
+      setNotice(message)
+    } finally {
+      setFileMoveUpdating('')
+    }
+  }
+
   const renderFileCard = (file: AIOSFile, mobile = false) => {
     const isUploading = file.status === 'uploading'
     const isError = file.status === 'error'
     const progress = Math.max(0, Math.min(100, Number(file.uploadProgress ?? 0)))
 
     return (
-      <button
+      <div
         key={file.id}
-        type="button"
+        role="button"
+        tabIndex={0}
         onClick={() => openFile(file)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            openFile(file)
+          }
+        }}
         onContextMenu={(event) => openFileContextMenu(event, file)}
-        className={`group relative overflow-hidden rounded-2xl border text-left transition active:scale-[0.99] ${
+        className={`group relative cursor-pointer overflow-hidden rounded-2xl border text-left transition active:scale-[0.99] ${
           mobile ? 'w-full p-3' : 'p-4'
         } ${
           isError
@@ -4263,9 +4319,28 @@ export default function AIOSDesktop() {
                 {mobile ? 'Tocca per anteprima fullscreen' : 'clicca per anteprima'}
               </p>
             )}
+
+            {!isUploading && !isError ? (
+              <div
+                className="mt-3 flex flex-wrap gap-1.5"
+                onClick={(event) => event.stopPropagation()}
+              >
+                {availableMoveTargets().map((targetSection) => (
+                  <button
+                    key={targetSection}
+                    type="button"
+                    disabled={fileMoveUpdating === file.id}
+                    onClick={() => moveFileToSection(file, targetSection)}
+                    className="rounded-full border border-[#8FBCBB]/25 bg-[#151A23]/70 px-2.5 py-1 text-[10px] font-semibold text-[#D8DEE9]/70 transition hover:border-[#A3BE8C]/55 hover:bg-[#1F2A24] hover:text-[#A3BE8C] disabled:cursor-wait disabled:opacity-50"
+                  >
+                    {fileMoveUpdating === file.id ? 'Sposto...' : `Sposta in ${moveTargetLabel(targetSection)}`}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
-      </button>
+      </div>
     )
   }
 
