@@ -4419,7 +4419,7 @@ export default function AIOSDesktop() {
             </header>
 
             <div className="min-h-0 flex-1 overflow-auto rounded-[28px] border border-[#8FBCBB]/15 bg-[#2E3440]/30 p-3 backdrop-blur-2xl">
-              {renderPathBar(true)}
+              {activeSection !== 'root' ? renderPathBar(true) : null}
 
               {renderSectionSwitcher(true)}
 
@@ -4872,7 +4872,7 @@ export default function AIOSDesktop() {
                     </div>
                   </div>
 
-                  {renderPathBar()}
+                  {activeSection !== 'root' ? renderPathBar() : null}
 
                   {renderSectionSwitcher()}
 
