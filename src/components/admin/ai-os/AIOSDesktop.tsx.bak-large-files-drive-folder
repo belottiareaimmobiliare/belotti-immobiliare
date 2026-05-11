@@ -234,8 +234,8 @@ type AIOSQuotaStatus = {
   is_blocked: boolean
 }
 
-const AI_OS_LARGE_FILE_THRESHOLD_BYTES = 45 * 1024 * 1024
-const AI_OS_VIDEO_TARGET_BYTES = 42 * 1024 * 1024
+const AI_OS_LARGE_FILE_THRESHOLD_BYTES = 50 * 1024 * 1024
+const AI_OS_VIDEO_TARGET_BYTES = 45 * 1024 * 1024
 
 const AI_OS_MAX_TOTAL_BYTES = 838860800
 const AI_OS_WARN_TOTAL_BYTES = 681574400
@@ -455,7 +455,7 @@ function createEmptyDriveSettingsForm(): AIOSDriveSettingsForm {
   return {
     driveRootName: 'Belotti AI-OS / Archivio Immobili',
     driveRootUrl: '',
-    largeFileThresholdMb: '45',
+    largeFileThresholdMb: '50',
     notes: 'Drive viene usato come archivio free per video e documenti pesanti. Supabase resta lo storage ufficiale per galleria pubblica e file sito.',
   }
 }
@@ -2168,7 +2168,7 @@ export default function AIOSDesktop() {
       setLargeFileQueue(largeFiles)
       setLargeFileDecisionOpen(true)
       setNotice(
-        `${largeFiles.length} file sopra 45 MB: scegli se ridurli o archiviarli su Google Drive.`,
+        `${largeFiles.length} file sopra 50 MB: scegli se ridurli o archiviarli su Google Drive.`,
       )
     }
   }
@@ -2179,100 +2179,23 @@ export default function AIOSDesktop() {
     setNotice('Upload file grande annullato.')
   }
 
-  const sendLargeFilesToDriveArchive = async () => {
+  const sendLargeFilesToDriveArchive = () => {
     setLargeFileDecisionOpen(false)
-
-    if (!activeFolderId) {
-      setNotice('Seleziona prima una cartella immobile per aprire il Drive dedicato.')
-      return
-    }
-
-    const driveWindow = window.open('about:blank', '_blank', 'noopener,noreferrer')
-
-    try {
-      setNotice('Apertura Drive immobile in corso...')
-
-      let nextDriveFolder: AIOSDriveFolder | null = driveFolder
-
-      if (!nextDriveFolder?.drive_folder_url) {
-        const createResponse = await fetch('/api/admin/ai-os/drive-folders/create-missing', {
-          method: 'POST',
-        })
-
-        const createPayload = await createResponse.json().catch(() => null)
-
-        if (!createResponse.ok) {
-          throw new Error(createPayload?.error || 'Errore creazione cartella Drive immobile')
-        }
-
-        const folderResponse = await fetch(
-          `/api/admin/ai-os/drive-folder?propertyId=${encodeURIComponent(activeFolderId)}`,
-          { cache: 'no-store' },
-        )
-
-        const folderPayload = await folderResponse.json().catch(() => null)
-
-        if (!folderResponse.ok) {
-          throw new Error(folderPayload?.error || 'Errore lettura cartella Drive immobile')
-        }
-
-        nextDriveFolder = folderPayload?.driveFolder ?? null
-        setDriveFolder(nextDriveFolder)
-
-        if (nextDriveFolder) {
-          setDriveFolderForm({
-            folderName: nextDriveFolder.folder_name || buildSuggestedDriveFolderName(activeFolder),
-            driveFolderUrl: nextDriveFolder.drive_folder_url || '',
-            syncStatus: nextDriveFolder.sync_status || 'pending_creation',
-            notes: nextDriveFolder.notes || '',
-          })
-        }
-      }
-
-      const driveUrl = nextDriveFolder?.drive_folder_url || ''
-
-      if (!driveUrl) {
-        if (driveWindow && !driveWindow.closed) {
-          driveWindow.close()
-        }
-
-        setNotice('Cartella Drive immobile non ancora disponibile. Apri la nuvoletta Drive e crea le cartelle immobili.')
-        return
-      }
-
-      if (driveWindow) {
-        driveWindow.location.href = driveUrl
-      } else {
-        window.open(driveUrl, '_blank', 'noopener,noreferrer')
-      }
-
-      setNotice(
-        largeFileQueue.length > 0
-          ? `Apri Drive immobile: carica lì ${largeFileQueue.length} file sopra 45 MB. Supabase resta per file leggeri.`
-          : 'Drive immobile aperto.',
-      )
-
-      setLargeFileQueue([])
-    } catch (error) {
-      if (driveWindow && !driveWindow.closed) {
-        driveWindow.close()
-      }
-
-      const message = error instanceof Error ? error.message : 'Errore apertura Drive immobile'
-      setNotice(message)
-    }
+    setNotice(
+      'Carica il file grande nella cartella Google Drive archivio dell’immobile. Supabase resta per file ottimizzati e pubblicabili.',
+    )
   }
 
   const reduceLargeVideos = () => {
     const videoFiles = largeFileQueue.filter((file) => file.type.startsWith('video/'))
 
     if (videoFiles.length === 0) {
-      setNotice('Riduzione disponibile solo per video. Per PDF/documenti grandi apri il Drive dell’immobile.')
+      setNotice('Riduzione disponibile solo per video. Per questo file usa Google Drive archivio.')
       return
     }
 
     setNotice(
-      `Riduzione video pronta come prossimo step: target circa ${formatFileSize(AI_OS_VIDEO_TARGET_BYTES)} usando compressione browser open-source.`,
+      `Riduzione video pronta come prossimo step: target ${formatFileSize(AI_OS_VIDEO_TARGET_BYTES)} usando compressione browser open-source.`,
     )
   }
 
@@ -4411,7 +4334,7 @@ export default function AIOSDesktop() {
                                 video pesanti e documenti oltre soglia.
                               </p>
                               <p>
-                                Soglia Supabase: <span className="font-bold text-[#EBCB8B]">{driveSettingsForm.largeFileThresholdMb || '45'} MB</span>.
+                                Soglia attuale: <span className="font-bold text-[#EBCB8B]">{driveSettingsForm.largeFileThresholdMb || '50'} MB</span>.
                               </p>
                               <p className="text-xs text-[#D8DEE9]/46">
                                 Questa impostazione non tocca OAuth admin, QR login, OTP o accessi fotografi.
@@ -4581,7 +4504,7 @@ export default function AIOSDesktop() {
                   File grande rilevato
                 </p>
                 <h3 className="mt-1 text-xl font-semibold text-white">
-                  Upload sopra 45 MB
+                  Upload sopra 50 MB
                 </h3>
                 <p className="mt-2 text-sm leading-6 text-[#D8DEE9]/68">
                   AI-OS usa Supabase per i file pubblicabili e Google Drive come archivio free per video/documenti pesanti.
@@ -4621,7 +4544,7 @@ export default function AIOSDesktop() {
                 onClick={sendLargeFilesToDriveArchive}
                 className="rounded-2xl border border-[#88C0D0]/25 bg-[#88C0D0]/12 px-4 py-3 text-sm font-bold text-[#88C0D0] transition hover:bg-[#88C0D0]/18"
               >
-                Apri Drive immobile
+                Usa Google Drive
               </button>
 
               <button

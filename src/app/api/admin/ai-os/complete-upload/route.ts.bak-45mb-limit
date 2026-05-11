@@ -10,9 +10,6 @@ import {
   shouldCreatePropertyMedia,
 } from '@/lib/ai-os'
 
-
-const AI_OS_MAX_SUPABASE_FILE_BYTES = 45 * 1024 * 1024
-
 const SIGNED_URL_SECONDS = 60 * 60
 
 export async function POST(request: Request) {
@@ -37,16 +34,6 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'Dati completamento upload mancanti o non validi' },
         { status: 400 },
-      )
-    }
-
-    if (sizeBytes > AI_OS_MAX_SUPABASE_FILE_BYTES) {
-      return NextResponse.json(
-        {
-          error:
-            'File sopra 45 MB: non caricarlo su Supabase. Usa la cartella Drive dell’immobile oppure riduci il video.',
-        },
-        { status: 413 },
       )
     }
 
