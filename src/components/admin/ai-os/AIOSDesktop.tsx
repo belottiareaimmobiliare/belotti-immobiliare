@@ -957,6 +957,7 @@ export default function AIOSDesktop() {
   const [driveExplorerCreatingFolder, setDriveExplorerCreatingFolder] = useState(false)
   const [driveExplorerIconSize, setDriveExplorerIconSize] = useState<24 | 32 | 48>(48)
   const [fileMoveUpdating, setFileMoveUpdating] = useState('')
+  const [movePicker, setMovePicker] = useState<{ fileId: string; fileName: string } | null>(null)
   const [driveExplorerHistory, setDriveExplorerHistory] = useState<string[]>([])
   const [mediaSyncing, setMediaSyncing] = useState(false)
   const [activeAgencyToolId, setActiveAgencyToolId] = useState<AIOSAgencyToolId | null>(null)
@@ -4195,6 +4196,11 @@ export default function AIOSDesktop() {
     return (['root', 'images', 'docs'] as AIOSSection[]).filter((section) => section !== currentSection)
   }
 
+  function openMovePickerFromContext(fileId: string, fileName: string) {
+    setMovePicker({ fileId, fileName })
+    setContextMenu(null)
+  }
+
   async function moveFileToSection(file: Pick<AIOSFile, 'id'>, targetSection: AIOSSection) {
     if (!file?.id) return
 
@@ -4319,25 +4325,6 @@ export default function AIOSDesktop() {
                 {mobile ? 'Tocca per anteprima fullscreen' : 'clicca per anteprima'}
               </p>
             )}
-
-            {!isUploading && !isError ? (
-              <div
-                className="mt-3 flex flex-wrap gap-1.5"
-                onClick={(event) => event.stopPropagation()}
-              >
-                {availableMoveTargets().map((targetSection) => (
-                  <button
-                    key={targetSection}
-                    type="button"
-                    disabled={fileMoveUpdating === file.id}
-                    onClick={() => moveFileToSection(file, targetSection)}
-                    className="rounded-full border border-[#8FBCBB]/25 bg-[#151A23]/70 px-2.5 py-1 text-[10px] font-semibold text-[#D8DEE9]/70 transition hover:border-[#A3BE8C]/55 hover:bg-[#1F2A24] hover:text-[#A3BE8C] disabled:cursor-wait disabled:opacity-50"
-                  >
-                    {fileMoveUpdating === file.id ? 'Sposto...' : `Sposta in ${moveTargetLabel(targetSection)}`}
-                  </button>
-                ))}
-              </div>
-            ) : null}
           </div>
         </div>
       </div>
@@ -5059,6 +5046,57 @@ export default function AIOSDesktop() {
         </div>
       </section>
 
+      {movePicker ? (
+        <div className="fixed inset-0 z-[10080] flex items-center justify-center bg-black/45 p-6 backdrop-blur-sm">
+          <div className="w-full max-w-2xl rounded-[28px] border border-[#8FBCBB]/24 bg-[#202632]/96 p-5 shadow-2xl shadow-black/60">
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.28em] text-[#8FBCBB]/75">
+                  Sposta file
+                </p>
+                <h3 className="mt-1 text-lg font-semibold text-white">
+                  {movePicker.fileName}
+                </h3>
+                <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/55">
+                  Seleziona la cartella di destinazione.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setMovePicker(null)}
+                className="rounded-full border border-[#BF616A]/35 bg-[#BF616A]/10 px-3 py-1.5 text-xs font-semibold text-[#FFCCD2] transition hover:bg-[#BF616A]/20"
+              >
+                Chiudi
+              </button>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              {availableMoveTargets().map((targetSection) => (
+                <button
+                  key={targetSection}
+                  type="button"
+                  disabled={fileMoveUpdating === movePicker.fileId}
+                  onClick={() => {
+                    void moveFileToSection({ id: movePicker.fileId }, targetSection)
+                    setMovePicker(null)
+                  }}
+                  className="group flex min-h-[130px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/14 bg-[#151A23]/72 p-4 text-center transition hover:border-[#A3BE8C]/55 hover:bg-[#A3BE8C]/10 disabled:cursor-wait disabled:opacity-50"
+                >
+                  <span className="mb-3 text-4xl">📁</span>
+                  <span className="text-sm font-bold text-white">
+                    {moveTargetLabel(targetSection)}
+                  </span>
+                  <span className="mt-1 text-[11px] text-[#D8DEE9]/45">
+                    Sposta qui
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {largeFileDecisionOpen ? (
         <div className="fixed inset-0 z-[10080] flex items-center justify-center bg-black/62 p-4 backdrop-blur-md">
           <div className="w-full max-w-xl rounded-[28px] border border-[#EBCB8B]/25 bg-[#202632]/96 p-5 shadow-2xl shadow-black/60">
@@ -5145,25 +5183,14 @@ export default function AIOSDesktop() {
               </p>
             </div>
 
-            
-              <div className="my-2 border-t border-[#8FBCBB]/10 pt-2">
-                <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8FBCBB]/60">
-                  Sposta file
-                </p>
-
-                {availableMoveTargets().map((targetSection) => (
-                  <button
-                    key={targetSection}
-                    type="button"
-                    disabled={fileMoveUpdating === contextMenu.fileId}
-                    onClick={() => moveFileToSection({ id: contextMenu.fileId }, targetSection)}
-                    className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold text-[#D8DEE9]/78 transition hover:bg-[#A3BE8C]/12 hover:text-[#A3BE8C] disabled:cursor-wait disabled:opacity-50"
-                  >
-                    <span>📁</span>
-                    <span>{fileMoveUpdating === contextMenu.fileId ? 'Sposto...' : `Sposta in ${moveTargetLabel(targetSection)}`}</span>
-                  </button>
-                ))}
-              </div>
+              <button
+                type="button"
+                onClick={() => openMovePickerFromContext(contextMenu.fileId, contextMenu.fileName)}
+                className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold text-[#D8DEE9]/78 transition hover:bg-[#A3BE8C]/12 hover:text-[#A3BE8C]"
+              >
+                <span>↪️</span>
+                <span>Sposta...</span>
+              </button>
 
 <button
               type="button"
