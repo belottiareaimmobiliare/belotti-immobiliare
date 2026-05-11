@@ -4070,7 +4070,7 @@ export default function AIOSDesktop() {
           </p>
         </div>
 
-        <div className={`min-h-[320px] rounded-[28px] border border-dashed border-[#8FBCBB]/18 bg-[#151A23]/42 p-4 grid content-start gap-3 ${mobile ? 'grid-cols-2' : 'sm:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8'}`}>
+        <div className={`${activeSection === "root" ? "hidden" : ""} min-h-[320px] rounded-[28px] border border-dashed border-[#8FBCBB]/18 bg-[#151A23]/42 p-4 grid content-start gap-3 ${mobile ? 'grid-cols-2' : 'sm:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8'}`}>
           {AI_OS_SECTIONS.map((section) => (
             <button
               key={section.id}
@@ -4088,6 +4088,10 @@ export default function AIOSDesktop() {
               </span>
             </button>
           ))}
+
+          {activeFolder && activeFolder.files.length > 0 ? (
+            activeFolder.files.map((file) => renderFileCard(file, mobile))
+          ) : null}
         </div>
 
         <div className="mt-4 rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/56 p-3">
