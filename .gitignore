@@ -38,3 +38,7 @@ pnpm-debug.log*
 *.log
 # Local security/report temp files
 tmp/
+
+# Local AI-OS patch backups
+*.bak-*
+*.bak
