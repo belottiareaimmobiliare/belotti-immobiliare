@@ -3284,7 +3284,7 @@ export default function AIOSDesktop() {
                   type="button"
                   disabled={propertyOwnerSaving}
                   onClick={savePropertyOwner}
-                  className="rounded-full bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/85 disabled:cursor-wait disabled:opacity-60"
+                  className="rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] transition disabled:cursor-wait disabled:opacity-60 hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
                 >
                   {propertyOwnerSaving ? 'Salvataggio...' : editingOwnerId ? 'Salva modifiche' : 'Salva proprietario'}
                 </button>
@@ -3575,7 +3575,7 @@ export default function AIOSDesktop() {
                   type="button"
                   disabled={propertyMandateSaving}
                   onClick={savePropertyMandate}
-                  className="rounded-full bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/85 disabled:cursor-wait disabled:opacity-60"
+                  className="rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] transition disabled:cursor-wait disabled:opacity-60 hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
                 >
                   {propertyMandateSaving ? 'Salvataggio...' : editingMandateId ? 'Salva modifiche' : 'Salva incarico'}
                 </button>
@@ -3692,7 +3692,7 @@ export default function AIOSDesktop() {
               <button
                 type="button"
                 onClick={() => openSubFolder('docs')}
-                className="mt-4 rounded-full bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/85"
+                className="mt-4 rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
               >
                 Apri Docs e planimetrie
               </button>
@@ -3995,7 +3995,7 @@ export default function AIOSDesktop() {
               onClick={() =>
                 setNotice(`${activeAgencyTool.label}: azione pronta per collegamento database/API.`)
               }
-              className="mt-4 rounded-full bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/85"
+              className="mt-4 rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
             >
               {activeAgencyTool.primaryAction}
             </button>
@@ -4785,7 +4785,7 @@ export default function AIOSDesktop() {
                                 type="button"
                                 disabled={driveSettingsSaving}
                                 onClick={saveDriveSettings}
-                                className="rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.22)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75 disabled:cursor-wait disabled:opacity-60"
+                                className="rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.22)] transition hover:bg-[#1F2A24] disabled:cursor-wait disabled:opacity-60 hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
                               >
                                 {driveSettingsSaving ? 'Salvataggio...' : 'Salva impostazioni Drive'}
                               </button>
@@ -4964,7 +4964,7 @@ export default function AIOSDesktop() {
                       <button
                         type="button"
                         onClick={saveTxtDraft}
-                        className="w-full rounded-2xl bg-[#A3BE8C] px-4 py-3 font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/85"
+                        className="w-full rounded-2xl border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-3 font-semibold text-[#1F2A24] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
                       >
                         Salva TXT
                       </button>
@@ -5260,7 +5260,7 @@ export default function AIOSDesktop() {
                     href={previewFile.previewUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center rounded-2xl bg-[#A3BE8C] px-5 py-3 text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/85"
+                    className="inline-flex items-center justify-center rounded-2xl border border-[#A3BE8C]/55 bg-[#A3BE8C] px-5 py-3 text-sm font-semibold text-[#1F2A24] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
                   >
                     Apri / scarica originale
                   </a>
@@ -5291,7 +5291,7 @@ export default function AIOSDesktop() {
                   href={previewFile.previewUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-5 inline-flex rounded-2xl bg-[#A3BE8C] px-5 py-3 text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/85"
+                  className="mt-5 inline-flex rounded-2xl border border-[#A3BE8C]/55 bg-[#A3BE8C] px-5 py-3 text-sm font-semibold text-[#1F2A24] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
                 >
                   Apri documento
                 </a>
