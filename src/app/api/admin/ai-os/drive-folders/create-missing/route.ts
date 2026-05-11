@@ -81,6 +81,7 @@ async function createDriveFolderWithAppsScript(input: {
     id: String(payload.id || ''),
     name: String(payload.name || input.folderName),
     url: String(payload.url || ''),
+    subfolders: Array.isArray(payload.subfolders) ? payload.subfolders : [],
   }
 }
 
@@ -163,11 +164,6 @@ export async function POST() {
       const existingUrl = String(existing?.drive_folder_url || '').trim()
       const existingId = String(existing?.drive_folder_id || '').trim()
 
-      if (existingUrl && existingId) {
-        alreadyLinked += 1
-        continue
-      }
-
       const folderName =
         String(existing?.folder_name || '').trim() ||
         buildPropertyDriveFolderName(property as Record<string, unknown>)
@@ -178,6 +174,10 @@ export async function POST() {
           propertyId,
         })
 
+        if (existingUrl && existingId) {
+          alreadyLinked += 1
+        }
+
         const { error: upsertError } = await supabase
           .from('property_drive_folders')
           .upsert(
@@ -187,7 +187,7 @@ export async function POST() {
               drive_folder_url: driveFolder.url,
               drive_folder_id: driveFolder.id,
               sync_status: 'synced',
-              notes: 'Cartella Drive creata automaticamente da AI-OS sotto la root agenzia.',
+              notes: 'Cartella Drive creata/sincronizzata automaticamente da AI-OS sotto la root agenzia, con sottocartelle immagini e documenti e planimetrie.',
               last_sync_at: new Date().toISOString(),
             },
             {
@@ -197,7 +197,9 @@ export async function POST() {
 
         if (upsertError) throw new Error(upsertError.message)
 
-        created += 1
+        if (!existingUrl || !existingId) {
+          created += 1
+        }
       } catch (error) {
         failed += 1
         const message = error instanceof Error ? error.message : 'Errore sconosciuto'

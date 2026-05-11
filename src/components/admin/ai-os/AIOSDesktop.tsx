@@ -1885,7 +1885,7 @@ export default function AIOSDesktop() {
       }
 
       setNotice(
-        `Drive: ${payload.created || 0} cartelle create, ${payload.alreadyLinked || 0} già collegate, ${payload.failed || 0} errori.`,
+        `Drive: ${payload.created || 0} cartelle create, ${payload.alreadyLinked || 0} già presenti/sistemate, ${payload.failed || 0} errori.`,
       )
 
       void loadFolders()
@@ -4380,7 +4380,7 @@ export default function AIOSDesktop() {
                                 onClick={createMissingDriveFolders}
                                 className="rounded-full border border-[#88C0D0]/35 bg-[#88C0D0]/12 px-4 py-2 text-xs font-bold text-[#88C0D0] transition hover:bg-[#88C0D0]/20 disabled:cursor-wait disabled:opacity-60"
                               >
-                                {driveFoldersCreating ? 'Creazione cartelle...' : 'Crea cartelle immobili in Drive'}
+                                {driveFoldersCreating ? 'Creazione cartelle...' : 'Crea/sistema cartelle immobili in Drive'}
                               </button>
 
                               {driveSettingsForm.driveRootUrl.trim() ? (
