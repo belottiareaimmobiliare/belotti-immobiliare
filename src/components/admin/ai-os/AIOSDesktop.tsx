@@ -967,6 +967,7 @@ export default function AIOSDesktop() {
   const [driveExplorerPreviewFile, setDriveExplorerPreviewFile] = useState<AIOSDriveExplorerFile | null>(null)
   const [driveExplorerNewFolderName, setDriveExplorerNewFolderName] = useState('')
   const [driveExplorerCreatingFolder, setDriveExplorerCreatingFolder] = useState(false)
+  const [driveExplorerHistory, setDriveExplorerHistory] = useState<string[]>([])
   const [mediaSyncing, setMediaSyncing] = useState(false)
   const [activeAgencyToolId, setActiveAgencyToolId] = useState<AIOSAgencyToolId | null>(null)
   const [documentRequests, setDocumentRequests] = useState<AIOSDocumentRequest[]>([])
@@ -1925,6 +1926,41 @@ export default function AIOSDesktop() {
     } finally {
       setDriveExplorerUploading(false)
     }
+  }
+
+  function openDriveExplorerFolder(folderId: string) {
+    const targetFolderId = String(folderId || '').trim()
+    const currentFolderId = String(driveExplorer?.folder?.id || driveFolder?.drive_folder_id || '').trim()
+
+    if (!targetFolderId) return
+
+    if (currentFolderId && currentFolderId !== targetFolderId) {
+      setDriveExplorerHistory((currentHistory) => [...currentHistory, currentFolderId])
+    }
+
+    setDriveExplorerPreviewFile(null)
+    void loadDriveExplorer(targetFolderId)
+  }
+
+  function openDriveExplorerRootFolder() {
+    if (!driveFolder?.drive_folder_id) return
+
+    setDriveExplorerHistory([])
+    setDriveExplorerPreviewFile(null)
+    void loadDriveExplorer(driveFolder.drive_folder_id)
+  }
+
+  function goBackDriveExplorerFolder() {
+    const previousFolderId = driveExplorerHistory[driveExplorerHistory.length - 1]
+
+    if (!previousFolderId) {
+      openDriveExplorerRootFolder()
+      return
+    }
+
+    setDriveExplorerHistory((currentHistory) => currentHistory.slice(0, -1))
+    setDriveExplorerPreviewFile(null)
+    void loadDriveExplorer(previousFolderId)
   }
 
   function driveFilePreviewUrl(file: AIOSDriveExplorerFile | null) {
@@ -3675,8 +3711,17 @@ export default function AIOSDesktop() {
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    onClick={() => driveFolder?.drive_folder_id && loadDriveExplorer(driveFolder.drive_folder_id)}
-                    className="rounded-full border border-[#8FBCBB]/25 bg-[#8FBCBB]/10 px-3 py-1.5 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#8FBCBB]/18"
+                    disabled={driveExplorerHistory.length === 0}
+                    onClick={goBackDriveExplorerFolder}
+                    className="rounded-full border border-[#8FBCBB]/25 bg-[#8FBCBB]/10 px-3 py-1.5 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#8FBCBB]/18 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    ← Indietro
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={openDriveExplorerRootFolder}
+                    className="rounded-full border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-3 py-1.5 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#88C0D0]/18"
                   >
                     Cartella immobile
                   </button>
@@ -3707,7 +3752,7 @@ export default function AIOSDesktop() {
                   Caricamento cartella Drive immobile...
                 </div>
               ) : driveFolder?.drive_folder_id ? (
-                <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_390px]">
+                <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_310px]">
                   <div className="min-w-0">
                     <div
                       onDrop={(event) => {
@@ -3720,6 +3765,15 @@ export default function AIOSDesktop() {
                       onDragOver={(event) => event.preventDefault()}
                       className="rounded-[28px] border border-dashed border-[#88C0D0]/36 bg-[#1B202B]/78 p-4 shadow-[inset_0_0_28px_rgba(0,0,0,0.20)] transition hover:border-[#A3BE8C]/60 hover:bg-[#1F2A24]/55"
                     >
+                      <div className="mb-4 rounded-2xl border border-[#8FBCBB]/12 bg-[#151A23]/72 px-3 py-2">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8FBCBB]/65">
+                          Percorso Drive
+                        </p>
+                        <p className="mt-1 truncate text-xs font-semibold text-[#D8DEE9]/72">
+                          ☁️ {activeFolder?.name || 'Immobile'} / {driveExplorer?.folder?.name || 'cartella immobile'}
+                        </p>
+                      </div>
+
                       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div>
                           <p className="text-sm font-semibold text-white">
@@ -3786,16 +3840,13 @@ export default function AIOSDesktop() {
                       ) : (
                         <div className="min-h-[280px] rounded-3xl border border-[#8FBCBB]/10 bg-[#151A23]/42 p-4">
                           {driveExplorer?.folders?.length || driveExplorer?.files?.length ? (
-                            <div className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+                            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
                               {driveExplorer?.folders?.map((folder) => (
                                 <button
                                   key={folder.id}
                                   type="button"
-                                  onClick={() => {
-                                    setDriveExplorerPreviewFile(null)
-                                    void loadDriveExplorer(folder.id)
-                                  }}
-                                  className="group flex min-h-[120px] flex-col items-center justify-center rounded-3xl border border-[#88C0D0]/18 bg-[#202632]/82 p-4 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12"
+                                  onClick={() => openDriveExplorerFolder(folder.id)}
+                                  className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#88C0D0]/14 bg-[#202632]/62 p-3 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12"
                                 >
                                   <span className="relative mb-3 flex h-14 w-16 items-end justify-center">
                                     <span className="absolute left-1 top-1 h-4 w-8 rounded-t-md bg-[#344153] transition group-hover:bg-[#48627A]" />
@@ -3813,7 +3864,7 @@ export default function AIOSDesktop() {
                                   key={file.id}
                                   type="button"
                                   onClick={() => setDriveExplorerPreviewFile(file)}
-                                  className="group flex min-h-[120px] flex-col items-center justify-center rounded-3xl border border-[#8FBCBB]/12 bg-[#202632]/70 p-4 text-center transition hover:border-[#B48EAD]/45 hover:bg-[#B48EAD]/10"
+                                  className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-3 text-center transition hover:border-[#B48EAD]/45 hover:bg-[#B48EAD]/10"
                                 >
                                   <span className="mb-3 text-4xl">
                                     {file.mimeType?.startsWith('video/') ? '🎥' : file.mimeType?.startsWith('image/') ? '🖼️' : file.mimeType === 'application/pdf' ? '📕' : '📄'}
@@ -3871,7 +3922,7 @@ export default function AIOSDesktop() {
                           <iframe
                             title={driveExplorerPreviewFile.name}
                             src={driveFilePreviewUrl(driveExplorerPreviewFile)}
-                            className="h-[360px] w-full bg-[#202632]"
+                            className="h-[300px] w-full bg-[#202632]"
                             allow="autoplay"
                           />
                         </div>
@@ -3886,7 +3937,7 @@ export default function AIOSDesktop() {
                         </a>
                       </div>
                     ) : (
-                      <div className="flex min-h-[360px] items-center justify-center rounded-2xl border border-dashed border-[#8FBCBB]/14 bg-[#202632]/42 text-center">
+                      <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-dashed border-[#8FBCBB]/14 bg-[#202632]/42 text-center">
                         <div>
                           <p className="text-4xl">👁️</p>
                           <p className="mt-3 text-sm font-semibold text-white">Seleziona un file</p>
@@ -4047,7 +4098,7 @@ export default function AIOSDesktop() {
           ))}
         </div>
 
-        <div className="mt-5 border-t border-[#8FBCBB]/12 pt-5">
+        <div className={`mt-5 border-t border-[#8FBCBB]/12 pt-5 ${activeAgencyToolId === "drive" ? "pb-1" : ""}`}>
           <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.28em] text-[#B48EAD]/78">
@@ -4062,8 +4113,8 @@ export default function AIOSDesktop() {
             </p>
           </div>
 
-          <div className={`grid gap-2 ${mobile ? 'grid-cols-1' : 'sm:grid-cols-2 xl:grid-cols-4'}`}>
-            {AI_OS_AGENCY_TOOLS.map((tool) => (
+          <div className={`grid gap-2 ${activeAgencyToolId === 'drive' ? 'max-w-[360px] grid-cols-1' : mobile ? 'grid-cols-1' : 'sm:grid-cols-2 xl:grid-cols-4'}`}>
+            {(activeAgencyToolId === 'drive' ? AI_OS_AGENCY_TOOLS.filter((tool) => tool.id === 'drive') : AI_OS_AGENCY_TOOLS).map((tool) => (
               <button
                 key={tool.id}
                 type="button"
