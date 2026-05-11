@@ -967,6 +967,7 @@ export default function AIOSDesktop() {
   const [driveExplorerPreviewFile, setDriveExplorerPreviewFile] = useState<AIOSDriveExplorerFile | null>(null)
   const [driveExplorerNewFolderName, setDriveExplorerNewFolderName] = useState('')
   const [driveExplorerCreatingFolder, setDriveExplorerCreatingFolder] = useState(false)
+  const [driveExplorerIconSize, setDriveExplorerIconSize] = useState<24 | 32 | 48>(48)
   const [driveExplorerHistory, setDriveExplorerHistory] = useState<string[]>([])
   const [mediaSyncing, setMediaSyncing] = useState(false)
   const [activeAgencyToolId, setActiveAgencyToolId] = useState<AIOSAgencyToolId | null>(null)
@@ -1963,6 +1964,24 @@ export default function AIOSDesktop() {
     void loadDriveExplorer(previousFolderId)
   }
 
+  function driveExplorerTileClass() {
+    if (driveExplorerIconSize === 24) {
+      return 'group flex min-h-[82px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-2 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12'
+    }
+
+    if (driveExplorerIconSize === 32) {
+      return 'group flex min-h-[98px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-3 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12'
+    }
+
+    return 'group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-3 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12'
+  }
+
+  function driveExplorerIconTextClass() {
+    if (driveExplorerIconSize === 24) return 'text-2xl'
+    if (driveExplorerIconSize === 32) return 'text-3xl'
+    return 'text-4xl'
+  }
+
   function driveFilePreviewUrl(file: AIOSDriveExplorerFile | null) {
     if (!file?.id) return ''
     return `https://drive.google.com/file/d/${file.id}/preview`
@@ -2251,14 +2270,14 @@ export default function AIOSDesktop() {
   }, [])
 
   useEffect(() => {
-    if (activeAgencyToolId === 'drive' && activeFolderId) {
+    if (String(activeAgencyToolId) === 'drive' && activeFolderId) {
       void loadDriveSettings()
       void loadDriveFolder(activeFolderId)
     }
   }, [activeAgencyToolId, activeFolderId])
 
   useEffect(() => {
-    if (activeAgencyToolId === 'drive' && driveFolder?.drive_folder_id) {
+    if (String(activeAgencyToolId) === 'drive' && driveFolder?.drive_folder_id) {
       void loadDriveExplorer(driveFolder.drive_folder_id)
     }
   }, [activeAgencyToolId, driveFolder?.drive_folder_id])
@@ -3744,6 +3763,23 @@ export default function AIOSDesktop() {
                       Apri in Drive
                     </a>
                   ) : null}
+
+                  <div className="flex items-center gap-1 rounded-full border border-[#8FBCBB]/14 bg-[#151A23]/72 px-2 py-1">
+                    {[24, 32, 48].map((size) => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => setDriveExplorerIconSize(size as 24 | 32 | 48)}
+                        className={`rounded-full px-2 py-1 text-[10px] font-bold transition ${
+                          driveExplorerIconSize === size
+                            ? 'bg-[#A3BE8C] text-[#1F2A24]'
+                            : 'text-[#D8DEE9]/55 hover:bg-[#8FBCBB]/10 hover:text-white'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -3752,7 +3788,7 @@ export default function AIOSDesktop() {
                   Caricamento cartella Drive immobile...
                 </div>
               ) : driveFolder?.drive_folder_id ? (
-                <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_310px]">
+                <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
                   <div className="min-w-0">
                     <div
                       onDrop={(event) => {
@@ -3840,7 +3876,7 @@ export default function AIOSDesktop() {
                       ) : (
                         <div className="min-h-[280px] rounded-3xl border border-[#8FBCBB]/10 bg-[#151A23]/42 p-4">
                           {driveExplorer?.folders?.length || driveExplorer?.files?.length ? (
-                            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
+                            <div className="grid gap-3 sm:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8">
                               {driveExplorer?.folders?.map((folder) => (
                                 <button
                                   key={folder.id}
@@ -3848,10 +3884,8 @@ export default function AIOSDesktop() {
                                   onClick={() => openDriveExplorerFolder(folder.id)}
                                   className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#88C0D0]/14 bg-[#202632]/62 p-3 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12"
                                 >
-                                  <span className="relative mb-3 flex h-14 w-16 items-end justify-center">
-                                    <span className="absolute left-1 top-1 h-4 w-8 rounded-t-md bg-[#344153] transition group-hover:bg-[#48627A]" />
-                                    <span className="absolute bottom-0 h-11 w-16 rounded-xl border border-[#ECEFF4]/10 bg-[#2B3544] shadow-[0_10px_24px_rgba(0,0,0,0.30)] transition group-hover:bg-[#3D4A5F]" />
-                                    <span className="relative z-10 pb-2 text-lg">📁</span>
+                                  <span className={`mb-3 ${driveExplorerIconTextClass()}`}>
+                                    📁
                                   </span>
                                   <span className="line-clamp-2 text-sm font-semibold text-white">
                                     {folder.name}
@@ -3864,9 +3898,9 @@ export default function AIOSDesktop() {
                                   key={file.id}
                                   type="button"
                                   onClick={() => setDriveExplorerPreviewFile(file)}
-                                  className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-3 text-center transition hover:border-[#B48EAD]/45 hover:bg-[#B48EAD]/10"
+                                  className={driveExplorerTileClass()}
                                 >
-                                  <span className="mb-3 text-4xl">
+                                  <span className={`mb-3 ${driveExplorerIconTextClass()}`}>
                                     {file.mimeType?.startsWith('video/') ? '🎥' : file.mimeType?.startsWith('image/') ? '🖼️' : file.mimeType === 'application/pdf' ? '📕' : '📄'}
                                   </span>
                                   <span className="line-clamp-2 text-sm font-semibold text-white">
@@ -3962,46 +3996,7 @@ export default function AIOSDesktop() {
                 </div>
               )}
             </div>
-
-            <div className="grid gap-3 lg:grid-cols-2">
-              <div className="rounded-2xl border border-[#8FBCBB]/16 bg-[#202632]/74 p-4">
-                <p className="text-xs uppercase tracking-[0.22em] text-[#8FBCBB]/70">
-                  Drive root progetto
-                </p>
-                <p className="mt-2 text-sm font-semibold text-white">
-                  {driveSettings?.drive_root_name || 'Belotti AI-OS / Archivio Immobili'}
-                </p>
-
-                {driveSettings?.drive_root_url ? (
-                  <a
-                    href={driveSettings.drive_root_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-4 inline-flex rounded-full border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#88C0D0]/18"
-                  >
-                    Apri Drive root
-                  </a>
-                ) : null}
-              </div>
-
-              <div className="rounded-2xl border border-[#B48EAD]/18 bg-[#202632]/74 p-4">
-                <p className="text-xs uppercase tracking-[0.22em] text-[#B48EAD]/72">
-                  Nome cartella consigliato
-                </p>
-                <p className="mt-2 break-words text-sm font-semibold text-white">
-                  {driveFolder?.folder_name || driveFolderForm.folderName || buildSuggestedDriveFolderName(activeFolder)}
-                </p>
-
-                <button
-                  type="button"
-                  onClick={copySuggestedDriveFolderName}
-                  className="mt-4 rounded-full border border-[#B48EAD]/25 bg-[#B48EAD]/10 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#B48EAD]/18"
-                >
-                  Copia nome cartella
-                </button>
-              </div>
-            </div>
-          </div>
+</div>
         ) : (
           <div className="rounded-2xl border border-[#8FBCBB]/15 bg-[#242B38]/82 p-4">
             <p className="text-sm font-semibold text-white">
@@ -4059,6 +4054,10 @@ export default function AIOSDesktop() {
       )
     }
 
+    if (String(activeAgencyToolId) === 'drive') {
+      return <>{renderAgencyToolDetails()}</>
+    }
+
     return (
       <>
         <div className="mb-4 rounded-3xl border border-[#8FBCBB]/22 bg-[#252B36]/88 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.36)]">
@@ -4098,7 +4097,7 @@ export default function AIOSDesktop() {
           ))}
         </div>
 
-        <div className={`mt-5 border-t border-[#8FBCBB]/12 pt-5 ${activeAgencyToolId === "drive" ? "pb-1" : ""}`}>
+        <div className={`mt-5 border-t border-[#8FBCBB]/12 pt-5 ${String(activeAgencyToolId) === "drive" ? "pb-1" : ""}`}>
           <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.28em] text-[#B48EAD]/78">
@@ -4113,8 +4112,8 @@ export default function AIOSDesktop() {
             </p>
           </div>
 
-          <div className={`grid gap-2 ${activeAgencyToolId === 'drive' ? 'max-w-[360px] grid-cols-1' : mobile ? 'grid-cols-1' : 'sm:grid-cols-2 xl:grid-cols-4'}`}>
-            {(activeAgencyToolId === 'drive' ? AI_OS_AGENCY_TOOLS.filter((tool) => tool.id === 'drive') : AI_OS_AGENCY_TOOLS).map((tool) => (
+          <div className={`grid gap-2 ${String(activeAgencyToolId) === 'drive' ? 'max-w-[360px] grid-cols-1' : mobile ? 'grid-cols-1' : 'sm:grid-cols-2 xl:grid-cols-4'}`}>
+            {(String(activeAgencyToolId) === 'drive' ? AI_OS_AGENCY_TOOLS.filter((tool) => tool.id === 'drive') : AI_OS_AGENCY_TOOLS).map((tool) => (
               <button
                 key={tool.id}
                 type="button"
@@ -4848,7 +4847,7 @@ export default function AIOSDesktop() {
                     onDragOver={(event) => event.preventDefault()}
                     className="min-h-[520px] rounded-3xl border border-dashed border-[#8FBCBB]/25 bg-[#1F2530]/72 p-4"
                   >
-                    <div className="mb-4 rounded-2xl border border-[#8FBCBB]/10 bg-[#242B38]/78 p-4">
+                    <div className={`${String(activeAgencyToolId) === "drive" ? "hidden" : ""} mb-4 rounded-2xl border border-[#8FBCBB]/10 bg-[#242B38]/78 p-4`}>
                       <p className="text-sm font-medium text-white">
                         Trascina qui foto, video, planimetrie o documenti
                       </p>
