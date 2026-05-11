@@ -4191,11 +4191,11 @@ export default function AIOSDesktop() {
     return 'Root'
   }
 
-  function availableMoveTargets() {
-    return (['root', 'images', 'docs'] as AIOSSection[]).filter((section) => section !== activeSection)
+  function availableMoveTargets(currentSection: AIOSSection = activeSection) {
+    return (['root', 'images', 'docs'] as AIOSSection[]).filter((section) => section !== currentSection)
   }
 
-  async function moveFileToSection(file: AIOSFile, targetSection: AIOSSection) {
+  async function moveFileToSection(file: Pick<AIOSFile, 'id'>, targetSection: AIOSSection) {
     if (!file?.id) return
 
     setFileMoveUpdating(file.id)
@@ -5145,7 +5145,27 @@ export default function AIOSDesktop() {
               </p>
             </div>
 
-            <button
+            
+              <div className="my-2 border-t border-[#8FBCBB]/10 pt-2">
+                <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8FBCBB]/60">
+                  Sposta file
+                </p>
+
+                {availableMoveTargets().map((targetSection) => (
+                  <button
+                    key={targetSection}
+                    type="button"
+                    disabled={fileMoveUpdating === contextMenu.fileId}
+                    onClick={() => moveFileToSection({ id: contextMenu.fileId }, targetSection)}
+                    className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold text-[#D8DEE9]/78 transition hover:bg-[#A3BE8C]/12 hover:text-[#A3BE8C] disabled:cursor-wait disabled:opacity-50"
+                  >
+                    <span>📁</span>
+                    <span>{fileMoveUpdating === contextMenu.fileId ? 'Sposto...' : `Sposta in ${moveTargetLabel(targetSection)}`}</span>
+                  </button>
+                ))}
+              </div>
+
+<button
               type="button"
               onClick={() => {
                 void deleteFileById(contextMenu.fileId)
