@@ -4077,36 +4077,41 @@ export default function AIOSDesktop() {
           </p>
         </div>
 
-        <div className={`grid gap-4 ${mobile ? 'grid-cols-2' : 'sm:grid-cols-2'}`}>
+        <div className="mb-4 rounded-2xl border border-[#8FBCBB]/12 bg-[#151A23]/72 px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8FBCBB]/65">
+            Percorso AI-OS
+          </p>
+          <p className="mt-1 truncate text-xs font-semibold text-[#D8DEE9]/72">
+            📁 {activeFolder?.name || 'Cartella immobile'} /
+          </p>
+        </div>
+
+        <div className={`min-h-[320px] rounded-[28px] border border-dashed border-[#8FBCBB]/18 bg-[#151A23]/42 p-4 grid content-start gap-3 ${mobile ? 'grid-cols-2' : 'sm:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8'}`}>
           {AI_OS_SECTIONS.map((section) => (
             <button
               key={section.id}
               type="button"
               onClick={() => openSubFolder(section.id)}
               title={section.description}
-              className="group flex min-h-[150px] w-full flex-col items-center justify-center gap-3 rounded-3xl border border-[#8FBCBB]/16 bg-[#202632]/70 p-4 text-center transition hover:border-[#B48EAD]/55 hover:bg-[#434C5E]/60 active:scale-[0.98]"
+              className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-3 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12 active:scale-[0.98]"
             >
-              <span className="relative flex h-20 w-24 shrink-0 items-end justify-center">
-                <span className="absolute left-2 top-2 h-6 w-12 rounded-t-lg bg-[#1F2632] transition group-hover:bg-[#344153]" />
-                <span className="absolute bottom-0 h-14 w-24 rounded-2xl border border-[#ECEFF4]/10 bg-[#2B3544] shadow-[0_12px_28px_rgba(0,0,0,0.36)] transition group-hover:bg-[#3D4A5F]" />
-                <span className="relative z-10 pb-4 text-2xl font-bold text-[#D8DEE9]">
-                  {section.id === 'images' ? '●' : '▤'}
-                </span>
+              <span className="mb-2 text-4xl">
+                📁
               </span>
 
-              <span className="line-clamp-2 min-h-[34px] text-sm font-bold leading-4 text-[#ECEFF4]">
+              <span className="line-clamp-2 text-xs font-bold leading-4 text-[#ECEFF4]">
                 {section.label}
               </span>
             </button>
           ))}
         </div>
 
-        <div className="mt-5 rounded-3xl border border-[#8FBCBB]/16 bg-[#1B202B]/62 p-4">
+        <div className="mt-4 rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/56 p-3">
           <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/70">
-            Caricamento rapido nella root immobile
+            Azioni rapide nella cartella aperta
           </p>
           <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/55">
-            Trascina file in questa area oppure usa i pulsanti rapidi. Per organizzare meglio, apri prima Immagini o Docs e planimetrie.
+            Trascina file nella cartella aperta oppure usa i pulsanti rapidi.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
