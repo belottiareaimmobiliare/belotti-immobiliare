@@ -958,6 +958,9 @@ export default function AIOSDesktop() {
   const [driveExplorerIconSize, setDriveExplorerIconSize] = useState<24 | 32 | 48>(48)
   const [fileMoveUpdating, setFileMoveUpdating] = useState('')
   const [movePicker, setMovePicker] = useState<{ fileId: string; fileName: string } | null>(null)
+  const [renameFileDialog, setRenameFileDialog] = useState<{ fileId: string; fileName: string } | null>(null)
+  const [renameFileDraft, setRenameFileDraft] = useState('')
+  const [renameFileSaving, setRenameFileSaving] = useState(false)
   const [movePickerTarget, setMovePickerTarget] = useState<AIOSSection | null>(null)
   const [movePickerLocation, setMovePickerLocation] = useState<AIOSSection>('root')
   const [driveExplorerHistory, setDriveExplorerHistory] = useState<string[]>([])
@@ -4210,6 +4213,65 @@ export default function AIOSDesktop() {
     return (['root', 'images', 'docs'] as AIOSSection[]).filter((section) => section !== currentSection)
   }
 
+  function openRenameFileDialogFromContext(fileId: string, fileName: string) {
+    setRenameFileDialog({ fileId, fileName })
+    setRenameFileDraft(fileName)
+    setContextMenu(null)
+  }
+
+  async function saveRenameFile() {
+    if (!renameFileDialog) return
+
+    const nextName = renameFileDraft.trim()
+
+    if (!nextName) {
+      setNotice('Inserisci un nome file valido.')
+      return
+    }
+
+    setRenameFileSaving(true)
+
+    try {
+      const response = await fetch('/api/admin/ai-os/rename-file', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fileId: renameFileDialog.fileId,
+          fileName: nextName,
+        }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore rinomina file')
+      }
+
+      const renamedFile = payload?.file ? normalizeFileFromApi(payload.file) : null
+
+      if (renamedFile && activeFolderId) {
+        replaceFileInFolder(activeFolderId, renameFileDialog.fileId, renamedFile)
+      } else if (activeFolderId) {
+        void loadFilesForFolder(activeFolderId, activeSection)
+      }
+
+      if (selectedTxtId === renameFileDialog.fileId) {
+        setSelectedTxtId(renameFileDialog.fileId)
+      }
+
+      setNotice(`File rinominato: ${nextName}`)
+      setRenameFileDialog(null)
+      setRenameFileDraft('')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore rinomina file'
+      setNotice(message)
+    } finally {
+      setRenameFileSaving(false)
+    }
+  }
+
   function openMovePickerFromContext(fileId: string, fileName: string) {
     setMovePicker({ fileId, fileName })
     setMovePickerTarget(null)
@@ -5083,6 +5145,62 @@ export default function AIOSDesktop() {
         </div>
       </section>
 
+      {renameFileDialog ? (
+        <div className="fixed inset-0 z-[10090] flex items-center justify-center bg-black/55 p-6 backdrop-blur-sm">
+          <div className="w-full max-w-lg overflow-hidden rounded-[22px] border border-[#3C4043] bg-[#111111] text-[#E8EAED] shadow-2xl shadow-black/80">
+            <div className="border-b border-[#3C4043] px-6 py-5">
+              <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/75">
+                Rinomina file
+              </p>
+              <h3 className="mt-2 truncate text-xl font-semibold text-[#E8EAED]">
+                {renameFileDialog.fileName}
+              </h3>
+            </div>
+
+            <div className="px-6 py-5">
+              <label className="text-sm font-semibold text-[#D8DEE9]/80">
+                Nuovo nome
+                <input
+                  value={renameFileDraft}
+                  onChange={(event) => setRenameFileDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault()
+                      void saveRenameFile()
+                    }
+                  }}
+                  autoFocus
+                  className="mt-2 w-full rounded-xl border border-[#8A8D91]/55 bg-[#1B1B1B] px-4 py-3 text-sm font-semibold text-[#E8EAED] outline-none transition placeholder:text-[#9AA0A6] focus:border-[#AECBFA]"
+                  placeholder="Nome file..."
+                />
+              </label>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 border-t border-[#3C4043] px-6 py-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setRenameFileDialog(null)
+                  setRenameFileDraft('')
+                }}
+                className="rounded-full px-4 py-2 text-sm font-medium text-[#AECBFA] transition hover:bg-[#1F1F1F]"
+              >
+                Annulla
+              </button>
+
+              <button
+                type="button"
+                disabled={renameFileSaving || !renameFileDraft.trim()}
+                onClick={() => void saveRenameFile()}
+                className="rounded-full bg-[#AECBFA] px-6 py-2 text-sm font-semibold text-[#202124] transition hover:bg-[#C6DAFF] disabled:cursor-not-allowed disabled:opacity-45"
+              >
+                {renameFileSaving ? 'Salvataggio...' : 'Rinomina'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {movePicker ? (
         <div className="fixed inset-0 z-[10080] flex items-center justify-center bg-black/62 p-6 backdrop-blur-sm">
           <div className="w-full max-w-3xl overflow-hidden rounded-[18px] border border-[#3C4043] bg-[#111111] text-[#E8EAED] shadow-2xl shadow-black/80">
@@ -5360,7 +5478,16 @@ export default function AIOSDesktop() {
               </p>
             </div>
 
-              <button
+                            <button
+                type="button"
+                onClick={() => openRenameFileDialogFromContext(contextMenu.fileId, contextMenu.fileName)}
+                className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold text-[#D8DEE9]/78 transition hover:bg-[#A3BE8C]/12 hover:text-[#A3BE8C]"
+              >
+                <span>✏️</span>
+                <span>Rinomina...</span>
+              </button>
+
+<button
                 type="button"
                 onClick={() => openMovePickerFromContext(contextMenu.fileId, contextMenu.fileName)}
                 className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold text-[#D8DEE9]/78 transition hover:bg-[#A3BE8C]/12 hover:text-[#A3BE8C]"
