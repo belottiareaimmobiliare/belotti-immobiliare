@@ -21,6 +21,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const propertyId = searchParams.get('propertyId')?.trim()
     const folderType = normalizeAIOSFolderType(searchParams.get('folderType'))
+    const customFolderId = searchParams.get('customFolderId')?.trim() || null
 
     if (!propertyId) {
       return NextResponse.json({ error: 'propertyId mancante' }, { status: 400 })
@@ -28,12 +29,19 @@ export async function GET(request: Request) {
 
     const supabase = createServiceClient()
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('ai_os_files')
       .select('*')
       .eq('property_id', propertyId)
-      .eq('folder_type', folderType)
       .eq('is_deleted', false)
+
+    if (customFolderId) {
+      query = query.eq('custom_folder_id', customFolderId)
+    } else {
+      query = query.eq('folder_type', folderType).is('custom_folder_id', null)
+    }
+
+    const { data, error } = await query
       .order('created_at', { ascending: false })
 
     if (error) {
