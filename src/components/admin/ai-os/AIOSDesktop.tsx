@@ -958,6 +958,7 @@ export default function AIOSDesktop() {
   const [driveExplorerIconSize, setDriveExplorerIconSize] = useState<24 | 32 | 48>(48)
   const [fileMoveUpdating, setFileMoveUpdating] = useState('')
   const [movePicker, setMovePicker] = useState<{ fileId: string; fileName: string } | null>(null)
+  const [movePickerTarget, setMovePickerTarget] = useState<AIOSSection | null>(null)
   const [driveExplorerHistory, setDriveExplorerHistory] = useState<string[]>([])
   const [mediaSyncing, setMediaSyncing] = useState(false)
   const [activeAgencyToolId, setActiveAgencyToolId] = useState<AIOSAgencyToolId | null>(null)
@@ -4186,6 +4187,18 @@ export default function AIOSDesktop() {
     )
   }
 
+  function moveTargetDescription(section: AIOSSection) {
+    if (section === 'images') return 'Foto, immagini e video pubblicabili'
+    if (section === 'docs') return 'Documenti, PDF, planimetrie e note'
+    return 'Root cartella immobile'
+  }
+
+  function moveTargetIcon(section: AIOSSection) {
+    if (section === 'images') return '🖼️'
+    if (section === 'docs') return '📐'
+    return '📁'
+  }
+
   function moveTargetLabel(section: AIOSSection) {
     if (section === 'images') return 'Immagini'
     if (section === 'docs') return 'Docs e planimetrie'
@@ -4198,6 +4211,7 @@ export default function AIOSDesktop() {
 
   function openMovePickerFromContext(fileId: string, fileName: string) {
     setMovePicker({ fileId, fileName })
+    setMovePickerTarget(null)
     setContextMenu(null)
   }
 
@@ -5047,51 +5061,133 @@ export default function AIOSDesktop() {
       </section>
 
       {movePicker ? (
-        <div className="fixed inset-0 z-[10080] flex items-center justify-center bg-black/45 p-6 backdrop-blur-sm">
-          <div className="w-full max-w-2xl rounded-[28px] border border-[#8FBCBB]/24 bg-[#202632]/96 p-5 shadow-2xl shadow-black/60">
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-[#8FBCBB]/75">
-                  Sposta file
-                </p>
-                <h3 className="mt-1 text-lg font-semibold text-white">
-                  {movePicker.fileName}
-                </h3>
-                <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/55">
-                  Seleziona la cartella di destinazione.
-                </p>
-              </div>
+        <div className="fixed inset-0 z-[10080] flex items-center justify-center bg-black/55 p-6 backdrop-blur-sm">
+          <div className="w-full max-w-3xl overflow-hidden rounded-[28px] border border-[#8FBCBB]/24 bg-[#151A18]/98 shadow-2xl shadow-black/70">
+            <div className="border-b border-[#D8DEE9]/14 px-6 py-5">
+              <h3 className="text-xl font-semibold leading-snug text-[#ECEFF4]">
+                Sposta “{movePicker.fileName}”
+              </h3>
 
-              <button
-                type="button"
-                onClick={() => setMovePicker(null)}
-                className="rounded-full border border-[#BF616A]/35 bg-[#BF616A]/10 px-3 py-1.5 text-xs font-semibold text-[#FFCCD2] transition hover:bg-[#BF616A]/20"
-              >
-                Chiudi
-              </button>
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-[#D8DEE9]/78">
+                <span>Posizione attuale:</span>
+                <span className="inline-flex items-center gap-2 rounded-xl border border-[#D8DEE9]/35 bg-[#202632]/92 px-3 py-1.5 text-[#ECEFF4]">
+                  <span>📁</span>
+                  <span>{moveTargetLabel(activeSection)}</span>
+                </span>
+              </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              {availableMoveTargets().map((targetSection) => (
+            <div className="px-6 pt-4">
+              <button
+                type="button"
+                className="mb-4 inline-flex items-center gap-2 rounded-xl px-1 py-1 text-sm font-semibold text-[#D8DEE9] transition hover:text-[#A3BE8C]"
+                onClick={() => setMovePickerTarget(null)}
+              >
+                <span className="text-lg">←</span>
+                <span>Più posizioni</span>
+              </button>
+
+              <p className="mb-2 text-sm font-semibold text-[#D8DEE9]/80">
+                AI-OS
+              </p>
+
+              <div className="overflow-hidden rounded-2xl border border-[#D8DEE9]/14 bg-[#10141C]/85">
+                <div className="grid grid-cols-[minmax(0,1fr)_170px_84px] border-b border-[#D8DEE9]/14 bg-[#202632]/70 px-4 py-2 text-xs font-semibold text-[#D8DEE9]/70">
+                  <span>Nome ↑</span>
+                  <span>Tipo</span>
+                  <span className="text-right">Azione</span>
+                </div>
+
+                <div className="max-h-[320px] overflow-y-auto">
+                  {availableMoveTargets().map((targetSection) => {
+                    const selected = movePickerTarget === targetSection
+
+                    return (
+                      <button
+                        key={targetSection}
+                        type="button"
+                        onClick={() => setMovePickerTarget(targetSection)}
+                        onDoubleClick={() => {
+                          void moveFileToSection({ id: movePicker.fileId }, targetSection)
+                          setMovePicker(null)
+                          setMovePickerTarget(null)
+                        }}
+                        className={`grid w-full grid-cols-[minmax(0,1fr)_170px_84px] items-center gap-3 px-4 py-3 text-left transition ${
+                          selected
+                            ? 'bg-[#3A3A35] text-white'
+                            : 'text-[#D8DEE9]/78 hover:bg-[#2E3440]/88 hover:text-white'
+                        }`}
+                      >
+                        <span className="flex min-w-0 items-center gap-3">
+                          <span className="text-xl">{moveTargetIcon(targetSection)}</span>
+                          <span className="min-w-0">
+                            <span className="block truncate text-sm font-semibold">
+                              {moveTargetLabel(targetSection)}
+                            </span>
+                            <span className="block truncate text-[11px] text-[#D8DEE9]/45">
+                              {moveTargetDescription(targetSection)}
+                            </span>
+                          </span>
+                        </span>
+
+                        <span className="text-xs text-[#D8DEE9]/55">
+                          Cartella AI-OS
+                        </span>
+
+                        <span className="text-right">
+                          {selected ? (
+                            <span className="rounded-full bg-[#1F2A24] px-3 py-1 text-xs font-bold text-[#A3BE8C]">
+                              Sposta
+                            </span>
+                          ) : (
+                            <span className="text-lg text-[#D8DEE9]/45">›</span>
+                          )}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-center justify-between border-t border-[#D8DEE9]/14 px-6 py-5">
+              <button
+                type="button"
+                onClick={() => {
+                  setNotice('Creazione nuova cartella AI-OS: prossimo step.')
+                }}
+                className="inline-flex items-center gap-2 rounded-full border border-[#D8DEE9]/35 bg-transparent px-4 py-2 text-sm font-semibold text-[#D8DEE9] transition hover:border-[#A3BE8C]/60 hover:text-[#A3BE8C]"
+              >
+                <span>⊞</span>
+                <span>Nuova cartella</span>
+              </button>
+
+              <div className="flex items-center gap-3">
                 <button
-                  key={targetSection}
                   type="button"
-                  disabled={fileMoveUpdating === movePicker.fileId}
                   onClick={() => {
-                    void moveFileToSection({ id: movePicker.fileId }, targetSection)
                     setMovePicker(null)
+                    setMovePickerTarget(null)
                   }}
-                  className="group flex min-h-[130px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/14 bg-[#151A23]/72 p-4 text-center transition hover:border-[#A3BE8C]/55 hover:bg-[#A3BE8C]/10 disabled:cursor-wait disabled:opacity-50"
+                  className="rounded-full px-4 py-2 text-sm font-semibold text-[#D8DEE9]/85 transition hover:text-white"
                 >
-                  <span className="mb-3 text-4xl">📁</span>
-                  <span className="text-sm font-bold text-white">
-                    {moveTargetLabel(targetSection)}
-                  </span>
-                  <span className="mt-1 text-[11px] text-[#D8DEE9]/45">
-                    Sposta qui
-                  </span>
+                  Annulla
                 </button>
-              ))}
+
+                <button
+                  type="button"
+                  disabled={!movePickerTarget || fileMoveUpdating === movePicker.fileId}
+                  onClick={() => {
+                    if (!movePickerTarget) return
+                    void moveFileToSection({ id: movePicker.fileId }, movePickerTarget)
+                    setMovePicker(null)
+                    setMovePickerTarget(null)
+                  }}
+                  className="rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-6 py-2 text-sm font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.18)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75 disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  {fileMoveUpdating === movePicker.fileId ? 'Sposto...' : 'Sposta'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
