@@ -25,6 +25,7 @@ export async function POST(request: Request) {
     const fileNameRaw = String(body?.fileName ?? '').trim()
     const content = String(body?.content ?? '')
     const folderType = normalizeAIOSFolderType(body?.folderType)
+    const customFolderId = String(body?.customFolderId ?? '').trim() || null
 
     if (folderType === 'images') {
       return NextResponse.json(
@@ -66,6 +67,7 @@ export async function POST(request: Request) {
           file_name: fileNameRaw ? safeFileName(fileNameRaw) : existing.file_name,
           file_kind: 'txt',
           folder_type: folderType,
+          custom_folder_id: customFolderId,
           mime_type: 'text/plain',
           size_bytes: sizeBytes,
           txt_content: content,

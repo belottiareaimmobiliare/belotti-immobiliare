@@ -2857,6 +2857,7 @@ export default function AIOSDesktop() {
         body: JSON.stringify({
           propertyId: activeFolderId,
           folderType: activeSection,
+          customFolderId: activeCustomFolderId,
           fileName,
           content: '',
         }),
@@ -3024,7 +3025,7 @@ export default function AIOSDesktop() {
           <span className="h-1.5 w-1.5 rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] shadow-[0_0_12px_rgba(110,231,183,0.8)] hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75" />
           Percorso
         </div>
-        <div className="truncate text-[#ECEFF4]">{getActivePath()}</div>
+        <div className="truncate text-[#ECEFF4]">{activeCustomFolderName ? `${getActivePath()} / ${activeCustomFolderName}` : getActivePath()}</div>
       </div>
     )
   }
@@ -5280,12 +5281,57 @@ export default function AIOSDesktop() {
                             onChange={handleFileInput}
                           />
                         </label>
+
+                        <button
+                          type="button"
+                          onClick={createTxtFile}
+                          className="rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-sm font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.24)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
+                        >
+                          + Nuovo TXT
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={openCreateCustomFolderDialog}
+                          className="rounded-full border border-[#8FBCBB]/30 bg-[#2E3440]/30 px-4 py-2 text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/10"
+                        >
+                          + Nuova cartella
+                        </button>
                       </div>
                     </div>
 
-                    {activeFolder && activeFolder.files.length > 0 ? (
+                    {customFolders.length > 0 || (activeFolder && activeFolder.files.length > 0) ? (
                       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                        {activeFolder.files.map((file) => renderFileCard(file))}
+                        {activeCustomFolderId ? (
+                          <button
+                            type="button"
+                            onClick={closeCustomFolder}
+                            className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-3 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12 active:scale-[0.98]"
+                          >
+                            <span className="mb-2 text-4xl">↩️</span>
+                            <span className="line-clamp-2 text-xs font-bold leading-4 text-[#ECEFF4]">
+                              Indietro
+                            </span>
+                          </button>
+                        ) : null}
+
+                        {customFolders.map((folder) => (
+                          <button
+                            key={folder.id}
+                            type="button"
+                            onClick={() => openCustomFolder(folder)}
+                            className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-3 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12 active:scale-[0.98]"
+                          >
+                            <span className="mb-2 text-4xl">📁</span>
+                            <span className="line-clamp-2 text-xs font-bold leading-4 text-[#ECEFF4]">
+                              {folder.name}
+                            </span>
+                          </button>
+                        ))}
+
+                        {activeFolder && activeFolder.files.length > 0
+                          ? activeFolder.files.map((file) => renderFileCard(file))
+                          : null}
                       </div>
                     ) : (
                       <div className={`${String(activeAgencyToolId) === "drive" ? "hidden" : ""} flex min-h-[300px] items-center justify-center rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/20 text-center`}>
@@ -5293,7 +5339,7 @@ export default function AIOSDesktop() {
                           <p className="text-4xl">📂</p>
                           <p className="mt-3 font-medium text-white">Cartella vuota</p>
                           <p className="mt-1 text-sm text-[#D8DEE9]/55">
-                            Carica o trascina qui i primi file.
+                            Carica o crea una cartella.
                           </p>
                         </div>
                       </div>
