@@ -116,6 +116,18 @@ type AIOSDriveExplorerData = {
   files: AIOSDriveExplorerFile[]
 }
 
+type AIOSCustomFolder = {
+  id: string
+  property_id: string
+  parent_folder_type: AIOSSection
+  parent_custom_folder_id?: string | null
+  name: string
+  sort_order?: number
+  is_deleted?: boolean
+  created_at?: string
+  updated_at?: string
+}
+
 type AIOSFolder = {
   id: string
   name: string
@@ -917,6 +929,13 @@ export default function AIOSDesktop() {
   const [folderSearchQuery, setFolderSearchQuery] = useState('')
   const [activeFolderId, setActiveFolderId] = useState<string>('')
   const [activeSection, setActiveSection] = useState<AIOSSection>('root')
+  const [activeCustomFolderId, setActiveCustomFolderId] = useState<string | null>(null)
+  const [activeCustomFolderName, setActiveCustomFolderName] = useState('')
+  const [customFolders, setCustomFolders] = useState<AIOSCustomFolder[]>([])
+  const [customFoldersLoading, setCustomFoldersLoading] = useState(false)
+  const [customFolderDialogOpen, setCustomFolderDialogOpen] = useState(false)
+  const [customFolderDraft, setCustomFolderDraft] = useState('')
+  const [customFolderSaving, setCustomFolderSaving] = useState(false)
   const [desktopWindowOpen, setDesktopWindowOpen] = useState(true)
   const [selectedTxtId, setSelectedTxtId] = useState<string | null>(null)
   const [txtDraft, setTxtDraft] = useState('')
@@ -1127,14 +1146,23 @@ export default function AIOSDesktop() {
     void loadQuota()
   }
 
-  async function loadFilesForFolder(propertyId: string, section: AIOSSection = activeSection) {
+  async function loadFilesForFolder(propertyId: string, section: AIOSSection = activeSection, customFolderId: string | null = activeCustomFolderId) {
     try {
       if (section === 'images' || section === 'docs') {
         await syncPropertyMediaForFolder(propertyId, true)
       }
 
+      const params = new URLSearchParams({
+        propertyId,
+        folderType: section,
+      })
+
+      if (customFolderId) {
+        params.set('customFolderId', customFolderId)
+      }
+
       const response = await fetch(
-        `/api/admin/ai-os/files?propertyId=${encodeURIComponent(propertyId)}&folderType=${encodeURIComponent(section)}`,
+        `/api/admin/ai-os/files?${params.toString()}`,
         { cache: 'no-store' },
       )
 
@@ -1159,6 +1187,132 @@ export default function AIOSDesktop() {
       const message = error instanceof Error ? error.message : 'Errore caricamento file'
       setNotice(message)
     }
+  }
+
+  async function loadCustomFolders(
+    propertyId: string,
+    parentFolderType: AIOSSection = activeSection,
+    parentCustomFolderId: string | null = activeCustomFolderId,
+  ) {
+    if (!propertyId) return
+
+    setCustomFoldersLoading(true)
+
+    try {
+      const params = new URLSearchParams({
+        propertyId,
+        parentFolderType,
+      })
+
+      if (parentCustomFolderId) {
+        params.set('parentCustomFolderId', parentCustomFolderId)
+      }
+
+      const response = await fetch(
+        `/api/admin/ai-os/custom-folders?${params.toString()}`,
+        { cache: 'no-store' },
+      )
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore caricamento cartelle custom')
+      }
+
+      setCustomFolders(Array.isArray(payload?.folders) ? payload.folders : [])
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore caricamento cartelle custom'
+      setNotice(message)
+    } finally {
+      setCustomFoldersLoading(false)
+    }
+  }
+
+  function openCreateCustomFolderDialog() {
+    if (!activeFolderId) {
+      setNotice('Seleziona prima una cartella immobile.')
+      return
+    }
+
+    setCustomFolderDraft('')
+    setCustomFolderDialogOpen(true)
+  }
+
+  async function saveCustomFolder() {
+    if (!activeFolderId) {
+      setNotice('Seleziona prima una cartella immobile.')
+      return
+    }
+
+    const name = customFolderDraft.trim()
+
+    if (!name) {
+      setNotice('Inserisci il nome della cartella.')
+      return
+    }
+
+    setCustomFolderSaving(true)
+
+    try {
+      const response = await fetch('/api/admin/ai-os/custom-folders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          propertyId: activeFolderId,
+          parentFolderType: activeSection,
+          parentCustomFolderId: activeCustomFolderId,
+          name,
+        }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore creazione cartella')
+      }
+
+      setNotice(`Cartella creata: ${payload?.folder?.name || name}`)
+      setCustomFolderDialogOpen(false)
+      setCustomFolderDraft('')
+
+      await loadCustomFolders(activeFolderId, activeSection, activeCustomFolderId)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore creazione cartella'
+      setNotice(message)
+    } finally {
+      setCustomFolderSaving(false)
+    }
+  }
+
+  function openCustomFolder(folder: AIOSCustomFolder) {
+    if (!activeFolderId) return
+
+    const parentFolderType = folder.parent_folder_type || activeSection
+
+    setActiveSection(parentFolderType)
+    setActiveCustomFolderId(folder.id)
+    setActiveCustomFolderName(folder.name)
+    setSelectedTxtId(null)
+    setTxtDraft('')
+    setNotice(`Apertura cartella: ${folder.name}`)
+
+    void loadFilesForFolder(activeFolderId, parentFolderType, folder.id)
+    void loadCustomFolders(activeFolderId, parentFolderType, folder.id)
+  }
+
+  function closeCustomFolder() {
+    if (!activeFolderId) return
+
+    setActiveCustomFolderId(null)
+    setActiveCustomFolderName('')
+    setSelectedTxtId(null)
+    setTxtDraft('')
+    setNotice(`Ritorno a ${getSectionLabel(activeSection)}.`)
+
+    void loadFilesForFolder(activeFolderId, activeSection, null)
+    void loadCustomFolders(activeFolderId, activeSection, null)
   }
 
   async function loadPropertyOwners(propertyId: string) {
@@ -2877,23 +3031,29 @@ export default function AIOSDesktop() {
 
   const openSubFolder = (section: Exclude<AIOSSection, 'root'>) => {
     setActiveSection(section)
+    setActiveCustomFolderId(null)
+    setActiveCustomFolderName('')
     setSelectedTxtId(null)
     setTxtDraft('')
 
     if (activeFolderId) {
       setNotice(`Apertura ${getSectionLabel(section)}...`)
-      void loadFilesForFolder(activeFolderId, section)
+      void loadFilesForFolder(activeFolderId, section, null)
+      void loadCustomFolders(activeFolderId, section, null)
     }
   }
 
   const openRootFolder = () => {
     setActiveSection('root')
+    setActiveCustomFolderId(null)
+    setActiveCustomFolderName('')
     setSelectedTxtId(null)
     setTxtDraft('')
 
     if (activeFolderId) {
       setNotice('Apertura root cartella immobile...')
-      void loadFilesForFolder(activeFolderId, 'root')
+      void loadFilesForFolder(activeFolderId, 'root', null)
+      void loadCustomFolders(activeFolderId, 'root', null)
     }
   }
 
@@ -4061,7 +4221,7 @@ export default function AIOSDesktop() {
               Percorso AI-OS
             </p>
             <p className="mt-1 truncate text-xs font-semibold text-[#D8DEE9]/72">
-              📁 {activeFolder?.name || 'Cartella immobile'} /
+              📁 {activeFolder?.name || 'Cartella immobile'} / {activeCustomFolderName || getSectionLabel(activeSection)}
             </p>
           </div>
 
@@ -4114,25 +4274,67 @@ export default function AIOSDesktop() {
               >
                 + Nuovo TXT
               </button>
+
+              <button
+                type="button"
+                onClick={openCreateCustomFolderDialog}
+                className="rounded-full border border-[#8FBCBB]/28 bg-[#202632]/86 px-4 py-2 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#8FBCBB]/12"
+              >
+                + Nuova cartella
+              </button>
             </div>
           </div>
 
           <div className={`min-h-[420px] rounded-[28px] border border-dashed border-[#8FBCBB]/18 bg-[#151A23]/42 p-4 grid content-start gap-3 ${mobile ? 'grid-cols-2' : 'sm:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8'}`}>
-            {AI_OS_SECTIONS.map((section) => (
+            {activeCustomFolderId ? (
               <button
-                key={section.id}
                 type="button"
-                onClick={() => openSubFolder(section.id)}
-                title={section.description}
+                onClick={closeCustomFolder}
                 className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-3 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12 active:scale-[0.98]"
               >
-                <span className="mb-2 text-4xl">📁</span>
-
+                <span className="mb-2 text-4xl">↩️</span>
                 <span className="line-clamp-2 text-xs font-bold leading-4 text-[#ECEFF4]">
-                  {section.label}
+                  Indietro
                 </span>
               </button>
-            ))}
+            ) : (
+              AI_OS_SECTIONS.map((section) => (
+                <button
+                  key={section.id}
+                  type="button"
+                  onClick={() => openSubFolder(section.id)}
+                  title={section.description}
+                  className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-3 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12 active:scale-[0.98]"
+                >
+                  <span className="mb-2 text-4xl">📁</span>
+
+                  <span className="line-clamp-2 text-xs font-bold leading-4 text-[#ECEFF4]">
+                    {section.label}
+                  </span>
+                </button>
+              ))
+            )}
+
+            {customFoldersLoading ? (
+              <div className="rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-4 text-center text-xs text-[#D8DEE9]/60">
+                Caricamento cartelle...
+              </div>
+            ) : (
+              customFolders.map((folder) => (
+                <button
+                  key={folder.id}
+                  type="button"
+                  onClick={() => openCustomFolder(folder)}
+                  className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-3 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12 active:scale-[0.98]"
+                >
+                  <span className="mb-2 text-4xl">📁</span>
+
+                  <span className="line-clamp-2 text-xs font-bold leading-4 text-[#ECEFF4]">
+                    {folder.name}
+                  </span>
+                </button>
+              ))
+            )}
 
             {activeFolder && activeFolder.files.length > 0
               ? activeFolder.files.map((file) => renderFileCard(file, mobile))
@@ -4279,7 +4481,7 @@ export default function AIOSDesktop() {
     setContextMenu(null)
   }
 
-  async function moveFileToSection(file: Pick<AIOSFile, 'id'>, targetSection: AIOSSection) {
+  async function moveFileToSection(file: Pick<AIOSFile, 'id'>, targetSection: AIOSSection, targetCustomFolderId: string | null = null) {
     if (!file?.id) return
 
     setFileMoveUpdating(file.id)
@@ -4293,6 +4495,7 @@ export default function AIOSDesktop() {
         body: JSON.stringify({
           fileId: file.id,
           targetSection,
+          targetCustomFolderId,
         }),
       })
 
@@ -5144,6 +5347,62 @@ export default function AIOSDesktop() {
           ) : null}
         </div>
       </section>
+
+      {customFolderDialogOpen ? (
+        <div className="fixed inset-0 z-[10090] flex items-center justify-center bg-black/55 p-6 backdrop-blur-sm">
+          <div className="w-full max-w-lg overflow-hidden rounded-[22px] border border-[#3C4043] bg-[#111111] text-[#E8EAED] shadow-2xl shadow-black/80">
+            <div className="border-b border-[#3C4043] px-6 py-5">
+              <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/75">
+                Nuova cartella
+              </p>
+              <h3 className="mt-2 truncate text-xl font-semibold text-[#E8EAED]">
+                {activeFolder?.name || 'Cartella immobile'} / {activeCustomFolderName || getSectionLabel(activeSection)}
+              </h3>
+            </div>
+
+            <div className="px-6 py-5">
+              <label className="text-sm font-semibold text-[#D8DEE9]/80">
+                Nome cartella
+                <input
+                  value={customFolderDraft}
+                  onChange={(event) => setCustomFolderDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault()
+                      void saveCustomFolder()
+                    }
+                  }}
+                  autoFocus
+                  className="mt-2 w-full rounded-xl border border-[#8A8D91]/55 bg-[#1B1B1B] px-4 py-3 text-sm font-semibold text-[#E8EAED] outline-none transition placeholder:text-[#9AA0A6] focus:border-[#AECBFA]"
+                  placeholder="Esempio: APE, Visure, Contratto..."
+                />
+              </label>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 border-t border-[#3C4043] px-6 py-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomFolderDialogOpen(false)
+                  setCustomFolderDraft('')
+                }}
+                className="rounded-full px-4 py-2 text-sm font-medium text-[#AECBFA] transition hover:bg-[#1F1F1F]"
+              >
+                Annulla
+              </button>
+
+              <button
+                type="button"
+                disabled={customFolderSaving || !customFolderDraft.trim()}
+                onClick={() => void saveCustomFolder()}
+                className="rounded-full bg-[#AECBFA] px-6 py-2 text-sm font-semibold text-[#202124] transition hover:bg-[#C6DAFF] disabled:cursor-not-allowed disabled:opacity-45"
+              >
+                {customFolderSaving ? 'Creazione...' : 'Crea'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {renameFileDialog ? (
         <div className="fixed inset-0 z-[10090] flex items-center justify-center bg-black/55 p-6 backdrop-blur-sm">
