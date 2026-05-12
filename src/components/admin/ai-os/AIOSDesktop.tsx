@@ -4242,11 +4242,32 @@ export default function AIOSDesktop() {
 
       setNotice(`File spostato in ${moveTargetLabel(targetSection)}.`)
 
+      setFolders((currentFolders) =>
+        currentFolders.map((folder) => {
+          if (folder.id !== activeFolderId) return folder
+
+          const nextFiles = folder.files.filter((item) => item.id !== file.id)
+
+          return {
+            ...folder,
+            files: nextFiles,
+            fileCount: Math.max(0, Number(folder.fileCount ?? folder.files.length) - 1),
+          }
+        }),
+      )
+
+      if (selectedTxtId === file.id) {
+        setSelectedTxtId(null)
+        setTxtDraft('')
+      }
+
+      if (previewFile?.id === file.id) {
+        setPreviewFile(null)
+      }
+
       if (activeFolderId) {
         void loadFilesForFolder(activeFolderId, activeSection)
       }
-
-      void loadFolders()
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Errore spostamento file'
       setNotice(message)

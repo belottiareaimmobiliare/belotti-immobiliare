@@ -13,7 +13,7 @@ async function tryUpdateFileSection(input: {
 }) {
   const supabase = createServiceClient()
 
-  const sectionColumns = ['section', 'folder_section', 'folder_key']
+  const sectionColumns = ['folder_type', 'section', 'folder_section', 'folder_key']
 
   let lastError: unknown = null
 
