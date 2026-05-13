@@ -3,6 +3,35 @@ import { requireAdminProfile } from '@/lib/admin-auth'
 import { createServiceClient } from '@/lib/supabase/service'
 import { canUseAIOS, jsonError } from '@/lib/ai-os'
 
+type DriveFolder = {
+  id: string
+  name: string
+  url: string
+}
+
+type DriveStructureNode = {
+  name: string
+  children?: DriveStructureNode[]
+}
+
+const PROPERTY_DRIVE_STRUCTURE: DriveStructureNode[] = [
+  { name: 'Foto' },
+  { name: 'Video' },
+  {
+    name: 'Docs e planimetrie',
+    children: [
+      { name: 'APE' },
+      { name: 'Visure' },
+      { name: 'Planimetrie catastali' },
+      { name: 'Documenti tecnici' },
+    ],
+  },
+  { name: 'Incarico' },
+  { name: 'Proprietari' },
+  { name: 'Note operative' },
+  { name: 'Pubblicazione' },
+]
+
 function extractDriveFolderId(value: string | null | undefined) {
   const raw = String(value || '').trim()
 
@@ -24,6 +53,20 @@ function extractDriveFolderId(value: string | null | undefined) {
   return null
 }
 
+function buildDriveFolderUrl(folderId: string) {
+  return `https://drive.google.com/drive/folders/${folderId}`
+}
+
+function cleanDriveName(value: unknown, fallback = 'Cartella') {
+  const cleaned = String(value ?? '')
+    .replace(/[\\/:*?"<>|]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 150)
+
+  return cleaned || fallback
+}
+
 function buildPropertyDriveFolderName(property: Record<string, unknown>) {
   const id = String(property.id ?? '')
   const title = String(property.title ?? '').trim()
@@ -34,22 +77,22 @@ function buildPropertyDriveFolderName(property: Record<string, unknown>) {
   const fallbackName = [propertyType, comune].filter(Boolean).join(' ') || `Immobile ${id.slice(0, 8)}`
   const rawName = `${referenceCode || id.slice(0, 8)} - ${title || fallbackName}`
 
-  return rawName
-    .replace(/[\\/:*?"<>|]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 150)
+  return cleanDriveName(rawName, `Immobile ${id.slice(0, 8)}`)
 }
 
-async function createDriveFolderWithAppsScript(input: {
-  folderName: string
-  propertyId: string
+async function callDriveScript(input: {
+  action: string
+  folderId?: string
+  folderName?: string
+  propertyId?: string
 }) {
   const scriptUrl = process.env.AIOS_DRIVE_APP_SCRIPT_URL
   const token = process.env.AIOS_DRIVE_APP_SCRIPT_TOKEN
 
   if (!scriptUrl || !token) {
-    throw new Error('Connettore Drive non configurato: mancano AIOS_DRIVE_APP_SCRIPT_URL o AIOS_DRIVE_APP_SCRIPT_TOKEN')
+    throw new Error(
+      'Connettore Drive non configurato: mancano AIOS_DRIVE_APP_SCRIPT_URL o AIOS_DRIVE_APP_SCRIPT_TOKEN',
+    )
   }
 
   const response = await fetch(scriptUrl, {
@@ -59,6 +102,8 @@ async function createDriveFolderWithAppsScript(input: {
     },
     body: JSON.stringify({
       token,
+      action: input.action,
+      folderId: input.folderId,
       folderName: input.folderName,
       propertyId: input.propertyId,
     }),
@@ -74,15 +119,86 @@ async function createDriveFolderWithAppsScript(input: {
   }
 
   if (!response.ok || !payload?.ok) {
-    throw new Error(payload?.error || 'Errore creazione cartella Drive')
+    throw new Error(payload?.error || 'Errore operazione Drive')
   }
 
-  return {
-    id: String(payload.id || ''),
-    name: String(payload.name || input.folderName),
-    url: String(payload.url || ''),
-    subfolders: Array.isArray(payload.subfolders) ? payload.subfolders : [],
+  return payload
+}
+
+async function listDriveFolders(folderId: string): Promise<DriveFolder[]> {
+  const payload = await callDriveScript({
+    action: 'listFolder',
+    folderId,
+  })
+
+  return Array.isArray(payload?.folders)
+    ? payload.folders
+        .map((folder: any) => ({
+          id: String(folder.id || ''),
+          name: String(folder.name || ''),
+          url: String(folder.url || (folder.id ? buildDriveFolderUrl(String(folder.id)) : '')),
+        }))
+        .filter((folder: DriveFolder) => folder.id && folder.name)
+    : []
+}
+
+async function ensureDriveSubfolder(input: {
+  parentFolderId: string
+  folderName: string
+  propertyId?: string
+}) {
+  const folderName = cleanDriveName(input.folderName)
+  const folders = await listDriveFolders(input.parentFolderId)
+  const existing = folders.find(
+    (folder) => folder.name.trim().toLowerCase() === folderName.toLowerCase(),
+  )
+
+  if (existing) return existing
+
+  const payload = await callDriveScript({
+    action: 'createSubfolder',
+    folderId: input.parentFolderId,
+    folderName,
+    propertyId: input.propertyId,
+  })
+
+  const folder = payload?.folder ?? payload
+  const id = String(folder?.id || '')
+  const name = String(folder?.name || folderName)
+  const url = String(folder?.url || (id ? buildDriveFolderUrl(id) : ''))
+
+  if (!id) {
+    throw new Error(`Drive non ha restituito l'id della cartella "${folderName}"`)
   }
+
+  return { id, name, url }
+}
+
+async function ensureDriveStructure(
+  parentFolder: DriveFolder,
+  nodes: DriveStructureNode[],
+  propertyId: string,
+) {
+  const createdOrFound: Array<DriveFolder & { children?: DriveFolder[] }> = []
+
+  for (const node of nodes) {
+    const folder = await ensureDriveSubfolder({
+      parentFolderId: parentFolder.id,
+      folderName: node.name,
+      propertyId,
+    })
+
+    const children = node.children?.length
+      ? await ensureDriveStructure(folder, node.children, propertyId)
+      : []
+
+    createdOrFound.push({
+      ...folder,
+      children,
+    })
+  }
+
+  return createdOrFound
 }
 
 export async function POST() {
@@ -154,28 +270,53 @@ export async function POST() {
     let created = 0
     let alreadyLinked = 0
     let failed = 0
+    let structured = 0
     const errors: string[] = []
+    const synced: Array<{
+      propertyId: string
+      folderName: string
+      folderId: string
+      folderUrl: string
+      subfolders: unknown[]
+    }> = []
 
     for (const property of properties ?? []) {
       const propertyId = String(property.id ?? '')
       if (!propertyId) continue
 
       const existing = existingByPropertyId.get(propertyId)
-      const existingUrl = String(existing?.drive_folder_url || '').trim()
       const existingId = String(existing?.drive_folder_id || '').trim()
+      const existingUrl = String(existing?.drive_folder_url || '').trim()
 
       const folderName =
-        String(existing?.folder_name || '').trim() ||
+        cleanDriveName(existing?.folder_name, '') ||
         buildPropertyDriveFolderName(property as Record<string, unknown>)
 
       try {
-        const driveFolder = await createDriveFolderWithAppsScript({
-          folderName,
-          propertyId,
-        })
+        const propertyDriveFolder = existingId
+          ? {
+              id: existingId,
+              name: folderName,
+              url: existingUrl || buildDriveFolderUrl(existingId),
+            }
+          : await ensureDriveSubfolder({
+              parentFolderId: rootFolderId,
+              folderName,
+              propertyId,
+            })
 
-        if (existingUrl && existingId) {
+        const subfolders = await ensureDriveStructure(
+          propertyDriveFolder,
+          PROPERTY_DRIVE_STRUCTURE,
+          propertyId,
+        )
+
+        structured += 1
+
+        if (existingId) {
           alreadyLinked += 1
+        } else {
+          created += 1
         }
 
         const { error: upsertError } = await supabase
@@ -183,11 +324,12 @@ export async function POST() {
           .upsert(
             {
               property_id: propertyId,
-              folder_name: driveFolder.name || folderName,
-              drive_folder_url: driveFolder.url,
-              drive_folder_id: driveFolder.id,
+              folder_name: propertyDriveFolder.name || folderName,
+              drive_folder_url: propertyDriveFolder.url,
+              drive_folder_id: propertyDriveFolder.id,
               sync_status: 'synced',
-              notes: 'Cartella Drive creata/sincronizzata automaticamente da AI-OS sotto la root agenzia, con sottocartelle immagini e documenti e planimetrie.',
+              notes:
+                'Drive-first: cartella immobile e struttura standard create/sincronizzate automaticamente da AI-OS.',
               last_sync_at: new Date().toISOString(),
             },
             {
@@ -197,9 +339,13 @@ export async function POST() {
 
         if (upsertError) throw new Error(upsertError.message)
 
-        if (!existingUrl || !existingId) {
-          created += 1
-        }
+        synced.push({
+          propertyId,
+          folderName: propertyDriveFolder.name || folderName,
+          folderId: propertyDriveFolder.id,
+          folderUrl: propertyDriveFolder.url,
+          subfolders,
+        })
       } catch (error) {
         failed += 1
         const message = error instanceof Error ? error.message : 'Errore sconosciuto'
@@ -209,14 +355,17 @@ export async function POST() {
 
     return NextResponse.json({
       ok: failed === 0,
+      mode: 'drive_first',
       created,
       alreadyLinked,
+      structured,
       failed,
       errors: errors.slice(0, 10),
+      synced: synced.slice(0, 20),
     })
   } catch (error) {
     return NextResponse.json(
-      { error: jsonError(error, 'Errore creazione cartelle Drive immobili') },
+      { error: jsonError(error, 'Errore creazione/sincronizzazione cartelle Drive immobili') },
       { status: 500 },
     )
   }

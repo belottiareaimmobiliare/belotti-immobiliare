@@ -1001,7 +1001,7 @@ export default function AIOSDesktop() {
   const [movePickerFoldersLoading, setMovePickerFoldersLoading] = useState(false)
   const [driveExplorerHistory, setDriveExplorerHistory] = useState<string[]>([])
   const [mediaSyncing, setMediaSyncing] = useState(false)
-  const [activeAgencyToolId, setActiveAgencyToolId] = useState<AIOSAgencyToolId | null>(null)
+  const [activeAgencyToolId, setActiveAgencyToolId] = useState<AIOSAgencyToolId | null>('drive')
   const [documentRequests, setDocumentRequests] = useState<AIOSDocumentRequest[]>([])
   const [documentRequestsLoading, setDocumentRequestsLoading] = useState(false)
   const [documentRequestSaving, setDocumentRequestSaving] = useState<string | null>(null)
@@ -4130,8 +4130,8 @@ export default function AIOSDesktop() {
                     ☁️ {driveExplorer?.folder?.name || driveFolder?.folder_name || activeFolder?.name || 'Drive immobile'}
                   </h4>
                   <p className="mt-1 max-w-3xl text-sm leading-6 text-[#D8DEE9]/60">
-                    Vista limitata alla cartella Drive di questo immobile. Puoi aprire sottocartelle,
-                    trascinare file, creare cartelle e vedere anteprime senza navigare verso la root agenzia.
+                    File manager Drive-first dell’immobile. Le cartelle e i file sono reali su Google Drive,
+                    mentre AI-OS mantiene permessi, stati operativi, checklist e collegamenti.
                   </p>
                 </div>
 
@@ -4220,7 +4220,7 @@ export default function AIOSDesktop() {
                             Trascina qui file o cartelle operative
                           </p>
                           <p className="mt-1 text-xs leading-5 text-[#D8DEE9]/55">
-                            I file piccoli vengono caricati da AI-OS. Per video/file pesanti si apre la cartella Drive corrente.
+                            I file piccoli vengono caricati direttamente da AI-OS su Drive. Per video o file pesanti si apre la cartella Drive corrente.
                           </p>
                         </div>
 
@@ -4389,7 +4389,7 @@ export default function AIOSDesktop() {
                 </div>
               ) : (
                 <div className="rounded-3xl border border-[#EBCB8B]/20 bg-[#EBCB8B]/10 p-5 text-sm text-[#D8DEE9]/65">
-                  Cartella Drive immobile non pronta. Usa la nuvoletta Drive globale per creare/sistemare le cartelle immobili.
+                  Cartella Drive immobile non pronta. Crea/sincronizza la struttura Drive-first dell’agenzia e poi rientra nell’immobile.
                   <button
                     type="button"
                     onClick={createMissingDriveFolders}

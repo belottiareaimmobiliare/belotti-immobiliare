@@ -73,7 +73,7 @@ async function ensurePropertyDriveFolderPlaceholders(supabase: ReturnType<typeof
       drive_folder_url: null,
       drive_folder_id: null,
       sync_status: 'pending_creation',
-      notes: 'Cartella Drive preconfigurata automaticamente da AI-OS. Creare la cartella dentro la Drive root e incollare qui il link.',
+      notes: 'Drive-first: cartella immobile preconfigurata da AI-OS. La struttura reale viene creata/sincronizzata in Google Drive.',
     }))
     .filter((row) => row.property_id)
 
@@ -171,7 +171,7 @@ export async function POST(request: Request) {
           drive_root_url: driveRootUrl,
           drive_root_folder_id: driveRootFolderId,
           large_file_threshold_mb: largeFileThresholdMb,
-          storage_strategy: 'supabase_public_drive_archive',
+          storage_strategy: 'drive_first_google_drive',
           notes,
         },
         {
