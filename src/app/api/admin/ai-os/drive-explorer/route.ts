@@ -159,9 +159,22 @@ export async function POST(request: Request) {
         targetFolderId,
       })
 
+      const movedItem = payload.item ?? payload.file ?? payload.folder ?? null
+      const movedItemId = String(movedItem?.id || payload.id || '').trim()
+
+      if (!movedItemId) {
+        return NextResponse.json(
+          {
+            error:
+              'Apps Script ha risposto OK ma non ha confermato lo spostamento. Aggiorna il connettore Drive con action moveItem.',
+          },
+          { status: 502 },
+        )
+      }
+
       return NextResponse.json({
         ok: true,
-        item: payload.item ?? null,
+        item: movedItem,
       })
     }
 
