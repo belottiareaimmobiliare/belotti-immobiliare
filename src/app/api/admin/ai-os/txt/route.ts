@@ -44,6 +44,38 @@ export async function POST(request: Request) {
     const sizeBytes = textSizeBytes(content)
     const supabase = createServiceClient()
 
+    if (customFolderId) {
+      const { data: customFolder, error: customFolderError } = await supabase
+        .from('ai_os_custom_folders')
+        .select('id, property_id, parent_folder_type')
+        .eq('id', customFolderId)
+        .eq('property_id', propertyId)
+        .eq('is_deleted', false)
+        .maybeSingle()
+
+      if (customFolderError) {
+        console.error('AI-OS TXT custom folder error:', customFolderError)
+        return NextResponse.json(
+          { error: customFolderError.message || 'Errore lettura sottocartella AI-OS' },
+          { status: 500 },
+        )
+      }
+
+      if (!customFolder) {
+        return NextResponse.json(
+          { error: 'Sottocartella AI-OS non trovata' },
+          { status: 404 },
+        )
+      }
+
+      if (normalizeAIOSFolderType(customFolder.parent_folder_type) !== folderType) {
+        return NextResponse.json(
+          { error: 'La sottocartella non appartiene alla sezione AI-OS corrente' },
+          { status: 400 },
+        )
+      }
+    }
+
     if (fileId) {
       const { data: existing, error: existingError } = await supabase
         .from('ai_os_files')
@@ -99,6 +131,7 @@ export async function POST(request: Request) {
         file_name: finalName.endsWith('.txt') ? finalName : `${finalName}.txt`,
         file_kind: 'txt',
         folder_type: folderType,
+        custom_folder_id: customFolderId,
         mime_type: 'text/plain',
         size_bytes: sizeBytes,
         storage_bucket: 'ai-os',

@@ -6,6 +6,7 @@ import {
   getAIOSFileKind,
   jsonError,
   mapAIOSFileRecord,
+  normalizeAIOSFolderType,
   safeFileName,
 } from '@/lib/ai-os'
 
@@ -27,6 +28,8 @@ export async function POST(request: Request) {
     const formData = await request.formData()
     const propertyId = String(formData.get('property_id') ?? '').trim()
     const file = formData.get('file')
+    const folderType = normalizeAIOSFolderType(formData.get('folder_type'))
+    const customFolderId = String(formData.get('custom_folder_id') ?? '').trim() || null
 
     if (!propertyId || !(file instanceof File)) {
       return NextResponse.json(
@@ -98,6 +101,8 @@ export async function POST(request: Request) {
         property_id: propertyId,
         file_name: file.name,
         file_kind: kind,
+        folder_type: folderType,
+        custom_folder_id: customFolderId,
         mime_type: file.type || null,
         size_bytes: file.size,
         storage_bucket: 'ai-os',

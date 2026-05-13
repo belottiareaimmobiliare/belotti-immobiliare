@@ -29,6 +29,7 @@ export async function POST(request: Request) {
     const mimeType = String(body?.mimeType ?? '').trim()
     const sizeBytes = Number(body?.sizeBytes ?? 0)
     const folderType = normalizeAIOSFolderType(body?.folderType)
+    const customFolderId = String(body?.customFolderId ?? '').trim() || null
 
     if (!propertyId || !fileName || !Number.isFinite(sizeBytes) || sizeBytes <= 0) {
       return NextResponse.json(
@@ -106,6 +107,7 @@ export async function POST(request: Request) {
         signedUrl: data.signedUrl,
         kind,
         folderType,
+        customFolderId,
       },
     })
   } catch (error) {

@@ -31,7 +31,8 @@ export async function POST(request: Request) {
     const sizeBytes = Number(body?.sizeBytes ?? 0)
     const storagePath = String(body?.storagePath ?? '').trim()
     const storageBucket = String(body?.storageBucket ?? 'ai-os').trim() || 'ai-os'
-    const folderType = normalizeAIOSFolderType(body?.folderType)
+    let folderType = normalizeAIOSFolderType(body?.folderType)
+    const customFolderId = String(body?.customFolderId ?? '').trim() || null
 
     if (!propertyId || !fileName || !storagePath || !Number.isFinite(sizeBytes) || sizeBytes <= 0) {
       return NextResponse.json(
@@ -51,6 +52,38 @@ export async function POST(request: Request) {
     }
 
     const supabase = createServiceClient()
+
+    if (customFolderId) {
+      const { data: customFolder, error: customFolderError } = await supabase
+        .from('ai_os_custom_folders')
+        .select('id, property_id, parent_folder_type')
+        .eq('id', customFolderId)
+        .eq('property_id', propertyId)
+        .eq('is_deleted', false)
+        .maybeSingle()
+
+      if (customFolderError) {
+        console.error('AI-OS complete custom folder error:', customFolderError)
+        await supabase.storage.from(storageBucket).remove([storagePath])
+
+        return NextResponse.json(
+          { error: customFolderError.message || 'Errore lettura sottocartella AI-OS' },
+          { status: 500 },
+        )
+      }
+
+      if (!customFolder) {
+        await supabase.storage.from(storageBucket).remove([storagePath])
+
+        return NextResponse.json(
+          { error: 'Sottocartella AI-OS non trovata' },
+          { status: 404 },
+        )
+      }
+
+      folderType = normalizeAIOSFolderType(customFolder.parent_folder_type)
+    }
+
     const kind = getAIOSFileKind(fileName, mimeType)
 
     if (folderType === 'images' && kind !== 'image' && kind !== 'video') {
@@ -129,6 +162,7 @@ export async function POST(request: Request) {
         file_name: fileName,
         file_kind: kind,
         folder_type: folderType,
+        custom_folder_id: customFolderId,
         mime_type: mimeType || null,
         size_bytes: sizeBytes,
         storage_bucket: storageBucket,

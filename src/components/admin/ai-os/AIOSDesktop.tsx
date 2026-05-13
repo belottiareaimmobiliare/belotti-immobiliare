@@ -46,6 +46,7 @@ type AIOSFile = {
   previewUrl?: string
   storagePath?: string
   folderType?: AIOSSection
+  customFolderId?: string | null
   propertyMediaId?: string
   isGalleryVisible?: boolean
   uploadProgress?: number
@@ -2625,6 +2626,10 @@ export default function AIOSDesktop() {
   const uploadFilesToActiveFolder = (uploadableFiles: File[]) => {
     if (!activeFolderId || uploadableFiles.length === 0) return
 
+    const targetFolderId = activeFolderId
+    const targetSection = activeSection
+    const targetCustomFolderId = activeCustomFolderId
+
     uploadableFiles.forEach((file) => {
       const tempId = `upload-${Date.now()}-${Math.random().toString(16).slice(2)}`
       const previewUrl = URL.createObjectURL(file)
@@ -2643,7 +2648,7 @@ export default function AIOSDesktop() {
 
       setFolders((currentFolders) =>
         currentFolders.map((folder) =>
-          folder.id === activeFolderId
+          folder.id === targetFolderId
             ? {
                 ...folder,
                 files: [tempFile, ...folder.files],
@@ -2656,8 +2661,8 @@ export default function AIOSDesktop() {
       setNotice(`Upload avviato: ${file.name}`)
 
       void uploadFileWithProgress({
-        propertyId: activeFolderId,
-        folderType: activeSection,
+        propertyId: targetFolderId,
+        folderType: targetSection,
         file,
         onProgress: (progress) => {
           updateFileInFolder(activeFolderId, tempId, (currentFile) => ({
@@ -2668,7 +2673,7 @@ export default function AIOSDesktop() {
       })
         .then((uploadedFile) => {
           URL.revokeObjectURL(previewUrl)
-          replaceFileInFolder(activeFolderId, tempId, uploadedFile)
+          replaceFileInFolder(targetFolderId, tempId, uploadedFile)
           setNotice(`Upload completato: ${uploadedFile.name}`)
           void loadQuota()
         })
