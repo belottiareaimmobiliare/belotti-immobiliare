@@ -2873,8 +2873,8 @@ export default function AIOSDesktop() {
     event.preventDefault()
     event.stopPropagation()
 
-    const menuWidth = 240
-    const menuHeight = 132
+    const menuWidth = 276
+    const menuHeight = 214
 
     setContextMenu({
       x: Math.max(8, Math.min(event.clientX, window.innerWidth - menuWidth - 8)),
@@ -4775,8 +4775,8 @@ export default function AIOSDesktop() {
 
   return (
     <main className={`${jetBrainsMono.className} aios-nord fixed inset-0 z-[9999] h-dvh w-screen overflow-hidden bg-[#2E3440] text-[#D8DEE9] antialiased`}>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(136,192,208,0.18),transparent_34%),radial-gradient(circle_at_76%_76%,rgba(180,142,173,0.22),transparent_32%),radial-gradient(circle_at_88%_18%,rgba(191,97,106,0.10),transparent_26%),linear-gradient(135deg,#2E3440_0%,#3B4252_48%,#2E3440_100%)]" />
-      <div className="pointer-events-none absolute inset-0 opacity-[0.10] [background-image:linear-gradient(rgba(143,188,187,.42)_1px,transparent_1px),linear-gradient(90deg,rgba(143,188,187,.42)_1px,transparent_1px)] [background-size:42px_42px]" />
+      <div className="aios-nordic-bg absolute inset-0 bg-[radial-gradient(circle_at_16%_12%,rgba(94,129,172,0.26),transparent_32%),radial-gradient(circle_at_78%_18%,rgba(143,188,187,0.15),transparent_28%),radial-gradient(circle_at_76%_84%,rgba(180,142,173,0.16),transparent_30%),linear-gradient(135deg,#111827_0%,#151A23_42%,#1B202B_100%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(136,192,208,.32)_1px,transparent_1px),linear-gradient(90deg,rgba(136,192,208,.32)_1px,transparent_1px)] [background-size:44px_44px]" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_18%,rgba(0,0,0,0.35))]" />
 
       <section className="relative z-10 flex h-[calc(100dvh-56px)] flex-col overflow-hidden p-3 md:hidden">
@@ -6025,7 +6025,7 @@ export default function AIOSDesktop() {
           }}
         >
           <div
-            className="fixed w-[240px] overflow-hidden rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/95 p-2 text-sm text-white shadow-2xl shadow-black/60 backdrop-blur-2xl"
+            className="aios-context-menu aios-nordic-dark fixed w-[276px] overflow-hidden rounded-[20px] border border-[#4C566A]/70 bg-[#151A23]/96 p-2 text-xs font-semibold text-[#E5E9F0] shadow-[0_22px_80px_rgba(0,0,0,0.62),0_0_0_1px_rgba(236,239,244,0.035),inset_0_1px_0_rgba(236,239,244,0.055)] backdrop-blur-2xl"
             style={{ left: contextMenu.x, top: contextMenu.y }}
             onClick={(event) => event.stopPropagation()}
           >
