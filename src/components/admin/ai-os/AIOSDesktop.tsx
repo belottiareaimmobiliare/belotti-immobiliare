@@ -117,6 +117,16 @@ type AIOSDriveExplorerData = {
   files: AIOSDriveExplorerFile[]
 }
 
+type AIOSDriveExplorerItem =
+  | { type: 'folder'; folder: AIOSDriveExplorerFolder }
+  | { type: 'file'; file: AIOSDriveExplorerFile }
+
+type AIOSDriveItemContextMenu = {
+  x: number
+  y: number
+  item: AIOSDriveExplorerItem
+} | null
+
 type AIOSCustomFolder = {
   id: string
   property_id: string
@@ -992,6 +1002,8 @@ export default function AIOSDesktop() {
   const [driveExplorerIconSize, setDriveExplorerIconSize] = useState<24 | 32 | 48>(48)
   const [driveExplorerViewMode, setDriveExplorerViewMode] = useState<'grid' | 'list'>('grid')
   const [driveExplorerSearchQuery, setDriveExplorerSearchQuery] = useState('')
+  const [selectedDriveItem, setSelectedDriveItem] = useState<AIOSDriveExplorerItem | null>(null)
+  const [driveItemContextMenu, setDriveItemContextMenu] = useState<AIOSDriveItemContextMenu>(null)
   const [fileMoveUpdating, setFileMoveUpdating] = useState('')
   const [movePicker, setMovePicker] = useState<{ fileId: string; fileName: string } | null>(null)
   const [renameFileDialog, setRenameFileDialog] = useState<{ fileId: string; fileName: string } | null>(null)
@@ -2335,6 +2347,8 @@ export default function AIOSDesktop() {
     }
 
     setDriveExplorerPreviewFile(null)
+    setSelectedDriveItem(null)
+    setDriveItemContextMenu(null)
     void loadDriveExplorer(targetFolderId)
   }
 
@@ -2343,6 +2357,8 @@ export default function AIOSDesktop() {
 
     setDriveExplorerHistory([])
     setDriveExplorerPreviewFile(null)
+    setSelectedDriveItem(null)
+    setDriveItemContextMenu(null)
     void loadDriveExplorer(driveFolder.drive_folder_id)
   }
 
@@ -2356,6 +2372,8 @@ export default function AIOSDesktop() {
 
     setDriveExplorerHistory((currentHistory) => currentHistory.slice(0, -1))
     setDriveExplorerPreviewFile(null)
+    setSelectedDriveItem(null)
+    setDriveItemContextMenu(null)
     void loadDriveExplorer(previousFolderId)
   }
 
@@ -2380,6 +2398,79 @@ export default function AIOSDesktop() {
   function driveFilePreviewUrl(file: AIOSDriveExplorerFile | null) {
     if (!file?.id) return ''
     return `https://drive.google.com/file/d/${file.id}/preview`
+  }
+
+  function isDriveImageFile(file: AIOSDriveExplorerFile | null) {
+    if (!file) return false
+
+    const mimeType = String(file.mimeType || '').toLowerCase()
+    const name = String(file.name || '').toLowerCase()
+
+    return (
+      mimeType.startsWith('image/') ||
+      /\.(png|jpe?g|webp|gif|bmp|avif|heic|heif)$/i.test(name)
+    )
+  }
+
+  function driveFileThumbnailUrl(file: AIOSDriveExplorerFile | null) {
+    if (!file?.id) return ''
+    return `https://drive.google.com/thumbnail?id=${encodeURIComponent(file.id)}&sz=w640`
+  }
+
+  function driveFileDownloadUrl(file: AIOSDriveExplorerFile | null) {
+    if (!file?.id) return ''
+    return `https://drive.google.com/uc?export=download&id=${encodeURIComponent(file.id)}`
+  }
+
+  function openDriveExplorerItem(item: AIOSDriveExplorerItem) {
+    setDriveItemContextMenu(null)
+    setSelectedDriveItem(item)
+
+    if (item.type === 'folder') {
+      openDriveExplorerFolder(item.folder.id)
+      return
+    }
+
+    if (item.file.url) {
+      window.open(item.file.url, '_blank', 'noopener,noreferrer')
+    }
+  }
+
+  function openDriveItemContextMenu(
+    event: MouseEvent<HTMLElement>,
+    item: AIOSDriveExplorerItem,
+  ) {
+    event.preventDefault()
+    event.stopPropagation()
+
+    const menuWidth = 320
+    const menuHeight = item.type === 'file' ? 276 : 230
+
+    setSelectedDriveItem(item)
+    setDriveItemContextMenu({
+      x: Math.max(8, Math.min(event.clientX, window.innerWidth - menuWidth - 8)),
+      y: Math.max(8, Math.min(event.clientY, window.innerHeight - menuHeight - 8)),
+      item,
+    })
+  }
+
+  async function copyDriveItemLink(item: AIOSDriveExplorerItem) {
+    const url = item.type === 'folder' ? item.folder.url : item.file.url
+    const name = item.type === 'folder' ? item.folder.name : item.file.name
+
+    try {
+      await navigator.clipboard.writeText(url)
+      setNotice(`Link copiato: ${name}`)
+    } catch {
+      setNotice(url)
+    } finally {
+      setDriveItemContextMenu(null)
+    }
+  }
+
+  function driveItemName(item: AIOSDriveExplorerItem | null) {
+    if (!item) return ''
+    return item.type === 'folder' ? item.folder.name : item.file.name
   }
 
   async function createDriveExplorerSubfolder() {
@@ -4329,8 +4420,14 @@ export default function AIOSDesktop() {
                                   <button
                                     key={folder.id}
                                     type="button"
-                                    onClick={() => openDriveExplorerFolder(folder.id)}
-                                    className="grid w-full grid-cols-[minmax(0,1fr)_170px_130px] items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-[#ECEFF4] transition hover:bg-[#151F2E]"
+                                    onClick={() => setSelectedDriveItem({ type: 'folder', folder })}
+                                    onDoubleClick={() => openDriveExplorerFolder(folder.id)}
+                                    onContextMenu={(event) => openDriveItemContextMenu(event, { type: 'folder', folder })}
+                                    className={`grid w-full grid-cols-[minmax(0,1fr)_170px_130px] items-center gap-3 px-4 py-3 text-left text-sm font-semibold transition ${
+                                      selectedDriveItem?.type === 'folder' && selectedDriveItem.folder.id === folder.id
+                                        ? 'bg-[#0B5CAD] text-white'
+                                        : 'text-[#ECEFF4] hover:bg-[#1F1F1F]'
+                                    }`}
                                   >
                                     <span className="flex min-w-0 items-center gap-3">
                                       <span className="aios-folder-icon-mini" />
@@ -4347,12 +4444,17 @@ export default function AIOSDesktop() {
                                   file.name.toLowerCase().includes(driveExplorerSearchQuery.trim().toLowerCase())
                                 )
                                 .map((file) => (
-                                  <a
+                                  <button
                                     key={file.id}
-                                    href={file.url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="grid w-full grid-cols-[minmax(0,1fr)_170px_130px] items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-[#ECEFF4] transition hover:bg-[#151F2E]"
+                                    type="button"
+                                    onClick={() => setSelectedDriveItem({ type: 'file', file })}
+                                    onDoubleClick={() => file.url && window.open(file.url, '_blank', 'noopener,noreferrer')}
+                                    onContextMenu={(event) => openDriveItemContextMenu(event, { type: 'file', file })}
+                                    className={`grid w-full grid-cols-[minmax(0,1fr)_170px_130px] items-center gap-3 px-4 py-3 text-left text-sm font-semibold transition ${
+                                      selectedDriveItem?.type === 'file' && selectedDriveItem.file.id === file.id
+                                        ? 'bg-[#0B5CAD] text-white'
+                                        : 'text-[#ECEFF4] hover:bg-[#1F1F1F]'
+                                    }`}
                                   >
                                     <span className="flex min-w-0 items-center gap-3">
                                       <span className="aios-file-icon-mini" />
@@ -4364,7 +4466,7 @@ export default function AIOSDesktop() {
                                     <span className="text-right text-[#D8DEE9]/42">
                                       {file.size ? formatFileSize(Number(file.size)) : '—'}
                                     </span>
-                                  </a>
+                                  </button>
                                 ))}
                             </div>
                           </div>
@@ -4379,8 +4481,14 @@ export default function AIOSDesktop() {
                                 <button
                                   key={folder.id}
                                   type="button"
-                                  onClick={() => openDriveExplorerFolder(folder.id)}
-                                  className="aios-drive-icon-item"
+                                  onClick={() => setSelectedDriveItem({ type: 'folder', folder })}
+                                  onDoubleClick={() => openDriveExplorerFolder(folder.id)}
+                                  onContextMenu={(event) => openDriveItemContextMenu(event, { type: 'folder', folder })}
+                                  className={`aios-drive-icon-item ${
+                                    selectedDriveItem?.type === 'folder' && selectedDriveItem.folder.id === folder.id
+                                      ? 'aios-drive-icon-item-selected'
+                                      : ''
+                                  }`}
                                 >
                                   <span className="aios-folder-icon" />
                                   <span className="aios-drive-icon-label">
@@ -4395,18 +4503,35 @@ export default function AIOSDesktop() {
                                 file.name.toLowerCase().includes(driveExplorerSearchQuery.trim().toLowerCase())
                               )
                               .map((file) => (
-                                <a
+                                <button
                                   key={file.id}
-                                  href={file.url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="aios-drive-icon-item"
+                                  type="button"
+                                  onClick={() => setSelectedDriveItem({ type: 'file', file })}
+                                  onDoubleClick={() => file.url && window.open(file.url, '_blank', 'noopener,noreferrer')}
+                                  onContextMenu={(event) => openDriveItemContextMenu(event, { type: 'file', file })}
+                                  className={`aios-drive-icon-item ${
+                                    selectedDriveItem?.type === 'file' && selectedDriveItem.file.id === file.id
+                                      ? 'aios-drive-icon-item-selected'
+                                      : ''
+                                  }`}
                                 >
-                                  <span className="aios-file-icon" />
+                                  <span className={`aios-drive-file-thumb ${isDriveImageFile(file) ? 'aios-drive-file-thumb-image' : ''}`}>
+                                    <span className="aios-file-icon" />
+                                    {isDriveImageFile(file) ? (
+                                      <img
+                                        src={driveFileThumbnailUrl(file)}
+                                        alt=""
+                                        loading="lazy"
+                                        onError={(event) => {
+                                          event.currentTarget.style.display = 'none'
+                                        }}
+                                      />
+                                    ) : null}
+                                  </span>
                                   <span className="aios-drive-icon-label">
                                     {file.name}
                                   </span>
-                                </a>
+                                </button>
                               ))}
                           </div>
                         )
@@ -5722,6 +5847,87 @@ export default function AIOSDesktop() {
           ) : null}
         </div>
       </section>
+
+      {driveItemContextMenu ? (
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-[10092] cursor-default bg-transparent"
+            aria-label="Chiudi menu Drive"
+            onClick={() => setDriveItemContextMenu(null)}
+          />
+
+          <div
+            className="aios-drive-context-menu fixed z-[10096] w-[320px] overflow-hidden rounded-xl border border-[#3C4043] bg-[#1F1F1F] py-2 text-sm text-[#E8EAED] shadow-[0_18px_60px_rgba(0,0,0,0.58)]"
+            style={{
+              left: driveItemContextMenu.x,
+              top: driveItemContextMenu.y,
+            }}
+          >
+            <div className="border-b border-[#3C4043] px-4 pb-2 pt-1">
+              <p className="truncate text-xs font-semibold text-[#C4C7C5]">
+                {driveItemName(driveItemContextMenu.item)}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => openDriveExplorerItem(driveItemContextMenu.item)}
+              className="aios-drive-menu-row"
+            >
+              <span>↗</span>
+              <span>{driveItemContextMenu.item.type === 'folder' ? 'Apri cartella' : 'Apri file'}</span>
+            </button>
+
+            {driveItemContextMenu.item.type === 'file' ? (
+              <a
+                href={driveFileDownloadUrl(driveItemContextMenu.item.file)}
+                target="_blank"
+                rel="noreferrer"
+                className="aios-drive-menu-row"
+                onClick={() => setDriveItemContextMenu(null)}
+              >
+                <span>⇩</span>
+                <span>Scarica</span>
+              </a>
+            ) : null}
+
+            <button
+              type="button"
+              onClick={() => void copyDriveItemLink(driveItemContextMenu.item)}
+              className="aios-drive-menu-row"
+            >
+              <span>🔗</span>
+              <span>Copia link</span>
+            </button>
+
+            <a
+              href={driveItemContextMenu.item.type === 'folder' ? driveItemContextMenu.item.folder.url : driveItemContextMenu.item.file.url}
+              target="_blank"
+              rel="noreferrer"
+              className="aios-drive-menu-row"
+              onClick={() => setDriveItemContextMenu(null)}
+            >
+              <span>☁</span>
+              <span>Apri in Google Drive</span>
+            </a>
+
+            <div className="my-2 border-t border-[#3C4043]" />
+
+            <button
+              type="button"
+              onClick={() => {
+                setDriveItemContextMenu(null)
+                setNotice('Rinomina/elimina direttamente da Google Drive per ora. Nel prossimo step le colleghiamo via Apps Script.')
+              }}
+              className="aios-drive-menu-row aios-drive-menu-row-muted"
+            >
+              <span>⋯</span>
+              <span>Altre azioni</span>
+            </button>
+          </div>
+        </>
+      ) : null}
 
       {customFolderContextMenu && !contextMenu ? (
         <>
