@@ -1161,8 +1161,19 @@ export default function AIOSDesktop() {
   }
 
   async function loadFilesForFolder(propertyId: string, section: AIOSSection = activeSection, customFolderId: string | null = activeCustomFolderId) {
+    // AI-OS folder transition: clear stale files from the previous level.
+    // Evita l'effetto brutto: entro in una sottocartella, vedo i file della cartella padre,
+    // poi sparisce tutto quando arriva la risposta API.
+    setFolders((currentFolders) =>
+      currentFolders.map((folder) =>
+        folder.id === propertyId ? { ...folder, files: [] } : folder,
+      ),
+    )
+
+    setNotice(customFolderId ? 'Apertura sottocartella AI-OS...' : 'Caricamento file AI-OS...')
+
     try {
-      if (section === 'images' || section === 'docs') {
+      if ((section === 'images' || section === 'docs') && !customFolderId) {
         await syncPropertyMediaForFolder(propertyId, true)
       }
 
@@ -1209,6 +1220,9 @@ export default function AIOSDesktop() {
     parentCustomFolderId: string | null = activeCustomFolderId,
   ) {
     if (!propertyId) return
+
+    // AI-OS folder transition: clear stale custom folders from the previous level.
+    setCustomFolders([])
 
     setCustomFoldersLoading(true)
 
@@ -1425,6 +1439,17 @@ export default function AIOSDesktop() {
     if (!activeFolderId) return
 
     const parentFolderType = folder.parent_folder_type || activeSection
+    // AI-OS subfolder navigation: pulizia immediata della vista corrente.
+    // Così non si vede per un attimo il contenuto della cartella padre dentro la sottocartella.
+    setContextMenu(null)
+    setCustomFolders([])
+    setFolders((currentFolders) =>
+      currentFolders.map((currentFolder) =>
+        currentFolder.id === activeFolderId ? { ...currentFolder, files: [] } : currentFolder,
+      ),
+    )
+    setNotice(`Apro sottocartella: ${folder.name}`)
+
 
     setActiveSection(parentFolderType)
     setActiveCustomFolderId(folder.id)
