@@ -3929,3 +3929,102 @@ body:has(.aios-nordic-bg) .fixed.z-\[10080\] > div {
 }
 
 /* === AI-OS File Manager Pro Polish END === */
+
+/* === AI-OS Drive Manager Nord Aurora START === */
+
+.aios-drive-manager {
+  font-family: var(--font-jetbrains-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
+}
+
+.aios-drive-manager input,
+.aios-drive-manager button,
+.aios-drive-manager a {
+  font-family: inherit;
+}
+
+.aios-drive-manager ::selection {
+  background: rgba(143, 188, 187, 0.30);
+  color: #eceff4;
+}
+
+/* Drive-like dark graphite */
+body:has(.aios-drive-manager) .aios-drive-manager {
+  --drive-bg-0: #05070b;
+  --drive-bg-1: #070a10;
+  --drive-bg-2: #0b1018;
+  --drive-bg-3: #111827;
+  --drive-border: rgba(76, 86, 106, 0.70);
+  --drive-border-soft: rgba(76, 86, 106, 0.42);
+  --drive-text: #eceff4;
+  --drive-muted: rgba(216, 222, 233, 0.54);
+  --drive-frost: #8fbcbb;
+  --drive-blue: #5e81ac;
+  --drive-green: #a3be8c;
+  --drive-purple: #b48ead;
+  color: var(--drive-text);
+}
+
+body:has(.aios-drive-manager) .aios-drive-manager [class*="bg-[#202632]"],
+body:has(.aios-drive-manager) .aios-drive-manager [class*="bg-[#151A23]"],
+body:has(.aios-drive-manager) .aios-drive-manager [class*="bg-[#1B202B]"],
+body:has(.aios-drive-manager) .aios-drive-manager [class*="bg-[#242B38]"] {
+  background:
+    linear-gradient(180deg, rgba(17, 24, 36, 0.84), rgba(5, 7, 11, 0.88)) !important;
+  border-color: var(--drive-border-soft) !important;
+}
+
+body:has(.aios-drive-manager) .aios-drive-manager button {
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}
+
+body:has(.aios-drive-manager) .aios-drive-manager button:focus-visible,
+body:has(.aios-drive-manager) .aios-drive-manager a:focus-visible,
+body:has(.aios-drive-manager) .aios-drive-manager input:focus-visible {
+  outline: 2px solid rgba(143, 188, 187, 0.75);
+  outline-offset: 3px;
+}
+
+/* Cards Drive */
+body:has(.aios-drive-manager) .aios-drive-manager button[class*="min-h-[118px]"] {
+  position: relative;
+}
+
+body:has(.aios-drive-manager) .aios-drive-manager button[class*="min-h-[118px]"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(236, 239, 244, 0.045), transparent 24%),
+    radial-gradient(circle at 50% 0%, rgba(143, 188, 187, 0.055), transparent 42%);
+  opacity: 0.85;
+}
+
+body:has(.aios-drive-manager) .aios-drive-manager button[class*="min-h-[118px]"]:hover {
+  transform: translateY(-1px);
+}
+
+/* Scrollbar interna Drive */
+.aios-drive-manager * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(143, 188, 187, 0.34) rgba(5, 7, 11, 0.78);
+}
+
+.aios-drive-manager *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.aios-drive-manager *::-webkit-scrollbar-track {
+  background: rgba(5, 7, 11, 0.78);
+}
+
+.aios-drive-manager *::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(143, 188, 187, 0.42), rgba(94, 129, 172, 0.38));
+  border: 2px solid rgba(5, 7, 11, 0.90);
+  border-radius: 999px;
+}
+
+/* === AI-OS Drive Manager Nord Aurora END === */
