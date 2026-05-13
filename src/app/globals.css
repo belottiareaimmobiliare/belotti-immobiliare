@@ -3515,3 +3515,353 @@ body.dark button[class*='emerald'][class*='uppercase'][class*='tracking']:hover,
 /* === AI-OS Nordic Parent Fallback END === */
 
 /* === AI-OS Nordic Darker Theme END === */
+
+/* === AI-OS Nordic Black Polish START === */
+
+/*
+  AI-OS Nordic Black Polish
+  Obiettivo:
+  - meno blu uniforme
+  - più nero / graphite / glass
+  - accenti Nord solo dove servono
+  - context menu file/cartella identici
+*/
+
+body:has(.aios-nordic-bg) {
+  --aios-black-0: #070a10;
+  --aios-black-1: #0b1018;
+  --aios-black-2: #0f1621;
+  --aios-black-3: #141c28;
+  --aios-black-4: #1a2330;
+
+  --aios-graphite-border: rgba(74, 86, 105, 0.46);
+  --aios-graphite-border-soft: rgba(74, 86, 105, 0.28);
+
+  --aios-frost-muted: rgba(136, 192, 208, 0.34);
+  --aios-frost-soft: rgba(143, 188, 187, 0.18);
+
+  --aios-text-main: #eceff4;
+  --aios-text-soft: rgba(216, 222, 233, 0.72);
+  --aios-text-muted: rgba(216, 222, 233, 0.52);
+}
+
+/* Sfondo desktop: più nero, meno blu */
+body:has(.aios-nordic-bg) .aios-nordic-bg {
+  background:
+    radial-gradient(circle at 14% 10%, rgba(94, 129, 172, 0.13), transparent 31%),
+    radial-gradient(circle at 76% 18%, rgba(143, 188, 187, 0.07), transparent 28%),
+    radial-gradient(circle at 72% 82%, rgba(180, 142, 173, 0.08), transparent 30%),
+    linear-gradient(135deg, #070a10 0%, #0b1018 42%, #111827 100%) !important;
+}
+
+/* Griglia desktop più discreta */
+body:has(.aios-nordic-bg) .aios-nordic-bg + div {
+  opacity: 0.72;
+}
+
+/* Pannelli principali: graphite/black */
+body:has(.aios-nordic-bg) [class*="bg-[#2E3440]"],
+body:has(.aios-nordic-bg) [class*="bg-[#202632]"],
+body:has(.aios-nordic-bg) [class*="bg-[#242B38]"],
+body:has(.aios-nordic-bg) [class*="bg-[#1B202B]"],
+body:has(.aios-nordic-bg) [class*="bg-[#151A23]"] {
+  background:
+    linear-gradient(180deg, rgba(20, 28, 40, 0.82), rgba(10, 15, 24, 0.86)) !important;
+  border-color: var(--aios-graphite-border-soft) !important;
+}
+
+/* Header/footer/finestre: più OS nero */
+body:has(.aios-nordic-bg) header,
+body:has(.aios-nordic-bg) footer,
+body:has(.aios-nordic-bg) aside,
+body:has(.aios-nordic-bg) section {
+  border-color: var(--aios-graphite-border-soft) !important;
+}
+
+/* Riduce il blu/ciano sparato dei bordi */
+body:has(.aios-nordic-bg) [class*="border-[#88C0D0]"],
+body:has(.aios-nordic-bg) [class*="border-[#8FBCBB]"] {
+  border-color: rgba(92, 106, 126, 0.48) !important;
+}
+
+body:has(.aios-nordic-bg) [class*="border-[#B48EAD]"] {
+  border-color: rgba(180, 142, 173, 0.34) !important;
+}
+
+/* Card file/cartelle: più scure */
+body:has(.aios-nordic-bg) [class*="rounded-2xl"],
+body:has(.aios-nordic-bg) [class*="rounded-3xl"],
+body:has(.aios-nordic-bg) [class*="rounded-[28px]"] {
+  box-shadow:
+    0 18px 60px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(236, 239, 244, 0.035) !important;
+}
+
+/* Hover generico: accento freddo più fine */
+body:has(.aios-nordic-bg) button:hover,
+body:has(.aios-nordic-bg) a:hover {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+/* Input/editor: nero graphite */
+body:has(.aios-nordic-bg) input,
+body:has(.aios-nordic-bg) textarea,
+body:has(.aios-nordic-bg) select {
+  background:
+    linear-gradient(180deg, rgba(8, 12, 19, 0.88), rgba(13, 19, 29, 0.86)) !important;
+  border-color: rgba(74, 86, 105, 0.55) !important;
+  color: var(--aios-text-main) !important;
+}
+
+body:has(.aios-nordic-bg) input:focus,
+body:has(.aios-nordic-bg) textarea:focus,
+body:has(.aios-nordic-bg) select:focus {
+  border-color: rgba(143, 188, 187, 0.46) !important;
+  box-shadow:
+    0 0 0 1px rgba(143, 188, 187, 0.16),
+    0 0 30px rgba(0, 0, 0, 0.34) !important;
+}
+
+/* Drop area: meno blu, più black glass */
+body:has(.aios-nordic-bg) [class*="border-dashed"] {
+  border-color: rgba(74, 86, 105, 0.55) !important;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(143, 188, 187, 0.045), transparent 34%),
+    linear-gradient(135deg, rgba(8, 12, 19, 0.70), rgba(12, 18, 28, 0.70)) !important;
+}
+
+body:has(.aios-nordic-bg) [class*="border-dashed"]:hover {
+  border-color: rgba(143, 188, 187, 0.42) !important;
+  box-shadow:
+    inset 0 0 34px rgba(143, 188, 187, 0.04),
+    0 0 34px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Testi secondari meno azzurri */
+body:has(.aios-nordic-bg) [class*="text-[#D8DEE9]/60"],
+body:has(.aios-nordic-bg) [class*="text-[#D8DEE9]/58"],
+body:has(.aios-nordic-bg) [class*="text-[#D8DEE9]/55"],
+body:has(.aios-nordic-bg) [class*="text-[#D8DEE9]/50"],
+body:has(.aios-nordic-bg) [class*="text-[#D8DEE9]/45"] {
+  color: var(--aios-text-muted) !important;
+}
+
+/* Accenti Nord più controllati */
+body:has(.aios-nordic-bg) [class*="text-[#88C0D0]"],
+body:has(.aios-nordic-bg) [class*="text-[#8FBCBB]"] {
+  color: rgba(143, 188, 187, 0.78) !important;
+}
+
+/* ============================================================
+   CONTEXT MENU FILE + CARTELLA
+   ============================================================ */
+
+.aios-context-menu,
+.aios-context-menu.aios-nordic-dark,
+.aios-context-menu.aios-nordic-black,
+.aios-context-menu.aios-folder-context-menu,
+.aios-context-menu.aios-file-context-menu {
+  width: 276px !important;
+  overflow: hidden !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(74, 86, 105, 0.70) !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(143, 188, 187, 0.07), transparent 34%),
+    linear-gradient(180deg, rgba(14, 19, 28, 0.98), rgba(6, 9, 15, 0.98)) !important;
+  box-shadow:
+    0 24px 90px rgba(0, 0, 0, 0.66),
+    0 0 0 1px rgba(236, 239, 244, 0.025),
+    inset 0 1px 0 rgba(236, 239, 244, 0.045) !important;
+  backdrop-filter: blur(22px) saturate(128%) !important;
+  color: #e5e9f0 !important;
+  font-size: 12px !important;
+  line-height: 1.05rem !important;
+  font-weight: 650 !important;
+  padding: 8px !important;
+}
+
+.aios-context-menu *,
+.aios-context-menu.aios-nordic-dark *,
+.aios-context-menu.aios-nordic-black * {
+  font-size: 12px !important;
+  line-height: 1.05rem !important;
+}
+
+.aios-context-menu button,
+.aios-context-menu.aios-nordic-dark button,
+.aios-context-menu.aios-nordic-black button {
+  width: 100% !important;
+  min-height: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  padding: 0 11px !important;
+  border-radius: 13px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: rgba(229, 233, 240, 0.86) !important;
+  font-size: 12px !important;
+  line-height: 1.05rem !important;
+  font-weight: 650 !important;
+  letter-spacing: 0.01em !important;
+  text-align: left !important;
+  box-shadow: none !important;
+}
+
+.aios-context-menu button:hover,
+.aios-context-menu.aios-nordic-dark button:hover,
+.aios-context-menu.aios-nordic-black button:hover {
+  color: #eceff4 !important;
+  background:
+    linear-gradient(135deg, rgba(38, 48, 63, 0.94), rgba(21, 28, 40, 0.94)) !important;
+  border-color: rgba(143, 188, 187, 0.18) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(236, 239, 244, 0.035),
+    0 8px 24px rgba(0, 0, 0, 0.28) !important;
+  transform: translateX(1px);
+}
+
+.aios-context-menu button:active {
+  transform: translateX(1px) scale(0.99);
+}
+
+/* Elimina: rosso elegante, non enorme */
+.aios-context-menu button[class*="BF616A"],
+.aios-context-menu button[class*="text-red"] {
+  color: rgba(255, 184, 194, 0.88) !important;
+  font-size: 12px !important;
+}
+
+.aios-context-menu button[class*="BF616A"]:hover,
+.aios-context-menu button[class*="text-red"]:hover {
+  color: #ffccd2 !important;
+  background:
+    linear-gradient(135deg, rgba(191, 97, 106, 0.16), rgba(20, 28, 40, 0.88)) !important;
+  border-color: rgba(191, 97, 106, 0.30) !important;
+}
+
+/* Titolo piccolo sopra al menu */
+.aios-context-menu p,
+.aios-context-menu span {
+  color: inherit;
+}
+
+/* === AI-OS Nordic Black Polish END === */
+
+/* === AI-OS Black Context And Move Fix START === */
+
+/* Meno blu generale: il desktop vira su black/graphite */
+body:has(.aios-nordic-bg) .aios-nordic-bg {
+  background:
+    radial-gradient(circle at 13% 8%, rgba(94, 129, 172, 0.10), transparent 30%),
+    radial-gradient(circle at 76% 17%, rgba(143, 188, 187, 0.045), transparent 27%),
+    radial-gradient(circle at 72% 83%, rgba(180, 142, 173, 0.055), transparent 28%),
+    linear-gradient(135deg, #06080d 0%, #090d14 44%, #101722 100%) !important;
+}
+
+body:has(.aios-nordic-bg) [class*="bg-[#2E3440]"],
+body:has(.aios-nordic-bg) [class*="bg-[#202632]"],
+body:has(.aios-nordic-bg) [class*="bg-[#242B38]"],
+body:has(.aios-nordic-bg) [class*="bg-[#1B202B]"],
+body:has(.aios-nordic-bg) [class*="bg-[#151A23]"] {
+  background:
+    linear-gradient(180deg, rgba(17, 24, 36, 0.84), rgba(7, 10, 16, 0.88)) !important;
+  border-color: rgba(74, 86, 105, 0.28) !important;
+}
+
+/* Smorza il ciano/blu dei bordi, lasciando solo accenti */
+body:has(.aios-nordic-bg) [class*="border-[#88C0D0]"],
+body:has(.aios-nordic-bg) [class*="border-[#8FBCBB]"] {
+  border-color: rgba(74, 86, 105, 0.44) !important;
+}
+
+body:has(.aios-nordic-bg) [class*="text-[#88C0D0]"],
+body:has(.aios-nordic-bg) [class*="text-[#8FBCBB]"] {
+  color: rgba(143, 188, 187, 0.74) !important;
+}
+
+/* Context menu file/cartella identici */
+.aios-context-menu,
+.aios-context-menu.aios-file-context-menu,
+.aios-context-menu.aios-folder-context-menu,
+.aios-context-menu.aios-nordic-dark,
+.aios-context-menu.aios-nordic-black {
+  z-index: 10095 !important;
+  width: 276px !important;
+  overflow: hidden !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(74, 86, 105, 0.70) !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(143, 188, 187, 0.065), transparent 34%),
+    linear-gradient(180deg, rgba(13, 18, 27, 0.985), rgba(5, 7, 12, 0.985)) !important;
+  box-shadow:
+    0 24px 90px rgba(0, 0, 0, 0.68),
+    0 0 0 1px rgba(236, 239, 244, 0.026),
+    inset 0 1px 0 rgba(236, 239, 244, 0.045) !important;
+  backdrop-filter: blur(22px) saturate(128%) !important;
+  color: #e5e9f0 !important;
+  font-size: 12px !important;
+  line-height: 1.05rem !important;
+  font-weight: 650 !important;
+  padding: 8px !important;
+}
+
+.aios-context-menu *,
+.aios-context-menu.aios-file-context-menu *,
+.aios-context-menu.aios-folder-context-menu * {
+  font-size: 12px !important;
+  line-height: 1.05rem !important;
+}
+
+.aios-context-menu button {
+  width: 100% !important;
+  min-height: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  padding: 0 11px !important;
+  border-radius: 13px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: rgba(229, 233, 240, 0.88) !important;
+  font-size: 12px !important;
+  line-height: 1.05rem !important;
+  font-weight: 650 !important;
+  letter-spacing: 0.01em !important;
+  text-align: left !important;
+  box-shadow: none !important;
+}
+
+.aios-context-menu button:hover {
+  color: #eceff4 !important;
+  background:
+    linear-gradient(135deg, rgba(38, 48, 63, 0.92), rgba(17, 24, 36, 0.94)) !important;
+  border-color: rgba(143, 188, 187, 0.18) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(236, 239, 244, 0.035),
+    0 8px 24px rgba(0, 0, 0, 0.30) !important;
+  transform: translateX(1px);
+}
+
+/* Rosso elimina elegante */
+.aios-context-menu button[class*="BF616A"],
+.aios-context-menu button[class*="text-red"] {
+  color: rgba(255, 184, 194, 0.88) !important;
+}
+
+.aios-context-menu button[class*="BF616A"]:hover,
+.aios-context-menu button[class*="text-red"]:hover {
+  color: #ffccd2 !important;
+  background:
+    linear-gradient(135deg, rgba(191, 97, 106, 0.16), rgba(17, 24, 36, 0.94)) !important;
+  border-color: rgba(191, 97, 106, 0.30) !important;
+}
+
+/* === AI-OS Black Context And Move Fix END === */

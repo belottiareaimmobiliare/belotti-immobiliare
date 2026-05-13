@@ -1307,6 +1307,7 @@ export default function AIOSDesktop() {
     const menuWidth = 230
     const menuHeight = 160
 
+    setContextMenu(null)
     setCustomFolderContextMenu({
       x: Math.max(8, Math.min(event.clientX, window.innerWidth - menuWidth - 8)),
       y: Math.max(8, Math.min(event.clientY, window.innerHeight - menuHeight - 8)),
@@ -2875,6 +2876,8 @@ export default function AIOSDesktop() {
 
     const menuWidth = 276
     const menuHeight = 214
+
+    setCustomFolderContextMenu(null)
 
     setContextMenu({
       x: Math.max(8, Math.min(event.clientX, window.innerWidth - menuWidth - 8)),
@@ -5534,7 +5537,7 @@ export default function AIOSDesktop() {
         </div>
       </section>
 
-      {customFolderContextMenu ? (
+      {customFolderContextMenu && !contextMenu ? (
         <>
           <button
             type="button"
@@ -5544,7 +5547,7 @@ export default function AIOSDesktop() {
           />
 
           <div
-            className="fixed z-[10050] w-[230px] overflow-hidden rounded-2xl border border-[#3C4043] bg-[#111111]/98 p-2 text-[#E8EAED] shadow-2xl shadow-black/70"
+            className="aios-context-menu aios-folder-context-menu aios-nordic-black fixed z-[10095] w-[276px] overflow-hidden rounded-2xl border border-[#3C4043] bg-[#111111]/98 p-2 text-[#E8EAED] shadow-2xl shadow-black/70"
             style={{
               left: customFolderContextMenu.x,
               top: customFolderContextMenu.y,
@@ -5812,7 +5815,56 @@ export default function AIOSDesktop() {
               </div>
 
               <div className="max-h-[330px] overflow-y-auto">
-                {movePickerLocation === 'root' ? (
+                
+                {/* AI-OS move custom folders */}
+                {customFolders.length > 0 ? (
+                  <div className="mb-3 rounded-2xl border border-[#4C566A]/55 bg-[#070A10]/72 p-3 shadow-[inset_0_1px_0_rgba(236,239,244,0.035)]">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#8FBCBB]/70">
+                          Sottocartelle disponibili
+                        </p>
+                        <p className="mt-1 text-xs text-[#D8DEE9]/55">
+                          Sposta direttamente dentro una sottocartella della posizione aperta.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {customFolders.map((folder) => {
+                        const targetSection = (folder.parent_folder_type || activeSection) as AIOSSection
+
+                        return (
+                          <button
+                            key={folder.id}
+                            type="button"
+                            disabled={fileMoveUpdating === movePicker.fileId}
+                            onClick={() => {
+                              void moveFileToSection(
+                                { id: movePicker.fileId },
+                                targetSection,
+                                folder.id,
+                              )
+                            }}
+                            className="group flex min-h-[44px] items-center gap-3 rounded-2xl border border-[#4C566A]/55 bg-[#0B1018]/82 px-3 py-2 text-left text-xs font-semibold text-[#E5E9F0] transition hover:border-[#8FBCBB]/35 hover:bg-[#121A26]"
+                          >
+                            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#4C566A]/50 bg-[#111827] text-base shadow-inner">
+                              📁
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block truncate">{folder.name}</span>
+                              <span className="mt-0.5 block text-[10px] font-medium text-[#D8DEE9]/42">
+                                dentro {moveTargetLabel(targetSection)}
+                              </span>
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ) : null}
+
+{movePickerLocation === 'root' ? (
                   (['images', 'docs'] as AIOSSection[]).map((targetSection) => {
                     const selected = movePickerTarget === targetSection
 
@@ -6025,7 +6077,7 @@ export default function AIOSDesktop() {
           }}
         >
           <div
-            className="aios-context-menu aios-nordic-dark fixed w-[276px] overflow-hidden rounded-[20px] border border-[#4C566A]/70 bg-[#151A23]/96 p-2 text-xs font-semibold text-[#E5E9F0] shadow-[0_22px_80px_rgba(0,0,0,0.62),0_0_0_1px_rgba(236,239,244,0.035),inset_0_1px_0_rgba(236,239,244,0.055)] backdrop-blur-2xl"
+            className="aios-context-menu aios-file-context-menu aios-nordic-dark aios-nordic-black fixed z-[10095] w-[276px] overflow-hidden rounded-[20px] border border-[#4C566A]/70 bg-[#151A23]/96 p-2 text-xs font-semibold text-[#E5E9F0] shadow-[0_22px_80px_rgba(0,0,0,0.62),0_0_0_1px_rgba(236,239,244,0.035),inset_0_1px_0_rgba(236,239,244,0.055)] backdrop-blur-2xl"
             style={{ left: contextMenu.x, top: contextMenu.y }}
             onClick={(event) => event.stopPropagation()}
           >
