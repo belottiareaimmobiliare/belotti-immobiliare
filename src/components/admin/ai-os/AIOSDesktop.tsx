@@ -936,6 +936,19 @@ export default function AIOSDesktop() {
   const [customFolderDialogOpen, setCustomFolderDialogOpen] = useState(false)
   const [customFolderDraft, setCustomFolderDraft] = useState('')
   const [customFolderSaving, setCustomFolderSaving] = useState(false)
+  const [customFolderContextMenu, setCustomFolderContextMenu] = useState<{
+    x: number
+    y: number
+    folderId: string
+    folderName: string
+  } | null>(null)
+  const [renameCustomFolderDialog, setRenameCustomFolderDialog] = useState<{
+    folderId: string
+    folderName: string
+  } | null>(null)
+  const [renameCustomFolderDraft, setRenameCustomFolderDraft] = useState('')
+  const [renameCustomFolderSaving, setRenameCustomFolderSaving] = useState(false)
+  const [customFolderDeleting, setCustomFolderDeleting] = useState('')
   const [desktopWindowOpen, setDesktopWindowOpen] = useState(true)
   const [selectedTxtId, setSelectedTxtId] = useState<string | null>(null)
   const [txtDraft, setTxtDraft] = useState('')
@@ -1283,6 +1296,126 @@ export default function AIOSDesktop() {
       setNotice(message)
     } finally {
       setCustomFolderSaving(false)
+    }
+  }
+
+  function openCustomFolderContextMenu(event: MouseEvent<HTMLElement>, folder: AIOSCustomFolder) {
+    event.preventDefault()
+    event.stopPropagation()
+
+    const menuWidth = 230
+    const menuHeight = 160
+
+    setCustomFolderContextMenu({
+      x: Math.max(8, Math.min(event.clientX, window.innerWidth - menuWidth - 8)),
+      y: Math.max(8, Math.min(event.clientY, window.innerHeight - menuHeight - 8)),
+      folderId: folder.id,
+      folderName: folder.name,
+    })
+  }
+
+  function openRenameCustomFolderDialog(folderId: string, folderName: string) {
+    setRenameCustomFolderDialog({ folderId, folderName })
+    setRenameCustomFolderDraft(folderName)
+    setCustomFolderContextMenu(null)
+  }
+
+  async function saveRenameCustomFolder() {
+    if (!renameCustomFolderDialog) return
+
+    const nextName = renameCustomFolderDraft.trim()
+
+    if (!nextName) {
+      setNotice('Inserisci un nome cartella valido.')
+      return
+    }
+
+    setRenameCustomFolderSaving(true)
+
+    try {
+      const response = await fetch('/api/admin/ai-os/custom-folders', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          folderId: renameCustomFolderDialog.folderId,
+          name: nextName,
+        }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore rinomina cartella')
+      }
+
+      setCustomFolders((current) =>
+        current.map((folder) =>
+          folder.id === renameCustomFolderDialog.folderId
+            ? { ...folder, name: payload?.folder?.name || nextName }
+            : folder,
+        ),
+      )
+
+      if (activeCustomFolderId === renameCustomFolderDialog.folderId) {
+        setActiveCustomFolderName(payload?.folder?.name || nextName)
+      }
+
+      setNotice(`Cartella rinominata: ${payload?.folder?.name || nextName}`)
+      setRenameCustomFolderDialog(null)
+      setRenameCustomFolderDraft('')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore rinomina cartella'
+      setNotice(message)
+    } finally {
+      setRenameCustomFolderSaving(false)
+    }
+  }
+
+  async function deleteCustomFolder(folderId: string, folderName: string) {
+    const confirmed = window.confirm(
+      `Eliminare la cartella "${folderName}"?\n\nLa cartella deve essere vuota.`,
+    )
+
+    if (!confirmed) return
+
+    setCustomFolderDeleting(folderId)
+    setCustomFolderContextMenu(null)
+
+    try {
+      const response = await fetch('/api/admin/ai-os/custom-folders', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ folderId }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore eliminazione cartella')
+      }
+
+      setCustomFolders((current) => current.filter((folder) => folder.id !== folderId))
+
+      if (activeCustomFolderId === folderId) {
+        setActiveCustomFolderId(null)
+        setActiveCustomFolderName('')
+
+        if (activeFolderId) {
+          void loadFilesForFolder(activeFolderId, activeSection, null)
+          void loadCustomFolders(activeFolderId, activeSection, null)
+        }
+      }
+
+      setNotice(`Cartella eliminata: ${folderName}`)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore eliminazione cartella'
+      setNotice(message)
+    } finally {
+      setCustomFolderDeleting('')
     }
   }
 
@@ -4326,6 +4459,7 @@ export default function AIOSDesktop() {
                   key={folder.id}
                   type="button"
                   onClick={() => openCustomFolder(folder)}
+                  onContextMenu={(event) => openCustomFolderContextMenu(event, folder)}
                   className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-3 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12 active:scale-[0.98]"
                 >
                   <span className="mb-2 text-4xl">📁</span>
@@ -5320,6 +5454,7 @@ export default function AIOSDesktop() {
                             key={folder.id}
                             type="button"
                             onClick={() => openCustomFolder(folder)}
+                  onContextMenu={(event) => openCustomFolderContextMenu(event, folder)}
                             className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#8FBCBB]/12 bg-[#202632]/58 p-3 text-center transition hover:border-[#88C0D0]/55 hover:bg-[#88C0D0]/12 active:scale-[0.98]"
                           >
                             <span className="mb-2 text-4xl">📁</span>
@@ -5393,6 +5528,118 @@ export default function AIOSDesktop() {
           ) : null}
         </div>
       </section>
+
+      {customFolderContextMenu ? (
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-[10040] cursor-default bg-transparent"
+            aria-label="Chiudi menu cartella"
+            onClick={() => setCustomFolderContextMenu(null)}
+          />
+
+          <div
+            className="fixed z-[10050] w-[230px] overflow-hidden rounded-2xl border border-[#3C4043] bg-[#111111]/98 p-2 text-[#E8EAED] shadow-2xl shadow-black/70"
+            style={{
+              left: customFolderContextMenu.x,
+              top: customFolderContextMenu.y,
+            }}
+          >
+            <p className="mb-1 truncate px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8FBCBB]/70">
+              {customFolderContextMenu.folderName}
+            </p>
+
+            <button
+              type="button"
+              onClick={() =>
+                openRenameCustomFolderDialog(
+                  customFolderContextMenu.folderId,
+                  customFolderContextMenu.folderName,
+                )
+              }
+              className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold text-[#D8DEE9]/82 transition hover:bg-[#A3BE8C]/12 hover:text-[#A3BE8C]"
+            >
+              <span>✏️</span>
+              <span>Rinomina cartella...</span>
+            </button>
+
+            <button
+              type="button"
+              disabled={customFolderDeleting === customFolderContextMenu.folderId}
+              onClick={() =>
+                deleteCustomFolder(
+                  customFolderContextMenu.folderId,
+                  customFolderContextMenu.folderName,
+                )
+              }
+              className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold text-[#FFCCD2] transition hover:bg-[#BF616A]/14 hover:text-white disabled:cursor-wait disabled:opacity-50"
+            >
+              <span>🗑️</span>
+              <span>
+                {customFolderDeleting === customFolderContextMenu.folderId
+                  ? 'Elimino...'
+                  : 'Elimina cartella'}
+              </span>
+            </button>
+          </div>
+        </>
+      ) : null}
+
+      {renameCustomFolderDialog ? (
+        <div className="fixed inset-0 z-[10090] flex items-center justify-center bg-black/55 p-6 backdrop-blur-sm">
+          <div className="w-full max-w-lg overflow-hidden rounded-[22px] border border-[#3C4043] bg-[#111111] text-[#E8EAED] shadow-2xl shadow-black/80">
+            <div className="border-b border-[#3C4043] px-6 py-5">
+              <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/75">
+                Rinomina cartella
+              </p>
+              <h3 className="mt-2 truncate text-xl font-semibold text-[#E8EAED]">
+                {renameCustomFolderDialog.folderName}
+              </h3>
+            </div>
+
+            <div className="px-6 py-5">
+              <label className="text-sm font-semibold text-[#D8DEE9]/80">
+                Nuovo nome
+                <input
+                  value={renameCustomFolderDraft}
+                  onChange={(event) => setRenameCustomFolderDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault()
+                      void saveRenameCustomFolder()
+                    }
+                  }}
+                  autoFocus
+                  className="mt-2 w-full rounded-xl border border-[#8A8D91]/55 bg-[#1B1B1B] px-4 py-3 text-sm font-semibold text-[#E8EAED] outline-none transition placeholder:text-[#9AA0A6] focus:border-[#AECBFA]"
+                  placeholder="Nome cartella..."
+                />
+              </label>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 border-t border-[#3C4043] px-6 py-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setRenameCustomFolderDialog(null)
+                  setRenameCustomFolderDraft('')
+                }}
+                className="rounded-full px-4 py-2 text-sm font-medium text-[#AECBFA] transition hover:bg-[#1F1F1F]"
+              >
+                Annulla
+              </button>
+
+              <button
+                type="button"
+                disabled={renameCustomFolderSaving || !renameCustomFolderDraft.trim()}
+                onClick={() => void saveRenameCustomFolder()}
+                className="rounded-full bg-[#AECBFA] px-6 py-2 text-sm font-semibold text-[#202124] transition hover:bg-[#C6DAFF] disabled:cursor-not-allowed disabled:opacity-45"
+              >
+                {renameCustomFolderSaving ? 'Salvataggio...' : 'Rinomina'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {customFolderDialogOpen ? (
         <div className="fixed inset-0 z-[10090] flex items-center justify-center bg-black/55 p-6 backdrop-blur-sm">
