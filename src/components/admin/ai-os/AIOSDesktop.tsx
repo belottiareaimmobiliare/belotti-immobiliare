@@ -1004,6 +1004,9 @@ export default function AIOSDesktop() {
   const [driveExplorerSearchQuery, setDriveExplorerSearchQuery] = useState('')
   const [selectedDriveItem, setSelectedDriveItem] = useState<AIOSDriveExplorerItem | null>(null)
   const [driveItemContextMenu, setDriveItemContextMenu] = useState<AIOSDriveItemContextMenu>(null)
+  const [draggedDriveItem, setDraggedDriveItem] = useState<AIOSDriveExplorerItem | null>(null)
+  const [driveDropTargetFolderId, setDriveDropTargetFolderId] = useState<string | null>(null)
+  const [driveMoveBusy, setDriveMoveBusy] = useState(false)
   const [fileMoveUpdating, setFileMoveUpdating] = useState('')
   const [movePicker, setMovePicker] = useState<{ fileId: string; fileName: string } | null>(null)
   const [renameFileDialog, setRenameFileDialog] = useState<{ fileId: string; fileName: string } | null>(null)
@@ -2471,6 +2474,69 @@ export default function AIOSDesktop() {
   function driveItemName(item: AIOSDriveExplorerItem | null) {
     if (!item) return ''
     return item.type === 'folder' ? item.folder.name : item.file.name
+  }
+
+  function driveItemId(item: AIOSDriveExplorerItem | null) {
+    if (!item) return ''
+    return item.type === 'folder' ? item.folder.id : item.file.id
+  }
+
+  function clearDriveDragState() {
+    setDraggedDriveItem(null)
+    setDriveDropTargetFolderId(null)
+  }
+
+  async function moveDriveItemToFolder(item: AIOSDriveExplorerItem, targetFolder: AIOSDriveExplorerFolder) {
+    const sourceItemId = driveItemId(item)
+    const targetFolderId = String(targetFolder.id || '').trim()
+    const currentFolderId = String(driveExplorer?.folder?.id || driveFolder?.drive_folder_id || '').trim()
+
+    if (!sourceItemId || !targetFolderId) return
+
+    if (item.type === 'folder' && item.folder.id === targetFolderId) {
+      setNotice('Non puoi spostare una cartella dentro sé stessa.')
+      clearDriveDragState()
+      return
+    }
+
+    setDriveMoveBusy(true)
+    setNotice(`Sposto “${driveItemName(item)}” in “${targetFolder.name}”...`)
+
+    try {
+      const response = await fetch('/api/admin/ai-os/drive-explorer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'moveItem',
+          folderId: currentFolderId,
+          sourceItemId,
+          targetFolderId,
+        }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore spostamento elemento Drive')
+      }
+
+      setSelectedDriveItem(null)
+      setDriveItemContextMenu(null)
+      clearDriveDragState()
+      setNotice(`Spostato in “${targetFolder.name}”.`)
+
+      if (currentFolderId) {
+        void loadDriveExplorer(currentFolderId)
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore spostamento elemento Drive'
+      setNotice(message)
+    } finally {
+      setDriveMoveBusy(false)
+      clearDriveDragState()
+    }
   }
 
   async function createDriveExplorerSubfolder() {
@@ -4381,7 +4447,11 @@ export default function AIOSDesktop() {
                   onDragOver={(event) => event.preventDefault()}
                   className="min-h-[650px] bg-[#080B11]/72 p-5"
                 >
-                  {driveExplorerUploading ? (
+                  {driveMoveBusy ? (
+                    <div className="mb-4 rounded-2xl border border-[#A3BE8C]/25 bg-[#A3BE8C]/10 p-3 text-xs font-semibold text-[#A3BE8C]">
+                      Spostamento Drive in corso...
+                    </div>
+                  ) : driveExplorerUploading ? (
                     <div className="mb-4 rounded-2xl border border-[#EBCB8B]/25 bg-[#EBCB8B]/10 p-3 text-xs font-semibold text-[#EBCB8B]">
                       Upload in corso...
                     </div>
@@ -4420,13 +4490,37 @@ export default function AIOSDesktop() {
                                   <button
                                     key={folder.id}
                                     type="button"
+                                    draggable
+                                    onDragStart={(event) => {
+                                      event.dataTransfer.effectAllowed = 'move'
+                                      setDraggedDriveItem({ type: 'folder', folder })
+                                      setSelectedDriveItem({ type: 'folder', folder })
+                                    }}
+                                    onDragEnd={clearDriveDragState}
+                                    onDragOver={(event) => {
+                                      if (!draggedDriveItem) return
+                                      if (draggedDriveItem.type === 'folder' && draggedDriveItem.folder.id === folder.id) return
+                                      event.preventDefault()
+                                      event.dataTransfer.dropEffect = 'move'
+                                      setDriveDropTargetFolderId(folder.id)
+                                    }}
+                                    onDragLeave={() => {
+                                      setDriveDropTargetFolderId((current) => current === folder.id ? null : current)
+                                    }}
+                                    onDrop={(event) => {
+                                      event.preventDefault()
+                                      if (!draggedDriveItem) return
+                                      void moveDriveItemToFolder(draggedDriveItem, folder)
+                                    }}
                                     onClick={() => setSelectedDriveItem({ type: 'folder', folder })}
                                     onDoubleClick={() => openDriveExplorerFolder(folder.id)}
                                     onContextMenu={(event) => openDriveItemContextMenu(event, { type: 'folder', folder })}
                                     className={`grid w-full grid-cols-[minmax(0,1fr)_170px_130px] items-center gap-3 px-4 py-3 text-left text-sm font-semibold transition ${
-                                      selectedDriveItem?.type === 'folder' && selectedDriveItem.folder.id === folder.id
-                                        ? 'bg-[#0B5CAD] text-white'
-                                        : 'text-[#ECEFF4] hover:bg-[#1F1F1F]'
+                                      driveDropTargetFolderId === folder.id
+                                        ? 'bg-[#2F3B2F] text-white'
+                                        : selectedDriveItem?.type === 'folder' && selectedDriveItem.folder.id === folder.id
+                                          ? 'bg-[#0B5CAD] text-white'
+                                          : 'text-[#ECEFF4] hover:bg-[#1F1F1F]'
                                     }`}
                                   >
                                     <span className="flex min-w-0 items-center gap-3">
@@ -4447,6 +4541,13 @@ export default function AIOSDesktop() {
                                   <button
                                     key={file.id}
                                     type="button"
+                                    draggable
+                                    onDragStart={(event) => {
+                                      event.dataTransfer.effectAllowed = 'move'
+                                      setDraggedDriveItem({ type: 'file', file })
+                                      setSelectedDriveItem({ type: 'file', file })
+                                    }}
+                                    onDragEnd={clearDriveDragState}
                                     onClick={() => setSelectedDriveItem({ type: 'file', file })}
                                     onDoubleClick={() => file.url && window.open(file.url, '_blank', 'noopener,noreferrer')}
                                     onContextMenu={(event) => openDriveItemContextMenu(event, { type: 'file', file })}
@@ -4481,6 +4582,28 @@ export default function AIOSDesktop() {
                                 <button
                                   key={folder.id}
                                   type="button"
+                                  draggable
+                                  onDragStart={(event) => {
+                                    event.dataTransfer.effectAllowed = 'move'
+                                    setDraggedDriveItem({ type: 'folder', folder })
+                                    setSelectedDriveItem({ type: 'folder', folder })
+                                  }}
+                                  onDragEnd={clearDriveDragState}
+                                  onDragOver={(event) => {
+                                    if (!draggedDriveItem) return
+                                    if (draggedDriveItem.type === 'folder' && draggedDriveItem.folder.id === folder.id) return
+                                    event.preventDefault()
+                                    event.dataTransfer.dropEffect = 'move'
+                                    setDriveDropTargetFolderId(folder.id)
+                                  }}
+                                  onDragLeave={() => {
+                                    setDriveDropTargetFolderId((current) => current === folder.id ? null : current)
+                                  }}
+                                  onDrop={(event) => {
+                                    event.preventDefault()
+                                    if (!draggedDriveItem) return
+                                    void moveDriveItemToFolder(draggedDriveItem, folder)
+                                  }}
                                   onClick={() => setSelectedDriveItem({ type: 'folder', folder })}
                                   onDoubleClick={() => openDriveExplorerFolder(folder.id)}
                                   onContextMenu={(event) => openDriveItemContextMenu(event, { type: 'folder', folder })}
@@ -4488,6 +4611,8 @@ export default function AIOSDesktop() {
                                     selectedDriveItem?.type === 'folder' && selectedDriveItem.folder.id === folder.id
                                       ? 'aios-drive-icon-item-selected'
                                       : ''
+                                  } ${
+                                    driveDropTargetFolderId === folder.id ? 'aios-drive-icon-item-drop-target' : ''
                                   }`}
                                 >
                                   <span className="aios-folder-icon" />
@@ -4506,6 +4631,13 @@ export default function AIOSDesktop() {
                                 <button
                                   key={file.id}
                                   type="button"
+                                  draggable
+                                  onDragStart={(event) => {
+                                    event.dataTransfer.effectAllowed = 'move'
+                                    setDraggedDriveItem({ type: 'file', file })
+                                    setSelectedDriveItem({ type: 'file', file })
+                                  }}
+                                  onDragEnd={clearDriveDragState}
                                   onClick={() => setSelectedDriveItem({ type: 'file', file })}
                                   onDoubleClick={() => file.url && window.open(file.url, '_blank', 'noopener,noreferrer')}
                                   onContextMenu={(event) => openDriveItemContextMenu(event, { type: 'file', file })}
@@ -5911,6 +6043,20 @@ export default function AIOSDesktop() {
               <span>☁</span>
               <span>Apri in Google Drive</span>
             </a>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedDriveItem(driveItemContextMenu.item)
+                setDraggedDriveItem(driveItemContextMenu.item)
+                setDriveItemContextMenu(null)
+                setNotice('Sposta: trascina l’elemento selezionato sopra una cartella.')
+              }}
+              className="aios-drive-menu-row"
+            >
+              <span>↪</span>
+              <span>Sposta in cartella selezionata</span>
+            </button>
 
             <div className="my-2 border-t border-[#3C4043]" />
 

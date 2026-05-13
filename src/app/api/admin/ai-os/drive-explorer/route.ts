@@ -12,6 +12,8 @@ async function callDriveScript(input: {
   fileName?: string
   mimeType?: string
   base64Data?: string
+  sourceItemId?: string
+  targetFolderId?: string
 }) {
   const scriptUrl = process.env.AIOS_DRIVE_APP_SCRIPT_URL
   const token = process.env.AIOS_DRIVE_APP_SCRIPT_TOKEN
@@ -33,6 +35,8 @@ async function callDriveScript(input: {
       fileName: input.fileName,
       mimeType: input.mimeType,
       base64Data: input.base64Data,
+      sourceItemId: input.sourceItemId,
+      targetFolderId: input.targetFolderId,
     }),
   })
 
@@ -127,6 +131,38 @@ export async function POST(request: Request) {
         { error: 'folderId mancante' },
         { status: 400 },
       )
+    }
+
+
+    if (action === 'moveItem') {
+      const sourceItemId = String(body?.sourceItemId ?? '').trim()
+      const targetFolderId = String(body?.targetFolderId ?? '').trim() || folderId
+
+      if (!sourceItemId) {
+        return NextResponse.json(
+          { error: 'sourceItemId mancante' },
+          { status: 400 },
+        )
+      }
+
+      if (!targetFolderId) {
+        return NextResponse.json(
+          { error: 'targetFolderId mancante' },
+          { status: 400 },
+        )
+      }
+
+      const payload = await callDriveScript({
+        action: 'moveItem',
+        folderId,
+        sourceItemId,
+        targetFolderId,
+      })
+
+      return NextResponse.json({
+        ok: true,
+        item: payload.item ?? null,
+      })
     }
 
     if (action === 'createSubfolder') {

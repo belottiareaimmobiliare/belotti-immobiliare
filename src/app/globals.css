@@ -4475,3 +4475,43 @@ body:has(.aios-drive-manager) .aios-drive-manager button[class*="min-h-[118px]"]
 }
 
 /* === AI-OS Drive Like Exact UI END === */
+
+/* === AI-OS Drive Move DnD Polish START === */
+
+/* Disinnesca qualunque residuo oro/giallo sulle tile Drive */
+.aios-drive-clean .aios-drive-icon-item,
+.aios-drive-clean .aios-drive-icon-item:hover,
+.aios-drive-clean .aios-drive-icon-item:focus,
+.aios-drive-clean .aios-drive-icon-item:active {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline-color: transparent !important;
+}
+
+.aios-drive-clean .aios-drive-icon-item-selected,
+.aios-drive-clean .aios-drive-icon-item-selected:hover,
+.aios-drive-clean .aios-drive-icon-item-selected:focus {
+  background: #0b5cad !important;
+  border-color: #0b5cad !important;
+  outline-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Target quando trascini sopra una cartella */
+.aios-drive-clean .aios-drive-icon-item-drop-target,
+.aios-drive-clean .aios-drive-icon-item-drop-target:hover {
+  background: #2b3a2b !important;
+  border-color: rgba(163, 190, 140, 0.80) !important;
+  box-shadow: inset 0 0 0 2px rgba(163, 190, 140, 0.42) !important;
+}
+
+.aios-drive-clean .aios-drive-icon-item[draggable="true"] {
+  user-select: none;
+  -webkit-user-drag: element;
+}
+
+.aios-drive-context-menu .aios-drive-menu-row {
+  cursor: pointer;
+}
+
+/* === AI-OS Drive Move DnD Polish END === */
