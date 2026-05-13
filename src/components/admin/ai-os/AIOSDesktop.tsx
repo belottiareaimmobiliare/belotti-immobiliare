@@ -932,6 +932,7 @@ export default function AIOSDesktop() {
   const [activeSection, setActiveSection] = useState<AIOSSection>('root')
   const [activeCustomFolderId, setActiveCustomFolderId] = useState<string | null>(null)
   const [activeCustomFolderName, setActiveCustomFolderName] = useState('')
+  const [customFolderTrail, setCustomFolderTrail] = useState<AIOSCustomFolder[]>([])
   const [customFolders, setCustomFolders] = useState<AIOSCustomFolder[]>([])
   const [customFoldersLoading, setCustomFoldersLoading] = useState(false)
   const [customFolderDialogOpen, setCustomFolderDialogOpen] = useState(false)
@@ -996,6 +997,8 @@ export default function AIOSDesktop() {
   const [renameFileSaving, setRenameFileSaving] = useState(false)
   const [movePickerTarget, setMovePickerTarget] = useState<AIOSSection | null>(null)
   const [movePickerLocation, setMovePickerLocation] = useState<AIOSSection>('root')
+  const [movePickerFolders, setMovePickerFolders] = useState<AIOSCustomFolder[]>([])
+  const [movePickerFoldersLoading, setMovePickerFoldersLoading] = useState(false)
   const [driveExplorerHistory, setDriveExplorerHistory] = useState<string[]>([])
   const [mediaSyncing, setMediaSyncing] = useState(false)
   const [activeAgencyToolId, setActiveAgencyToolId] = useState<AIOSAgencyToolId | null>(null)
@@ -1256,6 +1259,48 @@ export default function AIOSDesktop() {
     }
   }
 
+
+  async function loadMovePickerFolders(
+    propertyId: string,
+    targetSection: AIOSSection,
+    parentCustomFolderId: string | null = null,
+  ) {
+    if (!propertyId) return
+
+    setMovePickerFolders([])
+    setMovePickerFoldersLoading(true)
+
+    try {
+      const params = new URLSearchParams({
+        propertyId,
+        parentFolderType: targetSection,
+      })
+
+      if (parentCustomFolderId) {
+        params.set('parentCustomFolderId', parentCustomFolderId)
+      }
+
+      const response = await fetch(
+        `/api/admin/ai-os/custom-folders?${params.toString()}`,
+        { cache: 'no-store' },
+      )
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore caricamento sottocartelle spostamento')
+      }
+
+      setMovePickerFolders(Array.isArray(payload?.folders) ? payload.folders : [])
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Errore caricamento sottocartelle spostamento'
+      setNotice(message)
+    } finally {
+      setMovePickerFoldersLoading(false)
+    }
+  }
+
   function openCreateCustomFolderDialog() {
     if (!activeFolderId) {
       setNotice('Seleziona prima una cartella immobile.')
@@ -1454,6 +1499,20 @@ export default function AIOSDesktop() {
     setActiveSection(parentFolderType)
     setActiveCustomFolderId(folder.id)
     setActiveCustomFolderName(folder.name)
+    setCustomFolderTrail((currentTrail) => {
+      const nextFolder: AIOSCustomFolder = {
+        ...folder,
+        parent_folder_type: parentFolderType,
+      }
+
+      const existingIndex = currentTrail.findIndex((item) => item.id === folder.id)
+
+      if (existingIndex >= 0) {
+        return [...currentTrail.slice(0, existingIndex), nextFolder]
+      }
+
+      return [...currentTrail, nextFolder]
+    })
     setSelectedTxtId(null)
     setTxtDraft('')
     setNotice(`Apertura cartella: ${folder.name}`)
@@ -1465,15 +1524,40 @@ export default function AIOSDesktop() {
   function closeCustomFolder() {
     if (!activeFolderId) return
 
-    setActiveCustomFolderId(null)
-    setActiveCustomFolderName('')
+    setContextMenu(null)
+    setCustomFolderContextMenu(null)
     setSelectedTxtId(null)
     setTxtDraft('')
+
+    const previousFolder =
+      customFolderTrail.length > 1 ? customFolderTrail[customFolderTrail.length - 2] : null
+
+    if (previousFolder) {
+      const parentFolderType = (previousFolder.parent_folder_type || activeSection) as AIOSSection
+      const nextTrail = customFolderTrail.slice(0, -1)
+
+      setCustomFolderTrail(nextTrail)
+      setActiveSection(parentFolderType)
+      setActiveCustomFolderId(previousFolder.id)
+      setActiveCustomFolderName(previousFolder.name)
+      setNotice(`Ritorno a ${previousFolder.name}.`)
+
+      void loadFilesForFolder(activeFolderId, parentFolderType, previousFolder.id)
+      void loadCustomFolders(activeFolderId, parentFolderType, previousFolder.id)
+      return
+    }
+
+    setCustomFolderTrail([])
+    setActiveCustomFolderId(null)
+    setActiveCustomFolderName('')
     setNotice(`Ritorno a ${getSectionLabel(activeSection)}.`)
 
     void loadFilesForFolder(activeFolderId, activeSection, null)
     void loadCustomFolders(activeFolderId, activeSection, null)
   }
+
+
+  // AI-OS restore: funzioni operative ripristinate dal backup File Manager PRO.
 
   async function loadPropertyOwners(propertyId: string) {
     if (!propertyId) return
@@ -3200,6 +3284,7 @@ export default function AIOSDesktop() {
     setActiveSection(section)
     setActiveCustomFolderId(null)
     setActiveCustomFolderName('')
+    setCustomFolderTrail([])
     setSelectedTxtId(null)
     setTxtDraft('')
 
@@ -3214,6 +3299,7 @@ export default function AIOSDesktop() {
     setActiveSection('root')
     setActiveCustomFolderId(null)
     setActiveCustomFolderName('')
+    setCustomFolderTrail([])
     setSelectedTxtId(null)
     setTxtDraft('')
 
@@ -4624,7 +4710,7 @@ export default function AIOSDesktop() {
       if (renamedFile && activeFolderId) {
         replaceFileInFolder(activeFolderId, renameFileDialog.fileId, renamedFile)
       } else if (activeFolderId) {
-        void loadFilesForFolder(activeFolderId, activeSection)
+        void loadFilesForFolder(activeFolderId, activeSection, activeCustomFolderId)
       }
 
       if (selectedTxtId === renameFileDialog.fileId) {
@@ -4646,7 +4732,9 @@ export default function AIOSDesktop() {
     setMovePicker({ fileId, fileName })
     setMovePickerTarget(null)
     setMovePickerLocation('root')
+    setMovePickerFolders([])
     setContextMenu(null)
+    setCustomFolderContextMenu(null)
   }
 
   async function moveFileToSection(file: Pick<AIOSFile, 'id'>, targetSection: AIOSSection, targetCustomFolderId: string | null = null) {
@@ -4673,7 +4761,15 @@ export default function AIOSDesktop() {
         throw new Error(payload?.error || 'Errore spostamento file')
       }
 
-      setNotice(`File spostato in ${moveTargetLabel(targetSection)}.`)
+      const targetFolderLabel = targetCustomFolderId
+        ? movePickerFolders.find((folder) => folder.id === targetCustomFolderId)?.name || 'sottocartella'
+        : moveTargetLabel(targetSection)
+
+      setNotice(`File spostato in ${targetFolderLabel}.`)
+      setMovePicker(null)
+      setMovePickerTarget(null)
+      setMovePickerLocation('root')
+      setMovePickerFolders([])
 
       setFolders((currentFolders) =>
         currentFolders.map((folder) => {
@@ -4733,8 +4829,8 @@ export default function AIOSDesktop() {
           isError
             ? 'border-[#BF616A]/45 bg-[#BF616A]/10'
             : selectedTxtId === file.id
-              ? 'border-[#B48EAD]/55 bg-[#B48EAD]/15'
-              : 'border-[#8FBCBB]/10 bg-[#202632]/72 hover:border-[#B48EAD]/35 hover:bg-[#B48EAD]/10'
+              ? 'border-[#8FBCBB]/38 bg-[#111827]/90 shadow-[0_0_28px_rgba(143,188,187,0.08)]'
+              : 'border-[#4C566A]/45 bg-[#0B1018]/78 hover:border-[#8FBCBB]/28 hover:bg-[#111827]/88 hover:shadow-[0_14px_36px_rgba(0,0,0,0.32)]'
         }`}
       >
         {isUploading ? (
@@ -5115,7 +5211,26 @@ export default function AIOSDesktop() {
                     <h2 className="truncate text-sm font-semibold text-white md:text-base">
                       {driveSettingsOpen ? 'Impostazioni Drive' : 'Cartella Immobili'}
                     </h2>
-                    <p className="truncate text-xs text-[#D8DEE9]/55">{notice}</p>
+                    <div className="mt-0.5 flex max-w-[min(720px,70vw)] flex-wrap items-center gap-1 text-[11px] font-semibold text-[#D8DEE9]/55">
+                      <span>AI-OS</span>
+                      {activeFolder ? (
+                        <>
+                          <span className="text-[#6B7280]">/</span>
+                          <span className="truncate">{activeFolder.name}</span>
+                          <span className="text-[#6B7280]">/</span>
+                          <span>{getSectionLabel(activeSection)}</span>
+                          {customFolderTrail.map((folder) => (
+                            <span key={folder.id} className="inline-flex min-w-0 items-center gap-1">
+                              <span className="text-[#6B7280]">/</span>
+                              <span className="max-w-[160px] truncate text-[#ECEFF4]">
+                                {folder.name}
+                              </span>
+                            </span>
+                          ))}
+                        </>
+                      ) : null}
+                    </div>
+                    <p className="mt-0.5 truncate text-xs text-[#D8DEE9]/45">{notice}</p>
                   </div>
                 </div>
 
@@ -5814,6 +5929,7 @@ export default function AIOSDesktop() {
 
                   setMovePickerLocation('root')
                   setMovePickerTarget(null)
+                  setMovePickerFolders([])
                 }}
                 className="mb-3 inline-flex items-center gap-3 rounded-md px-1 py-2 text-sm font-medium text-[#E8EAED] transition hover:bg-[#2A2A2A]"
               >
@@ -5842,7 +5958,7 @@ export default function AIOSDesktop() {
               <div className="max-h-[330px] overflow-y-auto">
                 
                 {/* AI-OS move custom folders */}
-                {customFolders.length > 0 ? (
+                {movePickerLocation !== 'root' ? (
                   <div className="mb-3 rounded-2xl border border-[#4C566A]/55 bg-[#070A10]/72 p-3 shadow-[inset_0_1px_0_rgba(236,239,244,0.035)]">
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <div>
@@ -5850,42 +5966,52 @@ export default function AIOSDesktop() {
                           Sottocartelle disponibili
                         </p>
                         <p className="mt-1 text-xs text-[#D8DEE9]/55">
-                          Sposta direttamente dentro una sottocartella della posizione aperta.
+                          Dentro {moveTargetLabel(movePickerLocation)} puoi scegliere una sottocartella specifica.
                         </p>
                       </div>
                     </div>
 
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      {customFolders.map((folder) => {
-                        const targetSection = (folder.parent_folder_type || activeSection) as AIOSSection
+                    {movePickerFoldersLoading ? (
+                      <div className="rounded-2xl border border-[#4C566A]/45 bg-[#0B1018]/72 p-4 text-sm font-semibold text-[#D8DEE9]/62">
+                        Caricamento sottocartelle...
+                      </div>
+                    ) : movePickerFolders.length > 0 ? (
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {movePickerFolders.map((folder) => {
+                          const targetSection = (folder.parent_folder_type || movePickerLocation) as AIOSSection
 
-                        return (
-                          <button
-                            key={folder.id}
-                            type="button"
-                            disabled={fileMoveUpdating === movePicker.fileId}
-                            onClick={() => {
-                              void moveFileToSection(
-                                { id: movePicker.fileId },
-                                targetSection,
-                                folder.id,
-                              )
-                            }}
-                            className="group flex min-h-[44px] items-center gap-3 rounded-2xl border border-[#4C566A]/55 bg-[#0B1018]/82 px-3 py-2 text-left text-xs font-semibold text-[#E5E9F0] transition hover:border-[#8FBCBB]/35 hover:bg-[#121A26]"
-                          >
-                            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#4C566A]/50 bg-[#111827] text-base shadow-inner">
-                              📁
-                            </span>
-                            <span className="min-w-0">
-                              <span className="block truncate">{folder.name}</span>
-                              <span className="mt-0.5 block text-[10px] font-medium text-[#D8DEE9]/42">
-                                dentro {moveTargetLabel(targetSection)}
+                          return (
+                            <button
+                              key={folder.id}
+                              type="button"
+                              disabled={fileMoveUpdating === movePicker.fileId}
+                              onClick={() => {
+                                void moveFileToSection(
+                                  { id: movePicker.fileId },
+                                  targetSection,
+                                  folder.id,
+                                )
+                              }}
+                              className="group flex min-h-[44px] items-center gap-3 rounded-2xl border border-[#4C566A]/55 bg-[#0B1018]/82 px-3 py-2 text-left text-xs font-semibold text-[#E5E9F0] transition hover:border-[#8FBCBB]/35 hover:bg-[#121A26]"
+                            >
+                              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#4C566A]/50 bg-[#111827] text-base shadow-inner">
+                                📁
                               </span>
-                            </span>
-                          </button>
-                        )
-                      })}
-                    </div>
+                              <span className="min-w-0">
+                                <span className="block truncate">{folder.name}</span>
+                                <span className="mt-0.5 block text-[10px] font-medium text-[#D8DEE9]/42">
+                                  dentro {moveTargetLabel(targetSection)}
+                                </span>
+                              </span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-dashed border-[#4C566A]/55 bg-[#0B1018]/62 p-4 text-center text-sm text-[#D8DEE9]/55">
+                        Nessuna sottocartella in {moveTargetLabel(movePickerLocation)}.
+                      </div>
+                    )}
                   </div>
                 ) : null}
 
@@ -5951,6 +6077,7 @@ export default function AIOSDesktop() {
                               event.stopPropagation()
                               setMovePickerLocation(targetSection)
                               setMovePickerTarget(null)
+                              void loadMovePickerFolders(activeFolderId, targetSection, null)
                             }}
                             className="flex h-8 w-8 items-center justify-center rounded-full text-2xl text-[#E8EAED] transition hover:bg-[#4A4A4A]"
                             title={`Apri ${moveTargetLabel(targetSection)}`}

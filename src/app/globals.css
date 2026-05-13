@@ -3865,3 +3865,67 @@ body:has(.aios-nordic-bg) [class*="text-[#8FBCBB]"] {
 }
 
 /* === AI-OS Black Context And Move Fix END === */
+
+/* === AI-OS File Manager Pro Polish START === */
+
+/* Window shell più nera, con accenti Nord leggeri */
+body:has(.aios-nordic-bg) section[class*="h-[calc(100dvh-142px)]"] {
+  background:
+    linear-gradient(180deg, rgba(17, 24, 36, 0.94), rgba(6, 9, 15, 0.94)) !important;
+  border-color: rgba(76, 86, 106, 0.42) !important;
+  box-shadow:
+    0 28px 110px rgba(0, 0, 0, 0.62),
+    inset 0 1px 0 rgba(236, 239, 244, 0.045) !important;
+}
+
+/* Header finestra più graphite */
+body:has(.aios-nordic-bg) section[class*="h-[calc(100dvh-142px)]"] > div:first-child {
+  background:
+    linear-gradient(180deg, rgba(20, 28, 40, 0.94), rgba(10, 15, 24, 0.92)) !important;
+  border-color: rgba(76, 86, 106, 0.38) !important;
+}
+
+/* Sidebar e pannelli laterali meno blu */
+body:has(.aios-nordic-bg) aside[class*="bg-[#1F2530]"],
+body:has(.aios-nordic-bg) aside[class*="bg-[#151A23]"] {
+  background:
+    linear-gradient(180deg, rgba(12, 18, 28, 0.84), rgba(7, 10, 16, 0.88)) !important;
+  border-color: rgba(76, 86, 106, 0.34) !important;
+}
+
+/* Card file più da file manager */
+body:has(.aios-nordic-bg) [role="button"][class*="cursor-pointer"][class*="rounded-2xl"] {
+  background:
+    linear-gradient(180deg, rgba(17, 24, 36, 0.78), rgba(7, 10, 16, 0.82)) !important;
+  border-color: rgba(76, 86, 106, 0.48) !important;
+}
+
+body:has(.aios-nordic-bg) [role="button"][class*="cursor-pointer"][class*="rounded-2xl"]:hover {
+  background:
+    linear-gradient(180deg, rgba(21, 31, 44, 0.92), rgba(10, 15, 24, 0.94)) !important;
+  border-color: rgba(143, 188, 187, 0.34) !important;
+  box-shadow:
+    0 16px 42px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(236, 239, 244, 0.035) !important;
+}
+
+/* Breadcrumb leggibile e premium */
+body:has(.aios-nordic-bg) section[class*="h-[calc(100dvh-142px)]"] h2 + div {
+  color: rgba(216, 222, 233, 0.58) !important;
+}
+
+body:has(.aios-nordic-bg) section[class*="h-[calc(100dvh-142px)]"] h2 + div span {
+  line-height: 1.25rem;
+}
+
+/* Popup sposta più vicino a un file manager */
+body:has(.aios-nordic-bg) .fixed.z-\[10080\] > div {
+  background:
+    linear-gradient(180deg, rgba(13, 18, 27, 0.985), rgba(5, 7, 12, 0.985)) !important;
+  border-color: rgba(76, 86, 106, 0.62) !important;
+  box-shadow:
+    0 30px 120px rgba(0, 0, 0, 0.72),
+    inset 0 1px 0 rgba(236, 239, 244, 0.045) !important;
+}
+
+/* === AI-OS File Manager Pro Polish END === */
