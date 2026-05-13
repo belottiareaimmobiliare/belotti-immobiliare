@@ -4105,7 +4105,7 @@ export default function AIOSDesktop() {
               )}
             </div>
 
-            <div className="rounded-2xl border border-[#B48EAD]/15 bg-[#242B38]/76 p-4">
+            <div className={`${String(activeAgencyToolId) === "drive" ? "hidden" : ""} rounded-2xl border border-[#B48EAD]/15 bg-[#242B38]/76 p-4`}>
               <p className="text-sm font-semibold text-white">Dove caricare i file</p>
               <p className="mt-2 text-xs leading-5 text-[#D8DEE9]/60">
                 I PDF o le immagini dei documenti possono essere caricati nella sotto-cartella “Docs e planimetrie”.
@@ -4121,7 +4121,7 @@ export default function AIOSDesktop() {
             </div>
           </div>
         ) : activeAgencyTool.id === 'drive' ? (
-          <div className="aios-drive-manager space-y-4">
+          <div className="aios-drive-manager aios-drive-clean">
             <div className="overflow-hidden rounded-[28px] border border-[#3B4252]/70 bg-[#070A10]/94 shadow-[0_28px_120px_rgba(0,0,0,0.72),inset_0_1px_0_rgba(236,239,244,0.045)]">
               <div className="border-b border-[#3B4252]/70 bg-[#0B1018]/96 px-4 py-3">
                 <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
@@ -4137,16 +4137,12 @@ export default function AIOSDesktop() {
                       {driveExplorer?.folder?.name ? (
                         <>
                           <span className="text-[#4C566A]">›</span>
-                          <span className="max-w-[360px] truncate text-[#A3BE8C]">
+                          <span className="max-w-[420px] truncate text-[#A3BE8C]">
                             {driveExplorer.folder.name}
                           </span>
                         </>
                       ) : null}
                     </div>
-
-                    <p className="mt-2 text-xs leading-5 text-[#D8DEE9]/52">
-                      File manager Drive-first: cartelle e file reali su Google Drive, con shell AI-OS in tema Nord Aurora.
-                    </p>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
@@ -4283,105 +4279,47 @@ export default function AIOSDesktop() {
                   </div>
                 </div>
               ) : driveFolder?.drive_folder_id ? (
-                <div className="grid min-h-[620px] gap-0 xl:grid-cols-[minmax(0,1fr)_330px]">
-                  <div
-                    onDrop={(event) => {
-                      event.preventDefault()
-                      void uploadFilesToDriveExplorerFolder(
-                        driveExplorer?.folder?.id || driveFolder.drive_folder_id,
-                        Array.from(event.dataTransfer.files),
-                      )
-                    }}
-                    onDragOver={(event) => event.preventDefault()}
-                    className="min-w-0 border-r border-[#3B4252]/55 bg-[#080B11]/72 p-4"
-                  >
-                    {driveExplorerUploading ? (
-                      <div className="mb-4 rounded-2xl border border-[#EBCB8B]/25 bg-[#EBCB8B]/10 p-3 text-xs font-semibold text-[#EBCB8B]">
-                        Upload in corso...
-                      </div>
-                    ) : driveExplorerUploadMessage ? (
-                      <div className="mb-4 rounded-2xl border border-[#4C566A]/55 bg-[#0B1018]/82 p-3 text-xs leading-5 text-[#D8DEE9]/60">
-                        {driveExplorerUploadMessage}
-                      </div>
-                    ) : null}
+                <div
+                  onDrop={(event) => {
+                    event.preventDefault()
+                    void uploadFilesToDriveExplorerFolder(
+                      driveExplorer?.folder?.id || driveFolder.drive_folder_id,
+                      Array.from(event.dataTransfer.files),
+                    )
+                  }}
+                  onDragOver={(event) => event.preventDefault()}
+                  className="min-h-[650px] bg-[#080B11]/72 p-5"
+                >
+                  {driveExplorerUploading ? (
+                    <div className="mb-4 rounded-2xl border border-[#EBCB8B]/25 bg-[#EBCB8B]/10 p-3 text-xs font-semibold text-[#EBCB8B]">
+                      Upload in corso...
+                    </div>
+                  ) : driveExplorerUploadMessage ? (
+                    <div className="mb-4 rounded-2xl border border-[#4C566A]/55 bg-[#0B1018]/82 p-3 text-xs leading-5 text-[#D8DEE9]/60">
+                      {driveExplorerUploadMessage}
+                    </div>
+                  ) : null}
 
-                    {driveExplorerLoading ? (
-                      <div className="rounded-3xl border border-[#3B4252]/70 bg-[#0B1018]/82 p-6 text-sm font-semibold text-[#D8DEE9]/62">
-                        Lettura Drive immobile...
-                      </div>
-                    ) : driveExplorerError ? (
-                      <div className="rounded-3xl border border-[#BF616A]/25 bg-[#BF616A]/10 p-6 text-sm font-semibold text-[#FFCCD2]">
-                        {driveExplorerError}
-                      </div>
-                    ) : (
-                      <div className="min-h-[560px] rounded-[24px] border border-dashed border-[#3B4252]/65 bg-[#05070B]/48 p-4">
-                        {driveExplorer?.folders?.length || driveExplorer?.files?.length ? (
-                          driveExplorerViewMode === 'list' ? (
-                            <div className="overflow-hidden rounded-2xl border border-[#3B4252]/70 bg-[#0B1018]/70">
-                              <div className="grid grid-cols-[minmax(0,1fr)_170px_130px] border-b border-[#3B4252]/70 bg-[#0F1621]/90 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-[#D8DEE9]/52">
-                                <span>Nome</span>
-                                <span>Tipo</span>
-                                <span className="text-right">Dimensione</span>
-                              </div>
-
-                              <div className="divide-y divide-[#3B4252]/55">
-                                {(driveExplorer?.folders ?? [])
-                                  .filter((folder) =>
-                                    !driveExplorerSearchQuery.trim() ||
-                                    folder.name.toLowerCase().includes(driveExplorerSearchQuery.trim().toLowerCase())
-                                  )
-                                  .map((folder) => (
-                                    <button
-                                      key={folder.id}
-                                      type="button"
-                                      onClick={() => openDriveExplorerFolder(folder.id)}
-                                      className="grid w-full grid-cols-[minmax(0,1fr)_170px_130px] items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-[#ECEFF4] transition hover:bg-[#151F2E]"
-                                    >
-                                      <span className="flex min-w-0 items-center gap-3">
-                                        <span className="text-xl">📁</span>
-                                        <span className="truncate">{folder.name}</span>
-                                      </span>
-                                      <span className="text-[#D8DEE9]/52">Cartella</span>
-                                      <span className="text-right text-[#D8DEE9]/42">—</span>
-                                    </button>
-                                  ))}
-
-                                {(driveExplorer?.files ?? [])
-                                  .filter((file) =>
-                                    !driveExplorerSearchQuery.trim() ||
-                                    file.name.toLowerCase().includes(driveExplorerSearchQuery.trim().toLowerCase())
-                                  )
-                                  .map((file) => (
-                                    <button
-                                      key={file.id}
-                                      type="button"
-                                      onClick={() => setDriveExplorerPreviewFile(file)}
-                                      className="grid w-full grid-cols-[minmax(0,1fr)_170px_130px] items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-[#ECEFF4] transition hover:bg-[#151F2E]"
-                                    >
-                                      <span className="flex min-w-0 items-center gap-3">
-                                        <span className="text-xl">
-                                          {file.mimeType?.startsWith('video/')
-                                            ? '🎥'
-                                            : file.mimeType?.startsWith('image/')
-                                              ? '🖼️'
-                                              : file.mimeType === 'application/pdf'
-                                                ? '📕'
-                                                : '📄'}
-                                        </span>
-                                        <span className="truncate">{file.name}</span>
-                                      </span>
-                                      <span className="truncate text-[#D8DEE9]/52">
-                                        {file.mimeType || 'File'}
-                                      </span>
-                                      <span className="text-right text-[#D8DEE9]/42">
-                                        {file.size ? formatFileSize(Number(file.size)) : '—'}
-                                      </span>
-                                    </button>
-                                  ))}
-                              </div>
+                  {driveExplorerLoading ? (
+                    <div className="rounded-3xl border border-[#3B4252]/70 bg-[#0B1018]/82 p-6 text-sm font-semibold text-[#D8DEE9]/62">
+                      Lettura Drive immobile...
+                    </div>
+                  ) : driveExplorerError ? (
+                    <div className="rounded-3xl border border-[#BF616A]/25 bg-[#BF616A]/10 p-6 text-sm font-semibold text-[#FFCCD2]">
+                      {driveExplorerError}
+                    </div>
+                  ) : (
+                    <div className="aios-drive-file-space min-h-[590px] rounded-[24px] border border-dashed border-[#3B4252]/50 bg-[#05070B]/34 p-6">
+                      {driveExplorer?.folders?.length || driveExplorer?.files?.length ? (
+                        driveExplorerViewMode === 'list' ? (
+                          <div className="overflow-hidden rounded-2xl border border-[#3B4252]/70 bg-[#0B1018]/70">
+                            <div className="grid grid-cols-[minmax(0,1fr)_170px_130px] border-b border-[#3B4252]/70 bg-[#0F1621]/90 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-[#D8DEE9]/52">
+                              <span>Nome</span>
+                              <span>Tipo</span>
+                              <span className="text-right">Dimensione</span>
                             </div>
-                          ) : (
-                            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+
+                            <div className="divide-y divide-[#3B4252]/55">
                               {(driveExplorer?.folders ?? [])
                                 .filter((folder) =>
                                   !driveExplorerSearchQuery.trim() ||
@@ -4392,14 +4330,14 @@ export default function AIOSDesktop() {
                                     key={folder.id}
                                     type="button"
                                     onClick={() => openDriveExplorerFolder(folder.id)}
-                                    className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#3B4252]/75 bg-[#0B1018]/82 p-3 text-center shadow-[inset_0_1px_0_rgba(236,239,244,0.035)] transition hover:border-[#8FBCBB]/38 hover:bg-[#111827]"
+                                    className="grid w-full grid-cols-[minmax(0,1fr)_170px_130px] items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-[#ECEFF4] transition hover:bg-[#151F2E]"
                                   >
-                                    <span className="mb-3 text-4xl drop-shadow-[0_0_18px_rgba(143,188,187,0.14)]">
-                                      📁
+                                    <span className="flex min-w-0 items-center gap-3">
+                                      <span className="aios-folder-icon-mini" />
+                                      <span className="truncate">{folder.name}</span>
                                     </span>
-                                    <span className="line-clamp-2 text-sm font-semibold text-[#ECEFF4]">
-                                      {folder.name}
-                                    </span>
+                                    <span className="text-[#D8DEE9]/52">Cartella</span>
+                                    <span className="text-right text-[#D8DEE9]/42">—</span>
                                   </button>
                                 ))}
 
@@ -4409,110 +4347,82 @@ export default function AIOSDesktop() {
                                   file.name.toLowerCase().includes(driveExplorerSearchQuery.trim().toLowerCase())
                                 )
                                 .map((file) => (
-                                  <button
+                                  <a
                                     key={file.id}
-                                    type="button"
-                                    onClick={() => setDriveExplorerPreviewFile(file)}
-                                    className="group flex min-h-[118px] flex-col items-center justify-center rounded-2xl border border-[#3B4252]/75 bg-[#0B1018]/82 p-3 text-center shadow-[inset_0_1px_0_rgba(236,239,244,0.035)] transition hover:border-[#B48EAD]/38 hover:bg-[#111827]"
+                                    href={file.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="grid w-full grid-cols-[minmax(0,1fr)_170px_130px] items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-[#ECEFF4] transition hover:bg-[#151F2E]"
                                   >
-                                    <span className="mb-3 text-4xl">
-                                      {file.mimeType?.startsWith('video/')
-                                        ? '🎥'
-                                        : file.mimeType?.startsWith('image/')
-                                          ? '🖼️'
-                                          : file.mimeType === 'application/pdf'
-                                            ? '📕'
-                                            : '📄'}
+                                    <span className="flex min-w-0 items-center gap-3">
+                                      <span className="aios-file-icon-mini" />
+                                      <span className="truncate">{file.name}</span>
                                     </span>
-                                    <span className="line-clamp-2 text-sm font-semibold text-[#ECEFF4]">
-                                      {file.name}
+                                    <span className="truncate text-[#D8DEE9]/52">
+                                      {file.mimeType || 'File'}
                                     </span>
-                                    <span className="mt-1 text-xs text-[#D8DEE9]/45">
+                                    <span className="text-right text-[#D8DEE9]/42">
                                       {file.size ? formatFileSize(Number(file.size)) : '—'}
                                     </span>
-                                  </button>
+                                  </a>
                                 ))}
                             </div>
-                          )
-                        ) : (
-                          <div className="flex min-h-[520px] items-center justify-center text-center">
-                            <div>
-                              <p className="text-6xl drop-shadow-[0_0_24px_rgba(143,188,187,0.10)]">📂</p>
-                              <p className="mt-4 text-sm font-bold text-[#ECEFF4]">Cartella vuota</p>
-                              <p className="mt-1 text-xs text-[#D8DEE9]/50">
-                                Trascina qui file, crea una cartella o apri Google Drive.
-                              </p>
-                            </div>
                           </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                        ) : (
+                          <div className="aios-drive-icon-grid">
+                            {(driveExplorer?.folders ?? [])
+                              .filter((folder) =>
+                                !driveExplorerSearchQuery.trim() ||
+                                folder.name.toLowerCase().includes(driveExplorerSearchQuery.trim().toLowerCase())
+                              )
+                              .map((folder) => (
+                                <button
+                                  key={folder.id}
+                                  type="button"
+                                  onClick={() => openDriveExplorerFolder(folder.id)}
+                                  className="aios-drive-icon-item"
+                                >
+                                  <span className="aios-folder-icon" />
+                                  <span className="aios-drive-icon-label">
+                                    {folder.name}
+                                  </span>
+                                </button>
+                              ))}
 
-                  <aside className="bg-[#080B11]/86 p-4">
-                    <div className="mb-4 flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-xs uppercase tracking-[0.24em] text-[#8FBCBB]/70">
-                          Anteprima
-                        </p>
-                        <h5 className="mt-1 line-clamp-1 text-sm font-semibold text-white">
-                          {driveExplorerPreviewFile?.name || 'Nessun file selezionato'}
-                        </h5>
-                      </div>
-
-                      {driveExplorerPreviewFile ? (
-                        <button
-                          type="button"
-                          onClick={() => setDriveExplorerPreviewFile(null)}
-                          className="rounded-full border border-[#BF616A]/25 bg-[#BF616A]/10 px-3 py-1 text-xs font-semibold text-[#FFCCD2] transition hover:bg-[#BF616A]/20"
-                        >
-                          Chiudi
-                        </button>
-                      ) : null}
-                    </div>
-
-                    {driveExplorerPreviewFile ? (
-                      <div className="space-y-3">
-                        <div className="overflow-hidden rounded-2xl border border-[#3B4252]/70 bg-black/30">
-                          <iframe
-                            title={driveExplorerPreviewFile.name}
-                            src={driveFilePreviewUrl(driveExplorerPreviewFile)}
-                            className="h-[340px] w-full bg-[#0B1018]"
-                            allow="autoplay"
-                          />
+                            {(driveExplorer?.files ?? [])
+                              .filter((file) =>
+                                !driveExplorerSearchQuery.trim() ||
+                                file.name.toLowerCase().includes(driveExplorerSearchQuery.trim().toLowerCase())
+                              )
+                              .map((file) => (
+                                <a
+                                  key={file.id}
+                                  href={file.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="aios-drive-icon-item"
+                                >
+                                  <span className="aios-file-icon" />
+                                  <span className="aios-drive-icon-label">
+                                    {file.name}
+                                  </span>
+                                </a>
+                              ))}
+                          </div>
+                        )
+                      ) : (
+                        <div className="flex min-h-[520px] items-center justify-center text-center">
+                          <div>
+                            <span className="aios-folder-icon aios-folder-icon-empty mx-auto" />
+                            <p className="mt-5 text-sm font-bold text-[#ECEFF4]">Cartella vuota</p>
+                            <p className="mt-1 text-xs text-[#D8DEE9]/50">
+                              Trascina qui file, crea una cartella o apri Google Drive.
+                            </p>
+                          </div>
                         </div>
-
-                        <a
-                          href={driveExplorerPreviewFile.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex rounded-full border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-4 py-2 text-xs font-semibold text-[#88C0D0] transition hover:bg-[#88C0D0]/18"
-                        >
-                          Apri file in Drive
-                        </a>
-                      </div>
-                    ) : (
-                      <div className="flex min-h-[340px] items-center justify-center rounded-2xl border border-dashed border-[#3B4252]/70 bg-[#0B1018]/62 text-center">
-                        <div>
-                          <p className="text-5xl">👁️</p>
-                          <p className="mt-3 text-sm font-semibold text-white">Seleziona un file</p>
-                          <p className="mt-1 text-xs text-[#D8DEE9]/45">
-                            L’anteprima resta dentro AI-OS quando Drive lo permette.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="mt-4 rounded-2xl border border-[#3B4252]/70 bg-[#0B1018]/68 p-4 text-xs leading-5 text-[#D8DEE9]/55">
-                      <p className="font-bold uppercase tracking-[0.16em] text-[#A3BE8C]/80">
-                        Drive-first
-                      </p>
-                      <p className="mt-2">
-                        I file sono salvati in Google Drive. AI-OS gestisce interfaccia,
-                        permessi, stati immobile, checklist e collegamenti operativi.
-                      </p>
+                      )}
                     </div>
-                  </aside>
+                  )}
                 </div>
               ) : (
                 <div className="p-6">
