@@ -1007,6 +1007,7 @@ export default function AIOSDesktop() {
   const [draggedDriveItem, setDraggedDriveItem] = useState<AIOSDriveExplorerItem | null>(null)
   const [driveDropTargetFolderId, setDriveDropTargetFolderId] = useState<string | null>(null)
   const [driveMoveBusy, setDriveMoveBusy] = useState(false)
+  const [drivePhotoSyncing, setDrivePhotoSyncing] = useState(false)
   const [fileMoveUpdating, setFileMoveUpdating] = useState('')
   const [movePicker, setMovePicker] = useState<{ fileId: string; fileName: string } | null>(null)
   const [renameFileDialog, setRenameFileDialog] = useState<{ fileId: string; fileName: string } | null>(null)
@@ -2541,6 +2542,49 @@ export default function AIOSDesktop() {
     } finally {
       setDriveMoveBusy(false)
       clearDriveDragState()
+    }
+  }
+
+  async function syncDrivePhotosToPublicGallery() {
+    if (!activeFolderId) {
+      setNotice('Seleziona prima una cartella immobile.')
+      return
+    }
+
+    setDrivePhotoSyncing(true)
+    setNotice('Sincronizzazione foto Drive verso galleria pubblica...')
+
+    try {
+      const response = await fetch('/api/admin/ai-os/sync-drive-media', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          propertyId: activeFolderId,
+        }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore sincronizzazione foto Drive')
+      }
+
+      const imported = Number(payload?.imported ?? 0)
+      const skipped = Number(payload?.skipped ?? 0)
+      const found = Number(payload?.driveImagesFound ?? 0)
+
+      setNotice(
+        imported > 0
+          ? `Galleria aggiornata: ${imported} foto importate da Drive. Totale trovate: ${found}.`
+          : `Galleria già allineata: ${skipped} foto già presenti. Totale trovate: ${found}.`,
+      )
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore sincronizzazione foto Drive'
+      setNotice(message)
+    } finally {
+      setDrivePhotoSyncing(false)
     }
   }
 
@@ -4359,6 +4403,15 @@ export default function AIOSDesktop() {
                       className="rounded-full border border-[#4C566A]/70 bg-[#111827] px-4 py-2 text-xs font-bold text-[#D8DEE9] transition hover:border-[#B48EAD]/45 hover:bg-[#151F2E]"
                     >
                       Aggiorna
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={drivePhotoSyncing}
+                      onClick={() => void syncDrivePhotosToPublicGallery()}
+                      className="rounded-full border border-[#A3BE8C]/40 bg-[#A3BE8C]/10 px-4 py-2 text-xs font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/18 disabled:cursor-wait disabled:opacity-50"
+                    >
+                      {drivePhotoSyncing ? 'Sincronizzo...' : 'Sincronizza galleria'}
                     </button>
 
                     {driveExplorer?.folder?.url ? (
