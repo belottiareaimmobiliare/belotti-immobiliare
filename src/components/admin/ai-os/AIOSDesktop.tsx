@@ -2574,15 +2574,17 @@ export default function AIOSDesktop() {
       }
 
       const imported = Number(payload?.imported ?? 0)
+      const importedImages = Number(payload?.importedImages ?? 0)
+      const importedPlans = Number(payload?.importedPlans ?? 0)
       const skipped = Number(payload?.skipped ?? 0)
+      const photoFound = Number(payload?.photoImagesFound ?? 0)
+      const planFound = Number(payload?.planImagesFound ?? 0)
       const found = Number(payload?.driveImagesFound ?? 0)
-
-      const sourceName = String(payload?.sourceFolder?.name || 'cartella foto')
 
       setNotice(
         imported > 0
-          ? `Galleria aggiornata: ${imported} foto importate da “${sourceName}”. Totale trovate: ${found}.`
-          : `Galleria già allineata: ${skipped} foto già presenti in “${sourceName}”. Totale trovate: ${found}.`,
+          ? `Scheda immobile aggiornata: ${importedImages} foto e ${importedPlans} planimetrie importate da Drive. Totale media trovati: ${found}.`
+          : `Scheda già allineata: ${skipped} media già presenti. Foto trovate: ${photoFound}, planimetrie trovate: ${planFound}.`,
       )
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Errore sincronizzazione foto Drive'
@@ -4415,7 +4417,7 @@ export default function AIOSDesktop() {
                       onClick={() => void syncDrivePhotosToPublicGallery()}
                       className="rounded-full border border-[#A3BE8C]/40 bg-[#A3BE8C]/10 px-4 py-2 text-xs font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/18 disabled:cursor-wait disabled:opacity-50"
                     >
-                      {drivePhotoSyncing ? 'Sincronizzo...' : 'Sincronizza galleria'}
+                      {drivePhotoSyncing ? 'Sincronizzo...' : 'Sincronizza media'}
                     </button>
 
                     {driveExplorer?.folder?.url ? (

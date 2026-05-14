@@ -18,6 +18,10 @@ type DriveFile = {
   updatedAt?: string
 }
 
+type SourceFolder = DriveFolder & {
+  sourceType: 'image' | 'plan'
+}
+
 async function callDriveScript(input: {
   action: string
   folderId?: string
@@ -98,22 +102,18 @@ function isPhotoSourceFolderName(value: unknown) {
   )
 }
 
-function sortPhotoSourceFolders(folders: DriveFolder[]) {
-  return [...folders].sort((a, b) => {
-    const aName = normalizeDriveName(a.name)
-    const bName = normalizeDriveName(b.name)
+function isPlanSourceFolderName(value: unknown) {
+  const name = normalizeDriveName(value)
 
-    const score = (name: string) => {
-      if (name === 'foto') return 0
-      if (name === 'foto e video originali') return 1
-      if (name.includes('foto')) return 2
-      if (name === 'immagini') return 3
-      if (name.includes('immagini')) return 4
-      return 99
-    }
+  if (!name) return false
 
-    return score(aName) - score(bName) || aName.localeCompare(bName)
-  })
+  return (
+    name === 'planimetria' ||
+    name === 'planimetrie' ||
+    name.includes('planimetria') ||
+    name.includes('planimetrie') ||
+    name.includes('documenti e planimetrie')
+  )
 }
 
 function isImageDriveFile(file: DriveFile) {
@@ -130,31 +130,47 @@ function drivePublicImageUrl(fileId: string) {
   return `/api/public/drive-image?fileId=${encodeURIComponent(fileId)}`
 }
 
-async function collectImageFilesFromDriveFolder(folderId: string, depth = 1) {
+async function collectImageFilesFromDriveFolder(folderId: string, depth = 2) {
   const content = await listDriveFolder(folderId)
   const files = content.files.filter(isImageDriveFile)
 
   if (depth <= 0) {
-    return {
-      sourceFolder: content.folder,
-      files,
-    }
+    return files
   }
 
   for (const childFolder of content.folders) {
-    const child = await collectImageFilesFromDriveFolder(childFolder.id, depth - 1)
-    files.push(...child.files)
+    const childFiles = await collectImageFilesFromDriveFolder(childFolder.id, depth - 1)
+    files.push(...childFiles)
   }
 
   const uniqueById = new Map<string, DriveFile>()
+
   for (const file of files) {
-    if (file.id) uniqueById.set(file.id, file)
+    if (file.id) {
+      uniqueById.set(file.id, file)
+    }
   }
 
-  return {
-    sourceFolder: content.folder,
-    files: Array.from(uniqueById.values()),
+  return Array.from(uniqueById.values())
+}
+
+function addUniqueSourceFolder(
+  folders: SourceFolder[],
+  folder: DriveFolder | null | undefined,
+  sourceType: 'image' | 'plan',
+) {
+  if (!folder?.id) return
+
+  const key = `${sourceType}:${folder.id}`
+
+  if (folders.some((item) => `${item.sourceType}:${item.id}` === key)) {
+    return
   }
+
+  folders.push({
+    ...folder,
+    sourceType,
+  })
 }
 
 export async function POST(request: Request) {
@@ -199,42 +215,79 @@ export async function POST(request: Request) {
     }
 
     const root = await listDriveFolder(rootFolderId)
+    const sourceFolders: SourceFolder[] = []
 
-    let sourceFolder: DriveFolder | null = null
+    if (requestedSourceFolderId && requestedSourceFolderId !== rootFolderId) {
+      if (isPhotoSourceFolderName(requestedSourceFolderName)) {
+        addUniqueSourceFolder(
+          sourceFolders,
+          {
+            id: requestedSourceFolderId,
+            name: requestedSourceFolderName || 'Cartella immagini corrente',
+            url: '',
+          },
+          'image',
+        )
+      }
 
-    if (
-      requestedSourceFolderId &&
-      requestedSourceFolderId !== rootFolderId &&
-      isPhotoSourceFolderName(requestedSourceFolderName)
-    ) {
-      sourceFolder = {
-        id: requestedSourceFolderId,
-        name: requestedSourceFolderName || 'Cartella immagini corrente',
-        url: '',
+      if (isPlanSourceFolderName(requestedSourceFolderName)) {
+        addUniqueSourceFolder(
+          sourceFolders,
+          {
+            id: requestedSourceFolderId,
+            name: requestedSourceFolderName || 'Cartella planimetrie corrente',
+            url: '',
+          },
+          'plan',
+        )
       }
     }
 
-    if (!sourceFolder) {
-      const candidateFolders = sortPhotoSourceFolders(
-        root.folders.filter((folder) => isPhotoSourceFolderName(folder.name)),
-      )
+    for (const folder of root.folders) {
+      if (isPhotoSourceFolderName(folder.name)) {
+        addUniqueSourceFolder(sourceFolders, folder, 'image')
+      }
 
-      sourceFolder = candidateFolders[0] ?? null
+      if (isPlanSourceFolderName(folder.name)) {
+        addUniqueSourceFolder(sourceFolders, folder, 'plan')
+      }
     }
 
-    if (!sourceFolder?.id) {
+    if (sourceFolders.length === 0) {
       return NextResponse.json(
         {
           error:
-            'Nessuna cartella foto trovata. Crea o usa una cartella chiamata “01 Foto e video originali”, “Foto” o “Immagini”.',
+            'Nessuna cartella media trovata. Crea o usa “01 Foto e video originali”, “immagini” o “documenti e planimetrie / Planimetria”.',
           availableFolders: root.folders.map((folder) => folder.name),
         },
         { status: 404 },
       )
     }
 
-    const collected = await collectImageFilesFromDriveFolder(sourceFolder.id, 2)
-    const imageFiles = collected.files
+    const imageFilesById = new Map<string, DriveFile>()
+    const planFilesById = new Map<string, DriveFile>()
+    const usedSourceFolders: SourceFolder[] = []
+
+    for (const sourceFolder of sourceFolders) {
+      const files = await collectImageFilesFromDriveFolder(sourceFolder.id, 2)
+
+      if (files.length > 0) {
+        usedSourceFolders.push(sourceFolder)
+      }
+
+      for (const file of files) {
+        if (!file.id) continue
+
+        if (sourceFolder.sourceType === 'plan') {
+          planFilesById.set(file.id, file)
+        } else {
+          imageFilesById.set(file.id, file)
+        }
+      }
+    }
+
+    const imageFiles = Array.from(imageFilesById.values())
+    const planFiles = Array.from(planFilesById.values())
 
     const { data: existingMedia, error: existingMediaError } = await supabase
       .from('property_media')
@@ -260,7 +313,9 @@ export async function POST(request: Request) {
       return Number.isFinite(sortOrder) && sortOrder > max ? sortOrder : max
     }, -1)
 
-    const rowsToInsert = imageFiles
+    let nextSortOrder = maxSortOrder + 1
+
+    const imageRows = imageFiles
       .map((file) => ({
         file,
         fileUrl: drivePublicImageUrl(file.id),
@@ -271,9 +326,28 @@ export async function POST(request: Request) {
         media_type: 'image',
         file_url: item.fileUrl,
         label: item.file.name || null,
-        sort_order: maxSortOrder + 1 + index,
+        sort_order: nextSortOrder + index,
         is_cover: !hasCover && index === 0,
       }))
+
+    nextSortOrder += imageRows.length
+
+    const planRows = planFiles
+      .map((file) => ({
+        file,
+        fileUrl: drivePublicImageUrl(file.id),
+      }))
+      .filter((item) => !existingUrls.has(item.fileUrl))
+      .map((item, index) => ({
+        property_id: propertyId,
+        media_type: 'plan',
+        file_url: item.fileUrl,
+        label: item.file.name || 'Planimetria',
+        sort_order: nextSortOrder + index,
+        is_cover: false,
+      }))
+
+    const rowsToInsert = [...imageRows, ...planRows]
 
     if (rowsToInsert.length > 0) {
       const { error: insertError } = await supabase
@@ -282,7 +356,7 @@ export async function POST(request: Request) {
 
       if (insertError) {
         return NextResponse.json(
-          { error: insertError.message || 'Errore inserimento immagini in galleria' },
+          { error: insertError.message || 'Errore inserimento media in scheda immobile' },
           { status: 500 },
         )
       }
@@ -293,18 +367,25 @@ export async function POST(request: Request) {
         .eq('id', propertyId)
     }
 
+    const found = imageFiles.length + planFiles.length
+    const imported = rowsToInsert.length
+
     return NextResponse.json({
       ok: true,
       propertyId,
-      sourceFolder,
-      driveImagesFound: imageFiles.length,
-      imported: rowsToInsert.length,
-      skipped: imageFiles.length - rowsToInsert.length,
+      sourceFolders: usedSourceFolders,
+      photoImagesFound: imageFiles.length,
+      planImagesFound: planFiles.length,
+      driveImagesFound: found,
+      imported,
+      importedImages: imageRows.length,
+      importedPlans: planRows.length,
+      skipped: found - imported,
       availableRootFolders: root.folders.map((folder) => folder.name),
     })
   } catch (error) {
     return NextResponse.json(
-      { error: jsonError(error, 'Errore sincronizzazione foto Drive verso galleria') },
+      { error: jsonError(error, 'Errore sincronizzazione media Drive verso scheda immobile') },
       { status: 500 },
     )
   }
