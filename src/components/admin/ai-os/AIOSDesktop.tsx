@@ -2417,6 +2417,11 @@ export default function AIOSDesktop() {
 
   function driveFileThumbnailUrl(file: AIOSDriveExplorerFile | null) {
     if (!file?.id) return ''
+    return `/api/admin/ai-os/drive-thumbnail?fileId=${encodeURIComponent(file.id)}`
+  }
+
+  function driveFileGoogleThumbnailFallbackUrl(file: AIOSDriveExplorerFile | null) {
+    if (!file?.id) return ''
     return `https://drive.google.com/thumbnail?id=${encodeURIComponent(file.id)}&sz=w640`
   }
 
@@ -4655,7 +4660,13 @@ export default function AIOSDesktop() {
                                         alt=""
                                         loading="lazy"
                                         onError={(event) => {
-                                          event.currentTarget.style.display = 'none'
+                                          const img = event.currentTarget
+                                          if (img.dataset.fallback !== '1') {
+                                            img.dataset.fallback = '1'
+                                            img.src = driveFileGoogleThumbnailFallbackUrl(file)
+                                            return
+                                          }
+                                          img.style.display = 'none'
                                         }}
                                       />
                                     ) : null}
