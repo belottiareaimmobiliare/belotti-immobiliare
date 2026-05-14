@@ -70,6 +70,52 @@ async function listDriveFolder(folderId: string) {
   }
 }
 
+function normalizeDriveName(value: unknown) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/^\d+\s*[-_.]?\s*/, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function isPhotoSourceFolderName(value: unknown) {
+  const name = normalizeDriveName(value)
+
+  if (!name) return false
+
+  return (
+    name === 'foto' ||
+    name === 'immagini' ||
+    name === 'images' ||
+    name === 'foto e video' ||
+    name === 'foto e video originali' ||
+    name === 'foto video originali' ||
+    name.includes('foto e video') ||
+    name.includes('foto originali') ||
+    name.includes('immagini')
+  )
+}
+
+function sortPhotoSourceFolders(folders: DriveFolder[]) {
+  return [...folders].sort((a, b) => {
+    const aName = normalizeDriveName(a.name)
+    const bName = normalizeDriveName(b.name)
+
+    const score = (name: string) => {
+      if (name === 'foto') return 0
+      if (name === 'foto e video originali') return 1
+      if (name.includes('foto')) return 2
+      if (name === 'immagini') return 3
+      if (name.includes('immagini')) return 4
+      return 99
+    }
+
+    return score(aName) - score(bName) || aName.localeCompare(bName)
+  })
+}
+
 function isImageDriveFile(file: DriveFile) {
   const mimeType = String(file.mimeType || '').toLowerCase()
   const name = String(file.name || '').toLowerCase()
@@ -84,6 +130,33 @@ function drivePublicImageUrl(fileId: string) {
   return `/api/public/drive-image?fileId=${encodeURIComponent(fileId)}`
 }
 
+async function collectImageFilesFromDriveFolder(folderId: string, depth = 1) {
+  const content = await listDriveFolder(folderId)
+  const files = content.files.filter(isImageDriveFile)
+
+  if (depth <= 0) {
+    return {
+      sourceFolder: content.folder,
+      files,
+    }
+  }
+
+  for (const childFolder of content.folders) {
+    const child = await collectImageFilesFromDriveFolder(childFolder.id, depth - 1)
+    files.push(...child.files)
+  }
+
+  const uniqueById = new Map<string, DriveFile>()
+  for (const file of files) {
+    if (file.id) uniqueById.set(file.id, file)
+  }
+
+  return {
+    sourceFolder: content.folder,
+    files: Array.from(uniqueById.values()),
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const profile = await requireAdminProfile()
@@ -94,6 +167,8 @@ export async function POST(request: Request) {
 
     const body = await request.json().catch(() => null)
     const propertyId = String(body?.propertyId ?? '').trim()
+    const requestedSourceFolderId = String(body?.sourceFolderId ?? '').trim()
+    const requestedSourceFolderName = String(body?.sourceFolderName ?? '').trim()
 
     if (!propertyId) {
       return NextResponse.json({ error: 'propertyId mancante' }, { status: 400 })
@@ -124,19 +199,42 @@ export async function POST(request: Request) {
     }
 
     const root = await listDriveFolder(rootFolderId)
-    const fotoFolder = root.folders.find(
-      (folder) => String(folder.name || '').trim().toLowerCase() === 'foto',
-    )
 
-    if (!fotoFolder?.id) {
+    let sourceFolder: DriveFolder | null = null
+
+    if (
+      requestedSourceFolderId &&
+      requestedSourceFolderId !== rootFolderId &&
+      isPhotoSourceFolderName(requestedSourceFolderName)
+    ) {
+      sourceFolder = {
+        id: requestedSourceFolderId,
+        name: requestedSourceFolderName || 'Cartella immagini corrente',
+        url: '',
+      }
+    }
+
+    if (!sourceFolder) {
+      const candidateFolders = sortPhotoSourceFolders(
+        root.folders.filter((folder) => isPhotoSourceFolderName(folder.name)),
+      )
+
+      sourceFolder = candidateFolders[0] ?? null
+    }
+
+    if (!sourceFolder?.id) {
       return NextResponse.json(
-        { error: 'Cartella "Foto" non trovata nel Drive immobile' },
+        {
+          error:
+            'Nessuna cartella foto trovata. Crea o usa una cartella chiamata “01 Foto e video originali”, “Foto” o “Immagini”.',
+          availableFolders: root.folders.map((folder) => folder.name),
+        },
         { status: 404 },
       )
     }
 
-    const fotoContent = await listDriveFolder(fotoFolder.id)
-    const imageFiles = fotoContent.files.filter(isImageDriveFile)
+    const collected = await collectImageFilesFromDriveFolder(sourceFolder.id, 2)
+    const imageFiles = collected.files
 
     const { data: existingMedia, error: existingMediaError } = await supabase
       .from('property_media')
@@ -198,10 +296,11 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       propertyId,
-      sourceFolder: fotoFolder,
+      sourceFolder,
       driveImagesFound: imageFiles.length,
       imported: rowsToInsert.length,
       skipped: imageFiles.length - rowsToInsert.length,
+      availableRootFolders: root.folders.map((folder) => folder.name),
     })
   } catch (error) {
     return NextResponse.json(

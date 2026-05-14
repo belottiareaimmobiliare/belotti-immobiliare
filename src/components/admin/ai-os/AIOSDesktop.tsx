@@ -2562,6 +2562,8 @@ export default function AIOSDesktop() {
         },
         body: JSON.stringify({
           propertyId: activeFolderId,
+          sourceFolderId: driveExplorer?.folder?.id || null,
+          sourceFolderName: driveExplorer?.folder?.name || '',
         }),
       })
 
@@ -2575,10 +2577,12 @@ export default function AIOSDesktop() {
       const skipped = Number(payload?.skipped ?? 0)
       const found = Number(payload?.driveImagesFound ?? 0)
 
+      const sourceName = String(payload?.sourceFolder?.name || 'cartella foto')
+
       setNotice(
         imported > 0
-          ? `Galleria aggiornata: ${imported} foto importate da Drive. Totale trovate: ${found}.`
-          : `Galleria già allineata: ${skipped} foto già presenti. Totale trovate: ${found}.`,
+          ? `Galleria aggiornata: ${imported} foto importate da “${sourceName}”. Totale trovate: ${found}.`
+          : `Galleria già allineata: ${skipped} foto già presenti in “${sourceName}”. Totale trovate: ${found}.`,
       )
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Errore sincronizzazione foto Drive'
