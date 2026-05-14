@@ -1008,6 +1008,8 @@ export default function AIOSDesktop() {
   const [driveDropTargetFolderId, setDriveDropTargetFolderId] = useState<string | null>(null)
   const [driveMoveBusy, setDriveMoveBusy] = useState(false)
   const [drivePhotoSyncing, setDrivePhotoSyncing] = useState(false)
+  const [drivePropertyMediaSyncing, setDrivePropertyMediaSyncing] = useState(false)
+  const [drivePropertyMediaSyncedForFolderId, setDrivePropertyMediaSyncedForFolderId] = useState('')
   const [fileMoveUpdating, setFileMoveUpdating] = useState('')
   const [movePicker, setMovePicker] = useState<{ fileId: string; fileName: string } | null>(null)
   const [renameFileDialog, setRenameFileDialog] = useState<{ fileId: string; fileName: string } | null>(null)
@@ -2254,11 +2256,17 @@ export default function AIOSDesktop() {
         throw new Error(payload?.error || 'Errore lettura Drive immobile')
       }
 
+      const loadedDriveFolder = payload?.folder ?? null
+
       setDriveExplorer({
-        folder: payload?.folder ?? null,
+        folder: loadedDriveFolder,
         folders: Array.isArray(payload?.folders) ? payload.folders : [],
         files: Array.isArray(payload?.files) ? payload.files : [],
       })
+
+      if (loadedDriveFolder?.name && isDriveMediaSourceFolderNameClient(loadedDriveFolder.name)) {
+        void syncDrivePhotosToPublicGallery(true, loadedDriveFolder)
+      }
 
       setNotice('Drive immobile aggiornato dentro AI-OS.')
     } catch (error) {
@@ -2330,6 +2338,13 @@ export default function AIOSDesktop() {
 
       setDriveExplorerUploadMessage(`Upload completato: ${uploadableFiles.length} file.`)
       setNotice(`Drive immobile aggiornato: ${uploadableFiles.length} file caricato/i.`)
+
+      const currentDriveFolder = driveExplorer?.folder ?? null
+
+      if (currentDriveFolder?.name && isDriveMediaSourceFolderNameClient(currentDriveFolder.name)) {
+        void syncDrivePhotosToPublicGallery(true, currentDriveFolder)
+      }
+
       void loadDriveExplorer(targetFolderId)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Errore upload su Drive'
@@ -2545,14 +2560,124 @@ export default function AIOSDesktop() {
     }
   }
 
-  async function syncDrivePhotosToPublicGallery() {
+  function normalizeDriveFolderNameClient(value: unknown) {
+    return String(value || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/^\d+\s*[-_.]?\s*/, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+  }
+
+  function isDriveMediaSourceFolderNameClient(value: unknown) {
+    const name = normalizeDriveFolderNameClient(value)
+
+    if (!name) return false
+
+    return (
+      name === 'immagini' ||
+      name === 'foto' ||
+      name === 'images' ||
+      name === 'planimetria' ||
+      name === 'planimetrie' ||
+      name.includes('foto') ||
+      name.includes('immagini') ||
+      name.includes('planimetria') ||
+      name.includes('planimetrie') ||
+      name.includes('documenti e planimetrie')
+    )
+  }
+
+  async function syncPublishedImagesToDriveFolder(silent = false) {
     if (!activeFolderId) {
-      setNotice('Seleziona prima una cartella immobile.')
+      if (!silent) {
+        setNotice('Seleziona prima una cartella immobile.')
+      }
+
+      return
+    }
+
+    setDrivePropertyMediaSyncing(true)
+
+    if (!silent) {
+      setNotice('Allineo le foto già pubblicate verso Drive / immagini...')
+    }
+
+    try {
+      const response = await fetch('/api/admin/ai-os/sync-property-media-to-drive', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          propertyId: activeFolderId,
+        }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore sincronizzazione foto pubblicate verso Drive')
+      }
+
+      const imported = Number(payload?.imported ?? 0)
+      const skipped = Number(payload?.skipped ?? 0)
+      const failed = Number(payload?.failed ?? 0)
+      const found = Number(payload?.publishedImagesFound ?? 0)
+      const folderName = String(payload?.imagesFolder?.name || 'immagini')
+
+      if (!silent || imported > 0 || failed > 0) {
+        setNotice(
+          failed > 0
+            ? `Foto pubblicate verso Drive: ${imported} importate, ${skipped} già presenti, ${failed} errori.`
+            : `Drive / ${folderName} allineata: ${imported} foto copiate, ${skipped} già presenti, ${found} foto pubblicate trovate.`,
+        )
+      }
+
+      if (driveExplorer?.folder?.id && payload?.imagesFolder?.id === driveExplorer.folder.id) {
+        void loadDriveExplorer(driveExplorer.folder.id)
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore sincronizzazione foto pubblicate verso Drive'
+
+      if (!silent) {
+        setNotice(message)
+      } else {
+        console.error(message)
+      }
+    } finally {
+      setDrivePropertyMediaSyncing(false)
+    }
+  }
+
+  async function syncDrivePhotosToPublicGallery(
+    silent = false,
+    sourceFolderOverride?: AIOSDriveExplorerFolder | null,
+  ) {
+    if (!activeFolderId) {
+      if (!silent) {
+        setNotice('Seleziona prima una cartella immobile.')
+      }
+
+      return
+    }
+
+    const sourceFolder = sourceFolderOverride ?? driveExplorer?.folder ?? null
+
+    if (!sourceFolder?.id || !isDriveMediaSourceFolderNameClient(sourceFolder.name)) {
+      if (!silent) {
+        setNotice('Apri una cartella immagini/foto/planimetrie oppure usa la sincronizzazione manuale.')
+      }
+
       return
     }
 
     setDrivePhotoSyncing(true)
-    setNotice('Sincronizzazione foto Drive verso galleria pubblica...')
+
+    if (!silent) {
+      setNotice('Sincronizzazione media Drive verso scheda pubblica...')
+    }
 
     try {
       const response = await fetch('/api/admin/ai-os/sync-drive-media', {
@@ -2562,15 +2687,15 @@ export default function AIOSDesktop() {
         },
         body: JSON.stringify({
           propertyId: activeFolderId,
-          sourceFolderId: driveExplorer?.folder?.id || null,
-          sourceFolderName: driveExplorer?.folder?.name || '',
+          sourceFolderId: sourceFolder.id,
+          sourceFolderName: sourceFolder.name || '',
         }),
       })
 
       const payload = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(payload?.error || 'Errore sincronizzazione foto Drive')
+        throw new Error(payload?.error || 'Errore sincronizzazione media Drive')
       }
 
       const imported = Number(payload?.imported ?? 0)
@@ -2581,14 +2706,21 @@ export default function AIOSDesktop() {
       const planFound = Number(payload?.planImagesFound ?? 0)
       const found = Number(payload?.driveImagesFound ?? 0)
 
-      setNotice(
-        imported > 0
-          ? `Scheda immobile aggiornata: ${importedImages} foto e ${importedPlans} planimetrie importate da Drive. Totale media trovati: ${found}.`
-          : `Scheda già allineata: ${skipped} media già presenti. Foto trovate: ${photoFound}, planimetrie trovate: ${planFound}.`,
-      )
+      if (!silent || imported > 0) {
+        setNotice(
+          imported > 0
+            ? `Scheda immobile aggiornata: ${importedImages} foto e ${importedPlans} planimetrie importate da Drive. Totale media trovati: ${found}.`
+            : `Scheda già allineata: ${skipped} media già presenti. Foto trovate: ${photoFound}, planimetrie trovate: ${planFound}.`,
+        )
+      }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Errore sincronizzazione foto Drive'
-      setNotice(message)
+      const message = error instanceof Error ? error.message : 'Errore sincronizzazione media Drive'
+
+      if (!silent) {
+        setNotice(message)
+      } else {
+        console.error(message)
+      }
     } finally {
       setDrivePhotoSyncing(false)
     }
@@ -2888,6 +3020,23 @@ export default function AIOSDesktop() {
       void loadDriveExplorer(driveFolder.drive_folder_id)
     }
   }, [activeAgencyToolId, driveFolder?.drive_folder_id])
+
+  useEffect(() => {
+    if (
+      String(activeAgencyToolId) === 'drive' &&
+      activeFolderId &&
+      driveFolder?.drive_folder_id &&
+      drivePropertyMediaSyncedForFolderId !== activeFolderId
+    ) {
+      setDrivePropertyMediaSyncedForFolderId(activeFolderId)
+      void syncPublishedImagesToDriveFolder(true)
+    }
+  }, [
+    activeAgencyToolId,
+    activeFolderId,
+    driveFolder?.drive_folder_id,
+    drivePropertyMediaSyncedForFolderId,
+  ])
 
   useEffect(() => {
     setPreviewZoom(1)
@@ -4418,6 +4567,15 @@ export default function AIOSDesktop() {
                       className="rounded-full border border-[#A3BE8C]/40 bg-[#A3BE8C]/10 px-4 py-2 text-xs font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/18 disabled:cursor-wait disabled:opacity-50"
                     >
                       {drivePhotoSyncing ? 'Sincronizzo...' : 'Sincronizza media'}
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={drivePropertyMediaSyncing}
+                      onClick={() => void syncPublishedImagesToDriveFolder(false)}
+                      className="rounded-full border border-[#5E81AC]/45 bg-[#5E81AC]/12 px-4 py-2 text-xs font-bold text-[#AECBFA] transition hover:bg-[#5E81AC]/22 disabled:cursor-wait disabled:opacity-50"
+                    >
+                      {drivePropertyMediaSyncing ? 'Allineo...' : 'Foto pubblicate → Drive'}
                     </button>
 
                     {driveExplorer?.folder?.url ? (
