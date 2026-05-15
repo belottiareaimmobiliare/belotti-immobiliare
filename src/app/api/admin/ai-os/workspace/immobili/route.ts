@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdminProfile } from '@/lib/admin-auth'
 import { createServiceClient } from '@/lib/supabase/service'
-import { canUseAIOS, jsonError } from '@/lib/ai-os'
+import { jsonError } from '@/lib/ai-os'
 import {
   getAiOsWorkspaceAccess,
   permissionAllowsAction,
@@ -40,11 +40,20 @@ export async function GET() {
   try {
     const profile = await requireAdminProfile()
     const supabase = createServiceClient()
-
     const workspaceAccess = await getAiOsWorkspaceAccess(supabase, profile)
 
-    if (!canUseAIOS(profile) && !workspaceAccess.isActiveWorkspaceUser) {
-      return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
+    if (!workspaceAccess.canSeeAllProperties && !workspaceAccess.isActiveWorkspaceUser) {
+      return NextResponse.json({
+        ok: true,
+        access: {
+          role: workspaceAccess.workspaceRole,
+          profileRole: workspaceAccess.profileRole,
+          canSeeAllProperties: false,
+          isFullDesktop: false,
+          propertyCount: 0,
+        },
+        folders: [],
+      })
     }
 
     let propertiesQuery = supabase
@@ -58,8 +67,10 @@ export async function GET() {
         return NextResponse.json({
           ok: true,
           access: {
-            role: workspaceAccess.role,
+            role: workspaceAccess.workspaceRole,
+            profileRole: workspaceAccess.profileRole,
             canSeeAllProperties: false,
+            isFullDesktop: false,
             propertyCount: 0,
           },
           folders: [],
@@ -97,6 +108,7 @@ export async function GET() {
 
       for (const driveFolder of driveFolders ?? []) {
         const propertyId = cleanString(driveFolder.property_id)
+
         if (propertyId) {
           driveFoldersByProperty.set(propertyId, driveFolder as Record<string, unknown>)
         }
@@ -113,6 +125,7 @@ export async function GET() {
 
       for (const mediaRow of mediaRows ?? []) {
         const propertyId = cleanString(mediaRow.property_id)
+
         if (propertyId) {
           mediaCountByProperty.set(propertyId, (mediaCountByProperty.get(propertyId) ?? 0) + 1)
         }
@@ -126,7 +139,6 @@ export async function GET() {
       const driveFolderId = cleanString(driveFolder?.drive_folder_id)
       const syncStatus = cleanString(driveFolder?.sync_status)
       const permission = workspaceAccess.permissionsByProperty.get(propertyId) ?? null
-
       const hasDriveReady = Boolean(driveFolderId) && !driveFolderId.startsWith('aios-property-')
 
       return {
@@ -158,8 +170,10 @@ export async function GET() {
     return NextResponse.json({
       ok: true,
       access: {
-        role: workspaceAccess.role,
+        role: workspaceAccess.workspaceRole,
+        profileRole: workspaceAccess.profileRole,
         canSeeAllProperties: workspaceAccess.canSeeAllProperties,
+        isFullDesktop: workspaceAccess.isFullDesktop,
         propertyCount: folders.length,
       },
       folders,

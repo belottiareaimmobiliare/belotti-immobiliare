@@ -15,12 +15,14 @@ export type AiOsWorkspacePermission = {
 }
 
 export type AiOsWorkspaceAccess = {
-  authUserId: string
+  profileId: string
   email: string
-  role: string
+  profileRole: string
+  workspaceRole: string
   workspaceUserId: string
   isActiveWorkspaceUser: boolean
   canSeeAllProperties: boolean
+  isFullDesktop: boolean
   propertyIds: string[]
   permissionsByProperty: Map<string, AiOsWorkspacePermission>
 }
@@ -37,81 +39,46 @@ function cleanEmail(value: unknown) {
   return cleanString(value).toLowerCase()
 }
 
-function isUuid(value: string) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
-}
-
-function profileAuthUserId(profile: unknown) {
-  const record = asRecord(profile)
-
-  const direct =
-    cleanString(record.auth_user_id) ||
-    cleanString(record.user_id) ||
-    cleanString(record.supabase_user_id)
-
-  if (isUuid(direct)) return direct
-
-  const id = cleanString(record.id)
-  return isUuid(id) ? id : ''
+function profileId(profile: unknown) {
+  return cleanString(asRecord(profile).id)
 }
 
 function profileEmail(profile: unknown) {
   const record = asRecord(profile)
 
   return (
-    cleanEmail(record.email) ||
-    cleanEmail(record.user_email) ||
-    cleanEmail(record.admin_email)
+    cleanEmail(record.login_email) ||
+    cleanEmail(record.authorized_google_email) ||
+    cleanEmail(record.email)
   )
 }
 
 function profileRole(profile: unknown) {
-  const record = asRecord(profile)
-
-  return (
-    cleanString(record.role) ||
-    cleanString(record.user_role) ||
-    cleanString(record.type)
-  ).toLowerCase()
+  return cleanString(asRecord(profile).role).toLowerCase()
 }
 
-function profileHasNativeFullAccess(profile: unknown) {
-  const record = asRecord(profile)
-  const role = profileRole(profile)
+function roleCanSeeAllProperties(role: string) {
+  return role === 'administrator' || role === 'owner' || role === 'secretary'
+}
 
-  if (
-    role.includes('admin') ||
-    role.includes('owner') ||
-    role.includes('proprietario') ||
-    role.includes('segret') ||
-    role.includes('secretariat')
-  ) {
-    return true
-  }
-
-  return Boolean(
-    record.is_admin ||
-      record.is_super_admin ||
-      record.can_see_all_properties ||
-      record.can_manage_all ||
-      record.can_use_ai_os_full,
-  )
+function workspaceRoleCanSeeAllProperties(role: string) {
+  return role === 'admin' || role === 'owner' || role === 'secretariat'
 }
 
 async function findWorkspaceUser(
   supabase: ServiceClient,
-  authUserId: string,
+  id: string,
   email: string,
 ) {
-  if (authUserId) {
+  if (id) {
     const { data, error } = await supabase
       .from('ai_os_workspace_users')
       .select('*')
-      .eq('auth_user_id', authUserId)
+      .eq('auth_user_id', id)
       .maybeSingle()
 
     if (error) {
-      console.error('AI-OS workspace user lookup by auth id error:', error)
+      console.error('AI-OS workspace user lookup by profile id error:', error)
     }
 
     if (data) return data as Record<string, unknown>
@@ -138,12 +105,12 @@ export async function getAiOsWorkspaceAccess(
   supabase: ServiceClient,
   profile: unknown,
 ): Promise<AiOsWorkspaceAccess> {
-  const authUserId = profileAuthUserId(profile)
+  const id = profileId(profile)
   const email = profileEmail(profile)
   const nativeRole = profileRole(profile)
-  const nativeFullAccess = profileHasNativeFullAccess(profile)
+  const nativeFullAccess = roleCanSeeAllProperties(nativeRole)
 
-  const workspaceUser = await findWorkspaceUser(supabase, authUserId, email)
+  const workspaceUser = await findWorkspaceUser(supabase, id, email)
 
   const workspaceUserId = cleanString(workspaceUser?.id)
   const workspaceRole = cleanString(workspaceUser?.role).toLowerCase()
@@ -153,21 +120,22 @@ export async function getAiOsWorkspaceAccess(
     isActiveWorkspaceUser &&
     (
       Boolean(workspaceUser?.can_see_all_properties) ||
-      workspaceRole === 'admin' ||
-      workspaceRole === 'owner' ||
-      workspaceRole === 'secretariat'
+      workspaceRoleCanSeeAllProperties(workspaceRole)
     )
 
   const canSeeAllProperties = nativeFullAccess || workspaceFullAccess
+  const isFullDesktop = canSeeAllProperties
 
   if (!workspaceUserId || canSeeAllProperties) {
     return {
-      authUserId,
+      profileId: id,
       email,
-      role: workspaceRole || nativeRole || 'admin',
+      profileRole: nativeRole,
+      workspaceRole: workspaceRole || nativeRole || 'agent',
       workspaceUserId,
       isActiveWorkspaceUser,
       canSeeAllProperties,
+      isFullDesktop,
       propertyIds: [],
       permissionsByProperty: new Map(),
     }
@@ -177,16 +145,20 @@ export async function getAiOsWorkspaceAccess(
     .from('ai_os_property_permissions')
     .select('property_id, access_level, can_view, can_upload, can_manage, can_sync_public_gallery, can_delete')
     .eq('workspace_user_id', workspaceUserId)
+    .eq('can_view', true)
 
   if (error) {
     console.error('AI-OS property permissions lookup error:', error)
+
     return {
-      authUserId,
+      profileId: id,
       email,
-      role: workspaceRole || nativeRole || 'agent',
+      profileRole: nativeRole,
+      workspaceRole: workspaceRole || nativeRole || 'agent',
       workspaceUserId,
       isActiveWorkspaceUser,
       canSeeAllProperties: false,
+      isFullDesktop: false,
       propertyIds: [],
       permissionsByProperty: new Map(),
     }
@@ -202,12 +174,14 @@ export async function getAiOsWorkspaceAccess(
   }
 
   return {
-    authUserId,
+    profileId: id,
     email,
-    role: workspaceRole || nativeRole || 'agent',
+    profileRole: nativeRole,
+    workspaceRole: workspaceRole || nativeRole || 'agent',
     workspaceUserId,
     isActiveWorkspaceUser,
     canSeeAllProperties: false,
+    isFullDesktop: false,
     propertyIds: permissions.map((permission) => permission.property_id).filter(Boolean),
     permissionsByProperty,
   }
@@ -228,15 +202,29 @@ export function permissionAllowsAction(
   }
 
   if (action === 'upload') {
-    return Boolean(permission.can_upload || permission.can_manage || permission.access_level === 'upload' || permission.access_level === 'manage' || permission.access_level === 'full')
+    return Boolean(
+      permission.can_upload ||
+      permission.can_manage ||
+      permission.access_level === 'upload' ||
+      permission.access_level === 'manage' ||
+      permission.access_level === 'full',
+    )
   }
 
   if (action === 'manage') {
-    return Boolean(permission.can_manage || permission.access_level === 'manage' || permission.access_level === 'full')
+    return Boolean(
+      permission.can_manage ||
+      permission.access_level === 'manage' ||
+      permission.access_level === 'full',
+    )
   }
 
   if (action === 'sync') {
-    return Boolean(permission.can_sync_public_gallery || permission.can_manage || permission.access_level === 'full')
+    return Boolean(
+      permission.can_sync_public_gallery ||
+      permission.can_manage ||
+      permission.access_level === 'full',
+    )
   }
 
   if (action === 'delete') {

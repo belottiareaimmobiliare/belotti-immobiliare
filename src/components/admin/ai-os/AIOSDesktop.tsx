@@ -139,6 +139,14 @@ type AIOSCustomFolder = {
   updated_at?: string
 }
 
+type AIOSWorkspaceAccessInfo = {
+  role: string
+  profileRole?: string
+  canSeeAllProperties: boolean
+  isFullDesktop: boolean
+  propertyCount: number
+}
+
 type AIOSFolder = {
   id: string
   name: string
@@ -925,6 +933,7 @@ function uploadFileWithProgress({
 export default function AIOSDesktop() {
   const [folders, setFolders] = useState<AIOSFolder[]>([])
   const [foldersLoading, setFoldersLoading] = useState(true)
+  const [workspaceAccess, setWorkspaceAccess] = useState<AIOSWorkspaceAccessInfo | null>(null)
   const [folderSearchQuery, setFolderSearchQuery] = useState('')
   const [activeFolderId, setActiveFolderId] = useState<string>('')
   const [activeSection, setActiveSection] = useState<AIOSSection>('root')
@@ -2962,6 +2971,7 @@ export default function AIOSDesktop() {
           }))
         : []
 
+      setWorkspaceAccess(payload?.access ?? null)
       setFolders(nextFolders)
 
       const firstFolderId = nextFolders[0]?.id ?? ''
@@ -5446,6 +5456,13 @@ export default function AIOSDesktop() {
     )
   }
 
+  const isFullAIOSDesktop = workspaceAccess?.isFullDesktop !== false
+
+  const visibleDesktopFolders = useMemo(() => {
+    if (isFullAIOSDesktop) return desktopFolders
+    return desktopFolders.filter((item) => item.id === 'properties')
+  }, [isFullAIOSDesktop])
+
   return (
     <main className={`${jetBrainsMono.className} aios-nord fixed inset-0 z-[9999] h-dvh w-screen overflow-hidden bg-[#2E3440] text-[#D8DEE9] antialiased`}>
       <div className="aios-nordic-bg absolute inset-0 bg-[radial-gradient(circle_at_16%_12%,rgba(94,129,172,0.26),transparent_32%),radial-gradient(circle_at_78%_18%,rgba(143,188,187,0.15),transparent_28%),radial-gradient(circle_at_76%_84%,rgba(180,142,173,0.16),transparent_30%),linear-gradient(135deg,#111827_0%,#151A23_42%,#1B202B_100%)]" />
@@ -5709,7 +5726,7 @@ export default function AIOSDesktop() {
             <span className="text-xs font-semibold text-[#ECEFF4]">Immobili</span>
           </button>
 
-          {desktopFolders.slice(1).map((item) => (
+          {visibleDesktopFolders.filter((item) => item.id !== 'properties').map((item) => (
             <button
               key={item.id}
               type="button"
@@ -7178,6 +7195,9 @@ export default function AIOSDesktop() {
                   Lista cartelle
                 </button>
 
+                {workspaceAccess?.isFullDesktop !== false ? (
+
+
                 <button
                   type="button"
                   onClick={() => {
@@ -7186,7 +7206,10 @@ export default function AIOSDesktop() {
                   className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/10"
                 >
                   Gestisci accessi Workspace
-                </button>\n\n                <button
+                </button>
+
+
+                ) : null}\n\n                <button
                   type="button"
                   onClick={() => {
                     window.location.href = '/admin'
