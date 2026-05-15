@@ -42,3 +42,8 @@ tmp/
 # Local AI-OS patch backups
 *.bak-*
 *.bak
+
+# Local import/export scans
+data/imports/*.json
+data/imports/*.csv
+data/imports/debug-old-site/
