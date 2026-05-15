@@ -7181,6 +7181,14 @@ export default function AIOSDesktop() {
                 <button
                   type="button"
                   onClick={() => {
+                    window.location.href = '/admin/ai-os/accessi'
+                  }}
+                  className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/10"
+                >
+                  Gestisci accessi Workspace
+                </button>\n\n                <button
+                  type="button"
+                  onClick={() => {
                     window.location.href = '/admin'
                   }}
                   className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/10"
@@ -7229,6 +7237,14 @@ export default function AIOSDesktop() {
                 </button>
 
                 <button
+                  type="button"
+                  onClick={() => {
+                    window.location.href = '/admin/ai-os/accessi'
+                  }}
+                  className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/10"
+                >
+                  Gestisci accessi Workspace
+                </button>\n\n                <button
                   type="button"
                   onClick={() => {
                     window.location.href = '/admin'
