@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server'
 import { requireAdminProfile } from '@/lib/admin-auth'
 import { createServiceClient } from '@/lib/supabase/service'
 import { canUseAIOS, jsonError } from '@/lib/ai-os'
+import {
+  canUseAiOsProperty,
+  getAiOsWorkspaceAccess,
+} from '@/lib/ai-os/workspace-access'
 
 const MAX_DRIVE_EXPLORER_UPLOAD_BYTES = 4 * 1024 * 1024
 
@@ -64,15 +68,33 @@ export async function GET(request: Request) {
   try {
     const profile = await requireAdminProfile()
 
-    if (!canUseAIOS(profile)) {
-      return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
-    }
-
     const { searchParams } = new URL(request.url)
     const propertyId = searchParams.get('propertyId')?.trim()
     const folderIdParam = searchParams.get('folderId')?.trim()
 
     const supabase = createServiceClient()
+    const workspaceAccess = await getAiOsWorkspaceAccess(supabase, profile)
+
+    if (!canUseAIOS(profile) && !workspaceAccess.isActiveWorkspaceUser) {
+      return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
+    }
+
+    if (propertyId) {
+      const canViewProperty = await canUseAiOsProperty(supabase, profile, propertyId, 'view')
+
+      if (!canViewProperty) {
+        return NextResponse.json(
+          { error: 'Non autorizzato su questa cartella immobile' },
+          { status: 403 },
+        )
+      }
+    } else if (!workspaceAccess.canSeeAllProperties) {
+      return NextResponse.json(
+        { error: 'propertyId obbligatorio per utenti con accesso limitato' },
+        { status: 403 },
+      )
+    }
+
     let folderId = folderIdParam || ''
 
     if (!folderId && propertyId) {
@@ -132,13 +154,40 @@ export async function POST(request: Request) {
   try {
     const profile = await requireAdminProfile()
 
-    if (!canUseAIOS(profile)) {
-      return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
-    }
-
     const body = await request.json().catch(() => null)
     const action = String(body?.action ?? 'uploadFile').trim()
     const folderId = String(body?.folderId ?? '').trim()
+    const propertyId = String(body?.propertyId ?? '').trim()
+
+    const supabase = createServiceClient()
+    const workspaceAccess = await getAiOsWorkspaceAccess(supabase, profile)
+
+    if (!canUseAIOS(profile) && !workspaceAccess.isActiveWorkspaceUser) {
+      return NextResponse.json({ error: 'Non autorizzato' }, { status: 403 })
+    }
+
+    const requiredAction =
+      action === 'uploadFile'
+        ? 'upload'
+        : action === 'createSubfolder' || action === 'moveItem'
+          ? 'manage'
+          : 'view'
+
+    if (propertyId) {
+      const canUseProperty = await canUseAiOsProperty(supabase, profile, propertyId, requiredAction)
+
+      if (!canUseProperty) {
+        return NextResponse.json(
+          { error: 'Non autorizzato a modificare questa cartella immobile' },
+          { status: 403 },
+        )
+      }
+    } else if (!workspaceAccess.canSeeAllProperties) {
+      return NextResponse.json(
+        { error: 'propertyId obbligatorio per utenti con accesso limitato' },
+        { status: 403 },
+      )
+    }
 
     if (!folderId) {
       return NextResponse.json(

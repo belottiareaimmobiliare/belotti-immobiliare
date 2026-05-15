@@ -2233,8 +2233,16 @@ export default function AIOSDesktop() {
     setDriveExplorerError('')
 
     try {
+      const driveExplorerParams = new URLSearchParams({
+        folderId: targetFolderId,
+      })
+
+      if (activeFolderId) {
+        driveExplorerParams.set('propertyId', activeFolderId)
+      }
+
       const response = await fetch(
-        `/api/admin/ai-os/drive-explorer?folderId=${encodeURIComponent(targetFolderId)}`,
+        `/api/admin/ai-os/drive-explorer?${driveExplorerParams.toString()}`,
         { cache: 'no-store' },
       )
 
@@ -2311,6 +2319,7 @@ export default function AIOSDesktop() {
           },
           body: JSON.stringify({
             folderId: targetFolderId,
+            propertyId: activeFolderId,
             fileName: file.name,
             mimeType: file.type || 'application/octet-stream',
             base64Data,
@@ -2520,6 +2529,7 @@ export default function AIOSDesktop() {
         body: JSON.stringify({
           action: 'moveItem',
           folderId: currentFolderId,
+          propertyId: activeFolderId,
           sourceItemId,
           targetFolderId,
         }),
@@ -2739,6 +2749,7 @@ export default function AIOSDesktop() {
         body: JSON.stringify({
           action: 'createSubfolder',
           folderId: targetFolderId,
+          propertyId: activeFolderId,
           folderName,
         }),
       })
@@ -2930,7 +2941,7 @@ export default function AIOSDesktop() {
     setFoldersLoading(true)
 
     try {
-      const response = await fetch('/api/admin/ai-os/folders', {
+      const response = await fetch('/api/admin/ai-os/workspace/immobili', {
         cache: 'no-store',
       })
 
