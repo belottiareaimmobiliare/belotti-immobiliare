@@ -5,6 +5,10 @@ import { canUseAIOS, jsonError } from '@/lib/ai-os'
 
 const MAX_DRIVE_EXPLORER_UPLOAD_BYTES = 4 * 1024 * 1024
 
+function isVirtualDriveFolderId(value: unknown) {
+  return String(value || '').trim().startsWith('aios-property-')
+}
+
 async function callDriveScript(input: {
   action: string
   folderId: string
@@ -95,6 +99,16 @@ export async function GET(request: Request) {
       )
     }
 
+    if (isVirtualDriveFolderId(folderId)) {
+      return NextResponse.json(
+        {
+          error:
+            'Cartella Drive reale non ancora creata. Attendi la sincronizzazione automatica oppure premi Aggiorna.',
+        },
+        { status: 409 },
+      )
+    }
+
     const payload = await callDriveScript({
       action: 'listFolder',
       folderId,
@@ -133,6 +147,15 @@ export async function POST(request: Request) {
       )
     }
 
+    if (isVirtualDriveFolderId(folderId)) {
+      return NextResponse.json(
+        {
+          error:
+            'Cartella Drive reale non ancora creata. Attendi la sincronizzazione automatica oppure premi Aggiorna.',
+        },
+        { status: 409 },
+      )
+    }
 
     if (action === 'moveItem') {
       const sourceItemId = String(body?.sourceItemId ?? '').trim()
