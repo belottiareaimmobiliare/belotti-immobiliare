@@ -7212,6 +7212,16 @@ export default function AIOSDesktop() {
                 ) : null}\n\n                <button
                   type="button"
                   onClick={() => {
+                    window.location.href = '/admin/ai-os/condivisioni'
+                  }}
+                  className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/10"
+                >
+                  Genera link fotografo
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
                     window.location.href = '/admin'
                   }}
                   className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/10"
