@@ -26,7 +26,9 @@
     "import:old-site:active:no-thumb": "node scripts/filter-areaimmobiliare-active-no-thumbnails.mjs",
     "import:old-site:active:no-thumb:push:dry": "node scripts/import-areaimmobiliare-old-site-push.mjs --dry-run --input=data/imports/areaimmobiliare-active-strict-no-thumbnails-import.json --max-images-per-property=10",
     "import:old-site:active:no-thumb:push:test": "node scripts/import-areaimmobiliare-old-site-push.mjs --input=data/imports/areaimmobiliare-active-strict-no-thumbnails-import.json --limit=3 --max-images-per-property=3",
-    "import:old-site:active:no-thumb:push": "node scripts/import-areaimmobiliare-old-site-push.mjs --input=data/imports/areaimmobiliare-active-strict-no-thumbnails-import.json --max-images-per-property=10"
+    "import:old-site:active:no-thumb:push": "node scripts/import-areaimmobiliare-old-site-push.mjs --input=data/imports/areaimmobiliare-active-strict-no-thumbnails-import.json --max-images-per-property=10",
+    "drive:immobili:duplicates:audit": "node scripts/cleanup-drive-immobili-duplicates.mjs",
+    "drive:immobili:duplicates:quarantine": "node scripts/cleanup-drive-immobili-duplicates.mjs --confirm=MOVE_DUPLICATE_DRIVE_FOLDERS"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
