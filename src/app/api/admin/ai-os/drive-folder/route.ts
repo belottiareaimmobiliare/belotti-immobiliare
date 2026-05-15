@@ -36,6 +36,25 @@ function extractDriveFolderId(value: string) {
   return null
 }
 
+
+function cleanDriveFolderName(value: unknown) {
+  return String(value || '')
+    .replace(/[\\/:*?"<>|]/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 140)
+}
+
+function buildExpectedDriveFolderName(property: {
+  title?: string | null
+  reference_code?: string | null
+}) {
+  const code = cleanDriveFolderName(property.reference_code)
+  const title = cleanDriveFolderName(property.title || 'Immobile senza titolo')
+
+  return cleanDriveFolderName(code ? `${code} - ${title}` : title)
+}
+
 function normalizeDriveFolderUrl(value: string) {
   const cleaned = value.trim()
   const folderId = extractDriveFolderId(cleaned)
@@ -64,11 +83,20 @@ export async function GET(request: Request) {
 
     const supabase = createServiceClient()
 
-    const { data, error } = await supabase
-      .from('property_drive_folders')
-      .select('*')
-      .eq('property_id', propertyId)
-      .maybeSingle()
+    const [{ data, error }, { data: property, error: propertyError }] =
+      await Promise.all([
+        supabase
+          .from('property_drive_folders')
+          .select('*')
+          .eq('property_id', propertyId)
+          .maybeSingle(),
+
+        supabase
+          .from('properties')
+          .select('id,title,reference_code')
+          .eq('id', propertyId)
+          .maybeSingle(),
+      ])
 
     if (error) {
       console.error('AI-OS drive folder GET error:', error)
@@ -78,7 +106,53 @@ export async function GET(request: Request) {
       )
     }
 
-    return NextResponse.json({ driveFolder: data ?? null })
+    if (propertyError) {
+      console.error('AI-OS drive folder property GET error:', propertyError)
+      return NextResponse.json(
+        { error: propertyError.message || 'Errore caricamento immobile Drive' },
+        { status: 500 },
+      )
+    }
+
+    let driveFolder = data ?? null
+
+    if (driveFolder && property) {
+      const expectedFolderName = buildExpectedDriveFolderName(property)
+
+      if (
+        expectedFolderName &&
+        String(driveFolder.folder_name || '') !== expectedFolderName
+      ) {
+        const { data: updatedDriveFolder, error: updateError } = await supabase
+          .from('property_drive_folders')
+          .update({
+            folder_name: expectedFolderName,
+            sync_status: 'pending',
+            last_error: null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', driveFolder.id)
+          .select('*')
+          .single()
+
+        if (!updateError && updatedDriveFolder) {
+          driveFolder = updatedDriveFolder
+        }
+
+        await supabase.from('property_drive_folder_jobs').insert([
+          {
+            property_id: propertyId,
+            action: 'upsert',
+            status: 'pending',
+            desired_folder_name: expectedFolderName,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ])
+      }
+    }
+
+    return NextResponse.json({ driveFolder })
   } catch (error) {
     console.error('AI-OS drive folder GET exception:', error)
 
