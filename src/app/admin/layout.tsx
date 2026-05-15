@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import AdminShell from '@/components/admin/AdminShell'
 import { getSidebarLinks, getCurrentAdminProfile } from '@/lib/admin-auth'
 import { createClient } from '@/lib/supabase/server'
+import DriveFolderJobsAutoProcessor from '@/components/admin/DriveFolderJobsAutoProcessor'
 
 export default async function AdminRootLayout({
   children,
@@ -65,6 +66,7 @@ export default async function AdminRootLayout({
       }}
       links={links}
     >
+      <DriveFolderJobsAutoProcessor />
       {children}
     </AdminShell>
   )
