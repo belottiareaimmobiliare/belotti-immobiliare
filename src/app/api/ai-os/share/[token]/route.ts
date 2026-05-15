@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { jsonError } from '@/lib/ai-os'
+import { getAiOsShareFolderConfig } from '@/lib/ai-os/share-folders'
 
 export const dynamic = 'force-dynamic'
 
@@ -143,17 +144,20 @@ export async function GET(_request: Request, context: RouteContext) {
       )
     }
 
+    const folderConfig = getAiOsShareFolderConfig(link.recipient_role)
+
     return NextResponse.json({
       ok: true,
       link: {
         token: link.token,
-        targetFolderName: link.target_folder_name,
+        targetFolderName: link.target_folder_name || folderConfig.targetFolderName,
         recipientName: link.recipient_name,
         recipientRole: link.recipient_role,
         canUpload: link.can_upload,
         expiresAt: link.expires_at,
         maxUploadBytes: Number(link.max_upload_bytes || 4194304),
       },
+      folderConfig,
       property,
     })
   } catch (error) {

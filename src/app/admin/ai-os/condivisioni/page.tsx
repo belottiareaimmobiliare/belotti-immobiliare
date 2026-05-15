@@ -35,6 +35,34 @@ type ShareLink = {
 
 export const dynamic = 'force-dynamic'
 
+const roleFolderConfigs = {
+  photographer: {
+    label: 'Fotografo',
+    targetFolderName: 'Bozze Immagini e Video',
+    helper: 'Solo foto e video nella cartella bozze dell’immobile.',
+  },
+  owner: {
+    label: 'Proprietario immobile',
+    targetFolderName: 'Documenti Proprietario',
+    helper: 'Solo documenti del proprietario: PDF, foto documenti, file richiesti.',
+  },
+  collaborator: {
+    label: 'Collaboratore / tecnico',
+    targetFolderName: 'Documenti e Planimetrie',
+    helper: 'Materiale tecnico: planimetrie, PDF, immagini e documenti.',
+  },
+  client: {
+    label: 'Cliente',
+    targetFolderName: 'Documenti Cliente',
+    helper: 'Documenti cliente collegati alla pratica.',
+  },
+}
+
+function getRoleFolderConfig(role: string) {
+  return roleFolderConfigs[role as keyof typeof roleFolderConfigs] ?? roleFolderConfigs.photographer
+}
+
+
 export default function AIOSCondivisioniPage() {
   const [folders, setFolders] = useState<WorkspaceFolder[]>([])
   const [links, setLinks] = useState<ShareLink[]>([])
@@ -55,6 +83,8 @@ export default function AIOSCondivisioniPage() {
       return id && !id.startsWith('aios-property-')
     })
   }, [folders])
+
+  const selectedRoleConfig = useMemo(() => getRoleFolderConfig(recipientRole), [recipientRole])
 
   async function loadAll() {
     setLoading(true)
@@ -207,7 +237,7 @@ export default function AIOSCondivisioniPage() {
                   value={targetFolderName}
                   onChange={(event) => setTargetFolderName(event.target.value)}
                   className="w-full rounded-2xl border border-[#374151] bg-[#111827] px-4 py-3 text-sm font-semibold text-white outline-none transition placeholder:text-[#6B7280] focus:border-[#8FBCBB]/60"
-                  placeholder="Bozze Immagini e Video"
+                  placeholder={selectedRoleConfig.targetFolderName}
                 />
 
                 <input
@@ -226,14 +256,24 @@ export default function AIOSCondivisioniPage() {
 
                 <select
                   value={recipientRole}
-                  onChange={(event) => setRecipientRole(event.target.value)}
+                  onChange={(event) => {
+                    const nextRole = event.target.value
+                    const nextConfig = getRoleFolderConfig(nextRole)
+
+                    setRecipientRole(nextRole)
+                    setTargetFolderName(nextConfig.targetFolderName)
+                  }}
                   className="w-full rounded-2xl border border-[#374151] bg-[#111827] px-4 py-3 text-sm font-semibold text-white outline-none transition focus:border-[#8FBCBB]/60"
                 >
-                  <option value="photographer">Fotografo</option>
-                  <option value="owner">Proprietario immobile</option>
-                  <option value="collaborator">Collaboratore</option>
-                  <option value="client">Cliente</option>
+                  <option value="photographer">Fotografo → Bozze Immagini e Video</option>
+                  <option value="owner">Proprietario → Documenti Proprietario</option>
+                  <option value="collaborator">Collaboratore / tecnico → Documenti e Planimetrie</option>
+                  <option value="client">Cliente → Documenti Cliente</option>
                 </select>
+
+                <div className="rounded-2xl border border-[#8FBCBB]/20 bg-[#8FBCBB]/10 px-4 py-3 text-xs font-semibold leading-5 text-[#BFE8E5]">
+                  {selectedRoleConfig.helper}
+                </div>
 
                 <input
                   value={expiresInDays}

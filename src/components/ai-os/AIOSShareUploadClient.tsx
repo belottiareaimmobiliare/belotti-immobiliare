@@ -2,6 +2,19 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
+type ShareFolderConfig = {
+  role: string
+  label: string
+  targetFolderName: string
+  title: string
+  description: string
+  accept: string
+  primaryAction: string
+  secondaryAction: string
+  allowCamera: boolean
+  allowVideo: boolean
+}
+
 type ShareInfo = {
   link: {
     token: string
@@ -12,6 +25,7 @@ type ShareInfo = {
     expiresAt?: string | null
     maxUploadBytes: number
   }
+  folderConfig: ShareFolderConfig
   property: {
     id: string
     title?: string | null
@@ -33,6 +47,13 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
   const propertyRef = data?.property?.reference_code
   const location = [data?.property?.comune, data?.property?.province].filter(Boolean).join(' · ')
   const maxMb = useMemo(() => Math.round((data?.link.maxUploadBytes || 4194304) / 1024 / 1024), [data])
+  const uploadTitle = data?.folderConfig?.title || 'Carica file'
+  const uploadDescription = data?.folderConfig?.description || 'Carica i file richiesti nella cartella corretta.'
+  const uploadAccept = data?.folderConfig?.accept || 'image/*,video/*,application/pdf'
+  const primaryAction = data?.folderConfig?.primaryAction || '📁 Carica file'
+  const secondaryAction = data?.folderConfig?.secondaryAction || '📷 Fotocamera'
+  const allowCamera = data?.folderConfig?.allowCamera !== false
+  const allowVideo = Boolean(data?.folderConfig?.allowVideo)
 
   async function loadInfo() {
     setLoading(true)
@@ -47,6 +68,7 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
 
       setData({
         link: payload.link,
+        folderConfig: payload.folderConfig,
         property: payload.property,
       })
       setNotice('')
@@ -135,7 +157,7 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
           </p>
 
           <h1 className="mt-3 text-2xl font-black text-white">
-            Carica foto e video
+            {uploadTitle}
           </h1>
 
           <div className="mt-4 rounded-3xl border border-[#374151] bg-[#111827]/68 p-4">
@@ -152,46 +174,50 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
 
         <section className="mt-5 flex-1 rounded-[30px] border border-[#8FBCBB]/18 bg-[#1F2937]/82 p-5 shadow-2xl shadow-black/25">
           <p className="text-sm leading-6 text-[#D1D5DB]/72">
-            Scatta o seleziona i file. AI-OS li caricherà nella cartella Drive corretta senza mostrare Drive grezzo.
+            {uploadDescription} AI-OS caricherà tutto nella cartella Drive corretta senza mostrare Drive grezzo.
           </p>
 
           <div className="mt-5 grid gap-3">
-            <label className="flex min-h-20 cursor-pointer items-center justify-center rounded-3xl border border-[#A3BE8C]/55 bg-[#A3BE8C] px-5 py-4 text-base font-black text-[#101820] shadow-[0_0_28px_rgba(163,190,140,0.20)] transition active:scale-[0.99]">
-              📷 Fotocamera
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                disabled={uploading}
-                onChange={(event) => {
-                  void uploadFiles(event.currentTarget.files)
-                  event.currentTarget.value = ''
-                }}
-              />
-            </label>
+            {allowCamera ? (
+              <label className="flex min-h-20 cursor-pointer items-center justify-center rounded-3xl border border-[#A3BE8C]/55 bg-[#A3BE8C] px-5 py-4 text-base font-black text-[#101820] shadow-[0_0_28px_rgba(163,190,140,0.20)] transition active:scale-[0.99]">
+                {secondaryAction}
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  disabled={uploading}
+                  onChange={(event) => {
+                    void uploadFiles(event.currentTarget.files)
+                    event.currentTarget.value = ''
+                  }}
+                />
+              </label>
+            ) : null}
 
-            <label className="flex min-h-20 cursor-pointer items-center justify-center rounded-3xl border border-[#88C0D0]/45 bg-[#88C0D0]/14 px-5 py-4 text-base font-black text-[#AECBFA] transition active:scale-[0.99]">
-              🎥 Video
-              <input
-                type="file"
-                accept="video/*"
-                capture="environment"
-                className="hidden"
-                disabled={uploading}
-                onChange={(event) => {
-                  void uploadFiles(event.currentTarget.files)
-                  event.currentTarget.value = ''
-                }}
-              />
-            </label>
+            {allowVideo ? (
+              <label className="flex min-h-20 cursor-pointer items-center justify-center rounded-3xl border border-[#88C0D0]/45 bg-[#88C0D0]/14 px-5 py-4 text-base font-black text-[#AECBFA] transition active:scale-[0.99]">
+                🎥 Video
+                <input
+                  type="file"
+                  accept="video/*"
+                  capture="environment"
+                  className="hidden"
+                  disabled={uploading}
+                  onChange={(event) => {
+                    void uploadFiles(event.currentTarget.files)
+                    event.currentTarget.value = ''
+                  }}
+                />
+              </label>
+            ) : null}
 
             <label className="flex min-h-20 cursor-pointer items-center justify-center rounded-3xl border border-[#8FBCBB]/35 bg-[#8FBCBB]/10 px-5 py-4 text-base font-black text-[#8FBCBB] transition active:scale-[0.99]">
-              📁 Carica file
+              {primaryAction}
               <input
                 type="file"
                 multiple
-                accept="image/*,video/*,application/pdf"
+                accept={uploadAccept}
                 className="hidden"
                 disabled={uploading}
                 onChange={(event) => {

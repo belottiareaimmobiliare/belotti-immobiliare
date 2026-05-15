@@ -3,6 +3,11 @@ import { NextResponse } from 'next/server'
 import { requireAdminProfile } from '@/lib/admin-auth'
 import { createServiceClient } from '@/lib/supabase/service'
 import { jsonError } from '@/lib/ai-os'
+import {
+  getAiOsShareFolderConfig,
+  getAiOsShareTargetFolderName,
+  normalizeAiOsShareRole,
+} from '@/lib/ai-os/share-folders'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,10 +21,7 @@ function cleanEmail(value: unknown) {
 }
 
 function cleanRole(value: unknown) {
-  const role = cleanString(value).toLowerCase()
-
-  if (role === 'owner' || role === 'collaborator' || role === 'client') return role
-  return 'photographer'
+  return normalizeAiOsShareRole(value)
 }
 
 function allowedManagerRole(role: string) {
@@ -107,10 +109,11 @@ export async function POST(request: Request) {
 
     const body = await request.json().catch(() => null)
     const propertyId = cleanString(body?.propertyId)
-    const targetFolderName = cleanString(body?.targetFolderName) || 'Bozze Immagini e Video'
     const recipientName = cleanString(body?.recipientName) || null
     const recipientEmail = cleanEmail(body?.recipientEmail)
     const recipientRole = cleanRole(body?.recipientRole)
+    const roleConfig = getAiOsShareFolderConfig(recipientRole)
+    const targetFolderName = getAiOsShareTargetFolderName(recipientRole, body?.targetFolderName)
     const expiresAt = makeExpiresAt(body?.expiresInDays)
     const notes = cleanString(body?.notes) || null
 
@@ -179,6 +182,7 @@ export async function POST(request: Request) {
       ok: true,
       link,
       shareUrl: publicShareUrl(request, token),
+      folderConfig: roleConfig,
     })
   } catch (error) {
     return NextResponse.json(
