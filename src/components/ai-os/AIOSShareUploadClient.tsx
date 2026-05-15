@@ -36,6 +36,29 @@ type ShareInfo = {
   } | null
 }
 
+function roleLabel(role: string) {
+  if (role === 'owner') return 'Proprietario'
+  if (role === 'collaborator') return 'Collaboratore'
+  if (role === 'client') return 'Cliente'
+  return 'Fotografo'
+}
+
+function folderPurpose(role: string) {
+  if (role === 'owner') {
+    return 'Puoi caricare solo i documenti richiesti dall’agenzia per questo immobile.'
+  }
+
+  if (role === 'collaborator') {
+    return 'Puoi caricare solo documenti tecnici, planimetrie, immagini o materiale collegato a questo immobile.'
+  }
+
+  if (role === 'client') {
+    return 'Puoi caricare solo i documenti richiesti per questa pratica.'
+  }
+
+  return 'Puoi caricare solo foto e video nella cartella bozze di questo immobile.'
+}
+
 export default function AIOSShareUploadClient({ token }: { token: string }) {
   const [data, setData] = useState<ShareInfo | null>(null)
   const [loading, setLoading] = useState(true)
@@ -47,13 +70,12 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
   const propertyRef = data?.property?.reference_code
   const location = [data?.property?.comune, data?.property?.province].filter(Boolean).join(' · ')
   const maxMb = useMemo(() => Math.round((data?.link.maxUploadBytes || 4194304) / 1024 / 1024), [data])
-  const uploadTitle = data?.folderConfig?.title || 'Carica file'
-  const uploadDescription = data?.folderConfig?.description || 'Carica i file richiesti nella cartella corretta.'
+
+  const recipientRole = data?.link.recipientRole || data?.folderConfig?.role || 'photographer'
+  const folderName = data?.link.targetFolderName || data?.folderConfig?.targetFolderName || 'Cartella condivisa'
   const uploadAccept = data?.folderConfig?.accept || 'image/*,video/*,application/pdf'
-  const primaryAction = data?.folderConfig?.primaryAction || '📁 Carica file'
-  const secondaryAction = data?.folderConfig?.secondaryAction || '📷 Fotocamera'
-  const allowCamera = data?.folderConfig?.allowCamera !== false
   const allowVideo = Boolean(data?.folderConfig?.allowVideo)
+  const allowCamera = data?.folderConfig?.allowCamera !== false
 
   async function loadInfo() {
     setLoading(true)
@@ -119,7 +141,7 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
       }
 
       setUploadedCount((current) => current + files.length)
-      setNotice(`Upload completato: ${files.length} file caricati in "${data?.link.targetFolderName}".`)
+      setNotice(`Upload completato: ${files.length} file caricati in "${folderName}".`)
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Errore upload.')
     } finally {
@@ -142,7 +164,9 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
       <main className="flex min-h-dvh items-center justify-center bg-[#111827] px-5 text-white">
         <div className="max-w-md rounded-3xl border border-[#BF616A]/30 bg-[#BF616A]/10 p-6">
           <p className="text-lg font-bold text-[#FFCCD2]">Link non disponibile</p>
-          <p className="mt-2 text-sm leading-6 text-[#E5E7EB]/70">{notice || 'Il link non è valido o non è più attivo.'}</p>
+          <p className="mt-2 text-sm leading-6 text-[#E5E7EB]/70">
+            {notice || 'Il link non è valido o non è più attivo.'}
+          </p>
         </div>
       </main>
     )
@@ -157,8 +181,12 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
           </p>
 
           <h1 className="mt-3 text-2xl font-black text-white">
-            {uploadTitle}
+            {roleLabel(recipientRole)}
           </h1>
+
+          <p className="mt-2 text-sm leading-6 text-[#D1D5DB]/68">
+            Accesso limitato alla cartella assegnata.
+          </p>
 
           <div className="mt-4 rounded-3xl border border-[#374151] bg-[#111827]/68 p-4">
             <p className="text-sm font-bold text-white">{propertyTitle}</p>
@@ -166,21 +194,35 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
               {propertyRef ? `Rif. ${propertyRef}` : 'Riferimento non indicato'}
               {location ? ` · ${location}` : ''}
             </p>
-            <p className="mt-3 rounded-2xl border border-[#A3BE8C]/25 bg-[#A3BE8C]/10 px-3 py-2 text-xs font-bold text-[#A3BE8C]">
-              Destinazione: {data.link.targetFolderName}
-            </p>
+
+            <div className="mt-4 rounded-3xl border border-[#A3BE8C]/25 bg-[#A3BE8C]/10 p-4">
+              <div className="flex items-start gap-3">
+                <span className="text-3xl">📁</span>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#A3BE8C]/80">
+                    Cartella Drive assegnata
+                  </p>
+                  <p className="mt-1 truncate text-base font-black text-white">
+                    {folderName}
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-[#D1D5DB]/65">
+                    {folderPurpose(recipientRole)}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </header>
 
         <section className="mt-5 flex-1 rounded-[30px] border border-[#8FBCBB]/18 bg-[#1F2937]/82 p-5 shadow-2xl shadow-black/25">
           <p className="text-sm leading-6 text-[#D1D5DB]/72">
-            {uploadDescription} AI-OS caricherà tutto nella cartella Drive corretta senza mostrare Drive grezzo.
+            Scegli cosa vuoi fare. AI-OS caricherà tutto direttamente nella cartella corretta, senza aprire Google Drive.
           </p>
 
           <div className="mt-5 grid gap-3">
             {allowCamera ? (
               <label className="flex min-h-20 cursor-pointer items-center justify-center rounded-3xl border border-[#A3BE8C]/55 bg-[#A3BE8C] px-5 py-4 text-base font-black text-[#101820] shadow-[0_0_28px_rgba(163,190,140,0.20)] transition active:scale-[0.99]">
-                {secondaryAction}
+                📷 Scatta foto
                 <input
                   type="file"
                   accept="image/*"
@@ -197,7 +239,7 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
 
             {allowVideo ? (
               <label className="flex min-h-20 cursor-pointer items-center justify-center rounded-3xl border border-[#88C0D0]/45 bg-[#88C0D0]/14 px-5 py-4 text-base font-black text-[#AECBFA] transition active:scale-[0.99]">
-                🎥 Video
+                🎥 Registra video
                 <input
                   type="file"
                   accept="video/*"
@@ -213,7 +255,7 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
             ) : null}
 
             <label className="flex min-h-20 cursor-pointer items-center justify-center rounded-3xl border border-[#8FBCBB]/35 bg-[#8FBCBB]/10 px-5 py-4 text-base font-black text-[#8FBCBB] transition active:scale-[0.99]">
-              {primaryAction}
+              📁 Carica da galleria / file
               <input
                 type="file"
                 multiple
