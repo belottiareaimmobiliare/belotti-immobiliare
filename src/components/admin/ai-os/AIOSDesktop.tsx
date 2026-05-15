@@ -438,32 +438,20 @@ const desktopFolders = [
   {
     id: 'properties',
     label: 'Immobili',
-    icon: '📁',
-    hint: 'Cartelle immobili',
+    icon: '🗂️',
+    hint: 'Drive AI-OS / Immobili',
   },
   {
-    id: 'uploads',
-    label: 'Upload',
-    icon: '⬆️',
-    hint: 'Foto e video',
-  },
-  {
-    id: 'notes',
-    label: 'Note TXT',
-    icon: '📝',
-    hint: 'File modificabili',
+    id: 'tools',
+    label: 'Strumenti',
+    icon: '🧰',
+    hint: 'Gestionale agenzia',
   },
   {
     id: 'settings',
-    label: 'Aspetto',
-    icon: '⚙️',
+    label: 'Theme',
+    icon: '🎨',
     hint: 'Solo admin',
-  },
-  {
-    id: 'drive-settings',
-    label: 'Drive',
-    icon: '☁️',
-    hint: 'Archivio free',
   },
 ]
 
@@ -3508,9 +3496,26 @@ export default function AIOSDesktop() {
   }
 
   const openMainFolder = () => {
+    setDriveSettingsOpen(false)
+    setActiveAgencyToolId('drive')
     setDesktopWindowOpen(true)
     setStartOpen(false)
-    setNotice(activeFolder ? `Cartella aperta: ${activeFolder.name}` : 'Cartelle AI-OS aperte.')
+
+    setNotice(
+      activeFolder
+        ? `Drive Workspace Immobili aperto: ${activeFolder.name}.`
+        : 'Drive Workspace Immobili aperto. Seleziona un immobile dalla colonna sinistra.',
+    )
+
+    if (activeFolderId) {
+      void loadDriveFolder(activeFolderId)
+    }
+
+    const rootDriveFolderId = String(driveFolder?.drive_folder_id || '').trim()
+
+    if (rootDriveFolderId) {
+      void loadDriveExplorer(rootDriveFolderId)
+    }
   }
 
   const refreshActiveFolder = () => {
@@ -4488,13 +4493,15 @@ export default function AIOSDesktop() {
                 <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[#D8DEE9]/72">
-                      <span className="text-[#ECEFF4]">Il mio Drive</span>
+                      <span className="text-[#ECEFF4]">Drive AI-OS</span>
                       <span className="text-[#4C566A]">›</span>
                       <span className="rounded-full border border-[#4C566A]/70 bg-[#111827] px-3 py-1 text-[#D8DEE9]">
                         AI-OS
                       </span>
                       <span className="text-[#4C566A]">›</span>
                       <span>Immobili</span>
+                      <span className="text-[#4C566A]">›</span>
+                      <span className="text-[#88C0D0]">Workspace</span>
                       {driveExplorer?.folder?.name ? (
                         <>
                           <span className="text-[#4C566A]">›</span>
@@ -4549,7 +4556,7 @@ export default function AIOSDesktop() {
                       onClick={openDriveExplorerRootFolder}
                       className="rounded-full border border-[#4C566A]/70 bg-[#111827] px-4 py-2 text-xs font-bold text-[#D8DEE9] transition hover:border-[#8FBCBB]/45 hover:bg-[#151F2E]"
                     >
-                      Cartella immobile
+                      Root immobile
                     </button>
 
                     <button
@@ -4598,7 +4605,7 @@ export default function AIOSDesktop() {
                       value={driveExplorerSearchQuery}
                       onChange={(event) => setDriveExplorerSearchQuery(event.target.value)}
                       className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#ECEFF4] outline-none placeholder:text-[#D8DEE9]/34"
-                      placeholder="Cerca in questa cartella Drive..."
+                      placeholder="Cerca file, cartelle, foto, video o documenti..."
                     />
                     {driveExplorerSearchQuery.trim() ? (
                       <button
@@ -5005,7 +5012,7 @@ export default function AIOSDesktop() {
               Percorso AI-OS
             </p>
             <p className="mt-1 truncate text-xs font-semibold text-[#D8DEE9]/72">
-              📁 {activeFolder?.name || 'Cartella immobile'} / {activeCustomFolderName || getSectionLabel(activeSection)}
+              📁 {activeFolder?.name || 'Root immobile'} / {activeCustomFolderName || getSectionLabel(activeSection)}
             </p>
           </div>
 
@@ -5696,8 +5703,21 @@ export default function AIOSDesktop() {
               key={item.id}
               type="button"
               onClick={() => {
-                if (item.id === 'drive-settings') {
-                  openDriveSettingsPanel()
+                if (item.id === 'tools') {
+                  setDriveSettingsOpen(false)
+                  setActiveAgencyToolId(null)
+                  setDesktopWindowOpen(true)
+                  setStartOpen(false)
+                  setNotice('Strumenti Agenzia pronto: dopo Drive qui costruiamo il gestionale stile Getrix migliorato.')
+                  return
+                }
+
+                if (item.id === 'settings') {
+                  setDriveSettingsOpen(false)
+                  setActiveAgencyToolId(null)
+                  setDesktopWindowOpen(true)
+                  setStartOpen(false)
+                  setNotice('Theme AI-OS riservato admin: lo colleghiamo dopo il Drive Workspace.')
                   return
                 }
 
@@ -5740,7 +5760,7 @@ export default function AIOSDesktop() {
                   <span className="text-xl">📁</span>
                   <div className="min-w-0">
                     <h2 className="truncate text-sm font-semibold text-white md:text-base">
-                      {driveSettingsOpen ? 'Impostazioni Drive' : 'Cartella Immobili'}
+                      {driveSettingsOpen ? 'Impostazioni Drive' : activeAgencyToolId === 'drive' ? 'Drive Workspace Immobili' : 'Strumenti Agenzia'}
                     </h2>
                     <div className="mt-0.5 flex max-w-[min(720px,70vw)] flex-wrap items-center gap-1 text-[11px] font-semibold text-[#D8DEE9]/55">
                       <span>AI-OS</span>
@@ -6423,7 +6443,7 @@ export default function AIOSDesktop() {
                 Nuova cartella
               </p>
               <h3 className="mt-2 truncate text-xl font-semibold text-[#E8EAED]">
-                {activeFolder?.name || 'Cartella immobile'} / {activeCustomFolderName || getSectionLabel(activeSection)}
+                {activeFolder?.name || 'Root immobile'} / {activeCustomFolderName || getSectionLabel(activeSection)}
               </h3>
             </div>
 
