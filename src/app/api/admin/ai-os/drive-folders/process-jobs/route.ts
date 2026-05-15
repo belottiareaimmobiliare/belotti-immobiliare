@@ -180,7 +180,7 @@ async function upsertPropertyFolder(
   if (!property) throw new Error(`Immobile non trovato: ${job.property_id}`)
 
   const propertyRow = property as PropertyRow
-  const folderName = buildFolderName(propertyRow, job.desired_folder_name)
+  const folderName = buildFolderName(propertyRow, null)
   const now = new Date().toISOString()
 
   const { data: existing, error: existingError } = await supabase
