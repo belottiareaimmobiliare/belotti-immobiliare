@@ -3714,8 +3714,87 @@ export default function AIOSDesktop() {
     setNotice(activeFolder ? `Cartella aperta: ${activeFolder.name}` : 'Strumenti agenzia chiusi.')
   }
 
+
+  function buildRawDriveEmbedUrl(folderId: string) {
+    return `https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(folderId)}#grid`
+  }
+
+  function buildRawDriveOpenUrl(folderId: string, fallbackUrl?: string | null) {
+    if (fallbackUrl) return fallbackUrl
+    return `https://drive.google.com/drive/folders/${encodeURIComponent(folderId)}`
+  }
+
+  const renderDriveRawEmbed = () => {
+    const rawFolderId = String(
+      (activeFolder ? driveFolder?.drive_folder_id : driveSettings?.drive_root_folder_id) ||
+      driveSettings?.drive_root_folder_id ||
+      driveFolder?.drive_folder_id ||
+      '',
+    ).trim()
+
+    const rawFolderUrl = buildRawDriveOpenUrl(
+      rawFolderId,
+      activeFolder ? driveFolder?.drive_folder_url : driveSettings?.drive_root_url,
+    )
+
+    const rawTitle = activeFolder
+      ? activeFolder.name
+      : driveSettings?.drive_root_name || 'Immobili'
+
+    if (!rawFolderId) {
+      return (
+        <div className="h-full rounded-3xl border border-[#EBCB8B]/25 bg-[#EBCB8B]/10 p-6 text-sm leading-6 text-[#EBCB8B]">
+          Cartella Drive non configurata. Apri le impostazioni Drive e collega la cartella root Immobili.
+        </div>
+      )
+    }
+
+    return (
+      <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-[#3B4252]/70 bg-[#202124] shadow-[0_28px_120px_rgba(0,0,0,0.56)]">
+        <div className="flex shrink-0 items-center gap-3 border-b border-white/10 bg-[#202124] px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#8FBCBB]/75">
+              Google Drive
+            </p>
+            <h3 className="truncate text-base font-semibold text-white">
+              {rawTitle}
+            </h3>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => loadDriveFolder(activeFolderId)}
+            className="rounded-full border border-[#8FBCBB]/30 bg-[#8FBCBB]/10 px-3 py-2 text-xs font-bold text-[#8FBCBB] transition hover:bg-[#8FBCBB]/18"
+          >
+            Aggiorna
+          </button>
+
+          <a
+            href={rawFolderUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-full bg-[#8AB4F8] px-4 py-2 text-xs font-black text-[#202124] transition hover:brightness-110"
+          >
+            Apri in Drive
+          </a>
+        </div>
+
+        <iframe
+          src={buildRawDriveEmbedUrl(rawFolderId)}
+          title={rawTitle}
+          className="min-h-[620px] flex-1 border-0 bg-white"
+          allow="clipboard-read; clipboard-write"
+        />
+      </div>
+    )
+  }
+
   const renderAgencyToolDetails = () => {
     if (!activeAgencyTool) return null
+
+    if (activeAgencyTool.id === 'drive') {
+      return renderDriveRawEmbed()
+    }
 
     return (
       <div className="mb-4 rounded-3xl border border-[#B48EAD]/38 bg-[#242B38]/88 p-4 shadow-[0_18px_70px_rgba(0,0,0,0.42)]">
@@ -4507,7 +4586,7 @@ export default function AIOSDesktop() {
               </button>
             </div>
           </div>
-        ) : activeAgencyTool.id === 'drive' ? (
+        ) : String(activeAgencyTool.id) === 'drive' ? (
           <div className="aios-drive-manager aios-drive-clean">
             <div className="overflow-hidden rounded-[28px] border border-[#3B4252]/70 bg-[#070A10]/94 shadow-[0_28px_120px_rgba(0,0,0,0.72),inset_0_1px_0_rgba(236,239,244,0.045)]">
               <div className="border-b border-[#3B4252]/70 bg-[#0B1018]/96 px-4 py-3">
