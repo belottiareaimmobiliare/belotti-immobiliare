@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 type DriveFolder = {
   id: string
@@ -55,6 +55,16 @@ type ShareInfo = {
   files: DriveFile[]
 }
 
+type ActionItem =
+  | {
+      type: 'folder'
+      item: DriveFolder
+    }
+  | {
+      type: 'file'
+      item: DriveFile
+    }
+
 function roleLabel(role: string) {
   if (role === 'owner') return 'Proprietario'
   if (role === 'collaborator') return 'Collaboratore'
@@ -88,6 +98,31 @@ function formatSize(size?: number) {
   return `${(size / 1024 / 1024).toFixed(1)} MB`
 }
 
+function isImageFile(file: DriveFile) {
+  const mimeType = String(file.mimeType || '').toLowerCase()
+  const name = String(file.name || '').toLowerCase()
+
+  return mimeType.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp|avif|heic|heif)$/i.test(name)
+}
+
+function isVideoFile(file: DriveFile) {
+  const mimeType = String(file.mimeType || '').toLowerCase()
+  const name = String(file.name || '').toLowerCase()
+
+  return mimeType.startsWith('video/') || /\.(mp4|mov|m4v|webm|avi|mkv)$/i.test(name)
+}
+
+function fileIcon(file: DriveFile) {
+  if (isImageFile(file)) return '🖼️'
+  if (isVideoFile(file)) return '🎥'
+
+  const mimeType = String(file.mimeType || '').toLowerCase()
+  const name = String(file.name || '').toLowerCase()
+
+  if (mimeType.includes('pdf') || name.endsWith('.pdf')) return '📕'
+  return '📄'
+}
+
 export default function AIOSShareUploadClient({ token }: { token: string }) {
   const [data, setData] = useState<ShareInfo | null>(null)
   const [loading, setLoading] = useState(true)
@@ -96,6 +131,14 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
   const [uploadedCount, setUploadedCount] = useState(0)
   const [newFolderName, setNewFolderName] = useState('')
   const [history, setHistory] = useState<string[]>([])
+  const [actionItem, setActionItem] = useState<ActionItem | null>(null)
+  const [addMenuOpen, setAddMenuOpen] = useState(false)
+
+  const longPressTimerRef = useRef<number | null>(null)
+  const longPressTriggeredRef = useRef(false)
+  const photoInputRef = useRef<HTMLInputElement | null>(null)
+  const videoInputRef = useRef<HTMLInputElement | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const propertyTitle = data?.property?.title || 'Immobile'
   const propertyRef = data?.property?.reference_code
@@ -152,6 +195,28 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
 
+  function clearLongPress() {
+    if (longPressTimerRef.current) {
+      window.clearTimeout(longPressTimerRef.current)
+      longPressTimerRef.current = null
+    }
+  }
+
+  function startLongPress(item: ActionItem) {
+    clearLongPress()
+    longPressTriggeredRef.current = false
+
+    longPressTimerRef.current = window.setTimeout(() => {
+      longPressTriggeredRef.current = true
+      setActionItem(item)
+      setAddMenuOpen(false)
+    }, 520)
+  }
+
+  function stopLongPress() {
+    clearLongPress()
+  }
+
   async function uploadFiles(fileList: FileList | null) {
     const files = Array.from(fileList ?? [])
 
@@ -173,6 +238,7 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
     }
 
     setBusy(true)
+    setAddMenuOpen(false)
     setNotice(`Upload in corso: ${files.length} file...`)
 
     try {
@@ -201,6 +267,7 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
     if (!data?.currentFolder?.id) return
 
     setBusy(true)
+    setActionItem(null)
     setNotice('Operazione in corso...')
 
     try {
@@ -249,54 +316,71 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
     setNewFolderName('')
   }
 
-  async function renameItem(item: DriveFolder | DriveFile) {
-    const nextName = window.prompt('Nuovo nome', item.name)?.trim()
+  async function renameItem(item: ActionItem) {
+    const currentName = item.item.name
+    const nextName = window.prompt('Nuovo nome', currentName)?.trim()
 
-    if (!nextName || nextName === item.name) return
+    if (!nextName || nextName === currentName) return
 
     await runAction(
       {
         action: 'renameItem',
-        sourceItemId: item.id,
+        sourceItemId: item.item.id,
         newName: nextName,
       },
       `Rinominato: ${nextName}`,
     )
   }
 
-  async function deleteItem(item: DriveFolder | DriveFile) {
-    const confirmed = window.confirm(`Eliminare "${item.name}"?`)
+  async function deleteItem(item: ActionItem) {
+    const confirmed = window.confirm(`Eliminare "${item.item.name}"?`)
 
     if (!confirmed) return
 
     await runAction(
       {
         action: 'deleteItem',
-        sourceItemId: item.id,
+        sourceItemId: item.item.id,
       },
-      `Eliminato: ${item.name}`,
+      `Eliminato: ${item.item.name}`,
     )
   }
 
-  async function moveFile(file: DriveFile, targetFolderId: string) {
+  async function moveItem(item: ActionItem, targetFolderId: string) {
     if (!targetFolderId) return
 
     await runAction(
       {
         action: 'moveItem',
-        sourceItemId: file.id,
+        sourceItemId: item.item.id,
         targetFolderId,
       },
-      `File spostato: ${file.name}`,
+      `Spostato: ${item.item.name}`,
     )
   }
 
   function openFolder(folder: DriveFolder) {
+    if (longPressTriggeredRef.current) {
+      longPressTriggeredRef.current = false
+      return
+    }
+
     if (data?.currentFolder?.id) {
       setHistory((current) => [...current, data.currentFolder.id])
     }
 
     void loadFolder(folder.id)
+  }
+
+  function openFile(file: DriveFile) {
+    if (longPressTriggeredRef.current) {
+      longPressTriggeredRef.current = false
+      return
+    }
+
+    if (file.url) {
+      window.open(file.url, '_blank', 'noopener,noreferrer')
+    }
   }
 
   function goBack() {
@@ -335,23 +419,75 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
   }
 
   return (
-    <main className="min-h-dvh bg-[radial-gradient(circle_at_20%_10%,rgba(143,188,187,0.22),transparent_30%),linear-gradient(135deg,#0B1220,#111827_55%,#1F2937)] px-4 py-5 text-[#E5E7EB]">
+    <main className="min-h-dvh bg-[radial-gradient(circle_at_20%_10%,rgba(143,188,187,0.22),transparent_30%),linear-gradient(135deg,#0B1220,#111827_55%,#1F2937)] px-4 pb-28 pt-5 text-[#E5E7EB]">
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        disabled={busy}
+        onChange={(event) => {
+          void uploadFiles(event.currentTarget.files)
+          event.currentTarget.value = ''
+        }}
+      />
+
+      <input
+        ref={videoInputRef}
+        type="file"
+        accept="video/*"
+        capture="environment"
+        className="hidden"
+        disabled={busy}
+        onChange={(event) => {
+          void uploadFiles(event.currentTarget.files)
+          event.currentTarget.value = ''
+        }}
+      />
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept={uploadAccept}
+        className="hidden"
+        disabled={busy}
+        onChange={(event) => {
+          void uploadFiles(event.currentTarget.files)
+          event.currentTarget.value = ''
+        }}
+      />
+
       <div className="mx-auto flex min-h-[calc(100dvh-40px)] max-w-xl flex-col">
         <header className="rounded-[30px] border border-[#8FBCBB]/20 bg-[#1F2937]/86 p-5 shadow-2xl shadow-black/30">
-          <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#8FBCBB]/75">
-            AI-OS Mobile
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#8FBCBB]/75">
+                AI-OS Mobile
+              </p>
 
-          <h1 className="mt-3 text-2xl font-black text-white">
-            {roleLabel(recipientRole)}
-          </h1>
+              <h1 className="mt-3 truncate text-2xl font-black text-white">
+                {data.currentFolder?.name || folderName}
+              </h1>
 
-          <p className="mt-2 text-sm leading-6 text-[#D1D5DB]/68">
-            Accesso limitato alla cartella assegnata.
-          </p>
+              <p className="mt-2 text-sm leading-6 text-[#D1D5DB]/68">
+                {isRootFolder ? roleLabel(recipientRole) : 'Sottocartella'} · accesso limitato.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              disabled={busy || (isRootFolder && history.length === 0)}
+              onClick={goBack}
+              className="rounded-full border border-[#8FBCBB]/30 bg-[#8FBCBB]/10 px-3 py-2 text-xs font-bold text-[#8FBCBB] transition hover:bg-[#8FBCBB]/18 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              ←
+            </button>
+          </div>
 
           <div className="mt-4 rounded-3xl border border-[#374151] bg-[#111827]/68 p-4">
-            <p className="text-sm font-bold text-white">{propertyTitle}</p>
+            <p className="truncate text-sm font-bold text-white">{propertyTitle}</p>
             <p className="mt-1 text-xs text-[#9CA3AF]">
               {propertyRef ? `Rif. ${propertyRef}` : 'Riferimento non indicato'}
               {location ? ` · ${location}` : ''}
@@ -362,7 +498,7 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
                 <span className="text-3xl">📁</span>
                 <div className="min-w-0">
                   <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#A3BE8C]/80">
-                    Cartella Drive assegnata
+                    Cartella assegnata
                   </p>
                   <p className="mt-1 truncate text-base font-black text-white">
                     {folderName}
@@ -376,84 +512,24 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
           </div>
         </header>
 
-        <section className="mt-5 rounded-[30px] border border-[#8FBCBB]/18 bg-[#1F2937]/82 p-5 shadow-2xl shadow-black/25">
-          <p className="text-sm leading-6 text-[#D1D5DB]/72">
-            Azioni rapide nella cartella corrente.
-          </p>
-
-          <div className="mt-5 grid gap-3">
-            {allowCamera ? (
-              <label className="flex min-h-16 cursor-pointer items-center justify-center rounded-3xl border border-[#A3BE8C]/55 bg-[#A3BE8C] px-5 py-4 text-base font-black text-[#101820] shadow-[0_0_28px_rgba(163,190,140,0.20)] transition active:scale-[0.99]">
-                📷 Scatta foto
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  className="hidden"
-                  disabled={busy}
-                  onChange={(event) => {
-                    void uploadFiles(event.currentTarget.files)
-                    event.currentTarget.value = ''
-                  }}
-                />
-              </label>
-            ) : null}
-
-            {allowVideo ? (
-              <label className="flex min-h-16 cursor-pointer items-center justify-center rounded-3xl border border-[#88C0D0]/45 bg-[#88C0D0]/14 px-5 py-4 text-base font-black text-[#AECBFA] transition active:scale-[0.99]">
-                🎥 Registra video
-                <input
-                  type="file"
-                  accept="video/*"
-                  capture="environment"
-                  className="hidden"
-                  disabled={busy}
-                  onChange={(event) => {
-                    void uploadFiles(event.currentTarget.files)
-                    event.currentTarget.value = ''
-                  }}
-                />
-              </label>
-            ) : null}
-
-            <label className="flex min-h-16 cursor-pointer items-center justify-center rounded-3xl border border-[#8FBCBB]/35 bg-[#8FBCBB]/10 px-5 py-4 text-base font-black text-[#8FBCBB] transition active:scale-[0.99]">
-              📁 Carica da galleria / file
-              <input
-                type="file"
-                multiple
-                accept={uploadAccept}
-                className="hidden"
-                disabled={busy}
-                onChange={(event) => {
-                  void uploadFiles(event.currentTarget.files)
-                  event.currentTarget.value = ''
-                }}
-              />
-            </label>
-          </div>
-        </section>
-
         <section className="mt-5 flex-1 rounded-[30px] border border-[#8FBCBB]/18 bg-[#1F2937]/82 p-5 shadow-2xl shadow-black/25">
           <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
+            <div>
               <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#8FBCBB]/70">
-                Esplora cartella
+                Contenuto cartella
               </p>
-              <h2 className="mt-1 truncate text-lg font-black text-white">
-                {data.currentFolder?.name || folderName}
-              </h2>
-              <p className="mt-1 text-xs text-[#9CA3AF]">
-                {isRootFolder ? 'Root assegnata' : 'Sottocartella'}
+              <p className="mt-1 text-xs leading-5 text-[#9CA3AF]">
+                Tieni premuto su un file o una cartella per aprire il menu.
               </p>
             </div>
 
             <button
               type="button"
-              disabled={busy || (isRootFolder && history.length === 0)}
-              onClick={goBack}
-              className="rounded-full border border-[#8FBCBB]/30 bg-[#8FBCBB]/10 px-3 py-2 text-xs font-bold text-[#8FBCBB] transition hover:bg-[#8FBCBB]/18 disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={busy}
+              onClick={() => void loadFolder(data.currentFolder.id, true)}
+              className="rounded-full border border-[#8FBCBB]/25 bg-[#8FBCBB]/10 px-3 py-2 text-xs font-bold text-[#8FBCBB] disabled:opacity-50"
             >
-              ← Indietro
+              Aggiorna
             </button>
           </div>
 
@@ -476,94 +552,51 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
 
           <div className="mt-5 space-y-3">
             {data.folders.map((folder) => (
-              <div key={folder.id} className="rounded-3xl border border-[#8FBCBB]/18 bg-[#111827]/62 p-4">
-                <button
-                  type="button"
-                  onClick={() => openFolder(folder)}
-                  className="flex w-full items-center gap-3 text-left"
-                >
-                  <span className="text-3xl">📁</span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-black text-white">{folder.name}</span>
-                    <span className="mt-1 block text-xs text-[#9CA3AF]">Tocca per aprire</span>
-                  </span>
-                </button>
-
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => void renameItem(folder)}
-                    className="rounded-2xl border border-[#8FBCBB]/25 bg-[#8FBCBB]/10 px-3 py-2 text-xs font-bold text-[#8FBCBB]"
-                  >
-                    Rinomina
-                  </button>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => void deleteItem(folder)}
-                    className="rounded-2xl border border-[#BF616A]/25 bg-[#BF616A]/10 px-3 py-2 text-xs font-bold text-[#FFCCD2]"
-                  >
-                    Elimina
-                  </button>
-                </div>
-              </div>
+              <button
+                key={folder.id}
+                type="button"
+                onPointerDown={() => startLongPress({ type: 'folder', item: folder })}
+                onPointerUp={stopLongPress}
+                onPointerCancel={stopLongPress}
+                onPointerLeave={stopLongPress}
+                onContextMenu={(event) => {
+                  event.preventDefault()
+                  setActionItem({ type: 'folder', item: folder })
+                }}
+                onClick={() => openFolder(folder)}
+                className="flex w-full items-center gap-3 rounded-3xl border border-[#8FBCBB]/18 bg-[#111827]/62 p-4 text-left transition active:scale-[0.99]"
+              >
+                <span className="text-3xl">📁</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-black text-white">{folder.name}</span>
+                  <span className="mt-1 block text-xs text-[#9CA3AF]">Tocca per aprire · tieni premuto per menu</span>
+                </span>
+              </button>
             ))}
 
             {data.files.map((file) => (
-              <div key={file.id} className="rounded-3xl border border-[#374151] bg-[#111827]/72 p-4">
-                <div className="flex items-start gap-3">
-                  <span className="text-3xl">📄</span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-black text-white">{file.name}</p>
-                    <p className="mt-1 text-xs text-[#9CA3AF]">
-                      {file.mimeType || 'File'} · {formatSize(file.size)}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => void renameItem(file)}
-                    className="rounded-2xl border border-[#8FBCBB]/25 bg-[#8FBCBB]/10 px-3 py-2 text-xs font-bold text-[#8FBCBB]"
-                  >
-                    Rinomina
-                  </button>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => void deleteItem(file)}
-                    className="rounded-2xl border border-[#BF616A]/25 bg-[#BF616A]/10 px-3 py-2 text-xs font-bold text-[#FFCCD2]"
-                  >
-                    Elimina
-                  </button>
-                </div>
-
-                {data.folders.length > 0 ? (
-                  <select
-                    defaultValue=""
-                    disabled={busy}
-                    onChange={(event) => {
-                      const targetFolderId = event.target.value
-                      event.currentTarget.value = ''
-
-                      if (targetFolderId) {
-                        void moveFile(file, targetFolderId)
-                      }
-                    }}
-                    className="mt-2 w-full rounded-2xl border border-[#374151] bg-[#0B1220] px-3 py-2 text-xs font-bold text-[#D1D5DB] outline-none"
-                  >
-                    <option value="">Sposta in sottocartella...</option>
-                    {data.folders.map((folder) => (
-                      <option key={folder.id} value={folder.id}>
-                        {folder.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : null}
-              </div>
+              <button
+                key={file.id}
+                type="button"
+                onPointerDown={() => startLongPress({ type: 'file', item: file })}
+                onPointerUp={stopLongPress}
+                onPointerCancel={stopLongPress}
+                onPointerLeave={stopLongPress}
+                onContextMenu={(event) => {
+                  event.preventDefault()
+                  setActionItem({ type: 'file', item: file })
+                }}
+                onClick={() => openFile(file)}
+                className="flex w-full items-center gap-3 rounded-3xl border border-[#374151] bg-[#111827]/72 p-4 text-left transition active:scale-[0.99]"
+              >
+                <span className="text-3xl">{fileIcon(file)}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-black text-white">{file.name}</span>
+                  <span className="mt-1 block truncate text-xs text-[#9CA3AF]">
+                    {file.mimeType || 'File'} · {formatSize(file.size)}
+                  </span>
+                </span>
+              </button>
             ))}
 
             {data.folders.length === 0 && data.files.length === 0 ? (
@@ -571,7 +604,7 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
                 <p className="text-4xl">📂</p>
                 <p className="mt-3 text-sm font-bold text-white">Cartella vuota</p>
                 <p className="mt-1 text-xs leading-5 text-[#9CA3AF]">
-                  Carica foto, video, documenti o crea una sottocartella.
+                  Usa il pulsante + per scattare, registrare o caricare file.
                 </p>
               </div>
             ) : null}
@@ -595,6 +628,159 @@ export default function AIOSShareUploadClient({ token }: { token: string }) {
           AI-OS · Area Immobiliare
         </footer>
       </div>
+
+      {addMenuOpen ? (
+        <button
+          type="button"
+          aria-label="Chiudi menu caricamento"
+          onClick={() => setAddMenuOpen(false)}
+          className="fixed inset-0 z-40 cursor-default bg-black/20"
+        />
+      ) : null}
+
+      <div className="fixed bottom-6 right-5 z-50 flex flex-col items-end gap-3">
+        {addMenuOpen ? (
+          <div className="flex flex-col items-end gap-3">
+            {allowCamera ? (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => {
+                  setAddMenuOpen(false)
+                  photoInputRef.current?.click()
+                }}
+                className="flex h-14 items-center gap-3 rounded-full border border-[#A3BE8C]/50 bg-[#A3BE8C] px-5 text-sm font-black text-[#101820] shadow-2xl shadow-black/40 disabled:opacity-50"
+              >
+                <span>📷</span>
+                <span>Foto</span>
+              </button>
+            ) : null}
+
+            {allowVideo ? (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => {
+                  setAddMenuOpen(false)
+                  videoInputRef.current?.click()
+                }}
+                className="flex h-14 items-center gap-3 rounded-full border border-[#88C0D0]/45 bg-[#1F3A4A] px-5 text-sm font-black text-[#AECBFA] shadow-2xl shadow-black/40 disabled:opacity-50"
+              >
+                <span>🎥</span>
+                <span>Video</span>
+              </button>
+            ) : null}
+
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setAddMenuOpen(false)
+                fileInputRef.current?.click()
+              }}
+              className="flex h-14 items-center gap-3 rounded-full border border-[#8FBCBB]/45 bg-[#203B3D] px-5 text-sm font-black text-[#BFE8E5] shadow-2xl shadow-black/40 disabled:opacity-50"
+            >
+              <span>📁</span>
+              <span>Carica</span>
+            </button>
+          </div>
+        ) : null}
+
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => setAddMenuOpen((value) => !value)}
+          className="grid h-16 w-16 place-items-center rounded-full border border-[#A3BE8C]/70 bg-[#A3BE8C] text-4xl font-black leading-none text-[#101820] shadow-[0_20px_60px_rgba(0,0,0,0.55),0_0_34px_rgba(163,190,140,0.34)] transition active:scale-95 disabled:cursor-wait disabled:opacity-60"
+          aria-label="Apri menu caricamento"
+        >
+          {addMenuOpen ? '×' : '+'}
+        </button>
+      </div>
+
+      {actionItem ? (
+        <div className="fixed inset-0 z-[60] flex items-end bg-black/45 px-4 pb-4" onClick={() => setActionItem(null)}>
+          <div
+            className="w-full rounded-[30px] border border-[#8FBCBB]/20 bg-[#111827] p-4 shadow-2xl shadow-black/70"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mb-4 flex items-start gap-3">
+              <span className="text-3xl">{actionItem.type === 'folder' ? '📁' : fileIcon(actionItem.item as DriveFile)}</span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-base font-black text-white">{actionItem.item.name}</p>
+                <p className="mt-1 text-xs text-[#9CA3AF]">
+                  {actionItem.type === 'folder' ? 'Cartella' : 'File'}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              {actionItem.type === 'folder' ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => {
+                    const folder = actionItem.item as DriveFolder
+                    setActionItem(null)
+                    openFolder(folder)
+                  }}
+                  className="rounded-2xl border border-[#8FBCBB]/25 bg-[#8FBCBB]/10 px-4 py-3 text-left text-sm font-bold text-[#8FBCBB]"
+                >
+                  Apri cartella
+                </button>
+              ) : null}
+
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void renameItem(actionItem)}
+                className="rounded-2xl border border-[#8FBCBB]/25 bg-[#8FBCBB]/10 px-4 py-3 text-left text-sm font-bold text-[#8FBCBB]"
+              >
+                Rinomina
+              </button>
+
+              {actionItem.type === 'file' && data.folders.length > 0 ? (
+                <select
+                  defaultValue=""
+                  disabled={busy}
+                  onChange={(event) => {
+                    const targetFolderId = event.target.value
+                    event.currentTarget.value = ''
+
+                    if (targetFolderId) {
+                      void moveItem(actionItem, targetFolderId)
+                    }
+                  }}
+                  className="rounded-2xl border border-[#374151] bg-[#0B1220] px-4 py-3 text-sm font-bold text-[#D1D5DB] outline-none"
+                >
+                  <option value="">Sposta in sottocartella...</option>
+                  {data.folders.map((folder) => (
+                    <option key={folder.id} value={folder.id}>
+                      {folder.name}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
+
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void deleteItem(actionItem)}
+                className="rounded-2xl border border-[#BF616A]/25 bg-[#BF616A]/10 px-4 py-3 text-left text-sm font-bold text-[#FFCCD2]"
+              >
+                Elimina
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActionItem(null)}
+                className="rounded-2xl border border-[#374151] bg-[#1F2937] px-4 py-3 text-left text-sm font-bold text-[#D1D5DB]"
+              >
+                Annulla
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   )
 }
