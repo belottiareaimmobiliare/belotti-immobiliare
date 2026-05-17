@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { randomBytes } from 'crypto'
 import { requireAdminProfile } from '@/lib/admin-auth'
 import { createServiceClient } from '@/lib/supabase/service'
 import { jsonError } from '@/lib/ai-os'
@@ -23,6 +24,28 @@ function cleanPermission(value: unknown) {
 
   if (valueString === 'reader') return 'reader'
   return 'writer'
+}
+
+
+function roleForFolderKey(folderKey: string) {
+  if (folderKey === 'owner_documents') return 'owner'
+  if (folderKey === 'plans_documents') return 'collaborator'
+  if (folderKey === 'agency_material') return 'collaborator'
+  if (folderKey === 'site_publication') return 'collaborator'
+  return 'photographer'
+}
+
+function createShareToken() {
+  return randomBytes(24).toString('hex')
+}
+
+function buildAiOsShareUrl(request: Request, token: string) {
+  const origin = new URL(request.url).origin
+  return `${origin}/ai-os/share/${token}`
+}
+
+function defaultShareExpiry() {
+  return new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString()
 }
 
 async function callDriveScript(input: {
@@ -130,17 +153,49 @@ export async function POST(request: Request) {
       permissionRole,
     })
 
+    const shareToken = createShareToken()
+    const aiOsUrl = buildAiOsShareUrl(request, shareToken)
+    const recipientRole = roleForFolderKey(folderKey)
+    const folderName = subfolder?.folder_name || standardFolder.name
+    const folderUrl = subfolder?.drive_folder_url || `https://drive.google.com/drive/folders/${folderId}`
+
+    const { error: shareLinkError } = await supabase
+      .from('ai_os_share_links')
+      .insert({
+        token: shareToken,
+        property_id: propertyId,
+        drive_folder_id: folderId,
+        target_folder_name: folderName,
+        recipient_name: emailAddress,
+        recipient_email: emailAddress,
+        recipient_role: recipientRole,
+        can_upload: permissionRole !== 'reader',
+        max_upload_bytes: 50 * 1024 * 1024,
+        expires_at: defaultShareExpiry(),
+        is_active: true,
+        direct_drive_folder: true,
+        created_by: profile.id,
+        updated_at: new Date().toISOString(),
+      })
+
+    if (shareLinkError) {
+      throw new Error(shareLinkError.message || 'Errore generazione link AI-OS fallback')
+    }
+
     return NextResponse.json({
       ok: true,
       shared: {
         propertyId,
         folderKey,
-        folderName: subfolder?.folder_name || standardFolder.name,
+        folderName,
         folderId,
-        folderUrl: subfolder?.drive_folder_url || `https://drive.google.com/drive/folders/${folderId}`,
+        folderUrl,
+        aiOsUrl,
         emailAddress,
         permissionRole,
+        recipientRole,
       },
+      aiOsUrl,
       drive: payload.permission ?? payload.result ?? null,
     })
   } catch (error) {

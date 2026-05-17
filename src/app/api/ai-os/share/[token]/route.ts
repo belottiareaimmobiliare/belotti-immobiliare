@@ -26,6 +26,10 @@ type DriveFile = {
   updatedAt?: string
 }
 
+function buildDriveFolderUrl(folderId: string) {
+  return `https://drive.google.com/drive/folders/${encodeURIComponent(folderId)}`
+}
+
 function cleanString(value: unknown) {
   return String(value ?? '').trim()
 }
@@ -216,11 +220,31 @@ async function getShareWorkspace(token: string, requestedFolderId?: string | nul
   }
 
   const folderConfig = getAiOsShareFolderConfig(link.recipient_role)
+  const linkedDriveFolderId = cleanString(link.drive_folder_id)
 
-  const rootFolder = await ensureTargetFolder(
-    cleanString(link.drive_folder_id),
-    cleanString(link.target_folder_name) || folderConfig.targetFolderName,
-  )
+  if (!linkedDriveFolderId) {
+    return {
+      supabase,
+      link: null,
+      property: null,
+      rootFolder: null,
+      currentFolderId: '',
+      error: 'Cartella Drive non configurata per questo link.',
+    }
+  }
+
+  const directDriveFolder = link.direct_drive_folder === true
+
+  const rootFolder = directDriveFolder
+    ? {
+        id: linkedDriveFolderId,
+        name: cleanString(link.target_folder_name) || folderConfig.targetFolderName,
+        url: buildDriveFolderUrl(linkedDriveFolderId),
+      }
+    : await ensureTargetFolder(
+        linkedDriveFolderId,
+        cleanString(link.target_folder_name) || folderConfig.targetFolderName,
+      )
 
   const currentFolderId = cleanString(requestedFolderId) || rootFolder.id
   const isAllowedFolder = await isFolderInsideRoot(rootFolder.id, currentFolderId)

@@ -32,6 +32,7 @@ export default function AIOSCondivisioniPage() {
   const [permissionRole, setPermissionRole] = useState<'writer' | 'reader'>('writer')
   const [notice, setNotice] = useState('')
   const [sharedUrl, setSharedUrl] = useState('')
+  const [sharedAiOsUrl, setSharedAiOsUrl] = useState('')
   const [loading, setLoading] = useState(true)
   const [preparing, setPreparing] = useState(false)
   const [sharing, setSharing] = useState(false)
@@ -131,6 +132,7 @@ export default function AIOSCondivisioniPage() {
       }
 
       setSharedUrl(payload.shared?.folderUrl || '')
+      setSharedAiOsUrl(payload.shared?.aiOsUrl || payload.aiOsUrl || '')
       setNotice(`Cartella condivisa con ${emailAddress}. L’utente potrà usare solo quella cartella e le sue sottocartelle.`)
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Errore condivisione Drive')
@@ -196,6 +198,7 @@ export default function AIOSCondivisioniPage() {
                   const nextPropertyId = event.target.value
                   setPropertyId(nextPropertyId)
                   setSharedUrl('')
+                  setSharedAiOsUrl('')
                   void prepareSubfolders(nextPropertyId)
                 }}
                 className="w-full rounded-2xl border border-[#374151] bg-[#111827] px-4 py-3 text-sm font-semibold text-white outline-none transition focus:border-[#8FBCBB]/60"
@@ -232,6 +235,8 @@ export default function AIOSCondivisioniPage() {
                     onChange={(event) => {
                       setFolderKey(event.target.value)
                       setSharedUrl('')
+                      setSharedAiOsUrl('')
+                  setSharedAiOsUrl('')
                     }}
                     className="w-full rounded-2xl border border-[#374151] bg-[#111827] px-4 py-3 text-sm font-semibold text-white outline-none transition focus:border-[#8FBCBB]/60"
                   >
@@ -281,22 +286,45 @@ export default function AIOSCondivisioniPage() {
                 </>
               ) : null}
 
-              {sharedUrl ? (
+              {sharedUrl || sharedAiOsUrl ? (
                 <div className="rounded-3xl border border-[#A3BE8C]/25 bg-[#A3BE8C]/10 p-4">
-                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#A3BE8C]">
-                    Link Drive cartella condivisa
-                  </p>
-                  <p className="mt-2 break-all text-sm font-semibold text-white">
-                    {sharedUrl}
-                  </p>
-                  <a
-                    href={sharedUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-3 inline-flex rounded-full border border-[#A3BE8C]/45 bg-[#A3BE8C]/12 px-4 py-2 text-xs font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/20"
-                  >
-                    Apri cartella
-                  </a>
+                  {sharedAiOsUrl ? (
+                    <>
+                      <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#A3BE8C]">
+                        Link AI-OS da inviare al destinatario
+                      </p>
+                      <p className="mt-2 break-all text-sm font-semibold text-white">
+                        {sharedAiOsUrl}
+                      </p>
+                      <a
+                        href={sharedAiOsUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-3 inline-flex rounded-full border border-[#A3BE8C]/45 bg-[#A3BE8C]/12 px-4 py-2 text-xs font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/20"
+                      >
+                        Apri link AI-OS
+                      </a>
+                    </>
+                  ) : null}
+
+                  {sharedUrl ? (
+                    <div className={sharedAiOsUrl ? 'mt-5 border-t border-[#A3BE8C]/20 pt-4' : ''}>
+                      <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#8FBCBB]">
+                        Link Drive diretto
+                      </p>
+                      <p className="mt-2 break-all text-sm font-semibold text-white">
+                        {sharedUrl}
+                      </p>
+                      <a
+                        href={sharedUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-3 inline-flex rounded-full border border-[#8FBCBB]/35 bg-[#8FBCBB]/10 px-4 py-2 text-xs font-bold text-[#8FBCBB] transition hover:bg-[#8FBCBB]/18"
+                      >
+                        Apri cartella Drive
+                      </a>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </div>
