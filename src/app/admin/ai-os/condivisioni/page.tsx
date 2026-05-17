@@ -27,6 +27,7 @@ export default function AIOSCondivisioniPage() {
   const [folders, setFolders] = useState<WorkspaceFolder[]>([])
   const [subfolders, setSubfolders] = useState<DriveSubfolder[]>([])
   const [propertyId, setPropertyId] = useState('')
+  const [propertySearchQuery, setPropertySearchQuery] = useState('')
   const [folderKey, setFolderKey] = useState('')
   const [emailAddress, setEmailAddress] = useState('')
   const [permissionRole, setPermissionRole] = useState<'writer' | 'reader'>('writer')
@@ -48,6 +49,28 @@ export default function AIOSCondivisioniPage() {
     return subfolders.find((folder) => folder.key === folderKey) ?? null
   }, [subfolders, folderKey])
 
+  const filteredReadyFolders = useMemo(() => {
+    const query = propertySearchQuery.trim().toLowerCase()
+
+    if (query.length < 3) {
+      return []
+    }
+
+    return readyFolders.filter((folder) => {
+      const haystack = [
+        folder.name,
+        folder.propertyRef,
+        folder.address,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+
+      return haystack.includes(query)
+    })
+  }, [propertySearchQuery, readyFolders])
+
+
   async function loadFolders() {
     setLoading(true)
     setNotice('')
@@ -66,6 +89,20 @@ export default function AIOSCondivisioniPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  function selectPropertyForShare(nextPropertyId: string) {
+    const selectedFolder = readyFolders.find((folder) => folder.id === nextPropertyId) ?? null
+
+    setPropertyId(nextPropertyId)
+    setPropertySearchQuery(
+      selectedFolder
+        ? `${selectedFolder.propertyRef ? `${selectedFolder.propertyRef} - ` : ''}${selectedFolder.name}`
+        : '',
+    )
+    setSharedUrl('')
+    setSharedAiOsUrl('')
+    void prepareSubfolders(nextPropertyId)
   }
 
   async function prepareSubfolders(nextPropertyId = propertyId) {
@@ -92,7 +129,7 @@ export default function AIOSCondivisioniPage() {
       const nextSubfolders = Array.isArray(payload.folders) ? payload.folders : []
       setSubfolders(nextSubfolders)
       setFolderKey(nextSubfolders[0]?.key || '')
-      setNotice('Sottocartelle Drive pronte. Ora puoi condividere la cartella precisa.')
+      setNotice('Sottocartelle Drive pronte. Ora puoi condividere la cartella selezionata.')
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Errore preparazione sottocartelle')
       setSubfolders([])
@@ -149,10 +186,10 @@ export default function AIOSCondivisioniPage() {
             AI-OS / Drive
           </p>
           <h1 className="mt-2 text-2xl font-black text-white md:text-3xl">
-            Condividi cartella precisa
+            Condividi cartella Drive
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-[#D1D5DB]/68">
-            La segreteria sceglie immobile, sottocartella ed email Gmail. AI-OS condivide solo quella cartella: il destinatario può usare quella e le sottocartelle, ma non può salire alla cartella padre.
+            La segreteria sceglie immobile, sottocartella ed email Gmail. AI-OS condivide solo la cartella selezionata: il destinatario può usare quella e le sottocartelle, ma non può salire alla cartella padre.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -192,24 +229,64 @@ export default function AIOSCondivisioniPage() {
             </div>
           ) : (
             <div className="mt-5 grid gap-4">
-              <select
-                value={propertyId}
-                onChange={(event) => {
-                  const nextPropertyId = event.target.value
-                  setPropertyId(nextPropertyId)
-                  setSharedUrl('')
-                  setSharedAiOsUrl('')
-                  void prepareSubfolders(nextPropertyId)
-                }}
-                className="w-full rounded-2xl border border-[#374151] bg-[#111827] px-4 py-3 text-sm font-semibold text-white outline-none transition focus:border-[#8FBCBB]/60"
-              >
-                <option value="">Seleziona immobile...</option>
-                {readyFolders.map((folder) => (
-                  <option key={folder.id} value={folder.id}>
-                    {folder.propertyRef ? `${folder.propertyRef} - ` : ''}{folder.name}
-                  </option>
-                ))}
-              </select>
+              <div className="space-y-3">
+                <div className="relative">
+                  <input
+                    value={propertySearchQuery}
+                    onChange={(event) => {
+                      setPropertySearchQuery(event.target.value)
+                      setPropertyId('')
+                      setSubfolders([])
+                      setFolderKey('')
+                      setSharedUrl('')
+                      setSharedAiOsUrl('')
+                    }}
+                    className="w-full rounded-2xl border border-[#8FBCBB]/45 bg-[#111827] px-4 py-3 pr-24 text-sm font-semibold text-white outline-none transition placeholder:text-[#6B7280] focus:border-[#A3BE8C]/70"
+                    placeholder="Cerca immobile per codice, titolo o indirizzo..."
+                  />
+                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#8FBCBB]/65">
+                    min 3
+                  </span>
+                </div>
+
+                {propertySearchQuery.trim().length > 0 && propertySearchQuery.trim().length < 3 ? (
+                  <div className="rounded-2xl border border-[#EBCB8B]/20 bg-[#EBCB8B]/10 px-4 py-3 text-xs font-semibold text-[#EBCB8B]">
+                    Scrivi almeno 3 caratteri per cercare.
+                  </div>
+                ) : null}
+
+                {propertySearchQuery.trim().length >= 3 ? (
+                  <div className="max-h-[320px] space-y-2 overflow-y-auto rounded-2xl border border-[#374151] bg-[#0B1220]/72 p-2">
+                    {filteredReadyFolders.length > 0 ? (
+                      filteredReadyFolders.map((folder) => (
+                        <button
+                          key={folder.id}
+                          type="button"
+                          onClick={() => selectPropertyForShare(folder.id)}
+                          className={`w-full rounded-xl border px-4 py-3 text-left transition ${
+                            propertyId === folder.id
+                              ? 'border-[#A3BE8C]/60 bg-[#A3BE8C]/14'
+                              : 'border-[#374151] bg-[#111827]/80 hover:border-[#8FBCBB]/45 hover:bg-[#1F2937]'
+                          }`}
+                        >
+                          <p className="truncate text-sm font-black text-white">
+                            {folder.propertyRef ? `${folder.propertyRef} - ` : ''}{folder.name}
+                          </p>
+                          {folder.address ? (
+                            <p className="mt-1 truncate text-xs text-[#D1D5DB]/58">
+                              {folder.address}
+                            </p>
+                          ) : null}
+                        </button>
+                      ))
+                    ) : (
+                      <div className="rounded-xl border border-[#374151] bg-[#111827]/70 px-4 py-4 text-sm text-[#D1D5DB]/60">
+                        Nessun immobile trovato.
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+              </div>
 
               {readyFolders.length === 0 ? (
                 <div className="rounded-3xl border border-[#EBCB8B]/25 bg-[#EBCB8B]/10 p-4 text-sm leading-6 text-[#EBCB8B]">
@@ -281,7 +358,7 @@ export default function AIOSCondivisioniPage() {
                     onClick={shareFolder}
                     className="w-full rounded-2xl border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-3 text-sm font-black text-[#101820] transition hover:bg-[#111827] hover:text-[#A3BE8C] disabled:cursor-wait disabled:opacity-60"
                   >
-                    {sharing ? 'Condivido...' : 'Condividi cartella Drive precisa'}
+                    {sharing ? 'Condivido...' : 'Condividi cartella Drive'}
                   </button>
                 </>
               ) : null}
