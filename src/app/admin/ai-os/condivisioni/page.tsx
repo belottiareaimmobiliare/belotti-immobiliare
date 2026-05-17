@@ -54,15 +54,15 @@ export default function AIOSCondivisioniPage() {
   const filteredReadyFolders = useMemo(() => {
     const query = propertySearchQuery.trim().toLowerCase()
 
-    if (query.length < 3) {
-      return []
-    }
-
     return readyFolders.filter((folder) => {
       const contractType = String(folder.contractType || '').toLowerCase()
 
       if (contractFilter !== 'all' && contractType !== contractFilter) {
         return false
+      }
+
+      if (query.length < 3) {
+        return contractFilter !== 'all'
       }
 
       const haystack = [
@@ -78,6 +78,9 @@ export default function AIOSCondivisioniPage() {
       return haystack.includes(query)
     })
   }, [contractFilter, propertySearchQuery, readyFolders])
+
+  const showPropertyDropdown =
+    propertySearchQuery.trim().length >= 3 || contractFilter !== 'all'
 
 
   async function loadFolders() {
@@ -310,13 +313,13 @@ export default function AIOSCondivisioniPage() {
                   </span>
                 </div>
 
-                {propertySearchQuery.trim().length > 0 && propertySearchQuery.trim().length < 3 ? (
+                {contractFilter === 'all' && propertySearchQuery.trim().length > 0 && propertySearchQuery.trim().length < 3 ? (
                   <div className="rounded-2xl border border-[#EBCB8B]/20 bg-[#EBCB8B]/10 px-4 py-3 text-xs font-semibold text-[#EBCB8B]">
                     Scrivi almeno 3 caratteri per cercare.
                   </div>
                 ) : null}
 
-                {propertySearchQuery.trim().length >= 3 ? (
+                {showPropertyDropdown ? (
                   <select
                     value={propertyId}
                     onChange={(event) => selectPropertyForShare(event.target.value)}
@@ -324,7 +327,11 @@ export default function AIOSCondivisioniPage() {
                   >
                     <option value="">
                       {filteredReadyFolders.length > 0
-                        ? `Seleziona immobile (${filteredReadyFolders.length} risultati)...`
+                        ? contractFilter === 'vendita'
+                          ? `Seleziona vendita (${filteredReadyFolders.length} risultati)...`
+                          : contractFilter === 'affitto'
+                            ? `Seleziona affitto (${filteredReadyFolders.length} risultati)...`
+                            : `Seleziona immobile (${filteredReadyFolders.length} risultati)...`
                         : 'Nessun immobile trovato'}
                     </option>
 
