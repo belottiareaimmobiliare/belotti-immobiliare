@@ -344,6 +344,56 @@ export default function AIOSCondivisioniPage() {
                     ))}
                   </select>
                 ) : null}
+
+                {showPropertyDropdown && filteredReadyFolders.length > 0 ? (
+                  <div className="overflow-hidden rounded-2xl border border-[#374151] bg-[#0B1220]/72">
+                    <div className="border-b border-[#374151] bg-[#111827]/90 px-4 py-3">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#8FBCBB]/70">
+                        Lista immobili filtrata
+                      </p>
+                      <p className="mt-1 text-xs text-[#D1D5DB]/55">
+                        {contractFilter === 'vendita'
+                          ? 'Vendite disponibili'
+                          : contractFilter === 'affitto'
+                            ? 'Affitti disponibili'
+                            : 'Risultati ricerca'}
+                      </p>
+                    </div>
+
+                    <div className="max-h-[360px] divide-y divide-[#374151]/70 overflow-y-auto">
+                      {filteredReadyFolders.map((folder) => (
+                        <button
+                          key={folder.id}
+                          type="button"
+                          onClick={() => selectPropertyForShare(folder.id)}
+                          className={`grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-left transition ${
+                            propertyId === folder.id
+                              ? 'bg-[#A3BE8C]/16'
+                              : 'hover:bg-[#1F2937]/90'
+                          }`}
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-black text-white">
+                              {folder.propertyRef ? `${folder.propertyRef} - ` : ''}{folder.name}
+                            </p>
+
+                            <p className="mt-1 truncate text-xs text-[#D1D5DB]/55">
+                              {folder.address || 'Indirizzo non indicato'}
+                            </p>
+                          </div>
+
+                          <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${
+                            String(folder.contractType || '').toLowerCase() === 'affitto'
+                              ? 'border-[#88C0D0]/35 bg-[#88C0D0]/10 text-[#88C0D0]'
+                              : 'border-[#A3BE8C]/35 bg-[#A3BE8C]/10 text-[#A3BE8C]'
+                          }`}>
+                            {folder.contractType || 'immobile'}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </div>
 
               {readyFolders.length === 0 ? (
