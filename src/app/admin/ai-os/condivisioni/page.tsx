@@ -7,6 +7,7 @@ type WorkspaceFolder = {
   name: string
   propertyRef?: string
   address?: string
+  contractType?: string | null
   driveFolder?: {
     drive_folder_id?: string | null
     sync_status?: string | null
@@ -28,6 +29,7 @@ export default function AIOSCondivisioniPage() {
   const [subfolders, setSubfolders] = useState<DriveSubfolder[]>([])
   const [propertyId, setPropertyId] = useState('')
   const [propertySearchQuery, setPropertySearchQuery] = useState('')
+  const [contractFilter, setContractFilter] = useState<'all' | 'vendita' | 'affitto'>('all')
   const [folderKey, setFolderKey] = useState('')
   const [emailAddress, setEmailAddress] = useState('')
   const [permissionRole, setPermissionRole] = useState<'writer' | 'reader'>('writer')
@@ -57,10 +59,17 @@ export default function AIOSCondivisioniPage() {
     }
 
     return readyFolders.filter((folder) => {
+      const contractType = String(folder.contractType || '').toLowerCase()
+
+      if (contractFilter !== 'all' && contractType !== contractFilter) {
+        return false
+      }
+
       const haystack = [
         folder.name,
         folder.propertyRef,
         folder.address,
+        folder.contractType,
       ]
         .filter(Boolean)
         .join(' ')
@@ -68,7 +77,7 @@ export default function AIOSCondivisioniPage() {
 
       return haystack.includes(query)
     })
-  }, [propertySearchQuery, readyFolders])
+  }, [contractFilter, propertySearchQuery, readyFolders])
 
 
   async function loadFolders() {
@@ -92,14 +101,7 @@ export default function AIOSCondivisioniPage() {
   }
 
   function selectPropertyForShare(nextPropertyId: string) {
-    const selectedFolder = readyFolders.find((folder) => folder.id === nextPropertyId) ?? null
-
     setPropertyId(nextPropertyId)
-    setPropertySearchQuery(
-      selectedFolder
-        ? `${selectedFolder.propertyRef ? `${selectedFolder.propertyRef} - ` : ''}${selectedFolder.name}`
-        : '',
-    )
     setSharedUrl('')
     setSharedAiOsUrl('')
     void prepareSubfolders(nextPropertyId)
@@ -230,6 +232,65 @@ export default function AIOSCondivisioniPage() {
           ) : (
             <div className="mt-5 grid gap-4">
               <div className="space-y-3">
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setContractFilter('all')
+                      setPropertyId('')
+                      setSubfolders([])
+                      setFolderKey('')
+                      setSharedUrl('')
+                      setSharedAiOsUrl('')
+                    }}
+                    className={`rounded-2xl border px-3 py-2 text-xs font-black transition ${
+                      contractFilter === 'all'
+                        ? 'border-[#A3BE8C]/60 bg-[#A3BE8C]/18 text-[#A3BE8C]'
+                        : 'border-[#374151] bg-[#111827] text-[#D1D5DB]/72 hover:border-[#8FBCBB]/45'
+                    }`}
+                  >
+                    Tutti
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setContractFilter('vendita')
+                      setPropertyId('')
+                      setSubfolders([])
+                      setFolderKey('')
+                      setSharedUrl('')
+                      setSharedAiOsUrl('')
+                    }}
+                    className={`rounded-2xl border px-3 py-2 text-xs font-black transition ${
+                      contractFilter === 'vendita'
+                        ? 'border-[#A3BE8C]/60 bg-[#A3BE8C]/18 text-[#A3BE8C]'
+                        : 'border-[#374151] bg-[#111827] text-[#D1D5DB]/72 hover:border-[#8FBCBB]/45'
+                    }`}
+                  >
+                    Vendite
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setContractFilter('affitto')
+                      setPropertyId('')
+                      setSubfolders([])
+                      setFolderKey('')
+                      setSharedUrl('')
+                      setSharedAiOsUrl('')
+                    }}
+                    className={`rounded-2xl border px-3 py-2 text-xs font-black transition ${
+                      contractFilter === 'affitto'
+                        ? 'border-[#A3BE8C]/60 bg-[#A3BE8C]/18 text-[#A3BE8C]'
+                        : 'border-[#374151] bg-[#111827] text-[#D1D5DB]/72 hover:border-[#8FBCBB]/45'
+                    }`}
+                  >
+                    Affitti
+                  </button>
+                </div>
+
                 <div className="relative">
                   <input
                     value={propertySearchQuery}
@@ -256,35 +317,25 @@ export default function AIOSCondivisioniPage() {
                 ) : null}
 
                 {propertySearchQuery.trim().length >= 3 ? (
-                  <div className="max-h-[320px] space-y-2 overflow-y-auto rounded-2xl border border-[#374151] bg-[#0B1220]/72 p-2">
-                    {filteredReadyFolders.length > 0 ? (
-                      filteredReadyFolders.map((folder) => (
-                        <button
-                          key={folder.id}
-                          type="button"
-                          onClick={() => selectPropertyForShare(folder.id)}
-                          className={`w-full rounded-xl border px-4 py-3 text-left transition ${
-                            propertyId === folder.id
-                              ? 'border-[#A3BE8C]/60 bg-[#A3BE8C]/14'
-                              : 'border-[#374151] bg-[#111827]/80 hover:border-[#8FBCBB]/45 hover:bg-[#1F2937]'
-                          }`}
-                        >
-                          <p className="truncate text-sm font-black text-white">
-                            {folder.propertyRef ? `${folder.propertyRef} - ` : ''}{folder.name}
-                          </p>
-                          {folder.address ? (
-                            <p className="mt-1 truncate text-xs text-[#D1D5DB]/58">
-                              {folder.address}
-                            </p>
-                          ) : null}
-                        </button>
-                      ))
-                    ) : (
-                      <div className="rounded-xl border border-[#374151] bg-[#111827]/70 px-4 py-4 text-sm text-[#D1D5DB]/60">
-                        Nessun immobile trovato.
-                      </div>
-                    )}
-                  </div>
+                  <select
+                    value={propertyId}
+                    onChange={(event) => selectPropertyForShare(event.target.value)}
+                    className="w-full rounded-2xl border border-[#374151] bg-[#111827] px-4 py-3 text-sm font-semibold text-white outline-none transition focus:border-[#8FBCBB]/60"
+                  >
+                    <option value="">
+                      {filteredReadyFolders.length > 0
+                        ? `Seleziona immobile (${filteredReadyFolders.length} risultati)...`
+                        : 'Nessun immobile trovato'}
+                    </option>
+
+                    {filteredReadyFolders.map((folder) => (
+                      <option key={folder.id} value={folder.id}>
+                        {folder.propertyRef ? `${folder.propertyRef} - ` : ''}{folder.name}
+                        {folder.contractType ? ` · ${folder.contractType}` : ''}
+                        {folder.address ? ` · ${folder.address}` : ''}
+                      </option>
+                    ))}
+                  </select>
                 ) : null}
               </div>
 

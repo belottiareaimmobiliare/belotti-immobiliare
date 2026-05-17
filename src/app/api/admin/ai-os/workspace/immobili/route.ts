@@ -144,7 +144,8 @@ export async function GET() {
       return {
         id: propertyId,
         name: folderName(propertyRecord),
-        propertyRef: propertyReference(propertyRecord),
+        contractType: property.contract_type ?? null,
+      propertyRef: propertyReference(propertyRecord),
         address: buildAddress(propertyRecord),
         owner: '',
         fileCount: mediaCountByProperty.get(propertyId) ?? 0,
