@@ -77,6 +77,7 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
   if (profile.role === 'secretary') {
     return [
       { href: '/admin', label: 'Dashboard' },
+      { href: '/admin/ai-os/condivisioni', label: 'Condivisioni Drive' },
       {
         label: 'Immobili',
         href: '/admin/immobili',
@@ -117,6 +118,7 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
 
   return [
     { href: '/admin', label: 'Dashboard' },
+      { href: '/admin/ai-os/condivisioni', label: 'Condivisioni Drive' },
     {
       label: 'Tutti gli immobili',
       href: '/admin/immobili',
