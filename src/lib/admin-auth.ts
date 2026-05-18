@@ -77,6 +77,7 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
   if (profile.role === 'secretary') {
     return [
       { href: '/admin', label: 'Dashboard' },
+      { href: '/admin/ai-os/strumenti', label: 'Strumenti AI-OS' },
       { href: '/admin/ai-os/condivisioni', label: 'Condivisioni Drive' },
       {
         label: 'Immobili',
@@ -103,6 +104,7 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
 
   if (profile.role === 'agent') {
     return [
+      { href: '/admin/ai-os/strumenti', label: 'Strumenti AI-OS' },
       {
         label: 'Tutti gli immobili',
         href: '/admin/immobili',
@@ -118,6 +120,7 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
 
   return [
     { href: '/admin', label: 'Dashboard' },
+      { href: '/admin/ai-os/strumenti', label: 'Strumenti AI-OS' },
       { href: '/admin/ai-os/condivisioni', label: 'Condivisioni Drive' },
     {
       label: 'Tutti gli immobili',
