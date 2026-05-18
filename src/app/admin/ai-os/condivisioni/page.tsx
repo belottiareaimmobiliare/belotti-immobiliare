@@ -38,6 +38,7 @@ export default function AIOSCondivisioniPage() {
   const [sharedAiOsUrl, setSharedAiOsUrl] = useState('')
   const [loading, setLoading] = useState(true)
   const [preparing, setPreparing] = useState(false)
+  const [preparingAll, setPreparingAll] = useState(false)
   const [sharing, setSharing] = useState(false)
 
   const readyFolders = useMemo(() => {
@@ -148,6 +149,34 @@ export default function AIOSCondivisioniPage() {
     void loadFolders()
   }, [])
 
+  async function prepareAllSubfolders() {
+    setPreparingAll(true)
+    setNotice('Preparo tutte le sottocartelle Drive standard per gli immobili pronti...')
+
+    try {
+      const response = await fetch('/api/admin/ai-os/drive-folder-children/prepare-all', {
+        method: 'POST',
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok || !payload?.ok) {
+        throw new Error(payload?.error || 'Errore preparazione massiva sottocartelle')
+      }
+
+      const errors = Array.isArray(payload.errors) ? payload.errors : []
+      setNotice(
+        errors.length > 0
+          ? `Preparazione completata con ${errors.length} avvisi. Immobili gestiti: ${payload.processedProperties}. Cartelle create: ${payload.createdFolders}.`
+          : `Sottocartelle pronte per ${payload.processedProperties} immobili. Create: ${payload.createdFolders}, già presenti: ${payload.existingFolders}.`,
+      )
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Errore preparazione massiva sottocartelle')
+    } finally {
+      setPreparingAll(false)
+    }
+  }
+
   async function shareFolder() {
     setSharing(true)
     setSharedUrl('')
@@ -212,6 +241,15 @@ export default function AIOSCondivisioniPage() {
               className="rounded-full border border-[#A3BE8C]/40 bg-[#A3BE8C]/12 px-4 py-2 text-sm font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/20"
             >
               Aggiorna immobili
+            </button>
+
+            <button
+              type="button"
+              disabled={preparingAll}
+              onClick={() => void prepareAllSubfolders()}
+              className="rounded-full border border-[#8FBCBB]/35 bg-[#8FBCBB]/10 px-4 py-2 text-sm font-bold text-[#8FBCBB] transition hover:bg-[#8FBCBB]/18 disabled:cursor-wait disabled:opacity-60"
+            >
+              {preparingAll ? 'Preparo...' : 'Prepara tutte le cartelle'}
             </button>
           </div>
         </header>
