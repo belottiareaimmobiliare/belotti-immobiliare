@@ -260,10 +260,10 @@ export default function AIOSCondivisioniPage() {
 
   async function prepareAllSubfolders() {
     setPreparingAll(true)
-    setNotice('Preparo tutte le sottocartelle Drive standard per gli immobili pronti...')
+    setNotice('Avvio Drive Autopilot: creo cartelle immobile e sottocartelle standard...')
 
     try {
-      const response = await fetch('/api/admin/ai-os/drive-folder-children/prepare-all', {
+      const response = await fetch('/api/admin/ai-os/drive-autopilot', {
         method: 'POST',
       })
 
@@ -276,9 +276,12 @@ export default function AIOSCondivisioniPage() {
       const errors = Array.isArray(payload.errors) ? payload.errors : []
       setNotice(
         errors.length > 0
-          ? `Preparazione completata con ${errors.length} avvisi. Immobili gestiti: ${payload.processedProperties}. Cartelle create: ${payload.createdFolders}.`
-          : `Sottocartelle pronte per ${payload.processedProperties} immobili. Create: ${payload.createdFolders}, già presenti: ${payload.existingFolders}.`,
+          ? `Autopilot completato con ${errors.length} avvisi. Immobili gestiti: ${payload.processedProperties}. Cartelle immobile create: ${payload.createdPropertyFolders}. Sottocartelle create: ${payload.createdSubfolders}.`
+          : `Drive pronto per ${payload.processedProperties} immobili. Cartelle immobile create: ${payload.createdPropertyFolders}, già presenti: ${payload.existingPropertyFolders}. Sottocartelle create: ${payload.createdSubfolders}, già presenti: ${payload.existingSubfolders}.`,
       )
+
+      await loadFolders()
+      await loadShareHistory(propertyId)
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Errore preparazione massiva sottocartelle')
     } finally {
@@ -358,7 +361,7 @@ export default function AIOSCondivisioniPage() {
               onClick={() => void prepareAllSubfolders()}
               className="rounded-full border border-[#8FBCBB]/35 bg-[#8FBCBB]/10 px-4 py-2 text-sm font-bold text-[#8FBCBB] transition hover:bg-[#8FBCBB]/18 disabled:cursor-wait disabled:opacity-60"
             >
-              {preparingAll ? 'Preparo...' : 'Prepara tutte le cartelle'}
+              {preparingAll ? 'Preparo...' : 'Drive Autopilot'}
             </button>
           </div>
         </header>
