@@ -22,7 +22,42 @@ type DriveSubfolder = {
   driveFolderUrl: string
 }
 
+type ShareHistoryItem = {
+  id: string
+  propertyId: string
+  propertyTitle?: string | null
+  propertyRef?: string | null
+  propertyContractType?: string | null
+  propertyComune?: string | null
+  folderKey?: string | null
+  folderName: string
+  folderId: string
+  folderUrl: string
+  aiOsUrl: string
+  recipientEmail: string
+  recipientRole: string
+  permissionRole: string
+  canUpload: boolean
+  isActive: boolean
+  expiresAt?: string | null
+  createdAt?: string | null
+  revokedAt?: string | null
+}
+
 export const dynamic = 'force-dynamic'
+
+function formatDateTime(value?: string | null) {
+  if (!value) return '—'
+
+  try {
+    return new Intl.DateTimeFormat('it-IT', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    }).format(new Date(value))
+  } catch {
+    return value
+  }
+}
 
 export default function AIOSCondivisioniPage() {
   const [folders, setFolders] = useState<WorkspaceFolder[]>([])
@@ -36,6 +71,9 @@ export default function AIOSCondivisioniPage() {
   const [notice, setNotice] = useState('')
   const [sharedUrl, setSharedUrl] = useState('')
   const [sharedAiOsUrl, setSharedAiOsUrl] = useState('')
+  const [shareHistory, setShareHistory] = useState<ShareHistoryItem[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [revokingShareId, setRevokingShareId] = useState('')
   const [loading, setLoading] = useState(true)
   const [preparing, setPreparing] = useState(false)
   const [preparingAll, setPreparingAll] = useState(false)
@@ -84,6 +122,74 @@ export default function AIOSCondivisioniPage() {
     propertySearchQuery.trim().length >= 3 || contractFilter !== 'all'
 
 
+  async function loadShareHistory(nextPropertyId = propertyId) {
+    setHistoryLoading(true)
+
+    try {
+      const params = new URLSearchParams()
+      params.set('limit', '80')
+
+      if (nextPropertyId) {
+        params.set('propertyId', nextPropertyId)
+      }
+
+      const response = await fetch(`/api/admin/ai-os/drive-share/history?${params.toString()}`, {
+        cache: 'no-store',
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok || !payload?.ok) {
+        throw new Error(payload?.error || 'Errore caricamento storico condivisioni')
+      }
+
+      setShareHistory(Array.isArray(payload.shares) ? payload.shares : [])
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Errore storico condivisioni')
+      setShareHistory([])
+    } finally {
+      setHistoryLoading(false)
+    }
+  }
+
+  async function revokeShare(share: ShareHistoryItem) {
+    if (!share.id || !share.recipientEmail) return
+
+    const confirmed = window.confirm(
+      `Revocare l’accesso a ${share.recipientEmail} per la cartella "${share.folderName}"?`,
+    )
+
+    if (!confirmed) return
+
+    setRevokingShareId(share.id)
+    setNotice('Revoca accesso Drive in corso...')
+
+    try {
+      const response = await fetch('/api/admin/ai-os/drive-share/revoke', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          shareLinkId: share.id,
+        }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok || !payload?.ok) {
+        throw new Error(payload?.error || 'Errore revoca accesso')
+      }
+
+      setNotice(`Accesso revocato a ${share.recipientEmail}.`)
+      await loadShareHistory(propertyId)
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Errore revoca accesso')
+    } finally {
+      setRevokingShareId('')
+    }
+  }
+
   async function loadFolders() {
     setLoading(true)
     setNotice('')
@@ -109,6 +215,7 @@ export default function AIOSCondivisioniPage() {
     setSharedUrl('')
     setSharedAiOsUrl('')
     void prepareSubfolders(nextPropertyId)
+    void loadShareHistory(nextPropertyId)
   }
 
   async function prepareSubfolders(nextPropertyId = propertyId) {
@@ -147,6 +254,8 @@ export default function AIOSCondivisioniPage() {
 
   useEffect(() => {
     void loadFolders()
+    void loadShareHistory('')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function prepareAllSubfolders() {
@@ -553,6 +662,111 @@ export default function AIOSCondivisioniPage() {
             </div>
           )}
         </section>
+        <section className="mt-6 rounded-[28px] border border-[#8FBCBB]/18 bg-[#1F2937]/82 p-5 shadow-xl shadow-black/20">
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#8FBCBB]/65">
+                Storico condivisioni
+              </p>
+              <h2 className="mt-1 text-xl font-black text-white">Accessi Drive concessi</h2>
+              <p className="mt-2 text-sm leading-6 text-[#D1D5DB]/62">
+                Qui vedi chi ha accesso alle cartelle Drive condivise. Puoi revocare il permesso quando il lavoro è finito.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              disabled={historyLoading}
+              onClick={() => void loadShareHistory(propertyId)}
+              className="rounded-full border border-[#8FBCBB]/35 bg-[#8FBCBB]/10 px-4 py-2 text-sm font-bold text-[#8FBCBB] transition hover:bg-[#8FBCBB]/18 disabled:cursor-wait disabled:opacity-60"
+            >
+              {historyLoading ? 'Aggiorno...' : 'Aggiorna storico'}
+            </button>
+          </div>
+
+          <div className="mt-5 overflow-hidden rounded-2xl border border-[#374151] bg-[#0B1220]/72">
+            {historyLoading ? (
+              <div className="p-5 text-sm font-semibold text-[#D1D5DB]/62">
+                Caricamento storico...
+              </div>
+            ) : shareHistory.length > 0 ? (
+              <div className="divide-y divide-[#374151]/70">
+                {shareHistory.map((share) => (
+                  <div key={share.id} className="grid gap-3 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${
+                          share.isActive
+                            ? 'border-[#A3BE8C]/35 bg-[#A3BE8C]/10 text-[#A3BE8C]'
+                            : 'border-[#BF616A]/35 bg-[#BF616A]/10 text-[#FFCCD2]'
+                        }`}>
+                          {share.isActive ? 'Attiva' : 'Revocata'}
+                        </span>
+
+                        <span className="rounded-full border border-[#8FBCBB]/25 bg-[#8FBCBB]/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#8FBCBB]">
+                          {share.permissionRole === 'reader' ? 'lettura' : 'editor'}
+                        </span>
+                      </div>
+
+                      <p className="mt-3 truncate text-sm font-black text-white">
+                        {share.recipientEmail || 'Destinatario non indicato'}
+                      </p>
+
+                      <p className="mt-1 truncate text-xs text-[#D1D5DB]/58">
+                        {share.folderName} · {share.propertyRef ? `${share.propertyRef} - ` : ''}{share.propertyTitle || 'Immobile'}
+                      </p>
+
+                      <p className="mt-1 text-xs text-[#D1D5DB]/42">
+                        Creata: {formatDateTime(share.createdAt)}
+                        {share.revokedAt ? ` · Revocata: ${formatDateTime(share.revokedAt)}` : ''}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 md:justify-end">
+                      {share.aiOsUrl ? (
+                        <a
+                          href={share.aiOsUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-full border border-[#A3BE8C]/35 bg-[#A3BE8C]/10 px-4 py-2 text-xs font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/18"
+                        >
+                          Link AI-OS
+                        </a>
+                      ) : null}
+
+                      {share.folderUrl ? (
+                        <a
+                          href={share.folderUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-full border border-[#8FBCBB]/35 bg-[#8FBCBB]/10 px-4 py-2 text-xs font-bold text-[#8FBCBB] transition hover:bg-[#8FBCBB]/18"
+                        >
+                          Drive
+                        </a>
+                      ) : null}
+
+                      {share.isActive ? (
+                        <button
+                          type="button"
+                          disabled={revokingShareId === share.id}
+                          onClick={() => void revokeShare(share)}
+                          className="rounded-full border border-[#BF616A]/35 bg-[#BF616A]/10 px-4 py-2 text-xs font-bold text-[#FFCCD2] transition hover:bg-[#BF616A]/20 disabled:cursor-wait disabled:opacity-60"
+                        >
+                          {revokingShareId === share.id ? 'Revoco...' : 'Revoca'}
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-5 text-sm font-semibold text-[#D1D5DB]/62">
+                Nessuna condivisione trovata.
+              </div>
+            )}
+          </div>
+        </section>
+
       </div>
     </main>
   )
