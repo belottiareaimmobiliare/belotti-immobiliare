@@ -9,6 +9,30 @@ function cleanText(value: unknown) {
   return String(value ?? '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim()
 }
 
+function toPdfSafeText(value: unknown) {
+  return String(value ?? '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .replace(/☐/g, '[ ]')
+    .replace(/☑/g, '[x]')
+    .replace(/☒/g, '[x]')
+    .replace(/✓/g, 'v')
+    .replace(/✔/g, 'v')
+    .replace(/✗/g, 'x')
+    .replace(/→/g, '->')
+    .replace(/←/g, '<-')
+    .replace(/–/g, '-')
+    .replace(/—/g, '-')
+    .replace(/“/g, '"')
+    .replace(/”/g, '"')
+    .replace(/‘/g, "'")
+    .replace(/’/g, "'")
+    .replace(/…/g, '...')
+    .replace(/•/g, '-')
+    .replace(/[\u{1F300}-\u{1FAFF}]/gu, '')
+    .replace(/[^\n\t\x20-\x7E\u00A0-\u00FF]/g, '')
+}
+
 function cleanFilename(value: unknown) {
   const cleaned = String(value ?? 'documento-ai-os')
     .trim()
@@ -62,8 +86,8 @@ export async function POST(request: Request) {
 
     const body = await request.json().catch(() => null)
 
-    const title = cleanText(body?.title || 'Documento AI-OS')
-    const content = cleanText(body?.content)
+    const title = toPdfSafeText(cleanText(body?.title || 'Documento AI-OS'))
+    const content = toPdfSafeText(cleanText(body?.content))
     const filename = cleanFilename(body?.filename || title)
 
     if (!content) {
