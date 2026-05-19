@@ -85,7 +85,7 @@ function propertyHeadline(property: Record<string, any>) {
   return `${clean(property.reference_code, 'Senza rif.')} - ${clean(property.title, 'Immobile senza titolo')}`
 }
 
-function buildDocuments(data: ToolPropertyData | null): GeneratedDocument[] {
+function buildDocuments(data: ToolPropertyData | null, generatedAt: Date): GeneratedDocument[] {
   if (!data?.property) return []
 
   const property = data.property
@@ -93,7 +93,7 @@ function buildDocuments(data: ToolPropertyData | null): GeneratedDocument[] {
   const ownerDocuments = data.ownerDocuments ?? []
   const checklist = data.checklist ?? []
   const subfolders = data.driveSubfolders ?? []
-  const today = new Intl.DateTimeFormat('it-IT', { dateStyle: 'long' }).format(new Date())
+  const today = new Intl.DateTimeFormat('it-IT', { dateStyle: 'long' }).format(generatedAt)
 
   const ownersBlock = owners.length > 0
     ? owners.map((owner, index) => [
@@ -332,8 +332,9 @@ export default function AIOSDocumentiPage() {
   const [propertyData, setPropertyData] = useState<ToolPropertyData | null>(null)
   const [selectedDocId, setSelectedDocId] = useState('mandato-bozza')
   const [notice, setNotice] = useState('')
+  const [generatedAt, setGeneratedAt] = useState(() => new Date())
 
-  const documents = useMemo(() => buildDocuments(propertyData), [propertyData])
+  const documents = useMemo(() => buildDocuments(propertyData, generatedAt), [generatedAt, propertyData])
   const selectedDocument = documents.find((doc) => doc.id === selectedDocId) ?? documents[0] ?? null
 
   const filteredFolders = useMemo(() => {
@@ -400,6 +401,7 @@ export default function AIOSDocumentiPage() {
         driveFolder: payload.driveFolder ?? null,
         driveSubfolders: Array.isArray(payload.driveSubfolders) ? payload.driveSubfolders : [],
       })
+      setGeneratedAt(new Date())
       setSelectedDocId('mandato-bozza')
     } catch (error) {
       setPropertyData(null)
@@ -438,6 +440,19 @@ export default function AIOSDocumentiPage() {
     link.download = `${ref}-${selectedDocument.id}.txt`
     link.click()
     URL.revokeObjectURL(url)
+  }
+
+  function updateGeneratedDateToToday() {
+    setGeneratedAt(new Date())
+    setNotice('Data documento aggiornata ad oggi.')
+  }
+
+  function importTemplatePlaceholder() {
+    setNotice('Importa template sarà il prossimo step: caricheremo il modello agenzia e lo uniremo ai dati immobile.')
+  }
+
+  function createPdfPlaceholder() {
+    setNotice('Crea PDF sarà il prossimo step: genereremo un PDF vero partendo dal template e dai dati immobile.')
   }
 
   function printDocument() {
@@ -632,6 +647,15 @@ export default function AIOSDocumentiPage() {
                 <button
                   type="button"
                   disabled={!selectedDocument}
+                  onClick={updateGeneratedDateToToday}
+                  className="rounded-full border border-[#B48EAD]/35 bg-[#B48EAD]/10 px-4 py-2 text-xs font-bold text-[#E5E9F0] transition hover:bg-[#B48EAD]/18 disabled:opacity-40"
+                >
+                  Aggiorna ad oggi
+                </button>
+
+                <button
+                  type="button"
+                  disabled={!selectedDocument}
                   onClick={copyDocument}
                   className="rounded-full border border-[#A3BE8C]/35 bg-[#A3BE8C]/10 px-4 py-2 text-xs font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/18 disabled:opacity-40"
                 >
@@ -654,6 +678,24 @@ export default function AIOSDocumentiPage() {
                   className="rounded-full border border-[#EBCB8B]/35 bg-[#EBCB8B]/10 px-4 py-2 text-xs font-bold text-[#EBCB8B] transition hover:bg-[#EBCB8B]/18 disabled:opacity-40"
                 >
                   Stampa
+                </button>
+
+                <button
+                  type="button"
+                  disabled={!selectedDocument}
+                  onClick={importTemplatePlaceholder}
+                  className="rounded-full border border-[#88C0D0]/35 bg-[#88C0D0]/10 px-4 py-2 text-xs font-bold text-[#88C0D0] transition hover:bg-[#88C0D0]/18 disabled:opacity-40"
+                >
+                  Importa template
+                </button>
+
+                <button
+                  type="button"
+                  disabled={!selectedDocument}
+                  onClick={createPdfPlaceholder}
+                  className="rounded-full border border-[#BF616A]/35 bg-[#BF616A]/10 px-4 py-2 text-xs font-bold text-[#FFCCD2] transition hover:bg-[#BF616A]/18 disabled:opacity-40"
+                >
+                  Crea PDF
                 </button>
               </div>
             </div>
