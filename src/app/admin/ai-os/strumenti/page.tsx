@@ -116,11 +116,11 @@ export default function AIOSStrumentiPage() {
         id: 'social-card',
         title: 'Social / vetrina',
         badge: 'Operativo',
-        description: 'Genera materiale social e scheda grafica dell’immobile già collegata ai dati e alle immagini.',
+        description: 'Genera testi per Facebook, Instagram, TikTok, WhatsApp, portali e apre la scheda grafica.',
         icon: '📣',
         status: propertyId ? 'ready' : 'next',
         actionLabel: propertyId ? 'Apri social' : 'Seleziona immobile',
-        href: propertyId ? `/admin/immobili/${propertyId}/scheda-social` : undefined,
+        href: propertyId ? `/admin/ai-os/strumenti/social?propertyId=${propertyId}` : undefined,
       },
       {
         id: 'documents',
