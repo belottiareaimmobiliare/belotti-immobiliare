@@ -63,6 +63,90 @@ function yesNo(value: unknown) {
   return value === true ? 'Sì' : 'No'
 }
 
+function buildTemplateVariables(data: ToolPropertyData | null, generatedAt: Date) {
+  const property = data?.property ?? {}
+  const owners = data?.owners ?? []
+  const firstOwner = owners[0] ?? {}
+  const ownerDocuments = data?.ownerDocuments ?? []
+  const checklist = data?.checklist ?? []
+  const subfolders = data?.driveSubfolders ?? []
+
+  const today = new Intl.DateTimeFormat('it-IT', { dateStyle: 'long' }).format(generatedAt)
+
+  const ownerDocumentsText = ownerDocuments.length > 0
+    ? ownerDocuments.map((doc) => `- ${clean(doc.label)}: ${clean(doc.status, 'non verificato')}`).join('\n')
+    : 'Documenti proprietario non ancora caricati in AI-OS.'
+
+  const checklistText = checklist.length > 0
+    ? checklist.map((item) => `- ${clean(item.label)}: ${clean(item.status, 'da fare')}`).join('\n')
+    : 'Checklist non ancora compilata.'
+
+  const driveFoldersText = subfolders.length > 0
+    ? subfolders.map((folder) => `- ${clean(folder.folder_name)}: ${clean(folder.drive_folder_url)}`).join('\n')
+    : 'Cartelle Drive non ancora preparate.'
+
+  return {
+    data_generazione: today,
+    oggi: today,
+
+    riferimento: clean(property.reference_code, ''),
+    titolo: clean(property.title, ''),
+    slug: clean(property.slug, ''),
+    stato: clean(property.status, ''),
+    descrizione: clean(property.description, ''),
+    prezzo: formatCurrency(property.price),
+    prezzo_numero: clean(property.price, ''),
+    prezzo_precedente: formatCurrency(property.previous_price),
+
+    contratto: clean(property.contract_type, ''),
+    tipologia: clean(property.property_type, ''),
+    condizione: clean(property.condition, ''),
+    disponibilita: clean(property.availability, ''),
+
+    indirizzo: clean(property.address, ''),
+    comune: clean(property.comune || property.city, ''),
+    provincia: clean(property.province, ''),
+    frazione: clean(property.frazione, ''),
+    zona: clean(property.area, ''),
+    localizzazione: propertyLocation(property),
+
+    superficie: clean(property.surface, ''),
+    locali: clean(property.rooms, ''),
+    bagni: clean(property.bathrooms, ''),
+    piano: clean(property.floor, ''),
+    piani_totali: clean(property.total_floors, ''),
+    anno_costruzione: clean(property.year_built, ''),
+    classe_energetica: clean(property.energy_class, ''),
+    epgl: clean(property.energy_epgl, ''),
+    riscaldamento: `${clean(property.heating_type, '')} ${clean(property.heating_source, '')}`.trim(),
+
+    garage: yesNo(property.has_garage),
+    posto_auto: yesNo(property.has_parking),
+    giardino: yesNo(property.has_garden),
+    ascensore: yesNo(property.has_elevator),
+    asta: yesNo(property.is_auction),
+
+    proprietario_nome: clean(firstOwner.full_name, ''),
+    proprietario_email: clean(firstOwner.email, ''),
+    proprietario_telefono: clean(firstOwner.phone, ''),
+    proprietario_cf: clean(firstOwner.tax_code, ''),
+    proprietari_elenco: owners.length > 0
+      ? owners.map((owner, index) => `${index + 1}. ${clean(owner.full_name)} - ${clean(owner.email)} - ${clean(owner.phone)}`).join('\n')
+      : 'Nessun proprietario registrato.',
+
+    documenti_proprietario: ownerDocumentsText,
+    checklist: checklistText,
+    cartelle_drive: driveFoldersText,
+    link_drive_immobile: clean(data?.driveFolder?.drive_folder_url, ''),
+  } satisfies Record<string, string>
+}
+
+function applyTemplateVariables(template: string, variables: Record<string, string>) {
+  return template.replace(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g, (_match, key) => {
+    return variables[String(key)] ?? `{{${key}}}`
+  })
+}
+
 function escapeHtml(value: string) {
   return value
     .replaceAll('&', '&amp;')
@@ -333,9 +417,22 @@ export default function AIOSDocumentiPage() {
   const [selectedDocId, setSelectedDocId] = useState('mandato-bozza')
   const [notice, setNotice] = useState('')
   const [generatedAt, setGeneratedAt] = useState(() => new Date())
+  const [templateName, setTemplateName] = useState('')
+  const [templateContent, setTemplateContent] = useState('')
 
   const documents = useMemo(() => buildDocuments(propertyData, generatedAt), [generatedAt, propertyData])
   const selectedDocument = documents.find((doc) => doc.id === selectedDocId) ?? documents[0] ?? null
+  const templateVariables = useMemo(() => buildTemplateVariables(propertyData, generatedAt), [generatedAt, propertyData])
+  const currentDocumentContent = useMemo(() => {
+    if (templateContent) {
+      return applyTemplateVariables(templateContent, templateVariables)
+    }
+
+    return selectedDocument?.content || ''
+  }, [selectedDocument, templateContent, templateVariables])
+  const currentDocumentTitle = templateContent
+    ? `Template importato: ${templateName || 'modello'}`
+    : selectedDocument?.title || 'Nessun documento'
 
   const filteredFolders = useMemo(() => {
     const q = normalize(query)
@@ -402,6 +499,8 @@ export default function AIOSDocumentiPage() {
         driveSubfolders: Array.isArray(payload.driveSubfolders) ? payload.driveSubfolders : [],
       })
       setGeneratedAt(new Date())
+      setTemplateName('')
+      setTemplateContent('')
       setSelectedDocId('mandato-bozza')
     } catch (error) {
       setPropertyData(null)
@@ -412,32 +511,36 @@ export default function AIOSDocumentiPage() {
   }
 
   async function copyDocument() {
-    if (!selectedDocument) return
+    if (!currentDocumentContent) return
 
     try {
-      await navigator.clipboard.writeText(selectedDocument.content)
-      setNotice(`Testo copiato: ${selectedDocument.title}`)
+      await navigator.clipboard.writeText(currentDocumentContent)
+      setNotice(`Testo copiato: ${currentDocumentTitle}`)
     } catch {
       setNotice('Copia non riuscita: seleziona il testo e copialo manualmente.')
     }
   }
 
   function downloadDocument() {
-    if (!selectedDocument || !propertyData?.property) return
+    if (!currentDocumentContent || !propertyData?.property) return
 
     const ref = clean(propertyData.property.reference_code, 'immobile')
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '')
 
-    const blob = new Blob([selectedDocument.content], {
+    const blob = new Blob([currentDocumentContent], {
       type: 'text/plain;charset=utf-8',
     })
 
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `${ref}-${selectedDocument.id}.txt`
+    const docId = templateContent
+      ? (templateName || 'template').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+      : selectedDocument?.id || 'documento'
+
+    link.download = `${ref}-${docId}.txt`
     link.click()
     URL.revokeObjectURL(url)
   }
@@ -448,15 +551,45 @@ export default function AIOSDocumentiPage() {
   }
 
   function importTemplatePlaceholder() {
-    setNotice('Importa template sarà il prossimo step: caricheremo il modello agenzia e lo uniremo ai dati immobile.')
+    if (!propertyData?.property) {
+      setNotice('Seleziona prima un immobile.')
+      return
+    }
+
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.txt,.html,.htm,.md,text/plain,text/html,text/markdown'
+
+    input.onchange = async () => {
+      const file = input.files?.[0]
+
+      if (!file) return
+
+      try {
+        const content = await file.text()
+        setTemplateName(file.name)
+        setTemplateContent(content)
+        setNotice(`Template importato: ${file.name}. I placeholder {{titolo}}, {{prezzo}}, {{proprietario_nome}} ecc. sono stati compilati dove presenti.`)
+      } catch {
+        setNotice('Errore lettura template.')
+      }
+    }
+
+    input.click()
   }
 
   function createPdfPlaceholder() {
-    setNotice('Crea PDF sarà il prossimo step: genereremo un PDF vero partendo dal template e dai dati immobile.')
+    if (!currentDocumentContent) {
+      setNotice('Nessun documento da convertire in PDF.')
+      return
+    }
+
+    printDocument()
+    setNotice('Si è aperta la stampa: scegli “Salva come PDF” per creare il PDF.')
   }
 
   function printDocument() {
-    if (!selectedDocument) return
+    if (!currentDocumentContent) return
 
     const win = window.open('', '_blank', 'noopener,noreferrer')
     if (!win) return
@@ -464,7 +597,7 @@ export default function AIOSDocumentiPage() {
     win.document.write(`
       <html>
         <head>
-          <title>${escapeHtml(selectedDocument.title)}</title>
+          <title>${escapeHtml(currentDocumentTitle)}</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 32px; color: #111; }
             h1 { font-size: 22px; margin-bottom: 20px; }
@@ -472,8 +605,8 @@ export default function AIOSDocumentiPage() {
           </style>
         </head>
         <body>
-          <h1>${escapeHtml(selectedDocument.title)}</h1>
-          <pre>${escapeHtml(selectedDocument.content)}</pre>
+          <h1>${escapeHtml(currentDocumentTitle)}</h1>
+          <pre>${escapeHtml(currentDocumentContent)}</pre>
         </body>
       </html>
     `)
@@ -639,14 +772,14 @@ export default function AIOSDocumentiPage() {
                   Anteprima
                 </p>
                 <h2 className="mt-1 text-xl font-black text-white">
-                  {selectedDocument?.title || 'Nessun documento'}
+                  {currentDocumentTitle}
                 </h2>
               </div>
 
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  disabled={!selectedDocument}
+                  disabled={!currentDocumentContent}
                   onClick={updateGeneratedDateToToday}
                   className="rounded-full border border-[#B48EAD]/35 bg-[#B48EAD]/10 px-4 py-2 text-xs font-bold text-[#E5E9F0] transition hover:bg-[#B48EAD]/18 disabled:opacity-40"
                 >
@@ -655,7 +788,7 @@ export default function AIOSDocumentiPage() {
 
                 <button
                   type="button"
-                  disabled={!selectedDocument}
+                  disabled={!currentDocumentContent}
                   onClick={copyDocument}
                   className="rounded-full border border-[#A3BE8C]/35 bg-[#A3BE8C]/10 px-4 py-2 text-xs font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/18 disabled:opacity-40"
                 >
@@ -664,7 +797,7 @@ export default function AIOSDocumentiPage() {
 
                 <button
                   type="button"
-                  disabled={!selectedDocument}
+                  disabled={!currentDocumentContent}
                   onClick={downloadDocument}
                   className="rounded-full border border-[#8FBCBB]/35 bg-[#8FBCBB]/10 px-4 py-2 text-xs font-bold text-[#8FBCBB] transition hover:bg-[#8FBCBB]/18 disabled:opacity-40"
                 >
@@ -673,7 +806,7 @@ export default function AIOSDocumentiPage() {
 
                 <button
                   type="button"
-                  disabled={!selectedDocument}
+                  disabled={!currentDocumentContent}
                   onClick={printDocument}
                   className="rounded-full border border-[#EBCB8B]/35 bg-[#EBCB8B]/10 px-4 py-2 text-xs font-bold text-[#EBCB8B] transition hover:bg-[#EBCB8B]/18 disabled:opacity-40"
                 >
@@ -682,7 +815,7 @@ export default function AIOSDocumentiPage() {
 
                 <button
                   type="button"
-                  disabled={!selectedDocument}
+                  disabled={!currentDocumentContent}
                   onClick={importTemplatePlaceholder}
                   className="rounded-full border border-[#88C0D0]/35 bg-[#88C0D0]/10 px-4 py-2 text-xs font-bold text-[#88C0D0] transition hover:bg-[#88C0D0]/18 disabled:opacity-40"
                 >
@@ -691,7 +824,7 @@ export default function AIOSDocumentiPage() {
 
                 <button
                   type="button"
-                  disabled={!selectedDocument}
+                  disabled={!currentDocumentContent}
                   onClick={createPdfPlaceholder}
                   className="rounded-full border border-[#BF616A]/35 bg-[#BF616A]/10 px-4 py-2 text-xs font-bold text-[#FFCCD2] transition hover:bg-[#BF616A]/18 disabled:opacity-40"
                 >
@@ -700,9 +833,18 @@ export default function AIOSDocumentiPage() {
               </div>
             </div>
 
+            {templateContent ? (
+              <div className="mb-4 rounded-2xl border border-[#88C0D0]/25 bg-[#88C0D0]/10 px-4 py-3 text-xs leading-5 text-[#D8DEE9]/70">
+                <span className="font-black text-[#88C0D0]">Template attivo:</span> {templateName}. 
+                <span>
+                  Placeholder disponibili: {'{{titolo}}, {{riferimento}}, {{prezzo}}, {{contratto}}, {{tipologia}}, {{indirizzo}}, {{comune}}, {{proprietario_nome}}, {{proprietario_email}}, {{documenti_proprietario}}, {{checklist}}, {{cartelle_drive}}'}.
+                </span>
+              </div>
+            ) : null}
+
             <textarea
               readOnly
-              value={selectedDocument?.content || ''}
+              value={currentDocumentContent}
               className="min-h-[680px] w-full resize-y rounded-2xl border border-[#374151] bg-[#0B1220] p-5 font-mono text-sm leading-6 text-[#E5E7EB] outline-none"
               placeholder="Seleziona un immobile per vedere la bozza..."
             />
