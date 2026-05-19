@@ -419,6 +419,7 @@ export default function AIOSDocumentiPage() {
   const [generatedAt, setGeneratedAt] = useState(() => new Date())
   const [templateName, setTemplateName] = useState('')
   const [templateContent, setTemplateContent] = useState('')
+  const [pdfGenerating, setPdfGenerating] = useState(false)
 
   const documents = useMemo(() => buildDocuments(propertyData, generatedAt), [generatedAt, propertyData])
   const selectedDocument = documents.find((doc) => doc.id === selectedDocId) ?? documents[0] ?? null
@@ -578,14 +579,59 @@ export default function AIOSDocumentiPage() {
     input.click()
   }
 
-  function createPdfPlaceholder() {
+  async function createPdfPlaceholder() {
     if (!currentDocumentContent) {
       setNotice('Nessun documento da convertire in PDF.')
       return
     }
 
-    printDocument()
-    setNotice('Si è aperta la stampa: scegli “Salva come PDF” per creare il PDF.')
+    setPdfGenerating(true)
+    setNotice('Creo PDF...')
+
+    try {
+      const ref = clean(propertyData?.property?.reference_code, 'immobile')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+
+      const docId = templateContent
+        ? (templateName || 'template').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+        : selectedDocument?.id || 'documento'
+
+      const response = await fetch('/api/admin/ai-os/tools/document-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: currentDocumentTitle,
+          content: currentDocumentContent,
+          filename: `${ref}-${docId}`,
+        }),
+      })
+
+      const blob = await response.blob()
+
+      if (!response.ok) {
+        const text = await blob.text().catch(() => '')
+        throw new Error(text || 'Errore generazione PDF')
+      }
+
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${ref}-${docId}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+
+      setNotice(`PDF creato: ${ref}-${docId}.pdf`)
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Errore generazione PDF')
+    } finally {
+      setPdfGenerating(false)
+    }
   }
 
   function printDocument() {
@@ -824,11 +870,11 @@ export default function AIOSDocumentiPage() {
 
                 <button
                   type="button"
-                  disabled={!currentDocumentContent}
-                  onClick={createPdfPlaceholder}
-                  className="rounded-full border border-[#BF616A]/35 bg-[#BF616A]/10 px-4 py-2 text-xs font-bold text-[#FFCCD2] transition hover:bg-[#BF616A]/18 disabled:opacity-40"
+                  disabled={!currentDocumentContent || pdfGenerating}
+                  onClick={() => void createPdfPlaceholder()}
+                  className="rounded-full border border-[#BF616A]/35 bg-[#BF616A]/10 px-4 py-2 text-xs font-bold text-[#FFCCD2] transition hover:bg-[#BF616A]/18 disabled:cursor-wait disabled:opacity-40"
                 >
-                  Crea PDF
+                  {pdfGenerating ? 'Creo PDF...' : 'Crea PDF'}
                 </button>
               </div>
             </div>
