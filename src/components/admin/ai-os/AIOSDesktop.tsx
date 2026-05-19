@@ -5811,6 +5811,12 @@ export default function AIOSDesktop() {
               type="button"
               onClick={() => {
                 if (item.id === 'tools') {
+                  window.location.href = '/admin/ai-os/strumenti'
+                  return
+                }
+
+
+                if (item.id === 'tools') {
                   setDriveSettingsOpen(false)
                   setActiveAgencyToolId(null)
                   setDesktopWindowOpen(true)

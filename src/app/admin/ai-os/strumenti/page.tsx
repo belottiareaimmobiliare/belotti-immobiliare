@@ -125,11 +125,12 @@ export default function AIOSStrumentiPage() {
       {
         id: 'documents',
         title: 'Genera documenti',
-        badge: 'Prossimo step',
-        description: 'Mandato, incarico, scheda raccolta dati proprietario, checklist documentale e allegati.',
+        badge: 'Operativo',
+        description: 'Mandato, incarico, scheda raccolta dati proprietario, checklist documentale e testi pronti.',
         icon: '📄',
-        status: 'next',
-        actionLabel: 'In sviluppo',
+        status: propertyId ? 'ready' : 'next',
+        actionLabel: propertyId ? 'Apri documenti' : 'Seleziona immobile',
+        href: propertyId ? `/admin/ai-os/strumenti/documenti?propertyId=${propertyId}` : undefined,
       },
       {
         id: 'visure',
