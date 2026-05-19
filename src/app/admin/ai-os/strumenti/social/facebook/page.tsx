@@ -113,6 +113,94 @@ function drawCoverImage(
   ctx.drawImage(img, sx, sy, sw, sh, x, y, width, height)
 }
 
+function drawRoundedCoverImage(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+) {
+  ctx.save()
+  drawRoundedRect(ctx, x, y, width, height, radius)
+  ctx.clip()
+  drawCoverImage(ctx, img, x, y, width, height)
+  ctx.restore()
+}
+
+function drawCenteredWrappedText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  centerX: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+  maxLines: number,
+) {
+  const words = text.split(/\s+/).filter(Boolean)
+  const lines: string[] = []
+  let current = ''
+
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word
+
+    if (ctx.measureText(candidate).width <= maxWidth) {
+      current = candidate
+      continue
+    }
+
+    if (current) {
+      lines.push(current)
+      current = word
+    } else {
+      lines.push(word)
+      current = ''
+    }
+
+    if (lines.length >= maxLines) break
+  }
+
+  if (current && lines.length < maxLines) {
+    lines.push(current)
+  }
+
+  ctx.textAlign = 'center'
+
+  lines.forEach((line, index) => {
+    ctx.fillText(line, centerX, y + index * lineHeight)
+  })
+
+  return y + lines.length * lineHeight
+}
+
+function drawChip(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  centerX: number,
+  y: number,
+) {
+  ctx.font = '800 18px Arial'
+  const paddingX = 18
+  const width = ctx.measureText(text).width + paddingX * 2
+  const height = 34
+  const x = centerX - width / 2
+
+  ctx.fillStyle = 'rgba(235,203,139,0.08)'
+  drawRoundedRect(ctx, x, y, width, height, 17)
+  ctx.fill()
+
+  ctx.strokeStyle = 'rgba(235,203,139,0.42)'
+  ctx.lineWidth = 1.2
+  ctx.stroke()
+
+  ctx.fillStyle = '#EBCB8B'
+  ctx.textAlign = 'center'
+  ctx.fillText(text, centerX, y + 23)
+
+  return width
+}
+
 function drawWrappedText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -284,122 +372,223 @@ export default function FacebookImagesPage() {
       const location = shortLocation(property)
       const features = featureLine(property)
 
+      const typeLabel = clean(property.property_type, 'Immobile')
+      const description = clean(property.description, '')
+      const shortDescription = description.length > 230 ? `${description.slice(0, 230).trim()}...` : description
+      const tags = [
+        normalize(property.contract_type) === 'vendita' ? 'Vendita' : normalize(property.contract_type) === 'affitto' ? 'Affitto' : 'Immobile',
+        typeLabel,
+        property.has_garage ? 'Box / Garage' : '',
+        property.has_garden ? 'Giardino' : '',
+        property.has_parking ? 'Posto auto' : '',
+      ].filter(Boolean).slice(0, 4)
+
+      const drawSoftGrid = () => {
+        ctx.save()
+        ctx.strokeStyle = 'rgba(255,255,255,0.035)'
+        ctx.lineWidth = 1
+
+        for (let x = 0; x <= width; x += 120) {
+          ctx.beginPath()
+          ctx.moveTo(x, 0)
+          ctx.lineTo(x, height)
+          ctx.stroke()
+        }
+
+        for (let yLine = 0; yLine <= height; yLine += 120) {
+          ctx.beginPath()
+          ctx.moveTo(0, yLine)
+          ctx.lineTo(width, yLine)
+          ctx.stroke()
+        }
+
+        ctx.restore()
+      }
+
+      const drawMainFrame = () => {
+        ctx.strokeStyle = 'rgba(236,239,244,0.12)'
+        ctx.lineWidth = 1.4
+        drawRoundedRect(ctx, 32, 32, width - 64, height - 64, 32)
+        ctx.stroke()
+      }
+
+      ctx.fillStyle = '#030507'
+      ctx.fillRect(0, 0, width, height)
+      drawSoftGrid()
+      drawMainFrame()
+
       if (nextLayout === 'four') {
-        const gap = 14
-        const boxW = (width - gap * 3) / 2
-        const boxH = (height - gap * 3) / 2
+        const thumbW = 224
+        const thumbH = 210
+        const leftX = 66
+        const rightX = width - leftX - thumbW
+        const topY = 108
+        const bottomY = 340
+        const radius = 20
 
         const boxes = [
-          { x: gap, y: gap },
-          { x: gap * 2 + boxW, y: gap },
-          { x: gap, y: gap * 2 + boxH },
-          { x: gap * 2 + boxW, y: gap * 2 + boxH },
+          { x: leftX, y: topY, label: 'FOTO 1' },
+          { x: leftX, y: bottomY, label: 'FOTO 2' },
+          { x: rightX, y: topY, label: 'FOTO 3' },
+          { x: rightX, y: bottomY, label: 'FOTO 4' },
         ]
 
         boxes.forEach((box, index) => {
           const img = loadedImages[index]
 
           if (img) {
-            drawCoverImage(ctx, img, box.x, box.y, boxW, boxH)
+            drawRoundedCoverImage(ctx, img, box.x, box.y, thumbW, thumbH, radius)
           } else {
-            drawImagePlaceholder(ctx, box.x, box.y, boxW, boxH, 'AREA IMMOBILIARE')
+            drawImagePlaceholder(ctx, box.x, box.y, thumbW, thumbH, box.label)
           }
         })
 
-        const overlayY = 438
-        const gradient = ctx.createLinearGradient(0, overlayY, 0, height)
-        gradient.addColorStop(0, 'rgba(17,24,39,0)')
-        gradient.addColorStop(0.35, 'rgba(17,24,39,0.78)')
-        gradient.addColorStop(1, 'rgba(17,24,39,0.96)')
-        ctx.fillStyle = gradient
-        ctx.fillRect(0, overlayY, width, height - overlayY)
+        const centerX = width / 2
 
-        ctx.fillStyle = '#A3BE8C'
-        ctx.font = '800 24px Arial'
-        ctx.textAlign = 'left'
-        ctx.fillText(`${contract} · ${ref}`, 44, 500)
+        let chipX = centerX - 190
+        tags.forEach((tag) => {
+          ctx.font = '800 18px Arial'
+          const chipWidth = ctx.measureText(tag).width + 36
+          drawChip(ctx, tag, chipX + chipWidth / 2, 78)
+          chipX += chipWidth + 12
+        })
+
+        ctx.textAlign = 'center'
+
+        ctx.fillStyle = '#C4A15A'
+        ctx.font = '800 16px Arial'
+        ctx.fillText('A R E A   I M M O B I L I A R E', centerX, 154)
 
         ctx.fillStyle = '#FFFFFF'
-        ctx.font = '900 42px Arial'
-        drawWrappedText(ctx, title, 44, 552, 760, 46, 2)
-
-        ctx.textAlign = 'right'
-        ctx.fillStyle = '#EBCB8B'
-        ctx.font = '900 40px Arial'
-        ctx.fillText(price, 1156, 552)
+        ctx.font = '900 41px Arial'
+        const titleEnd = drawCenteredWrappedText(ctx, title.toUpperCase(), centerX, 214, 470, 43, 3)
 
         ctx.fillStyle = '#D8DEE9'
-        ctx.font = '700 22px Arial'
-        ctx.fillText(location, 1156, 590)
+        ctx.font = '800 22px Arial'
+        drawCenteredWrappedText(ctx, location, centerX, titleEnd + 30, 520, 28, 2)
+
+        ctx.fillStyle = '#EBCB8B'
+        ctx.font = '900 36px Arial'
+        ctx.fillText(price, centerX, titleEnd + 102)
+
+        if (shortDescription) {
+          ctx.fillStyle = '#D1D5DB'
+          ctx.font = '700 22px Arial'
+          drawCenteredWrappedText(ctx, shortDescription, centerX, titleEnd + 152, 470, 30, 4)
+        }
+
+        ctx.strokeStyle = 'rgba(236,239,244,0.14)'
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        ctx.moveTo(382, 502)
+        ctx.lineTo(818, 502)
+        ctx.stroke()
+
+        ctx.fillStyle = '#FFFFFF'
+        drawRoundedRect(ctx, 376, 526, 126, 66, 12)
+        ctx.fill()
+
+        ctx.fillStyle = '#111827'
+        ctx.font = '900 25px Arial'
+        ctx.textAlign = 'center'
+        ctx.fillText('AREA', 439, 566)
+
+        ctx.textAlign = 'left'
+        ctx.fillStyle = '#FFFFFF'
+        ctx.font = '800 18px Arial'
+        ctx.fillText('Area Immobiliare', 520, 548)
+
+        ctx.fillStyle = '#D1D5DB'
+        ctx.font = '700 16px Arial'
+        ctx.fillText('Bergamo · Via Locatelli, 62', 520, 574)
+
+        ctx.fillStyle = '#EBCB8B'
+        ctx.font = '900 18px Arial'
+        ctx.fillText('035 237979 · 035 221206', 520, 598)
       } else {
-        const sideW = 355
-        const centerX = sideW
-        const centerW = width - sideW * 2
+        const sideW = 330
+        const photoY = 64
+        const photoH = height - 128
+        const leftX = 58
+        const rightX = width - leftX - sideW
+        const centerX = width / 2
+        const cardX = 404
+        const cardY = 58
+        const cardW = 392
+        const cardH = height - 116
 
         const leftImage = loadedImages[0]
         const rightImage = loadedImages[1] || loadedImages[0]
 
         if (leftImage) {
-          drawCoverImage(ctx, leftImage, 0, 0, sideW, height)
+          drawRoundedCoverImage(ctx, leftImage, leftX, photoY, sideW, photoH, 26)
         } else {
-          drawImagePlaceholder(ctx, 0, 0, sideW, height, 'FOTO 1')
+          drawImagePlaceholder(ctx, leftX, photoY, sideW, photoH, 'FOTO 1')
         }
 
         if (rightImage) {
-          drawCoverImage(ctx, rightImage, width - sideW, 0, sideW, height)
+          drawRoundedCoverImage(ctx, rightImage, rightX, photoY, sideW, photoH, 26)
         } else {
-          drawImagePlaceholder(ctx, width - sideW, 0, sideW, height, 'FOTO 2')
+          drawImagePlaceholder(ctx, rightX, photoY, sideW, photoH, 'FOTO 2')
         }
 
-        const gradientLeft = ctx.createLinearGradient(sideW - 80, 0, sideW, 0)
-        gradientLeft.addColorStop(0, 'rgba(17,24,39,0)')
-        gradientLeft.addColorStop(1, '#111827')
+        const gradientLeft = ctx.createLinearGradient(leftX + sideW - 96, 0, cardX, 0)
+        gradientLeft.addColorStop(0, 'rgba(3,5,7,0)')
+        gradientLeft.addColorStop(1, '#030507')
         ctx.fillStyle = gradientLeft
-        ctx.fillRect(sideW - 80, 0, 80, height)
+        ctx.fillRect(leftX + sideW - 96, 0, cardX - (leftX + sideW - 96), height)
 
-        const gradientRight = ctx.createLinearGradient(width - sideW, 0, width - sideW + 80, 0)
-        gradientRight.addColorStop(0, '#111827')
-        gradientRight.addColorStop(1, 'rgba(17,24,39,0)')
+        const gradientRight = ctx.createLinearGradient(cardX + cardW, 0, rightX + 96, 0)
+        gradientRight.addColorStop(0, '#030507')
+        gradientRight.addColorStop(1, 'rgba(3,5,7,0)')
         ctx.fillStyle = gradientRight
-        ctx.fillRect(width - sideW, 0, 80, height)
+        ctx.fillRect(cardX + cardW, 0, rightX + 96 - (cardX + cardW), height)
 
-        ctx.fillStyle = '#111827'
-        ctx.fillRect(centerX, 0, centerW, height)
+        ctx.fillStyle = '#070B14'
+        drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 26)
+        ctx.fill()
 
-        ctx.strokeStyle = 'rgba(163,190,140,0.42)'
-        ctx.lineWidth = 2
-        drawRoundedRect(ctx, centerX + 32, 38, centerW - 64, height - 76, 28)
+        ctx.strokeStyle = 'rgba(163,190,140,0.50)'
+        ctx.lineWidth = 1.6
+        drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 26)
         ctx.stroke()
 
         ctx.textAlign = 'center'
 
         ctx.fillStyle = '#8FBCBB'
-        ctx.font = '800 22px Arial'
-        ctx.fillText('AREA IMMOBILIARE', width / 2, 92)
+        ctx.font = '900 22px Arial'
+        ctx.fillText('AREA IMMOBILIARE', centerX, 112)
 
         ctx.fillStyle = '#A3BE8C'
-        ctx.font = '900 26px Arial'
-        ctx.fillText(`${contract} · ${ref}`, width / 2, 140)
+        ctx.font = '900 24px Arial'
+        ctx.fillText(`${contract} · ${ref}`, centerX, 152)
 
         ctx.fillStyle = '#FFFFFF'
-        ctx.font = '900 39px Arial'
-        const titleEnd = drawWrappedText(ctx, title.toUpperCase(), centerX + 48, 208, centerW - 96, 44, 3)
+        ctx.font = '900 34px Arial'
+        const titleEnd = drawCenteredWrappedText(ctx, title.toUpperCase(), centerX, 212, cardW - 64, 38, 3)
 
         ctx.fillStyle = '#D8DEE9'
-        ctx.font = '700 21px Arial'
-        drawWrappedText(ctx, features, centerX + 56, titleEnd + 30, centerW - 112, 28, 3)
+        ctx.font = '800 19px Arial'
+        const featuresEnd = drawCenteredWrappedText(ctx, features, centerX, titleEnd + 26, cardW - 62, 26, 3)
 
         ctx.fillStyle = '#EBCB8B'
-        ctx.font = '900 39px Arial'
-        ctx.fillText(price, width / 2, 510)
+        ctx.font = '900 34px Arial'
+        ctx.fillText(price, centerX, Math.max(featuresEnd + 58, 440))
 
         ctx.fillStyle = '#D8DEE9'
-        ctx.font = '700 22px Arial'
-        ctx.fillText(location, width / 2, 552)
+        ctx.font = '800 19px Arial'
+        drawCenteredWrappedText(ctx, location, centerX, Math.max(featuresEnd + 92, 474), cardW - 58, 25, 2)
+
+        ctx.strokeStyle = 'rgba(236,239,244,0.13)'
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        ctx.moveTo(cardX + 42, cardY + cardH - 76)
+        ctx.lineTo(cardX + cardW - 42, cardY + cardH - 76)
+        ctx.stroke()
 
         ctx.fillStyle = '#8FBCBB'
-        ctx.font = '700 18px Arial'
-        ctx.fillText('Contattaci per info e visite', width / 2, 594)
+        ctx.font = '800 17px Arial'
+        ctx.fillText('Contattaci per info e visite', centerX, cardY + cardH - 38)
       }
 
       const url = canvas.toDataURL('image/png')
