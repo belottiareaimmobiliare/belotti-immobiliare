@@ -383,13 +383,23 @@ export default function AIOSSocialPage() {
             </button>
 
             {propertyData?.property?.id ? (
-              <button
-                type="button"
-                onClick={() => window.location.href = `/admin/immobili/${propertyData.property.id}/scheda-social`}
-                className="rounded-full border border-[#EBCB8B]/35 bg-[#EBCB8B]/10 px-4 py-2 text-sm font-bold text-[#EBCB8B] transition hover:bg-[#EBCB8B]/18"
-              >
-                Apri scheda grafica
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => window.location.href = `/admin/ai-os/strumenti/social/facebook?propertyId=${propertyData.property.id}`}
+                  className="rounded-full border border-[#A3BE8C]/40 bg-[#A3BE8C]/12 px-4 py-2 text-sm font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/20"
+                >
+                  Crea immagini Facebook
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => window.location.href = `/admin/immobili/${propertyData.property.id}/scheda-social`}
+                  className="rounded-full border border-[#EBCB8B]/35 bg-[#EBCB8B]/10 px-4 py-2 text-sm font-bold text-[#EBCB8B] transition hover:bg-[#EBCB8B]/18"
+                >
+                  Apri scheda grafica
+                </button>
+              </>
             ) : null}
           </div>
         </header>

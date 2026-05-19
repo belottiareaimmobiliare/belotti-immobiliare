@@ -167,6 +167,7 @@ export async function GET(
       checklistResult,
       driveFolderResult,
       subfoldersResult,
+      mediaResult,
     ] = await Promise.all([
       supabase
         .from('property_owners')
@@ -193,6 +194,11 @@ export async function GET(
         .select('folder_key, folder_name, drive_folder_id, drive_folder_url')
         .eq('property_id', propertyId)
         .order('folder_name', { ascending: true }),
+      supabase
+        .from('property_media')
+        .select('id, media_type, file_url, label, sort_order, is_cover, created_at')
+        .eq('property_id', propertyId)
+        .order('sort_order', { ascending: true }),
     ])
 
     return NextResponse.json({
@@ -203,6 +209,7 @@ export async function GET(
       checklist: checklistResult.data ?? [],
       driveFolder: driveFolderResult.data ?? null,
       driveSubfolders: subfoldersResult.data ?? [],
+      propertyMedia: mediaResult.data ?? [],
     })
   } catch (error) {
     return NextResponse.json(
