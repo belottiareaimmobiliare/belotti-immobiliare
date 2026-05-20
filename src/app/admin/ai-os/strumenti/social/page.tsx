@@ -111,15 +111,15 @@ function buildSocialOutputs(data: ToolPropertyData | null): SocialOutput[] {
   const location = propertyLocation(property)
   const shortLocation = propertyShortLocation(property)
   const features = propertyFeatures(property)
-  const description = clean(property.description, '')
+  const description = clean(property.description, 'Descrizione non inserita nella scheda immobile.')
   const url = property.slug ? `https://www.areaimmobiliare.com/immobili/${property.slug}` : ''
   const hashtagsBase = STANDARD_SOCIAL_HASHTAGS_TEXT
 
   return [
     {
       id: 'facebook',
-      title: 'Post Facebook / Instagram / TikTok',
-      description: 'Testo completo, chiaro e commerciale per pagina Facebook / Instagram / TikTok.',
+      title: 'Post Facebook',
+      description: 'Testo completo con descrizione integrale e hashtag standard Belotti.',
       content: [
         `🏠 ${title}`,
         '',
@@ -130,9 +130,8 @@ function buildSocialOutputs(data: ToolPropertyData | null): SocialOutput[] {
         `💰 Prezzo: ${price}`,
         `🔎 Riferimento: ${ref}`,
         '',
-        description
-          ? description.slice(0, 620)
-          : 'Soluzione interessante per chi cerca un immobile ben posizionato e pronto da valutare con attenzione.',
+        'Descrizione completa:',
+        description,
         '',
         'Vuoi ricevere maggiori informazioni o fissare una visita?',
         'Contattaci e ti accompagniamo nella valutazione.',
@@ -146,7 +145,7 @@ function buildSocialOutputs(data: ToolPropertyData | null): SocialOutput[] {
     {
       id: 'instagram',
       title: 'Caption Instagram',
-      description: 'Caption più compatta, adatta a carosello o reel.',
+      description: 'Caption completa con descrizione integrale e hashtag standard Belotti.',
       content: [
         `✨ ${title}`,
         '',
@@ -155,6 +154,9 @@ function buildSocialOutputs(data: ToolPropertyData | null): SocialOutput[] {
         '',
         `Prezzo: ${price}`,
         `Rif. ${ref}`,
+        '',
+        'Descrizione completa:',
+        description,
         '',
         'Scrivici per info o per organizzare una visita.',
         '',
@@ -165,17 +167,19 @@ function buildSocialOutputs(data: ToolPropertyData | null): SocialOutput[] {
     {
       id: 'tiktok',
       title: 'Testo TikTok / Reel',
-      description: 'Caption e idea breve per video verticale.',
+      description: 'Caption TikTok completa con descrizione integrale e hashtag standard Belotti.',
       content: [
         `Hai visto questo ${type} ${contract} a ${shortLocation}?`,
         '',
         `📍 ${location}`,
         `📐 ${features}`,
         `💰 ${price}`,
+        `🔎 Rif. ${ref}`,
+        '',
+        'Descrizione completa:',
+        description,
         '',
         'Guarda le immagini, salva il video e contattaci se vuoi maggiori informazioni.',
-        '',
-        `Rif. ${ref}`,
         '',
         'Hashtag:',
         hashtagsBase,
@@ -184,20 +188,23 @@ function buildSocialOutputs(data: ToolPropertyData | null): SocialOutput[] {
     {
       id: 'voice-script',
       title: 'Script voce breve',
-      description: 'Testo breve per ElevenLabs, voiceover o video social.',
+      description: 'Script con descrizione completa, utile anche per voiceover più lungo.',
       content: [
         `Oggi ti presentiamo ${title}.`,
         `${type} ${contract} a ${shortLocation}, con ${features}.`,
         `Il prezzo è ${price}.`,
-        'Una soluzione da valutare se cerchi una casa in questa zona.',
-        'Per informazioni o visite, contatta Area Immobiliare.',
         `Riferimento annuncio: ${ref}.`,
-      ].join(' '),
+        '',
+        'Descrizione completa:',
+        description,
+        '',
+        'Per informazioni o visite, contatta Area Immobiliare.',
+      ].join('\n'),
     },
     {
       id: 'whatsapp',
       title: 'Messaggio WhatsApp',
-      description: 'Messaggio rapido da inviare a cliente interessato.',
+      description: 'Messaggio completo da inviare a cliente interessato.',
       content: [
         `Buongiorno, le invio il riepilogo dell’immobile ${ref}.`,
         '',
@@ -205,6 +212,9 @@ function buildSocialOutputs(data: ToolPropertyData | null): SocialOutput[] {
         `${type} ${contract} a ${shortLocation}`,
         `${features}`,
         `Prezzo: ${price}`,
+        '',
+        'Descrizione completa:',
+        description,
         '',
         url ? `Scheda: ${url}` : '',
         '',
@@ -214,7 +224,7 @@ function buildSocialOutputs(data: ToolPropertyData | null): SocialOutput[] {
     {
       id: 'portals',
       title: 'Descrizione portali',
-      description: 'Base descrittiva più pulita per portali immobiliari.',
+      description: 'Descrizione completa per portali immobiliari.',
       content: [
         `${title}`,
         '',
@@ -222,9 +232,8 @@ function buildSocialOutputs(data: ToolPropertyData | null): SocialOutput[] {
         '',
         `L’immobile si trova in ${location} e presenta le seguenti caratteristiche: ${features}.`,
         '',
-        description
-          ? description
-          : 'La soluzione è adatta a chi cerca un immobile funzionale, ben collocato e con caratteristiche interessanti per il mercato di riferimento.',
+        'Descrizione completa:',
+        description,
         '',
         `Prezzo: ${price}.`,
         `Riferimento: ${ref}.`,
@@ -234,6 +243,7 @@ function buildSocialOutputs(data: ToolPropertyData | null): SocialOutput[] {
     },
   ]
 }
+
 
 export default function AIOSSocialPage() {
   const [folders, setFolders] = useState<WorkspaceFolder[]>([])

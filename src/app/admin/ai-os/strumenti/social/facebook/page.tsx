@@ -109,6 +109,7 @@ function buildSocialCaption(property: Record<string, any>, platform: Platform) {
   const contract = normalize(property.contract_type) === 'affitto' ? 'in affitto' : 'in vendita'
   const location = shortLocation(property)
   const features = featureLine(property)
+  const description = clean(property.description, 'Descrizione non inserita nella scheda immobile.')
   const url = property.slug ? `https://www.areaimmobiliare.com/immobili/${property.slug}` : ''
 
   if (platform === 'facebook') {
@@ -120,6 +121,9 @@ function buildSocialCaption(property: Record<string, any>, platform: Platform) {
       `📐 ${features}`,
       `💰 ${price}`,
       `🔎 Rif. ${ref}`,
+      '',
+      'Descrizione completa:',
+      description,
       '',
       'Vuoi ricevere maggiori informazioni o fissare una visita?',
       'Contattaci: ti accompagniamo nella valutazione.',
@@ -141,6 +145,9 @@ function buildSocialCaption(property: Record<string, any>, platform: Platform) {
       `Prezzo: ${price}`,
       `Rif. ${ref}`,
       '',
+      'Descrizione completa:',
+      description,
+      '',
       'Scrivici per informazioni o per organizzare una visita.',
       '',
       'Hashtag:',
@@ -156,12 +163,16 @@ function buildSocialCaption(property: Record<string, any>, platform: Platform) {
     `Prezzo: ${price}`,
     `Rif. ${ref}`,
     '',
+    'Descrizione completa:',
+    description,
+    '',
     'Per informazioni e visite contatta Area Immobiliare.',
     '',
     'Hashtag:',
     STANDARD_SOCIAL_HASHTAGS_TEXT,
   ].join('\n')
 }
+
 
 function safeFilename(value: string) {
   return value
@@ -1219,7 +1230,7 @@ export default function SocialImagesPage() {
                   {config.label} + 5 hashtag standard
                 </h2>
                 <p className="mt-1 text-xs leading-5 text-[#D1D5DB]/58">
-                  Gli hashtag restano sempre uguali per Facebook, Instagram e TikTok.
+                  Gli hashtag restano sempre uguali per Facebook, Instagram e TikTok. La descrizione è sempre completa.
                 </p>
               </div>
 
