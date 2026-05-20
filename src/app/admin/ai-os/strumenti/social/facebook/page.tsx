@@ -355,16 +355,16 @@ function getLayoutBoxes(platform: Platform, layout: SocialLayout, width: number,
           { x: width - 66 - 224, y: 108, w: 224, h: 210 },
           { x: width - 66 - 224, y: 340, w: 224, h: 210 },
         ],
-        content: { x: 342, y: 68, w: 516, h: 512 },
+        content: { x: 330, y: 66, w: 540, h: 522 },
       }
     }
 
     return {
       boxes: [
-        { x: 58, y: 64, w: 330, h: height - 128 },
-        { x: width - 58 - 330, y: 64, w: 330, h: height - 128 },
+        { x: 58, y: 76, w: 320, h: height - 152 },
+        { x: width - 58 - 320, y: 76, w: 320, h: height - 152 },
       ],
-      content: { x: 404, y: 66, w: 392, h: height - 132 },
+      content: { x: 400, y: 70, w: 400, h: height - 140 },
     }
   }
 
@@ -372,43 +372,124 @@ function getLayoutBoxes(platform: Platform, layout: SocialLayout, width: number,
     if (layout === 'four') {
       return {
         boxes: [
-          { x: 56, y: 122, w: 238, h: 276 },
-          { x: 56, y: height - 122 - 276, w: 238, h: 276 },
-          { x: width - 56 - 238, y: 122, w: 238, h: 276 },
-          { x: width - 56 - 238, y: height - 122 - 276, w: 238, h: 276 },
+          { x: 58, y: 154, w: 250, h: 278 },
+          { x: 58, y: height - 154 - 278, w: 250, h: 278 },
+          { x: width - 58 - 250, y: 154, w: 250, h: 278 },
+          { x: width - 58 - 250, y: height - 154 - 278, w: 250, h: 278 },
         ],
-        content: { x: 326, y: 110, w: 428, h: 860 },
+        content: { x: 330, y: 126, w: 420, h: height - 252 },
       }
     }
 
     return {
       boxes: [
-        { x: 54, y: 220, w: 310, h: 640 },
-        { x: width - 54 - 310, y: 220, w: 310, h: 640 },
+        { x: 58, y: 214, w: 306, h: height - 428 },
+        { x: width - 58 - 306, y: 214, w: 306, h: height - 428 },
       ],
-      content: { x: 386, y: 132, w: 308, h: 816 },
+      content: { x: 386, y: 148, w: 308, h: height - 296 },
     }
   }
 
   if (layout === 'four') {
     return {
       boxes: [
-        { x: 72, y: 132, w: 428, h: 330 },
-        { x: 580, y: 132, w: 428, h: 330 },
-        { x: 72, y: height - 132 - 330, w: 428, h: 330 },
-        { x: 580, y: height - 132 - 330, w: 428, h: 330 },
+        { x: 76, y: 132, w: 428, h: 330 },
+        { x: width - 76 - 428, y: 132, w: 428, h: 330 },
+        { x: 76, y: height - 132 - 330, w: 428, h: 330 },
+        { x: width - 76 - 428, y: height - 132 - 330, w: 428, h: 330 },
       ],
-      content: { x: 132, y: 560, w: width - 264, h: 800 },
+      content: { x: 132, y: 560, w: width - 264, h: height - 1120 },
     }
   }
 
   return {
     boxes: [
-      { x: 86, y: 120, w: width - 172, h: 460 },
-      { x: 86, y: height - 120 - 460, w: width - 172, h: 460 },
+      { x: 86, y: 126, w: width - 172, h: 470 },
+      { x: 86, y: height - 126 - 470, w: width - 172, h: 470 },
     ],
-    content: { x: 132, y: 660, w: width - 264, h: 620 },
+    content: { x: 132, y: 660, w: width - 264, h: height - 1320 },
   }
+}
+
+function drawStandardChips(
+  ctx: CanvasRenderingContext2D,
+  tags: string[],
+  centerX: number,
+  y: number,
+  fontSize: number,
+  maxWidth: number,
+) {
+  const chipGap = Math.max(8, Math.round(fontSize * 0.65))
+  let safeFont = fontSize
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    ctx.font = `800 ${safeFont}px Arial`
+
+    const widths = tags.map((tag) => ctx.measureText(tag).width + safeFont * 1.8)
+    const total = widths.reduce((sum, item) => sum + item, 0) + chipGap * Math.max(0, widths.length - 1)
+
+    if (total <= maxWidth || safeFont <= 13) {
+      let x = centerX - total / 2
+
+      tags.forEach((tag, index) => {
+        const chipW = widths[index] ?? 0
+        drawChip(ctx, tag, x + chipW / 2, y, safeFont)
+        x += chipW + chipGap
+      })
+
+      return
+    }
+
+    safeFont -= 2
+  }
+}
+
+function drawStandardFooter(
+  ctx: CanvasRenderingContext2D,
+  input: {
+    x: number
+    y: number
+    w: number
+    logo: HTMLImageElement | null
+    scale: number
+  },
+) {
+  const { x, y, w, logo, scale } = input
+
+  const lineY = y
+  const logoW = Math.round(126 * scale)
+  const logoH = Math.round(66 * scale)
+  const logoX = x + Math.round(18 * scale)
+  const logoY = y + Math.round(20 * scale)
+  const infoX = logoX + logoW + Math.round(26 * scale)
+
+  ctx.strokeStyle = 'rgba(236,239,244,0.14)'
+  ctx.lineWidth = Math.max(1, scale)
+  ctx.beginPath()
+  ctx.moveTo(x, lineY)
+  ctx.lineTo(x + w, lineY)
+  ctx.stroke()
+
+  ctx.fillStyle = '#FFFFFF'
+  drawRoundedRect(ctx, logoX, logoY, logoW, logoH, Math.round(12 * scale))
+  ctx.fill()
+
+  drawContainedLogo(ctx, logo, logoX, logoY, logoW, logoH)
+
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'alphabetic'
+
+  ctx.fillStyle = '#FFFFFF'
+  ctx.font = `800 ${Math.round(18 * scale)}px Arial`
+  ctx.fillText('Area Immobiliare', infoX, logoY + Math.round(21 * scale))
+
+  ctx.fillStyle = '#D1D5DB'
+  ctx.font = `700 ${Math.round(15 * scale)}px Arial`
+  ctx.fillText('Bergamo · Via Locatelli, 62', infoX, logoY + Math.round(46 * scale))
+
+  ctx.fillStyle = '#EBCB8B'
+  ctx.font = `900 ${Math.round(16 * scale)}px Arial`
+  ctx.fillText('035 237979 · 035 221206', infoX, logoY + Math.round(70 * scale))
 }
 
 function drawContentPanel(
@@ -439,9 +520,7 @@ function drawContentPanel(
     w,
     h,
     title,
-    ref,
     price,
-    contract,
     location,
     features,
     description,
@@ -450,147 +529,130 @@ function drawContentPanel(
   } = input
 
   const centerX = x + w / 2
-  const isVertical = platform === 'tiktok'
-  const isSquare = platform === 'instagram'
-  const scale = platform === 'facebook' ? 1 : platform === 'instagram' ? 1.12 : 1.34
-  const compact = platform === 'instagram' && layout === 'two'
+  const isTikTok = platform === 'tiktok'
+  const isInstagram = platform === 'instagram'
 
-  if (layout === 'two' || platform !== 'facebook') {
-    ctx.fillStyle = 'rgba(7,11,20,0.96)'
-    drawRoundedRect(ctx, x, y, w, h, isVertical ? 34 : 26)
+  const scale =
+    platform === 'facebook'
+      ? 1
+      : platform === 'instagram'
+        ? 1.08
+        : 1.32
+
+  const safeX = x + Math.round(26 * scale)
+  const safeW = w - Math.round(52 * scale)
+  const footerH = Math.round(platform === 'tiktok' ? 142 * scale : 102 * scale)
+  const footerY = y + h - footerH
+
+  if (layout === 'two' || isTikTok) {
+    ctx.fillStyle = 'rgba(7,11,20,0.965)'
+    drawRoundedRect(ctx, x, y, w, h, isTikTok ? 38 : 26)
     ctx.fill()
 
     ctx.strokeStyle = 'rgba(163,190,140,0.50)'
     ctx.lineWidth = 1.6
-    drawRoundedRect(ctx, x, y, w, h, isVertical ? 34 : 26)
+    drawRoundedRect(ctx, x, y, w, h, isTikTok ? 38 : 26)
     ctx.stroke()
   }
 
-  const chipFont = Math.max(15, Math.round(16 * scale))
-  const shownTags = tags.slice(0, platform === 'tiktok' ? 3 : 4)
-  const chipGap = Math.max(8, Math.round(10 * scale))
-  const chipWidths = shownTags.map((tag) => {
-    ctx.font = `800 ${chipFont}px Arial`
-    return ctx.measureText(tag).width + chipFont * 1.8
-  })
-  const totalChipWidth = chipWidths.reduce((total, item) => total + item, 0) + chipGap * Math.max(0, chipWidths.length - 1)
+  const chipFont = Math.round((isTikTok ? 23 : isInstagram ? 19 : 18) * scale)
+  const brandFont = Math.round((isTikTok ? 20 : 16) * scale)
+  const titleFont = Math.round((isTikTok ? 43 : isInstagram ? 34 : 39) * scale)
+  const titleLine = Math.round(titleFont * 1.08)
+  const locationFont = Math.round((isTikTok ? 27 : isInstagram ? 21 : 22) * scale)
+  const priceFont = Math.round((isTikTok ? 40 : isInstagram ? 32 : 36) * scale)
+  const featureFont = Math.round((isTikTok ? 24 : isInstagram ? 18 : 21) * scale)
+  const descFont = Math.round((isTikTok ? 23 : isInstagram ? 18 : 21) * scale)
 
-  if (layout === 'four' && platform !== 'tiktok') {
-    let chipX = centerX - totalChipWidth / 2
-    shownTags.forEach((tag, index) => {
-      const chipWidth = chipWidths[index] ?? 0
-      drawChip(ctx, tag, chipX + chipWidth / 2, y + 2, chipFont)
-      chipX += chipWidth + chipGap
-    })
+  let cursorY = y + Math.round((layout === 'four' ? 2 : 30) * scale)
+
+  if (layout === 'four') {
+    drawStandardChips(ctx, tags, centerX, cursorY, chipFont, safeW)
+    cursorY += Math.round(68 * scale)
   }
 
-  let cursorY = y + (layout === 'four' && platform !== 'tiktok' ? 70 * scale : 48 * scale)
-
   ctx.textAlign = 'center'
+  ctx.textBaseline = 'alphabetic'
 
   ctx.fillStyle = '#C4A15A'
-  ctx.font = `800 ${Math.round((compact ? 13 : 16) * scale)}px Arial`
+  ctx.font = `800 ${brandFont}px Arial`
   ctx.fillText('A R E A   I M M O B I L I A R E', centerX, cursorY)
 
-  cursorY += compact ? 48 : 58 * scale
+  cursorY += Math.round((isTikTok ? 70 : 54) * scale)
 
   ctx.fillStyle = '#FFFFFF'
-  ctx.font = `900 ${Math.round((compact ? 25 : 34) * scale)}px Arial`
+  ctx.font = `900 ${titleFont}px Arial`
   cursorY = drawCenteredWrappedText(
     ctx,
     title.toUpperCase(),
     centerX,
     cursorY,
-    w - Math.max(42, 70 * scale),
-    Math.round((compact ? 30 : 38) * scale),
-    isVertical ? 3 : 2,
+    safeW,
+    titleLine,
+    isTikTok ? 3 : 2,
   )
 
-  cursorY += compact ? 30 : 42 * scale
+  cursorY += Math.round((isTikTok ? 46 : 34) * scale)
 
   ctx.fillStyle = '#D8DEE9'
-  ctx.font = `800 ${Math.round((compact ? 16 : 19) * scale)}px Arial`
+  ctx.font = `800 ${locationFont}px Arial`
   cursorY = drawCenteredWrappedText(
     ctx,
     location,
     centerX,
     cursorY,
-    w - Math.max(40, 64 * scale),
-    Math.round((compact ? 21 : 26) * scale),
+    safeW,
+    Math.round(locationFont * 1.35),
     2,
   )
 
-  cursorY += compact ? 30 : 42 * scale
+  cursorY += Math.round((isTikTok ? 50 : 36) * scale)
 
   ctx.fillStyle = '#EBCB8B'
-  ctx.font = `900 ${Math.round((compact ? 27 : 34) * scale)}px Arial`
+  ctx.font = `900 ${priceFont}px Arial`
   ctx.fillText(price, centerX, cursorY)
 
-  cursorY += compact ? 40 : 58 * scale
+  cursorY += Math.round((isTikTok ? 62 : 46) * scale)
 
   ctx.fillStyle = '#D1D5DB'
-  ctx.font = `800 ${Math.round((compact ? 15 : 18) * scale)}px Arial`
+  ctx.font = `800 ${featureFont}px Arial`
   cursorY = drawCenteredWrappedText(
     ctx,
     features,
     centerX,
     cursorY,
-    w - Math.max(44, 74 * scale),
-    Math.round((compact ? 21 : 25) * scale),
-    isVertical ? 3 : 2,
+    safeW,
+    Math.round(featureFont * 1.35),
+    isTikTok ? 3 : 2,
   )
 
-  const remainingToFooter = y + h - cursorY
-  const canDrawDescription = remainingToFooter > (isVertical ? 230 : 150)
+  const freeSpaceBeforeFooter = footerY - cursorY
 
-  if (description && canDrawDescription) {
-    cursorY += compact ? 28 : 36 * scale
+  if (description && freeSpaceBeforeFooter > Math.round(90 * scale)) {
+    cursorY += Math.round(30 * scale)
 
     ctx.fillStyle = '#D1D5DB'
-    ctx.font = `700 ${Math.round((compact ? 15 : 18) * scale)}px Arial`
+    ctx.font = `700 ${descFont}px Arial`
     drawCenteredWrappedText(
       ctx,
       description,
       centerX,
       cursorY,
-      w - Math.max(48, 78 * scale),
-      Math.round((compact ? 21 : 25) * scale),
-      isVertical ? 4 : 3,
+      safeW,
+      Math.round(descFont * 1.35),
+      isTikTok ? 4 : 3,
     )
   }
 
-  const footerY = y + h - Math.max(82, 108 * scale)
-  ctx.strokeStyle = 'rgba(236,239,244,0.13)'
-  ctx.lineWidth = 1
-  ctx.beginPath()
-  ctx.moveTo(x + Math.max(32, 46 * scale), footerY - 18)
-  ctx.lineTo(x + w - Math.max(32, 46 * scale), footerY - 18)
-  ctx.stroke()
-
-  const logoW = Math.min(w * 0.32, Math.max(104, 126 * scale))
-  const logoH = Math.min(72 * scale, Math.max(52, 60 * scale))
-  const logoX = x + Math.max(28, 38 * scale)
-  const logoY = footerY
-
-  ctx.fillStyle = '#FFFFFF'
-  drawRoundedRect(ctx, logoX, logoY, logoW, logoH, 12)
-  ctx.fill()
-  drawContainedLogo(ctx, logo, logoX, logoY, logoW, logoH)
-
-  const infoX = logoX + logoW + Math.max(16, 22 * scale)
-  ctx.textAlign = 'left'
-  ctx.fillStyle = '#FFFFFF'
-  ctx.font = `800 ${Math.round(16 * scale)}px Arial`
-  ctx.fillText('Area Immobiliare', infoX, footerY + 20 * scale)
-
-  ctx.fillStyle = '#D1D5DB'
-  ctx.font = `700 ${Math.round(13 * scale)}px Arial`
-  ctx.fillText('Bergamo · Via Locatelli, 62', infoX, footerY + 43 * scale)
-
-  ctx.fillStyle = '#EBCB8B'
-  ctx.font = `900 ${Math.round(14 * scale)}px Arial`
-  ctx.fillText('035 237979 · 035 221206', infoX, footerY + 64 * scale)
+  drawStandardFooter(ctx, {
+    x: safeX,
+    y: footerY,
+    w: safeW,
+    logo,
+    scale,
+  })
 }
+
 
 export default function SocialImagesPage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
