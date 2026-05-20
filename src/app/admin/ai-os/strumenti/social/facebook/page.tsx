@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 type FacebookLayout = 'four' | 'side-text-side'
 
+const AREA_FACEBOOK_LOGO_SRC = '/images/brand/areaimmobiliare.png'
+
 type PropertyMedia = {
   id: string
   media_type?: string | null
@@ -254,6 +256,39 @@ async function loadImage(url: string) {
   })
 }
 
+function drawContainedLogo(
+  ctx: CanvasRenderingContext2D,
+  logo: HTMLImageElement | null,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  if (!logo) {
+    return
+  }
+
+  const padding = 12
+  const availableW = width - padding * 2
+  const availableH = height - padding * 2
+  const logoRatio = logo.width / logo.height
+  const boxRatio = availableW / availableH
+
+  let drawW = availableW
+  let drawH = availableH
+
+  if (logoRatio > boxRatio) {
+    drawH = drawW / logoRatio
+  } else {
+    drawW = drawH * logoRatio
+  }
+
+  const drawX = x + (width - drawW) / 2
+  const drawY = y + (height - drawH) / 2
+
+  ctx.drawImage(logo, drawX, drawY, drawW, drawH)
+}
+
 function drawImagePlaceholder(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -284,6 +319,7 @@ export default function FacebookImagesPage() {
   const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [notice, setNotice] = useState('')
+  const [areaLogo, setAreaLogo] = useState<HTMLImageElement | null>(null)
   const [photoSlots, setPhotoSlots] = useState<number[]>([0, 1, 2, 3])
 
   const property = data?.property ?? null
@@ -525,10 +561,7 @@ export default function FacebookImagesPage() {
         drawRoundedRect(ctx, 376, 506, 126, 58, 12)
         ctx.fill()
 
-        ctx.fillStyle = '#111827'
-        ctx.font = '900 25px Arial'
-        ctx.textAlign = 'center'
-        ctx.fillText('AREA', 439, 544)
+        drawContainedLogo(ctx, areaLogo, 376, 506, 126, 58)
 
         ctx.textAlign = 'left'
         ctx.fillStyle = '#FFFFFF'
@@ -656,6 +689,19 @@ export default function FacebookImagesPage() {
   }
 
   useEffect(() => {
+    async function loadAreaLogo() {
+      try {
+        const logo = await loadImage(AREA_FACEBOOK_LOGO_SRC)
+        setAreaLogo(logo)
+      } catch {
+        setAreaLogo(null)
+      }
+    }
+
+    void loadAreaLogo()
+  }, [])
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const fromUrl = params.get('propertyId') || ''
 
@@ -671,7 +717,7 @@ export default function FacebookImagesPage() {
       void generateImage(layout)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layout, property?.id, photoSlots])
+  }, [layout, property?.id, photoSlots, areaLogo])
 
   return (
     <main className="min-h-screen bg-[#111827] px-4 py-6 text-[#E5E7EB] md:px-8">
