@@ -468,11 +468,20 @@ function drawStandardFooter(
   const { x, y, w, logo, scale } = input
 
   const lineY = y
+  const safePadding = Math.round(18 * scale)
+  const availableW = w - safePadding * 2
+
   const logoW = Math.round(126 * scale)
   const logoH = Math.round(66 * scale)
-  const logoX = x + Math.round(18 * scale)
-  const logoY = y + Math.round(20 * scale)
-  const infoX = logoX + logoW + Math.round(26 * scale)
+  const gap = Math.round(26 * scale)
+
+  const titleFont = Math.round(18 * scale)
+  const addressFont = Math.round(15 * scale)
+  const phoneFont = Math.round(16 * scale)
+
+  const agencyName = 'Area Immobiliare'
+  const agencyAddress = 'Bergamo · Via Locatelli, 62'
+  const agencyPhone = '035 237979 · 035 221206'
 
   ctx.strokeStyle = 'rgba(236,239,244,0.14)'
   ctx.lineWidth = Math.max(1, scale)
@@ -481,27 +490,75 @@ function drawStandardFooter(
   ctx.lineTo(x + w, lineY)
   ctx.stroke()
 
+  ctx.textBaseline = 'alphabetic'
+
+  ctx.font = `800 ${titleFont}px Arial`
+  const nameW = ctx.measureText(agencyName).width
+
+  ctx.font = `700 ${addressFont}px Arial`
+  const addressW = ctx.measureText(agencyAddress).width
+
+  ctx.font = `900 ${phoneFont}px Arial`
+  const phoneW = ctx.measureText(agencyPhone).width
+
+  const textW = Math.max(nameW, addressW, phoneW)
+  const groupW = logoW + gap + textW
+  const groupFits = groupW <= availableW
+
+  if (groupFits) {
+    const groupX = x + safePadding + (availableW - groupW) / 2
+    const logoX = groupX
+    const logoY = y + Math.round(20 * scale)
+    const infoX = logoX + logoW + gap
+
+    ctx.fillStyle = '#FFFFFF'
+    drawRoundedRect(ctx, logoX, logoY, logoW, logoH, Math.round(12 * scale))
+    ctx.fill()
+
+    drawContainedLogo(ctx, logo, logoX, logoY, logoW, logoH)
+
+    ctx.textAlign = 'left'
+
+    ctx.fillStyle = '#FFFFFF'
+    ctx.font = `800 ${titleFont}px Arial`
+    ctx.fillText(agencyName, infoX, logoY + Math.round(21 * scale))
+
+    ctx.fillStyle = '#D1D5DB'
+    ctx.font = `700 ${addressFont}px Arial`
+    ctx.fillText(agencyAddress, infoX, logoY + Math.round(46 * scale))
+
+    ctx.fillStyle = '#EBCB8B'
+    ctx.font = `900 ${phoneFont}px Arial`
+    ctx.fillText(agencyPhone, infoX, logoY + Math.round(70 * scale))
+
+    return
+  }
+
+  const centerX = x + w / 2
+  const logoX = centerX - logoW / 2
+  const logoY = y + Math.round(14 * scale)
+
   ctx.fillStyle = '#FFFFFF'
   drawRoundedRect(ctx, logoX, logoY, logoW, logoH, Math.round(12 * scale))
   ctx.fill()
 
   drawContainedLogo(ctx, logo, logoX, logoY, logoW, logoH)
 
-  ctx.textAlign = 'left'
-  ctx.textBaseline = 'alphabetic'
+  ctx.textAlign = 'center'
 
   ctx.fillStyle = '#FFFFFF'
-  ctx.font = `800 ${Math.round(18 * scale)}px Arial`
-  ctx.fillText('Area Immobiliare', infoX, logoY + Math.round(21 * scale))
+  ctx.font = `800 ${titleFont}px Arial`
+  ctx.fillText(agencyName, centerX, logoY + logoH + Math.round(24 * scale))
 
   ctx.fillStyle = '#D1D5DB'
-  ctx.font = `700 ${Math.round(15 * scale)}px Arial`
-  ctx.fillText('Bergamo · Via Locatelli, 62', infoX, logoY + Math.round(46 * scale))
+  ctx.font = `700 ${addressFont}px Arial`
+  ctx.fillText(agencyAddress, centerX, logoY + logoH + Math.round(48 * scale))
 
   ctx.fillStyle = '#EBCB8B'
-  ctx.font = `900 ${Math.round(16 * scale)}px Arial`
-  ctx.fillText('035 237979 · 035 221206', infoX, logoY + Math.round(70 * scale))
+  ctx.font = `900 ${phoneFont}px Arial`
+  ctx.fillText(agencyPhone, centerX, logoY + logoH + Math.round(72 * scale))
 }
+
 
 function drawContentPanel(
   ctx: CanvasRenderingContext2D,
