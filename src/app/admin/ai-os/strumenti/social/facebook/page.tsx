@@ -681,17 +681,34 @@ function drawContentPanel(
   const centerX = x + w / 2
   const isTikTok = platform === 'tiktok'
   const isInstagram = platform === 'instagram'
+  const isFacebook = platform === 'facebook'
+  const isTwoPhoto = layout === 'two'
+  const isCompactTwo = isTwoPhoto && (isFacebook || isInstagram)
 
+  /*
+   * Regola:
+   * - Facebook/Instagram 2 foto: card centrale più stretta, quindi testo/spacing più compatti.
+   * - Facebook/Instagram 4 foto: NON toccato, perché è quello buono.
+   * - TikTok 2/4: NON toccato, perché già ok in safe area.
+   */
   const scale =
-    platform === 'facebook'
-      ? 1
-      : platform === 'instagram'
-        ? 1.08
+    isFacebook
+      ? isTwoPhoto ? 0.78 : 1
+      : isInstagram
+        ? isTwoPhoto ? 0.66 : 1.08
         : 1
 
   const safeX = x + Math.round(26 * scale)
   const safeW = w - Math.round(52 * scale)
-  const footerH = Math.round(platform === 'tiktok' ? 112 * scale : 102 * scale)
+
+  const footerH = Math.round(
+    isTikTok
+      ? 112 * scale
+      : isCompactTwo
+        ? 82 * scale
+        : 102 * scale,
+  )
+
   const footerY = y + h - footerH
 
   if (layout === 'two' || isTikTok) {
@@ -714,7 +731,15 @@ function drawContentPanel(
   const featureFont = Math.round((isTikTok ? 21 : isInstagram ? 18 : 21) * scale)
   const descFont = Math.round((isTikTok ? 20 : isInstagram ? 18 : 21) * scale)
 
-  let cursorY = y + Math.round((isTikTok ? 34 : layout === 'four' ? 2 : 30) * scale)
+  let cursorY = y + Math.round(
+    isTikTok
+      ? 34 * scale
+      : layout === 'four'
+        ? 2 * scale
+        : isCompactTwo
+          ? 16 * scale
+          : 30 * scale,
+  )
 
   if (layout === 'four') {
     drawStandardChips(ctx, tags, centerX, cursorY, chipFont, safeW)
@@ -728,7 +753,13 @@ function drawContentPanel(
   ctx.font = `800 ${brandFont}px Arial`
   ctx.fillText('A R E A   I M M O B I L I A R E', centerX, cursorY)
 
-  cursorY += Math.round((isTikTok ? 52 : 54) * scale)
+  cursorY += Math.round(
+    isTikTok
+      ? 52 * scale
+      : isCompactTwo
+        ? 34 * scale
+        : 54 * scale,
+  )
 
   ctx.fillStyle = '#FFFFFF'
   ctx.font = `900 ${titleFont}px Arial`
@@ -739,10 +770,16 @@ function drawContentPanel(
     cursorY,
     safeW,
     titleLine,
-    isTikTok ? 3 : 2,
+    isTikTok ? 3 : isCompactTwo ? 2 : 2,
   )
 
-  cursorY += Math.round((isTikTok ? 34 : 34) * scale)
+  cursorY += Math.round(
+    isTikTok
+      ? 34 * scale
+      : isCompactTwo
+        ? 18 * scale
+        : 34 * scale,
+  )
 
   ctx.fillStyle = '#D8DEE9'
   ctx.font = `800 ${locationFont}px Arial`
@@ -752,17 +789,29 @@ function drawContentPanel(
     centerX,
     cursorY,
     safeW,
-    Math.round(locationFont * 1.35),
+    Math.round(locationFont * 1.28),
     2,
   )
 
-  cursorY += Math.round((isTikTok ? 34 : 36) * scale)
+  cursorY += Math.round(
+    isTikTok
+      ? 34 * scale
+      : isCompactTwo
+        ? 20 * scale
+        : 36 * scale,
+  )
 
   ctx.fillStyle = '#EBCB8B'
   ctx.font = `900 ${priceFont}px Arial`
   ctx.fillText(price, centerX, cursorY)
 
-  cursorY += Math.round((isTikTok ? 40 : 46) * scale)
+  cursorY += Math.round(
+    isTikTok
+      ? 40 * scale
+      : isCompactTwo
+        ? 22 * scale
+        : 46 * scale,
+  )
 
   ctx.fillStyle = '#D1D5DB'
   ctx.font = `800 ${featureFont}px Arial`
@@ -772,13 +821,19 @@ function drawContentPanel(
     centerX,
     cursorY,
     safeW,
-    Math.round(featureFont * 1.35),
+    Math.round(featureFont * 1.28),
     isTikTok ? 3 : 2,
   )
 
   const freeSpaceBeforeFooter = footerY - cursorY
 
-  if (description && freeSpaceBeforeFooter > Math.round(90 * scale)) {
+  /*
+   * Importantissimo:
+   * Nei layout 2 foto Facebook/Instagram NON mettiamo la descrizione dentro l'immagine,
+   * perché la descrizione completa sta già nei testi copiabili.
+   * Qui serve solo che la card non sfondi sotto.
+   */
+  if (!isCompactTwo && description && freeSpaceBeforeFooter > Math.round(90 * scale)) {
     cursorY += Math.round(30 * scale)
 
     ctx.fillStyle = '#D1D5DB'
@@ -802,6 +857,7 @@ function drawContentPanel(
     scale,
   })
 }
+
 
 
 export default function SocialImagesPage() {
