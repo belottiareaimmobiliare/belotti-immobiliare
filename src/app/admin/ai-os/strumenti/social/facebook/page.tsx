@@ -284,6 +284,7 @@ export default function FacebookImagesPage() {
   const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [notice, setNotice] = useState('')
+  const [photoSlots, setPhotoSlots] = useState<number[]>([0, 1, 2, 3])
 
   const property = data?.property ?? null
 
@@ -299,6 +300,29 @@ export default function FacebookImagesPage() {
       })
       .map((item) => String(item.file_url))
   }, [data])
+
+  function currentSlotIndex(slotIndex: number) {
+    if (images.length === 0) return 0
+
+    const raw = Number(photoSlots[slotIndex] ?? slotIndex)
+    return ((raw % images.length) + images.length) % images.length
+  }
+
+  function cyclePhotoSlot(slotIndex: number, direction = 1) {
+    if (images.length === 0) {
+      setNotice('Nessuna foto disponibile per questo immobile.')
+      return
+    }
+
+    setPhotoSlots((current) => {
+      const next = [...current]
+      const currentValue = Number(next[slotIndex] ?? slotIndex)
+      next[slotIndex] = ((currentValue + direction) % images.length + images.length) % images.length
+      return next
+    })
+
+    setNotice(`Foto ${slotIndex + 1} cambiata. Clicca ancora per passare alla successiva.`)
+  }
 
   async function loadProperty(nextPropertyId: string) {
     if (!nextPropertyId) return
@@ -321,6 +345,7 @@ export default function FacebookImagesPage() {
         property: payload.property,
         propertyMedia: Array.isArray(payload.propertyMedia) ? payload.propertyMedia : [],
       })
+      setPhotoSlots([0, 1, 2, 3])
     } catch (error) {
       setData(null)
       setNotice(error instanceof Error ? error.message : 'Errore caricamento immobile')
@@ -355,9 +380,13 @@ export default function FacebookImagesPage() {
       ctx.fillStyle = '#111827'
       ctx.fillRect(0, 0, width, height)
 
+      const selectedImageUrls = (nextLayout === 'four' ? [0, 1, 2, 3] : [0, 1])
+        .map((slotIndex) => images[currentSlotIndex(slotIndex)])
+        .filter(Boolean)
+
       const loadedImages: HTMLImageElement[] = []
 
-      for (const src of images.slice(0, 4)) {
+      for (const src of selectedImageUrls) {
         try {
           loadedImages.push(await loadImage(src))
         } catch {
@@ -374,7 +403,7 @@ export default function FacebookImagesPage() {
 
       const typeLabel = clean(property.property_type, 'Immobile')
       const description = clean(property.description, '')
-      const shortDescription = description.length > 230 ? `${description.slice(0, 230).trim()}...` : description
+      const shortDescription = description.length > 185 ? `${description.slice(0, 185).trim()}...` : description
       const tags = [
         normalize(property.contract_type) === 'vendita' ? 'Vendita' : normalize(property.contract_type) === 'affitto' ? 'Affitto' : 'Immobile',
         typeLabel,
@@ -444,44 +473,49 @@ export default function FacebookImagesPage() {
         })
 
         const centerX = width / 2
-
-        let chipX = centerX - 190
-        tags.forEach((tag) => {
+        const chipGap = 12
+        const chipWidths = tags.map((tag) => {
           ctx.font = '800 18px Arial'
-          const chipWidth = ctx.measureText(tag).width + 36
-          drawChip(ctx, tag, chipX + chipWidth / 2, 78)
-          chipX += chipWidth + 12
+          return ctx.measureText(tag).width + 36
+        })
+        const totalChipWidth = chipWidths.reduce((total, item) => total + item, 0) + chipGap * Math.max(0, chipWidths.length - 1)
+        let chipX = centerX - totalChipWidth / 2
+
+        tags.forEach((tag, index) => {
+          const chipWidth = chipWidths[index] ?? 0
+          drawChip(ctx, tag, chipX + chipWidth / 2, 74)
+          chipX += chipWidth + chipGap
         })
 
         ctx.textAlign = 'center'
 
         ctx.fillStyle = '#C4A15A'
         ctx.font = '800 16px Arial'
-        ctx.fillText('A R E A   I M M O B I L I A R E', centerX, 154)
+        ctx.fillText('A R E A   I M M O B I L I A R E', centerX, 150)
 
         ctx.fillStyle = '#FFFFFF'
-        ctx.font = '900 41px Arial'
-        const titleEnd = drawCenteredWrappedText(ctx, title.toUpperCase(), centerX, 214, 470, 43, 3)
+        ctx.font = '900 39px Arial'
+        drawCenteredWrappedText(ctx, title.toUpperCase(), centerX, 204, 500, 42, 2)
 
         ctx.fillStyle = '#D8DEE9'
         ctx.font = '800 22px Arial'
-        drawCenteredWrappedText(ctx, location, centerX, titleEnd + 30, 520, 28, 2)
+        drawCenteredWrappedText(ctx, location, centerX, 314, 520, 28, 2)
 
         ctx.fillStyle = '#EBCB8B'
         ctx.font = '900 36px Arial'
-        ctx.fillText(price, centerX, titleEnd + 102)
+        ctx.fillText(price, centerX, 376)
 
         if (shortDescription) {
           ctx.fillStyle = '#D1D5DB'
-          ctx.font = '700 22px Arial'
-          drawCenteredWrappedText(ctx, shortDescription, centerX, titleEnd + 152, 470, 30, 4)
+          ctx.font = '700 21px Arial'
+          drawCenteredWrappedText(ctx, shortDescription, centerX, 424, 470, 28, 3)
         }
 
         ctx.strokeStyle = 'rgba(236,239,244,0.14)'
         ctx.lineWidth = 1
         ctx.beginPath()
-        ctx.moveTo(382, 502)
-        ctx.lineTo(818, 502)
+        ctx.moveTo(382, 506)
+        ctx.lineTo(818, 506)
         ctx.stroke()
 
         ctx.fillStyle = '#FFFFFF'
@@ -513,9 +547,9 @@ export default function FacebookImagesPage() {
         const rightX = width - leftX - sideW
         const centerX = width / 2
         const cardX = 404
-        const cardY = 58
+        const cardY = 66
         const cardW = 392
-        const cardH = height - 116
+        const cardH = height - 132
 
         const leftImage = loadedImages[0]
         const rightImage = loadedImages[1] || loadedImages[0]
@@ -560,35 +594,35 @@ export default function FacebookImagesPage() {
         ctx.fillText('AREA IMMOBILIARE', centerX, 112)
 
         ctx.fillStyle = '#A3BE8C'
-        ctx.font = '900 24px Arial'
-        ctx.fillText(`${contract} · ${ref}`, centerX, 152)
+        ctx.font = '900 23px Arial'
+        ctx.fillText(`${contract} · ${ref}`, centerX, 150)
 
         ctx.fillStyle = '#FFFFFF'
-        ctx.font = '900 34px Arial'
-        const titleEnd = drawCenteredWrappedText(ctx, title.toUpperCase(), centerX, 212, cardW - 64, 38, 3)
+        ctx.font = '900 33px Arial'
+        drawCenteredWrappedText(ctx, title.toUpperCase(), centerX, 206, cardW - 64, 37, 2)
 
         ctx.fillStyle = '#D8DEE9'
         ctx.font = '800 19px Arial'
-        const featuresEnd = drawCenteredWrappedText(ctx, features, centerX, titleEnd + 26, cardW - 62, 26, 3)
+        drawCenteredWrappedText(ctx, features, centerX, 312, cardW - 62, 26, 2)
 
         ctx.fillStyle = '#EBCB8B'
         ctx.font = '900 34px Arial'
-        ctx.fillText(price, centerX, Math.max(featuresEnd + 58, 440))
+        ctx.fillText(price, centerX, 408)
 
         ctx.fillStyle = '#D8DEE9'
-        ctx.font = '800 19px Arial'
-        drawCenteredWrappedText(ctx, location, centerX, Math.max(featuresEnd + 92, 474), cardW - 58, 25, 2)
+        ctx.font = '800 18px Arial'
+        drawCenteredWrappedText(ctx, location, centerX, 452, cardW - 58, 24, 2)
 
         ctx.strokeStyle = 'rgba(236,239,244,0.13)'
         ctx.lineWidth = 1
         ctx.beginPath()
-        ctx.moveTo(cardX + 42, cardY + cardH - 76)
-        ctx.lineTo(cardX + cardW - 42, cardY + cardH - 76)
+        ctx.moveTo(cardX + 42, cardY + cardH - 72)
+        ctx.lineTo(cardX + cardW - 42, cardY + cardH - 72)
         ctx.stroke()
 
         ctx.fillStyle = '#8FBCBB'
-        ctx.font = '800 17px Arial'
-        ctx.fillText('Contattaci per info e visite', centerX, cardY + cardH - 38)
+        ctx.font = '800 16px Arial'
+        ctx.fillText('Contattaci per info e visite', centerX, cardY + cardH - 36)
       }
 
       const url = canvas.toDataURL('image/png')
@@ -634,7 +668,7 @@ export default function FacebookImagesPage() {
       void generateImage(layout)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layout, property?.id])
+  }, [layout, property?.id, photoSlots])
 
   return (
     <main className="min-h-screen bg-[#111827] px-4 py-6 text-[#E5E7EB] md:px-8">
@@ -717,7 +751,7 @@ export default function FacebookImagesPage() {
             >
               <p className="font-black text-white">Versione 4 foto</p>
               <p className="mt-1 text-xs leading-5 text-[#D1D5DB]/58">
-                Griglia 2x2 con overlay testo, prezzo e riferimento.
+                Template premium con 4 miniature laterali e testo centrale.
               </p>
             </button>
           </div>
@@ -735,6 +769,52 @@ export default function FacebookImagesPage() {
             </div>
           ) : null}
         </section>
+
+        {property && images.length > 0 ? (
+          <section className="mb-6 rounded-[28px] border border-[#8FBCBB]/18 bg-[#1F2937]/82 p-5">
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#8FBCBB]/65">
+              Foto usate nel layout
+            </p>
+            <p className="mt-1 text-xs leading-5 text-[#D1D5DB]/58">
+              Clicca una miniatura per cambiare quella foto. Shift + click torna alla foto precedente.
+            </p>
+
+            <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+              {(layout === 'four' ? [0, 1, 2, 3] : [0, 1]).map((slotIndex) => {
+                const imageIndex = currentSlotIndex(slotIndex)
+                const imageUrl = images[imageIndex]
+
+                return (
+                  <button
+                    key={slotIndex}
+                    type="button"
+                    onClick={(event) => cyclePhotoSlot(slotIndex, event.shiftKey ? -1 : 1)}
+                    className="group overflow-hidden rounded-2xl border border-[#374151] bg-[#111827] text-left transition hover:border-[#A3BE8C]/60"
+                    title="Clicca per cambiare foto"
+                  >
+                    <div className="aspect-[16/10] overflow-hidden bg-[#0B1220]">
+                      {imageUrl ? (
+                        <img
+                          src={imageUrl}
+                          alt={`Foto layout ${slotIndex + 1}`}
+                          className="h-full w-full object-cover transition group-hover:scale-[1.03]"
+                        />
+                      ) : (
+                        <div className="grid h-full place-items-center text-xs font-bold text-[#D1D5DB]/50">
+                          Foto mancante
+                        </div>
+                      )}
+                    </div>
+                    <div className="px-3 py-2">
+                      <p className="text-xs font-black text-white">Foto {slotIndex + 1}</p>
+                      <p className="text-[11px] text-[#A3BE8C]">Immagine {imageIndex + 1} di {images.length}</p>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </section>
+        ) : null}
 
         <section className="rounded-[28px] border border-[#8FBCBB]/18 bg-[#1F2937]/82 p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
