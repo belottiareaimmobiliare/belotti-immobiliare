@@ -365,6 +365,60 @@ export default function AIOSSocialPage() {
     URL.revokeObjectURL(url)
   }
 
+
+  function downloadSocialPack() {
+    if (!outputs.length || !propertyData?.property) {
+      setNotice('Seleziona prima un immobile.')
+      return
+    }
+
+    const property = propertyData.property
+    const ref = clean(property.reference_code, 'immobile')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+
+    const title = clean(property.title, 'Immobile selezionato')
+
+    const pack = [
+      'PACCHETTO SOCIAL AI-OS',
+      'Area Immobiliare · Gianfederico Belotti',
+      '',
+      `Immobile: ${title}`,
+      `Riferimento: ${clean(property.reference_code, '—')}`,
+      `Data generazione: ${new Date().toLocaleDateString('it-IT')}`,
+      '',
+      'HASHTAG STANDARD BELOTTI',
+      STANDARD_SOCIAL_HASHTAGS_TEXT,
+      '',
+      '============================================================',
+      '',
+      ...outputs.flatMap((item) => [
+        item.title.toUpperCase(),
+        '',
+        item.content,
+        '',
+        '============================================================',
+        '',
+      ]),
+    ].join('\n')
+
+    const blob = new Blob([pack], {
+      type: 'text/plain;charset=utf-8',
+    })
+
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${ref}-pacchetto-social-completo.txt`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+
+    setNotice(`Pacchetto social completo scaricato: ${ref}-pacchetto-social-completo.txt`)
+  }
+
   useEffect(() => {
     void loadFolders()
 
@@ -554,6 +608,15 @@ export default function AIOSSocialPage() {
                   className="rounded-full border border-[#8FBCBB]/35 bg-[#8FBCBB]/10 px-4 py-2 text-xs font-bold text-[#8FBCBB] transition hover:bg-[#8FBCBB]/18 disabled:opacity-40"
                 >
                   Scarica TXT
+                </button>
+
+                <button
+                  type="button"
+                  disabled={!outputs.length}
+                  onClick={downloadSocialPack}
+                  className="rounded-full border border-[#EBCB8B]/35 bg-[#EBCB8B]/10 px-4 py-2 text-xs font-bold text-[#EBCB8B] transition hover:bg-[#EBCB8B]/18 disabled:opacity-40"
+                >
+                  Pacchetto completo
                 </button>
               </div>
             </div>
