@@ -403,14 +403,17 @@ export default function FacebookImagesPage() {
 
       const typeLabel = clean(property.property_type, 'Immobile')
       const description = clean(property.description, '')
-      const shortDescription = description.length > 185 ? `${description.slice(0, 185).trim()}...` : description
+      const shortDescription = description.length > 150 ? `${description.slice(0, 150).trim()}...` : description
       const tags = [
         normalize(property.contract_type) === 'vendita' ? 'Vendita' : normalize(property.contract_type) === 'affitto' ? 'Affitto' : 'Immobile',
         typeLabel,
         property.has_garage ? 'Box / Garage' : '',
         property.has_garden ? 'Giardino' : '',
         property.has_parking ? 'Posto auto' : '',
-      ].filter(Boolean).slice(0, 4)
+      ]
+        .filter(Boolean)
+        .slice(0, 4)
+        .map((tag) => String(tag).length > 17 ? `${String(tag).slice(0, 15)}...` : String(tag))
 
       const drawSoftGrid = () => {
         ctx.save()
@@ -483,7 +486,7 @@ export default function FacebookImagesPage() {
 
         tags.forEach((tag, index) => {
           const chipWidth = chipWidths[index] ?? 0
-          drawChip(ctx, tag, chipX + chipWidth / 2, 74)
+          drawChip(ctx, tag, chipX + chipWidth / 2, 68)
           chipX += chipWidth + chipGap
         })
 
@@ -491,54 +494,54 @@ export default function FacebookImagesPage() {
 
         ctx.fillStyle = '#C4A15A'
         ctx.font = '800 16px Arial'
-        ctx.fillText('A R E A   I M M O B I L I A R E', centerX, 150)
+        ctx.fillText('A R E A   I M M O B I L I A R E', centerX, 138)
 
         ctx.fillStyle = '#FFFFFF'
         ctx.font = '900 39px Arial'
-        drawCenteredWrappedText(ctx, title.toUpperCase(), centerX, 204, 500, 42, 2)
+        drawCenteredWrappedText(ctx, title.toUpperCase(), centerX, 190, 500, 40, 2)
 
         ctx.fillStyle = '#D8DEE9'
         ctx.font = '800 22px Arial'
-        drawCenteredWrappedText(ctx, location, centerX, 314, 520, 28, 2)
+        drawCenteredWrappedText(ctx, location, centerX, 292, 520, 27, 2)
 
         ctx.fillStyle = '#EBCB8B'
         ctx.font = '900 36px Arial'
-        ctx.fillText(price, centerX, 376)
+        ctx.fillText(price, centerX, 350)
 
         if (shortDescription) {
           ctx.fillStyle = '#D1D5DB'
           ctx.font = '700 21px Arial'
-          drawCenteredWrappedText(ctx, shortDescription, centerX, 424, 470, 28, 3)
+          drawCenteredWrappedText(ctx, shortDescription, centerX, 392, 460, 26, 3)
         }
 
         ctx.strokeStyle = 'rgba(236,239,244,0.14)'
         ctx.lineWidth = 1
         ctx.beginPath()
-        ctx.moveTo(382, 506)
-        ctx.lineTo(818, 506)
+        ctx.moveTo(382, 486)
+        ctx.lineTo(818, 486)
         ctx.stroke()
 
         ctx.fillStyle = '#FFFFFF'
-        drawRoundedRect(ctx, 376, 526, 126, 66, 12)
+        drawRoundedRect(ctx, 376, 506, 126, 58, 12)
         ctx.fill()
 
         ctx.fillStyle = '#111827'
         ctx.font = '900 25px Arial'
         ctx.textAlign = 'center'
-        ctx.fillText('AREA', 439, 566)
+        ctx.fillText('AREA', 439, 544)
 
         ctx.textAlign = 'left'
         ctx.fillStyle = '#FFFFFF'
         ctx.font = '800 18px Arial'
-        ctx.fillText('Area Immobiliare', 520, 548)
+        ctx.fillText('Area Immobiliare', 520, 525)
 
         ctx.fillStyle = '#D1D5DB'
         ctx.font = '700 16px Arial'
-        ctx.fillText('Bergamo · Via Locatelli, 62', 520, 574)
+        ctx.fillText('Bergamo · Via Locatelli, 62', 520, 550)
 
         ctx.fillStyle = '#EBCB8B'
         ctx.font = '900 18px Arial'
-        ctx.fillText('035 237979 · 035 221206', 520, 598)
+        ctx.fillText('035 237979 · 035 221206', 520, 574)
       } else {
         const sideW = 330
         const photoY = 64
