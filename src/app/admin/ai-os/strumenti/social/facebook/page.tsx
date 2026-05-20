@@ -390,24 +390,35 @@ function getLayoutBoxes(platform: Platform, layout: SocialLayout, width: number,
     }
   }
 
+  /*
+   * TikTok safe area 9:16.
+   * Evitiamo:
+   * - alto: tab "Following / For You", status bar, ricerca
+   * - destra: colonna like/commenti/share
+   * - basso: caption, nome account, audio, navbar
+   *
+   * Quindi il contenuto utile resta più centrale:
+   * x: 90..960 circa
+   * y: 240..1520 circa
+   */
   if (layout === 'four') {
     return {
       boxes: [
-        { x: 76, y: 132, w: 428, h: 330 },
-        { x: width - 76 - 428, y: 132, w: 428, h: 330 },
-        { x: 76, y: height - 132 - 330, w: 428, h: 330 },
-        { x: width - 76 - 428, y: height - 132 - 330, w: 428, h: 330 },
+        { x: 110, y: 250, w: 360, h: 290 },
+        { x: 570, y: 250, w: 360, h: 290 },
+        { x: 110, y: 1230, w: 360, h: 290 },
+        { x: 570, y: 1230, w: 360, h: 290 },
       ],
-      content: { x: 132, y: 560, w: width - 264, h: height - 1120 },
+      content: { x: 150, y: 590, w: 780, h: 590 },
     }
   }
 
   return {
     boxes: [
-      { x: 86, y: 126, w: width - 172, h: 470 },
-      { x: 86, y: height - 126 - 470, w: width - 172, h: 470 },
+      { x: 120, y: 250, w: 840, h: 390 },
+      { x: 120, y: 1210, w: 840, h: 300 },
     ],
-    content: { x: 132, y: 660, w: width - 264, h: height - 1320 },
+    content: { x: 150, y: 690, w: 780, h: 470 },
   }
 }
 
@@ -537,11 +548,11 @@ function drawContentPanel(
       ? 1
       : platform === 'instagram'
         ? 1.08
-        : 1.32
+        : 1
 
   const safeX = x + Math.round(26 * scale)
   const safeW = w - Math.round(52 * scale)
-  const footerH = Math.round(platform === 'tiktok' ? 142 * scale : 102 * scale)
+  const footerH = Math.round(platform === 'tiktok' ? 112 * scale : 102 * scale)
   const footerY = y + h - footerH
 
   if (layout === 'two' || isTikTok) {
@@ -555,16 +566,16 @@ function drawContentPanel(
     ctx.stroke()
   }
 
-  const chipFont = Math.round((isTikTok ? 23 : isInstagram ? 19 : 18) * scale)
-  const brandFont = Math.round((isTikTok ? 20 : 16) * scale)
-  const titleFont = Math.round((isTikTok ? 43 : isInstagram ? 34 : 39) * scale)
+  const chipFont = Math.round((isTikTok ? 20 : isInstagram ? 19 : 18) * scale)
+  const brandFont = Math.round((isTikTok ? 18 : 16) * scale)
+  const titleFont = Math.round((isTikTok ? 40 : isInstagram ? 34 : 39) * scale)
   const titleLine = Math.round(titleFont * 1.08)
-  const locationFont = Math.round((isTikTok ? 27 : isInstagram ? 21 : 22) * scale)
-  const priceFont = Math.round((isTikTok ? 40 : isInstagram ? 32 : 36) * scale)
-  const featureFont = Math.round((isTikTok ? 24 : isInstagram ? 18 : 21) * scale)
-  const descFont = Math.round((isTikTok ? 23 : isInstagram ? 18 : 21) * scale)
+  const locationFont = Math.round((isTikTok ? 23 : isInstagram ? 21 : 22) * scale)
+  const priceFont = Math.round((isTikTok ? 36 : isInstagram ? 32 : 36) * scale)
+  const featureFont = Math.round((isTikTok ? 21 : isInstagram ? 18 : 21) * scale)
+  const descFont = Math.round((isTikTok ? 20 : isInstagram ? 18 : 21) * scale)
 
-  let cursorY = y + Math.round((layout === 'four' ? 2 : 30) * scale)
+  let cursorY = y + Math.round((isTikTok ? 34 : layout === 'four' ? 2 : 30) * scale)
 
   if (layout === 'four') {
     drawStandardChips(ctx, tags, centerX, cursorY, chipFont, safeW)
@@ -578,7 +589,7 @@ function drawContentPanel(
   ctx.font = `800 ${brandFont}px Arial`
   ctx.fillText('A R E A   I M M O B I L I A R E', centerX, cursorY)
 
-  cursorY += Math.round((isTikTok ? 70 : 54) * scale)
+  cursorY += Math.round((isTikTok ? 52 : 54) * scale)
 
   ctx.fillStyle = '#FFFFFF'
   ctx.font = `900 ${titleFont}px Arial`
@@ -592,7 +603,7 @@ function drawContentPanel(
     isTikTok ? 3 : 2,
   )
 
-  cursorY += Math.round((isTikTok ? 46 : 34) * scale)
+  cursorY += Math.round((isTikTok ? 34 : 34) * scale)
 
   ctx.fillStyle = '#D8DEE9'
   ctx.font = `800 ${locationFont}px Arial`
@@ -606,13 +617,13 @@ function drawContentPanel(
     2,
   )
 
-  cursorY += Math.round((isTikTok ? 50 : 36) * scale)
+  cursorY += Math.round((isTikTok ? 34 : 36) * scale)
 
   ctx.fillStyle = '#EBCB8B'
   ctx.font = `900 ${priceFont}px Arial`
   ctx.fillText(price, centerX, cursorY)
 
-  cursorY += Math.round((isTikTok ? 62 : 46) * scale)
+  cursorY += Math.round((isTikTok ? 40 : 46) * scale)
 
   ctx.fillStyle = '#D1D5DB'
   ctx.font = `800 ${featureFont}px Arial`
@@ -788,7 +799,7 @@ export default function SocialImagesPage() {
       const features = featureLine(property)
       const typeLabel = clean(property.property_type, 'Immobile')
       const description = clean(property.description, '')
-      const descriptionLimit = nextPlatform === 'tiktok' ? 210 : nextPlatform === 'instagram' ? 170 : 150
+      const descriptionLimit = nextPlatform === 'tiktok' ? 120 : nextPlatform === 'instagram' ? 170 : 150
       const shortDescription = description.length > descriptionLimit
         ? `${description.slice(0, descriptionLimit).trim()}...`
         : description
