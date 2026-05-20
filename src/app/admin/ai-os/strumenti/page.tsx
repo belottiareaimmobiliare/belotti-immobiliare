@@ -133,6 +133,17 @@ export default function AIOSStrumentiPage() {
         href: propertyId ? `/admin/ai-os/strumenti/documenti?propertyId=${propertyId}` : undefined,
       },
       {
+        id: 'fillable-modules',
+        title: 'Moduli compilabili',
+        badge: 'Operativo',
+        description: 'Acquisisce dati immobile/proprietario, permette modifiche manuali, revisione finale e generazione PDF.',
+        icon: '🧾',
+        status: propertyId ? 'ready' : 'next',
+        actionLabel: propertyId ? 'Apri moduli' : 'Seleziona immobile',
+        href: propertyId ? `/admin/ai-os/strumenti/moduli?propertyId=${propertyId}` : undefined,
+      },
+
+      {
         id: 'visure',
         title: 'Visure e richieste',
         badge: 'Prossimo step',
