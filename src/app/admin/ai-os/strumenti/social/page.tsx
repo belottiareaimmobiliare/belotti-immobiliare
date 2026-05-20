@@ -21,10 +21,10 @@ type ToolPropertyData = {
 
 const STANDARD_SOCIAL_HASHTAGS = [
   '#AreaImmobiliare',
+  '#GianfedericoBelotti',
   '#ImmobiliareBergamo',
   '#CasaBergamo',
   '#AgenziaImmobiliare',
-  '#Immobili',
 ]
 
 const STANDARD_SOCIAL_HASHTAGS_TEXT = STANDARD_SOCIAL_HASHTAGS.join(' ')
