@@ -722,6 +722,109 @@ function drawContentPanel(
     ctx.stroke()
   }
 
+  /*
+   * Compatto dedicato FB/IG layout 2 foto.
+   * Qui NON usiamo il flusso del 4 foto, perché la card centrale è stretta:
+   * - testo centrato verticalmente
+   * - font leggibili
+   * - footer sempre dentro
+   * - descrizione esclusa dall'immagine, resta completa nei testi copiabili
+   * TikTok non passa da qui.
+   */
+  if (isCompactTwo) {
+    const compactScale = isFacebook ? 0.95 : 0.82
+    const compactSafeW = w - Math.round(58 * compactScale)
+    const footerScale = isFacebook ? 0.88 : 0.66
+    const footerBlockH = Math.round(isFacebook ? 116 : 104)
+    const compactFooterY = y + h - footerBlockH
+
+    const brandFont = Math.round(isFacebook ? 16 : 15)
+    const titleFont = Math.round(isFacebook ? 34 : 25)
+    const titleLine = Math.round(titleFont * 1.12)
+    const locationFont = Math.round(isFacebook ? 21 : 17)
+    const priceFont = Math.round(isFacebook ? 32 : 25)
+    const featureFont = Math.round(isFacebook ? 18 : 15)
+
+    const textBlockEstimatedH =
+      brandFont +
+      Math.round(titleLine * 2.25) +
+      locationFont +
+      priceFont +
+      featureFont +
+      Math.round(94 * compactScale)
+
+    const availableTop = y + Math.round(isFacebook ? 64 : 90)
+    const availableBottom = compactFooterY - Math.round(isFacebook ? 20 : 26)
+    const availableH = availableBottom - availableTop
+
+    let compactY = availableTop + Math.max(0, (availableH - textBlockEstimatedH) / 2)
+
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'alphabetic'
+
+    ctx.fillStyle = '#C4A15A'
+    ctx.font = `800 ${brandFont}px Arial`
+    ctx.fillText('A R E A   I M M O B I L I A R E', centerX, compactY)
+
+    compactY += Math.round(isFacebook ? 38 : 32)
+
+    ctx.fillStyle = '#FFFFFF'
+    ctx.font = `900 ${titleFont}px Arial`
+    compactY = drawCenteredWrappedText(
+      ctx,
+      title.toUpperCase(),
+      centerX,
+      compactY,
+      compactSafeW,
+      titleLine,
+      isFacebook ? 2 : 3,
+    )
+
+    compactY += Math.round(isFacebook ? 28 : 24)
+
+    ctx.fillStyle = '#D8DEE9'
+    ctx.font = `800 ${locationFont}px Arial`
+    compactY = drawCenteredWrappedText(
+      ctx,
+      location,
+      centerX,
+      compactY,
+      compactSafeW,
+      Math.round(locationFont * 1.34),
+      2,
+    )
+
+    compactY += Math.round(isFacebook ? 30 : 24)
+
+    ctx.fillStyle = '#EBCB8B'
+    ctx.font = `900 ${priceFont}px Arial`
+    ctx.fillText(price, centerX, compactY)
+
+    compactY += Math.round(isFacebook ? 30 : 24)
+
+    ctx.fillStyle = '#D1D5DB'
+    ctx.font = `800 ${featureFont}px Arial`
+    drawCenteredWrappedText(
+      ctx,
+      features,
+      centerX,
+      compactY,
+      compactSafeW,
+      Math.round(featureFont * 1.32),
+      2,
+    )
+
+    drawStandardFooter(ctx, {
+      x: x + Math.round(28 * compactScale),
+      y: compactFooterY,
+      w: w - Math.round(56 * compactScale),
+      logo,
+      scale: footerScale,
+    })
+
+    return
+  }
+
   const chipFont = Math.round((isTikTok ? 20 : isInstagram ? 19 : 18) * scale)
   const brandFont = Math.round((isTikTok ? 18 : 16) * scale)
   const titleFont = Math.round((isTikTok ? 40 : isInstagram ? 34 : 39) * scale)
