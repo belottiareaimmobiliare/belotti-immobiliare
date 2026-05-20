@@ -19,6 +19,16 @@ type ToolPropertyData = {
   driveSubfolders: Record<string, any>[]
 }
 
+const STANDARD_SOCIAL_HASHTAGS = [
+  '#AreaImmobiliare',
+  '#ImmobiliareBergamo',
+  '#CasaBergamo',
+  '#AgenziaImmobiliare',
+  '#Immobili',
+]
+
+const STANDARD_SOCIAL_HASHTAGS_TEXT = STANDARD_SOCIAL_HASHTAGS.join(' ')
+
 type SocialOutput = {
   id: string
   title: string
@@ -103,13 +113,7 @@ function buildSocialOutputs(data: ToolPropertyData | null): SocialOutput[] {
   const features = propertyFeatures(property)
   const description = clean(property.description, '')
   const url = property.slug ? `https://www.areaimmobiliare.com/immobili/${property.slug}` : ''
-  const hashtagsBase = [
-    '#AreaImmobiliare',
-    '#Immobili',
-    property.contract_type === 'vendita' ? '#CasaInVendita' : '#CasaInAffitto',
-    property.comune ? `#${String(property.comune).replace(/\s+/g, '')}` : '',
-    property.property_type ? `#${String(property.property_type).replace(/\s+/g, '')}` : '',
-  ].filter(Boolean).join(' ')
+  const hashtagsBase = STANDARD_SOCIAL_HASHTAGS_TEXT
 
   return [
     {
@@ -135,6 +139,7 @@ function buildSocialOutputs(data: ToolPropertyData | null): SocialOutput[] {
         '',
         url ? `Scheda immobile: ${url}` : '',
         '',
+        'Hashtag:',
         hashtagsBase,
       ].filter(Boolean).join('\n'),
     },
@@ -153,6 +158,7 @@ function buildSocialOutputs(data: ToolPropertyData | null): SocialOutput[] {
         '',
         'Scrivici per info o per organizzare una visita.',
         '',
+        'Hashtag:',
         hashtagsBase,
       ].join('\n'),
     },
@@ -171,6 +177,7 @@ function buildSocialOutputs(data: ToolPropertyData | null): SocialOutput[] {
         '',
         `Rif. ${ref}`,
         '',
+        'Hashtag:',
         hashtagsBase,
       ].join('\n'),
     },

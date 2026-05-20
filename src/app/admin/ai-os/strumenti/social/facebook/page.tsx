@@ -21,6 +21,16 @@ type ToolPropertyData = {
 
 const AREA_SOCIAL_LOGO_SRC = '/images/brand/areaimmobiliare.png'
 
+const STANDARD_SOCIAL_HASHTAGS = [
+  '#AreaImmobiliare',
+  '#ImmobiliareBergamo',
+  '#CasaBergamo',
+  '#AgenziaImmobiliare',
+  '#Immobili',
+]
+
+const STANDARD_SOCIAL_HASHTAGS_TEXT = STANDARD_SOCIAL_HASHTAGS.join(' ')
+
 const PLATFORM_CONFIG: Record<Platform, {
   label: string
   ratioLabel: string
@@ -90,6 +100,67 @@ function featureLine(property: Record<string, any>) {
     property.bathrooms ? `${property.bathrooms} bagni` : '',
     property.energy_class ? `Classe ${property.energy_class}` : '',
   ].filter(Boolean).join(' · ') || 'Dettagli in agenzia'
+}
+
+function buildSocialCaption(property: Record<string, any>, platform: Platform) {
+  const title = clean(property.title, 'Immobile Area Immobiliare')
+  const ref = clean(property.reference_code, 'Rif. —')
+  const price = formatCurrency(property.price)
+  const contract = normalize(property.contract_type) === 'affitto' ? 'in affitto' : 'in vendita'
+  const location = shortLocation(property)
+  const features = featureLine(property)
+  const url = property.slug ? `https://www.areaimmobiliare.com/immobili/${property.slug}` : ''
+
+  if (platform === 'facebook') {
+    return [
+      `🏠 ${title}`,
+      '',
+      `Immobile ${contract} a ${location}.`,
+      '',
+      `📐 ${features}`,
+      `💰 ${price}`,
+      `🔎 Rif. ${ref}`,
+      '',
+      'Vuoi ricevere maggiori informazioni o fissare una visita?',
+      'Contattaci: ti accompagniamo nella valutazione.',
+      '',
+      url ? `Scheda immobile: ${url}` : '',
+      '',
+      'Hashtag:',
+      STANDARD_SOCIAL_HASHTAGS_TEXT,
+    ].filter(Boolean).join('\n')
+  }
+
+  if (platform === 'instagram') {
+    return [
+      `✨ ${title}`,
+      '',
+      `${contract} · ${location}`,
+      `${features}`,
+      '',
+      `Prezzo: ${price}`,
+      `Rif. ${ref}`,
+      '',
+      'Scrivici per informazioni o per organizzare una visita.',
+      '',
+      'Hashtag:',
+      STANDARD_SOCIAL_HASHTAGS_TEXT,
+    ].join('\n')
+  }
+
+  return [
+    `Guarda questo immobile ${contract} a ${location}.`,
+    '',
+    `${title}`,
+    `${features}`,
+    `Prezzo: ${price}`,
+    `Rif. ${ref}`,
+    '',
+    'Per informazioni e visite contatta Area Immobiliare.',
+    '',
+    'Hashtag:',
+    STANDARD_SOCIAL_HASHTAGS_TEXT,
+  ].join('\n')
 }
 
 function safeFilename(value: string) {
@@ -737,6 +808,11 @@ export default function SocialImagesPage() {
 
   const property = data?.property ?? null
   const config = PLATFORM_CONFIG[platform]
+  const socialCaption = useMemo(() => {
+    if (!property) return ''
+    return buildSocialCaption(property, platform)
+  }, [property, platform])
+
 
   const images = useMemo(() => {
     const media = data?.propertyMedia ?? []
@@ -772,6 +848,20 @@ export default function SocialImagesPage() {
     })
 
     setNotice(`Foto ${slotIndex + 1} cambiata.`)
+  }
+
+  async function copySocialCaption() {
+    if (!socialCaption) {
+      setNotice('Nessun testo social da copiare.')
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(socialCaption)
+      setNotice(`Testo ${config.label} copiato con i 5 hashtag standard.`)
+    } catch {
+      setNotice('Copia non riuscita: seleziona il testo e copialo manualmente.')
+    }
   }
 
   async function loadProperty(nextPropertyId: string) {
@@ -1117,6 +1207,38 @@ export default function SocialImagesPage() {
             </div>
           ) : null}
         </section>
+
+        {property ? (
+          <section className="mb-6 rounded-[28px] border border-[#8FBCBB]/18 bg-[#1F2937]/82 p-5">
+            <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#8FBCBB]/65">
+                  Testo pronto per il post
+                </p>
+                <h2 className="mt-1 text-xl font-black text-white">
+                  {config.label} + 5 hashtag standard
+                </h2>
+                <p className="mt-1 text-xs leading-5 text-[#D1D5DB]/58">
+                  Gli hashtag restano sempre uguali per Facebook, Instagram e TikTok.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => void copySocialCaption()}
+                className="rounded-full border border-[#A3BE8C]/35 bg-[#A3BE8C]/10 px-4 py-2 text-xs font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/18"
+              >
+                Copia testo
+              </button>
+            </div>
+
+            <textarea
+              readOnly
+              value={socialCaption}
+              className="min-h-[230px] w-full resize-y rounded-2xl border border-[#374151] bg-[#0B1220] p-4 font-mono text-sm leading-6 text-[#E5E7EB] outline-none"
+            />
+          </section>
+        ) : null}
 
         {property && images.length > 0 ? (
           <section className="mb-6 rounded-[28px] border border-[#8FBCBB]/18 bg-[#1F2937]/82 p-5">
