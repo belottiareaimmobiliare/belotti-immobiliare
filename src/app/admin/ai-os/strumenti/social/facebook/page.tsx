@@ -1,10 +1,9 @@
-'use client'
+ 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-type FacebookLayout = 'four' | 'side-text-side'
-
-const AREA_FACEBOOK_LOGO_SRC = '/images/brand/areaimmobiliare.png'
+type Platform = 'facebook' | 'instagram' | 'tiktok'
+type SocialLayout = 'two' | 'four'
 
 type PropertyMedia = {
   id: string
@@ -20,9 +19,45 @@ type ToolPropertyData = {
   propertyMedia: PropertyMedia[]
 }
 
+const AREA_SOCIAL_LOGO_SRC = '/images/brand/areaimmobiliare.png'
+
+const PLATFORM_CONFIG: Record<Platform, {
+  label: string
+  ratioLabel: string
+  width: number
+  height: number
+  filename: string
+}> = {
+  facebook: {
+    label: 'Facebook',
+    ratioLabel: '1200x630',
+    width: 1200,
+    height: 630,
+    filename: 'facebook-1200x630',
+  },
+  instagram: {
+    label: 'Instagram',
+    ratioLabel: '1:1 1080x1080',
+    width: 1080,
+    height: 1080,
+    filename: 'instagram-1x1',
+  },
+  tiktok: {
+    label: 'TikTok',
+    ratioLabel: '9:16 1080x1920',
+    width: 1080,
+    height: 1920,
+    filename: 'tiktok-9x16',
+  },
+}
+
 function clean(value: unknown, fallback = '—') {
   const text = String(value ?? '').trim()
   return text || fallback
+}
+
+function normalize(value: unknown) {
+  return String(value ?? '').trim().toLowerCase()
 }
 
 function formatCurrency(value: unknown) {
@@ -35,10 +70,6 @@ function formatCurrency(value: unknown) {
     currency: 'EUR',
     maximumFractionDigits: 0,
   }).format(amount)
-}
-
-function normalize(value: unknown) {
-  return String(value ?? '').trim().toLowerCase()
 }
 
 function formatContract(value: unknown) {
@@ -66,7 +97,7 @@ function safeFilename(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
-    .slice(0, 90) || 'facebook-immobile'
+    .slice(0, 90) || 'social-immobile'
 }
 
 function drawRoundedRect(
@@ -131,6 +162,70 @@ function drawRoundedCoverImage(
   ctx.restore()
 }
 
+function drawImagePlaceholder(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  label: string,
+) {
+  ctx.save()
+  ctx.fillStyle = '#1F2937'
+  drawRoundedRect(ctx, x, y, width, height, 22)
+  ctx.fill()
+
+  ctx.strokeStyle = 'rgba(143,188,187,0.45)'
+  ctx.lineWidth = 3
+  drawRoundedRect(ctx, x + 10, y + 10, width - 20, height - 20, 18)
+  ctx.stroke()
+
+  ctx.fillStyle = '#D8DEE9'
+  ctx.font = `800 ${Math.max(18, Math.min(30, width / 11))}px Arial`
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(label, x + width / 2, y + height / 2)
+  ctx.restore()
+}
+
+function drawContainedLogo(
+  ctx: CanvasRenderingContext2D,
+  logo: HTMLImageElement | null,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  if (!logo) {
+    ctx.fillStyle = '#111827'
+    ctx.font = `900 ${Math.max(20, Math.min(30, width / 4.9))}px Arial`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('AREA', x + width / 2, y + height / 2)
+    return
+  }
+
+  const padding = Math.max(8, Math.min(16, width * 0.1))
+  const availableW = width - padding * 2
+  const availableH = height - padding * 2
+  const logoRatio = logo.width / logo.height
+  const boxRatio = availableW / availableH
+
+  let drawW = availableW
+  let drawH = availableH
+
+  if (logoRatio > boxRatio) {
+    drawH = drawW / logoRatio
+  } else {
+    drawW = drawH * logoRatio
+  }
+
+  const drawX = x + (width - drawW) / 2
+  const drawY = y + (height - drawH) / 2
+
+  ctx.drawImage(logo, drawX, drawY, drawW, drawH)
+}
+
 function drawCenteredWrappedText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -168,6 +263,7 @@ function drawCenteredWrappedText(
   }
 
   ctx.textAlign = 'center'
+  ctx.textBaseline = 'alphabetic'
 
   lines.forEach((line, index) => {
     ctx.fillText(line, centerX, y + index * lineHeight)
@@ -181,69 +277,62 @@ function drawChip(
   text: string,
   centerX: number,
   y: number,
+  fontSize: number,
 ) {
-  ctx.font = '800 18px Arial'
-  const paddingX = 18
+  ctx.font = `800 ${fontSize}px Arial`
+  const paddingX = fontSize * 0.9
   const width = ctx.measureText(text).width + paddingX * 2
-  const height = 34
+  const height = fontSize * 1.9
   const x = centerX - width / 2
 
   ctx.fillStyle = 'rgba(235,203,139,0.08)'
-  drawRoundedRect(ctx, x, y, width, height, 17)
+  drawRoundedRect(ctx, x, y, width, height, height / 2)
   ctx.fill()
 
   ctx.strokeStyle = 'rgba(235,203,139,0.42)'
-  ctx.lineWidth = 1.2
+  ctx.lineWidth = Math.max(1, fontSize / 14)
   ctx.stroke()
 
   ctx.fillStyle = '#EBCB8B'
   ctx.textAlign = 'center'
-  ctx.fillText(text, centerX, y + 23)
+  ctx.textBaseline = 'alphabetic'
+  ctx.fillText(text, centerX, y + fontSize * 1.28)
 
   return width
 }
 
-function drawWrappedText(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  x: number,
-  y: number,
-  maxWidth: number,
-  lineHeight: number,
-  maxLines: number,
-) {
-  const words = text.split(/\s+/).filter(Boolean)
-  const lines: string[] = []
-  let current = ''
+function drawSoftGrid(ctx: CanvasRenderingContext2D, width: number, height: number) {
+  ctx.save()
+  ctx.strokeStyle = 'rgba(255,255,255,0.035)'
+  ctx.lineWidth = 1
 
-  for (const word of words) {
-    const candidate = current ? `${current} ${word}` : word
+  const step = Math.max(90, Math.round(width / 10))
 
-    if (ctx.measureText(candidate).width <= maxWidth) {
-      current = candidate
-      continue
-    }
-
-    if (current) {
-      lines.push(current)
-      current = word
-    } else {
-      lines.push(word)
-      current = ''
-    }
-
-    if (lines.length >= maxLines) break
+  for (let x = 0; x <= width; x += step) {
+    ctx.beginPath()
+    ctx.moveTo(x, 0)
+    ctx.lineTo(x, height)
+    ctx.stroke()
   }
 
-  if (current && lines.length < maxLines) {
-    lines.push(current)
+  for (let y = 0; y <= height; y += step) {
+    ctx.beginPath()
+    ctx.moveTo(0, y)
+    ctx.lineTo(width, y)
+    ctx.stroke()
   }
 
-  lines.forEach((line, index) => {
-    ctx.fillText(line, x, y + index * lineHeight)
-  })
+  ctx.restore()
+}
 
-  return y + lines.length * lineHeight
+function drawMainFrame(ctx: CanvasRenderingContext2D, width: number, height: number) {
+  const margin = Math.max(26, Math.round(Math.min(width, height) * 0.048))
+  const radius = Math.max(24, Math.round(Math.min(width, height) * 0.045))
+
+  ctx.strokeStyle = 'rgba(236,239,244,0.12)'
+  ctx.lineWidth = 1.5
+  drawRoundedRect(ctx, margin, margin, width - margin * 2, height - margin * 2, radius)
+  ctx.stroke()
 }
 
 async function loadImage(url: string) {
@@ -256,73 +345,268 @@ async function loadImage(url: string) {
   })
 }
 
-function drawContainedLogo(
-  ctx: CanvasRenderingContext2D,
-  logo: HTMLImageElement | null,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-) {
-  if (!logo) {
-    return
+function getLayoutBoxes(platform: Platform, layout: SocialLayout, width: number, height: number) {
+  if (platform === 'facebook') {
+    if (layout === 'four') {
+      return {
+        boxes: [
+          { x: 66, y: 108, w: 224, h: 210 },
+          { x: 66, y: 340, w: 224, h: 210 },
+          { x: width - 66 - 224, y: 108, w: 224, h: 210 },
+          { x: width - 66 - 224, y: 340, w: 224, h: 210 },
+        ],
+        content: { x: 342, y: 68, w: 516, h: 512 },
+      }
+    }
+
+    return {
+      boxes: [
+        { x: 58, y: 64, w: 330, h: height - 128 },
+        { x: width - 58 - 330, y: 64, w: 330, h: height - 128 },
+      ],
+      content: { x: 404, y: 66, w: 392, h: height - 132 },
+    }
   }
 
-  const padding = 12
-  const availableW = width - padding * 2
-  const availableH = height - padding * 2
-  const logoRatio = logo.width / logo.height
-  const boxRatio = availableW / availableH
+  if (platform === 'instagram') {
+    if (layout === 'four') {
+      return {
+        boxes: [
+          { x: 56, y: 122, w: 238, h: 276 },
+          { x: 56, y: height - 122 - 276, w: 238, h: 276 },
+          { x: width - 56 - 238, y: 122, w: 238, h: 276 },
+          { x: width - 56 - 238, y: height - 122 - 276, w: 238, h: 276 },
+        ],
+        content: { x: 326, y: 110, w: 428, h: 860 },
+      }
+    }
 
-  let drawW = availableW
-  let drawH = availableH
-
-  if (logoRatio > boxRatio) {
-    drawH = drawW / logoRatio
-  } else {
-    drawW = drawH * logoRatio
+    return {
+      boxes: [
+        { x: 54, y: 220, w: 310, h: 640 },
+        { x: width - 54 - 310, y: 220, w: 310, h: 640 },
+      ],
+      content: { x: 386, y: 132, w: 308, h: 816 },
+    }
   }
 
-  const drawX = x + (width - drawW) / 2
-  const drawY = y + (height - drawH) / 2
+  if (layout === 'four') {
+    return {
+      boxes: [
+        { x: 72, y: 132, w: 428, h: 330 },
+        { x: 580, y: 132, w: 428, h: 330 },
+        { x: 72, y: height - 132 - 330, w: 428, h: 330 },
+        { x: 580, y: height - 132 - 330, w: 428, h: 330 },
+      ],
+      content: { x: 132, y: 560, w: width - 264, h: 800 },
+    }
+  }
 
-  ctx.drawImage(logo, drawX, drawY, drawW, drawH)
+  return {
+    boxes: [
+      { x: 86, y: 120, w: width - 172, h: 460 },
+      { x: 86, y: height - 120 - 460, w: width - 172, h: 460 },
+    ],
+    content: { x: 132, y: 660, w: width - 264, h: 620 },
+  }
 }
 
-function drawImagePlaceholder(
+function drawContentPanel(
   ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  label: string,
+  input: {
+    platform: Platform
+    layout: SocialLayout
+    x: number
+    y: number
+    w: number
+    h: number
+    title: string
+    ref: string
+    price: string
+    contract: string
+    location: string
+    features: string
+    description: string
+    tags: string[]
+    logo: HTMLImageElement | null
+  },
 ) {
-  ctx.fillStyle = '#1F2937'
-  ctx.fillRect(x, y, width, height)
+  const {
+    platform,
+    layout,
+    x,
+    y,
+    w,
+    h,
+    title,
+    ref,
+    price,
+    contract,
+    location,
+    features,
+    description,
+    tags,
+    logo,
+  } = input
 
-  ctx.strokeStyle = 'rgba(143,188,187,0.45)'
-  ctx.lineWidth = 3
-  ctx.strokeRect(x + 10, y + 10, width - 20, height - 20)
+  const centerX = x + w / 2
+  const isVertical = platform === 'tiktok'
+  const isSquare = platform === 'instagram'
+  const scale = platform === 'facebook' ? 1 : platform === 'instagram' ? 1.12 : 1.34
+  const compact = platform === 'instagram' && layout === 'two'
+
+  if (layout === 'two' || platform !== 'facebook') {
+    ctx.fillStyle = 'rgba(7,11,20,0.96)'
+    drawRoundedRect(ctx, x, y, w, h, isVertical ? 34 : 26)
+    ctx.fill()
+
+    ctx.strokeStyle = 'rgba(163,190,140,0.50)'
+    ctx.lineWidth = 1.6
+    drawRoundedRect(ctx, x, y, w, h, isVertical ? 34 : 26)
+    ctx.stroke()
+  }
+
+  const chipFont = Math.max(15, Math.round(16 * scale))
+  const shownTags = tags.slice(0, platform === 'tiktok' ? 3 : 4)
+  const chipGap = Math.max(8, Math.round(10 * scale))
+  const chipWidths = shownTags.map((tag) => {
+    ctx.font = `800 ${chipFont}px Arial`
+    return ctx.measureText(tag).width + chipFont * 1.8
+  })
+  const totalChipWidth = chipWidths.reduce((total, item) => total + item, 0) + chipGap * Math.max(0, chipWidths.length - 1)
+
+  if (layout === 'four' && platform !== 'tiktok') {
+    let chipX = centerX - totalChipWidth / 2
+    shownTags.forEach((tag, index) => {
+      const chipWidth = chipWidths[index] ?? 0
+      drawChip(ctx, tag, chipX + chipWidth / 2, y + 2, chipFont)
+      chipX += chipWidth + chipGap
+    })
+  }
+
+  let cursorY = y + (layout === 'four' && platform !== 'tiktok' ? 70 * scale : 48 * scale)
+
+  ctx.textAlign = 'center'
+
+  ctx.fillStyle = '#C4A15A'
+  ctx.font = `800 ${Math.round((compact ? 13 : 16) * scale)}px Arial`
+  ctx.fillText('A R E A   I M M O B I L I A R E', centerX, cursorY)
+
+  cursorY += compact ? 48 : 58 * scale
+
+  ctx.fillStyle = '#FFFFFF'
+  ctx.font = `900 ${Math.round((compact ? 25 : 34) * scale)}px Arial`
+  cursorY = drawCenteredWrappedText(
+    ctx,
+    title.toUpperCase(),
+    centerX,
+    cursorY,
+    w - Math.max(42, 70 * scale),
+    Math.round((compact ? 30 : 38) * scale),
+    isVertical ? 3 : 2,
+  )
+
+  cursorY += compact ? 30 : 42 * scale
 
   ctx.fillStyle = '#D8DEE9'
-  ctx.font = '700 24px Arial'
-  ctx.textAlign = 'center'
-  ctx.fillText(label, x + width / 2, y + height / 2)
+  ctx.font = `800 ${Math.round((compact ? 16 : 19) * scale)}px Arial`
+  cursorY = drawCenteredWrappedText(
+    ctx,
+    location,
+    centerX,
+    cursorY,
+    w - Math.max(40, 64 * scale),
+    Math.round((compact ? 21 : 26) * scale),
+    2,
+  )
+
+  cursorY += compact ? 30 : 42 * scale
+
+  ctx.fillStyle = '#EBCB8B'
+  ctx.font = `900 ${Math.round((compact ? 27 : 34) * scale)}px Arial`
+  ctx.fillText(price, centerX, cursorY)
+
+  cursorY += compact ? 40 : 58 * scale
+
+  ctx.fillStyle = '#D1D5DB'
+  ctx.font = `800 ${Math.round((compact ? 15 : 18) * scale)}px Arial`
+  cursorY = drawCenteredWrappedText(
+    ctx,
+    features,
+    centerX,
+    cursorY,
+    w - Math.max(44, 74 * scale),
+    Math.round((compact ? 21 : 25) * scale),
+    isVertical ? 3 : 2,
+  )
+
+  const remainingToFooter = y + h - cursorY
+  const canDrawDescription = remainingToFooter > (isVertical ? 230 : 150)
+
+  if (description && canDrawDescription) {
+    cursorY += compact ? 28 : 36 * scale
+
+    ctx.fillStyle = '#D1D5DB'
+    ctx.font = `700 ${Math.round((compact ? 15 : 18) * scale)}px Arial`
+    drawCenteredWrappedText(
+      ctx,
+      description,
+      centerX,
+      cursorY,
+      w - Math.max(48, 78 * scale),
+      Math.round((compact ? 21 : 25) * scale),
+      isVertical ? 4 : 3,
+    )
+  }
+
+  const footerY = y + h - Math.max(82, 108 * scale)
+  ctx.strokeStyle = 'rgba(236,239,244,0.13)'
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.moveTo(x + Math.max(32, 46 * scale), footerY - 18)
+  ctx.lineTo(x + w - Math.max(32, 46 * scale), footerY - 18)
+  ctx.stroke()
+
+  const logoW = Math.min(w * 0.32, Math.max(104, 126 * scale))
+  const logoH = Math.min(72 * scale, Math.max(52, 60 * scale))
+  const logoX = x + Math.max(28, 38 * scale)
+  const logoY = footerY
+
+  ctx.fillStyle = '#FFFFFF'
+  drawRoundedRect(ctx, logoX, logoY, logoW, logoH, 12)
+  ctx.fill()
+  drawContainedLogo(ctx, logo, logoX, logoY, logoW, logoH)
+
+  const infoX = logoX + logoW + Math.max(16, 22 * scale)
+  ctx.textAlign = 'left'
+  ctx.fillStyle = '#FFFFFF'
+  ctx.font = `800 ${Math.round(16 * scale)}px Arial`
+  ctx.fillText('Area Immobiliare', infoX, footerY + 20 * scale)
+
+  ctx.fillStyle = '#D1D5DB'
+  ctx.font = `700 ${Math.round(13 * scale)}px Arial`
+  ctx.fillText('Bergamo · Via Locatelli, 62', infoX, footerY + 43 * scale)
+
+  ctx.fillStyle = '#EBCB8B'
+  ctx.font = `900 ${Math.round(14 * scale)}px Arial`
+  ctx.fillText('035 237979 · 035 221206', infoX, footerY + 64 * scale)
 }
 
-export default function FacebookImagesPage() {
+export default function SocialImagesPage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [propertyId, setPropertyId] = useState('')
   const [data, setData] = useState<ToolPropertyData | null>(null)
-  const [layout, setLayout] = useState<FacebookLayout>('side-text-side')
+  const [platform, setPlatform] = useState<Platform>('facebook')
+  const [layout, setLayout] = useState<SocialLayout>('two')
   const [previewUrl, setPreviewUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [notice, setNotice] = useState('')
-  const [areaLogo, setAreaLogo] = useState<HTMLImageElement | null>(null)
   const [photoSlots, setPhotoSlots] = useState<number[]>([0, 1, 2, 3])
+  const [areaLogo, setAreaLogo] = useState<HTMLImageElement | null>(null)
 
   const property = data?.property ?? null
+  const config = PLATFORM_CONFIG[platform]
 
   const images = useMemo(() => {
     const media = data?.propertyMedia ?? []
@@ -357,7 +641,7 @@ export default function FacebookImagesPage() {
       return next
     })
 
-    setNotice(`Foto ${slotIndex + 1} cambiata. Clicca ancora per passare alla successiva.`)
+    setNotice(`Foto ${slotIndex + 1} cambiata.`)
   }
 
   async function loadProperty(nextPropertyId: string) {
@@ -390,31 +674,29 @@ export default function FacebookImagesPage() {
     }
   }
 
-  async function generateImage(nextLayout = layout) {
+  async function generateImage(nextPlatform = platform, nextLayout = layout) {
     if (!property) {
       setNotice('Seleziona prima un immobile.')
       return
     }
 
     setGenerating(true)
-    setNotice('Creo immagine Facebook...')
+    setNotice('Creo immagine social...')
 
     try {
       const canvas = canvasRef.current
+      const nextConfig = PLATFORM_CONFIG[nextPlatform]
 
       if (!canvas) throw new Error('Canvas non disponibile')
 
-      const width = 1200
-      const height = 630
+      const width = nextConfig.width
+      const height = nextConfig.height
+
       canvas.width = width
       canvas.height = height
 
       const ctx = canvas.getContext('2d')
       if (!ctx) throw new Error('Canvas non disponibile')
-
-      ctx.clearRect(0, 0, width, height)
-      ctx.fillStyle = '#111827'
-      ctx.fillRect(0, 0, width, height)
 
       const selectedImageUrls = (nextLayout === 'four' ? [0, 1, 2, 3] : [0, 1])
         .map((slotIndex) => images[currentSlotIndex(slotIndex)])
@@ -426,9 +708,15 @@ export default function FacebookImagesPage() {
         try {
           loadedImages.push(await loadImage(src))
         } catch {
-          // se una foto non passa CORS o non si carica, uso placeholder
+          // Se una foto non passa CORS o non si carica, uso placeholder.
         }
       }
+
+      ctx.clearRect(0, 0, width, height)
+      ctx.fillStyle = '#030507'
+      ctx.fillRect(0, 0, width, height)
+      drawSoftGrid(ctx, width, height)
+      drawMainFrame(ctx, width, height)
 
       const title = clean(property.title, 'Immobile Area Immobiliare')
       const ref = clean(property.reference_code, 'Rif. —')
@@ -436,10 +724,13 @@ export default function FacebookImagesPage() {
       const contract = formatContract(property.contract_type)
       const location = shortLocation(property)
       const features = featureLine(property)
-
       const typeLabel = clean(property.property_type, 'Immobile')
       const description = clean(property.description, '')
-      const shortDescription = description.length > 150 ? `${description.slice(0, 150).trim()}...` : description
+      const descriptionLimit = nextPlatform === 'tiktok' ? 210 : nextPlatform === 'instagram' ? 170 : 150
+      const shortDescription = description.length > descriptionLimit
+        ? `${description.slice(0, descriptionLimit).trim()}...`
+        : description
+
       const tags = [
         normalize(property.contract_type) === 'vendita' ? 'Vendita' : normalize(property.contract_type) === 'affitto' ? 'Affitto' : 'Immobile',
         typeLabel,
@@ -451,219 +742,72 @@ export default function FacebookImagesPage() {
         .slice(0, 4)
         .map((tag) => String(tag).length > 17 ? `${String(tag).slice(0, 15)}...` : String(tag))
 
-      const drawSoftGrid = () => {
-        ctx.save()
-        ctx.strokeStyle = 'rgba(255,255,255,0.035)'
-        ctx.lineWidth = 1
+      const layoutData = getLayoutBoxes(nextPlatform, nextLayout, width, height)
 
-        for (let x = 0; x <= width; x += 120) {
-          ctx.beginPath()
-          ctx.moveTo(x, 0)
-          ctx.lineTo(x, height)
-          ctx.stroke()
+      layoutData.boxes.forEach((box, index) => {
+        const img = loadedImages[index]
+
+        if (img) {
+          drawRoundedCoverImage(ctx, img, box.x, box.y, box.w, box.h, Math.max(20, Math.min(box.w, box.h) * 0.08))
+        } else {
+          drawImagePlaceholder(ctx, box.x, box.y, box.w, box.h, `FOTO ${index + 1}`)
         }
+      })
 
-        for (let yLine = 0; yLine <= height; yLine += 120) {
-          ctx.beginPath()
-          ctx.moveTo(0, yLine)
-          ctx.lineTo(width, yLine)
-          ctx.stroke()
-        }
+      if (nextLayout === 'two') {
+        const firstBox = layoutData.boxes[0]
+        const lastBox = layoutData.boxes[layoutData.boxes.length - 1]
 
-        ctx.restore()
-      }
+        if (firstBox && lastBox) {
+          if (nextPlatform === 'tiktok') {
+            const topGradient = ctx.createLinearGradient(0, firstBox.y + firstBox.h - 120, 0, layoutData.content.y)
+            topGradient.addColorStop(0, 'rgba(3,5,7,0)')
+            topGradient.addColorStop(1, '#030507')
+            ctx.fillStyle = topGradient
+            ctx.fillRect(0, firstBox.y + firstBox.h - 120, width, layoutData.content.y - firstBox.y - firstBox.h + 120)
 
-      const drawMainFrame = () => {
-        ctx.strokeStyle = 'rgba(236,239,244,0.12)'
-        ctx.lineWidth = 1.4
-        drawRoundedRect(ctx, 32, 32, width - 64, height - 64, 32)
-        ctx.stroke()
-      }
-
-      ctx.fillStyle = '#030507'
-      ctx.fillRect(0, 0, width, height)
-      drawSoftGrid()
-      drawMainFrame()
-
-      if (nextLayout === 'four') {
-        const thumbW = 224
-        const thumbH = 210
-        const leftX = 66
-        const rightX = width - leftX - thumbW
-        const topY = 108
-        const bottomY = 340
-        const radius = 20
-
-        const boxes = [
-          { x: leftX, y: topY, label: 'FOTO 1' },
-          { x: leftX, y: bottomY, label: 'FOTO 2' },
-          { x: rightX, y: topY, label: 'FOTO 3' },
-          { x: rightX, y: bottomY, label: 'FOTO 4' },
-        ]
-
-        boxes.forEach((box, index) => {
-          const img = loadedImages[index]
-
-          if (img) {
-            drawRoundedCoverImage(ctx, img, box.x, box.y, thumbW, thumbH, radius)
+            const bottomGradient = ctx.createLinearGradient(0, layoutData.content.y + layoutData.content.h, 0, lastBox.y + 120)
+            bottomGradient.addColorStop(0, '#030507')
+            bottomGradient.addColorStop(1, 'rgba(3,5,7,0)')
+            ctx.fillStyle = bottomGradient
+            ctx.fillRect(0, layoutData.content.y + layoutData.content.h, width, lastBox.y + 120 - (layoutData.content.y + layoutData.content.h))
           } else {
-            drawImagePlaceholder(ctx, box.x, box.y, thumbW, thumbH, box.label)
+            const gradientLeft = ctx.createLinearGradient(firstBox.x + firstBox.w - 96, 0, layoutData.content.x, 0)
+            gradientLeft.addColorStop(0, 'rgba(3,5,7,0)')
+            gradientLeft.addColorStop(1, '#030507')
+            ctx.fillStyle = gradientLeft
+            ctx.fillRect(firstBox.x + firstBox.w - 96, 0, layoutData.content.x - (firstBox.x + firstBox.w - 96), height)
+
+            const gradientRight = ctx.createLinearGradient(layoutData.content.x + layoutData.content.w, 0, lastBox.x + 96, 0)
+            gradientRight.addColorStop(0, '#030507')
+            gradientRight.addColorStop(1, 'rgba(3,5,7,0)')
+            ctx.fillStyle = gradientRight
+            ctx.fillRect(layoutData.content.x + layoutData.content.w, 0, lastBox.x + 96 - (layoutData.content.x + layoutData.content.w), height)
           }
-        })
-
-        const centerX = width / 2
-        const chipGap = 12
-        const chipWidths = tags.map((tag) => {
-          ctx.font = '800 18px Arial'
-          return ctx.measureText(tag).width + 36
-        })
-        const totalChipWidth = chipWidths.reduce((total, item) => total + item, 0) + chipGap * Math.max(0, chipWidths.length - 1)
-        let chipX = centerX - totalChipWidth / 2
-
-        tags.forEach((tag, index) => {
-          const chipWidth = chipWidths[index] ?? 0
-          drawChip(ctx, tag, chipX + chipWidth / 2, 68)
-          chipX += chipWidth + chipGap
-        })
-
-        ctx.textAlign = 'center'
-
-        ctx.fillStyle = '#C4A15A'
-        ctx.font = '800 16px Arial'
-        ctx.fillText('A R E A   I M M O B I L I A R E', centerX, 138)
-
-        ctx.fillStyle = '#FFFFFF'
-        ctx.font = '900 39px Arial'
-        drawCenteredWrappedText(ctx, title.toUpperCase(), centerX, 190, 500, 40, 2)
-
-        ctx.fillStyle = '#D8DEE9'
-        ctx.font = '800 22px Arial'
-        drawCenteredWrappedText(ctx, location, centerX, 292, 520, 27, 2)
-
-        ctx.fillStyle = '#EBCB8B'
-        ctx.font = '900 36px Arial'
-        ctx.fillText(price, centerX, 350)
-
-        if (shortDescription) {
-          ctx.fillStyle = '#D1D5DB'
-          ctx.font = '700 21px Arial'
-          drawCenteredWrappedText(ctx, shortDescription, centerX, 392, 460, 26, 3)
         }
-
-        ctx.strokeStyle = 'rgba(236,239,244,0.14)'
-        ctx.lineWidth = 1
-        ctx.beginPath()
-        ctx.moveTo(382, 486)
-        ctx.lineTo(818, 486)
-        ctx.stroke()
-
-        ctx.fillStyle = '#FFFFFF'
-        drawRoundedRect(ctx, 376, 506, 126, 58, 12)
-        ctx.fill()
-
-        drawContainedLogo(ctx, areaLogo, 376, 506, 126, 58)
-
-        ctx.textAlign = 'left'
-        ctx.fillStyle = '#FFFFFF'
-        ctx.font = '800 18px Arial'
-        ctx.fillText('Area Immobiliare', 520, 525)
-
-        ctx.fillStyle = '#D1D5DB'
-        ctx.font = '700 16px Arial'
-        ctx.fillText('Bergamo · Via Locatelli, 62', 520, 550)
-
-        ctx.fillStyle = '#EBCB8B'
-        ctx.font = '900 18px Arial'
-        ctx.fillText('035 237979 · 035 221206', 520, 574)
-      } else {
-        const sideW = 330
-        const photoY = 64
-        const photoH = height - 128
-        const leftX = 58
-        const rightX = width - leftX - sideW
-        const centerX = width / 2
-        const cardX = 404
-        const cardY = 66
-        const cardW = 392
-        const cardH = height - 132
-
-        const leftImage = loadedImages[0]
-        const rightImage = loadedImages[1] || loadedImages[0]
-
-        if (leftImage) {
-          drawRoundedCoverImage(ctx, leftImage, leftX, photoY, sideW, photoH, 26)
-        } else {
-          drawImagePlaceholder(ctx, leftX, photoY, sideW, photoH, 'FOTO 1')
-        }
-
-        if (rightImage) {
-          drawRoundedCoverImage(ctx, rightImage, rightX, photoY, sideW, photoH, 26)
-        } else {
-          drawImagePlaceholder(ctx, rightX, photoY, sideW, photoH, 'FOTO 2')
-        }
-
-        const gradientLeft = ctx.createLinearGradient(leftX + sideW - 96, 0, cardX, 0)
-        gradientLeft.addColorStop(0, 'rgba(3,5,7,0)')
-        gradientLeft.addColorStop(1, '#030507')
-        ctx.fillStyle = gradientLeft
-        ctx.fillRect(leftX + sideW - 96, 0, cardX - (leftX + sideW - 96), height)
-
-        const gradientRight = ctx.createLinearGradient(cardX + cardW, 0, rightX + 96, 0)
-        gradientRight.addColorStop(0, '#030507')
-        gradientRight.addColorStop(1, 'rgba(3,5,7,0)')
-        ctx.fillStyle = gradientRight
-        ctx.fillRect(cardX + cardW, 0, rightX + 96 - (cardX + cardW), height)
-
-        ctx.fillStyle = '#070B14'
-        drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 26)
-        ctx.fill()
-
-        ctx.strokeStyle = 'rgba(163,190,140,0.50)'
-        ctx.lineWidth = 1.6
-        drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 26)
-        ctx.stroke()
-
-        ctx.textAlign = 'center'
-
-        ctx.fillStyle = '#8FBCBB'
-        ctx.font = '900 22px Arial'
-        ctx.fillText('AREA IMMOBILIARE', centerX, 112)
-
-        ctx.fillStyle = '#A3BE8C'
-        ctx.font = '900 23px Arial'
-        ctx.fillText(`${contract} · ${ref}`, centerX, 150)
-
-        ctx.fillStyle = '#FFFFFF'
-        ctx.font = '900 33px Arial'
-        drawCenteredWrappedText(ctx, title.toUpperCase(), centerX, 206, cardW - 64, 37, 2)
-
-        ctx.fillStyle = '#D8DEE9'
-        ctx.font = '800 19px Arial'
-        drawCenteredWrappedText(ctx, features, centerX, 312, cardW - 62, 26, 2)
-
-        ctx.fillStyle = '#EBCB8B'
-        ctx.font = '900 34px Arial'
-        ctx.fillText(price, centerX, 408)
-
-        ctx.fillStyle = '#D8DEE9'
-        ctx.font = '800 18px Arial'
-        drawCenteredWrappedText(ctx, location, centerX, 452, cardW - 58, 24, 2)
-
-        ctx.strokeStyle = 'rgba(236,239,244,0.13)'
-        ctx.lineWidth = 1
-        ctx.beginPath()
-        ctx.moveTo(cardX + 42, cardY + cardH - 72)
-        ctx.lineTo(cardX + cardW - 42, cardY + cardH - 72)
-        ctx.stroke()
-
-        ctx.fillStyle = '#8FBCBB'
-        ctx.font = '800 16px Arial'
-        ctx.fillText('Contattaci per info e visite', centerX, cardY + cardH - 36)
       }
+
+      drawContentPanel(ctx, {
+        platform: nextPlatform,
+        layout: nextLayout,
+        x: layoutData.content.x,
+        y: layoutData.content.y,
+        w: layoutData.content.w,
+        h: layoutData.content.h,
+        title,
+        ref,
+        price,
+        contract,
+        location,
+        features,
+        description: shortDescription,
+        tags,
+        logo: areaLogo,
+      })
 
       const url = canvas.toDataURL('image/png')
       setPreviewUrl(url)
-      setNotice('Immagine Facebook pronta.')
+      setNotice(`Immagine ${nextConfig.label} pronta.`)
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Errore generazione immagine')
     } finally {
@@ -678,11 +822,10 @@ export default function FacebookImagesPage() {
     }
 
     const ref = safeFilename(clean(property.reference_code, 'immobile'))
-    const name = layout === 'four' ? 'facebook-4-foto' : 'facebook-2-foto-testo-centro'
-
+    const layoutName = layout === 'four' ? '4-foto' : '2-foto'
     const link = document.createElement('a')
     link.href = previewUrl
-    link.download = `${ref}-${name}.png`
+    link.download = `${ref}-${config.filename}-${layoutName}.png`
     document.body.appendChild(link)
     link.click()
     link.remove()
@@ -690,8 +833,10 @@ export default function FacebookImagesPage() {
 
   useEffect(() => {
     async function loadAreaLogo() {
+      if (!AREA_SOCIAL_LOGO_SRC) return
+
       try {
-        const logo = await loadImage(AREA_FACEBOOK_LOGO_SRC)
+        const logo = await loadImage(AREA_SOCIAL_LOGO_SRC)
         setAreaLogo(logo)
       } catch {
         setAreaLogo(null)
@@ -714,10 +859,10 @@ export default function FacebookImagesPage() {
 
   useEffect(() => {
     if (property) {
-      void generateImage(layout)
+      void generateImage(platform, layout)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layout, property?.id, photoSlots, areaLogo])
+  }, [platform, layout, property?.id, photoSlots, areaLogo])
 
   return (
     <main className="min-h-screen bg-[#111827] px-4 py-6 text-[#E5E7EB] md:px-8">
@@ -727,10 +872,10 @@ export default function FacebookImagesPage() {
             AI-OS / Social
           </p>
           <h1 className="mt-2 text-3xl font-black text-white">
-            Crea immagini Facebook
+            Crea immagini social
           </h1>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-[#D1D5DB]/68">
-            Genera immagini 1200x630 per Facebook usando le foto dell’immobile.
+            Genera immagini per Facebook, Instagram e TikTok usando le foto dell’immobile.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -745,7 +890,7 @@ export default function FacebookImagesPage() {
             <button
               type="button"
               disabled={!property || generating}
-              onClick={() => void generateImage(layout)}
+              onClick={() => void generateImage(platform, layout)}
               className="rounded-full border border-[#A3BE8C]/40 bg-[#A3BE8C]/12 px-4 py-2 text-sm font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/20 disabled:cursor-wait disabled:opacity-50"
             >
               {generating ? 'Genero...' : 'Rigenera immagine'}
@@ -770,22 +915,46 @@ export default function FacebookImagesPage() {
 
         <section className="mb-6 rounded-[28px] border border-[#8FBCBB]/18 bg-[#1F2937]/82 p-5">
           <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#8FBCBB]/65">
-            Layout Facebook
+            Formato
+          </p>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            {(Object.keys(PLATFORM_CONFIG) as Platform[]).map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => setPlatform(item)}
+                className={`rounded-2xl border p-4 text-left transition ${
+                  platform === item
+                    ? 'border-[#A3BE8C]/60 bg-[#A3BE8C]/14'
+                    : 'border-[#374151] bg-[#111827]/70 hover:border-[#8FBCBB]/45'
+                }`}
+              >
+                <p className="font-black text-white">{PLATFORM_CONFIG[item].label}</p>
+                <p className="mt-1 text-xs leading-5 text-[#D1D5DB]/58">{PLATFORM_CONFIG[item].ratioLabel}</p>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="mb-6 rounded-[28px] border border-[#8FBCBB]/18 bg-[#1F2937]/82 p-5">
+          <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#8FBCBB]/65">
+            Layout
           </p>
 
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <button
               type="button"
-              onClick={() => setLayout('side-text-side')}
+              onClick={() => setLayout('two')}
               className={`rounded-2xl border p-4 text-left transition ${
-                layout === 'side-text-side'
+                layout === 'two'
                   ? 'border-[#A3BE8C]/60 bg-[#A3BE8C]/14'
                   : 'border-[#374151] bg-[#111827]/70 hover:border-[#8FBCBB]/45'
               }`}
             >
-              <p className="font-black text-white">1 foto sinistra + testo centro + 1 foto destra</p>
+              <p className="font-black text-white">Versione 2 foto</p>
               <p className="mt-1 text-xs leading-5 text-[#D1D5DB]/58">
-                Layout Facebook più pulito, con testo centrale e due immagini laterali.
+                Due immagini e testo centrale adattato al formato scelto.
               </p>
             </button>
 
@@ -800,7 +969,7 @@ export default function FacebookImagesPage() {
             >
               <p className="font-black text-white">Versione 4 foto</p>
               <p className="mt-1 text-xs leading-5 text-[#D1D5DB]/58">
-                Template premium con 4 miniature laterali e testo centrale.
+                Quattro miniature e testo centrale premium.
               </p>
             </button>
           </div>
@@ -872,7 +1041,7 @@ export default function FacebookImagesPage() {
                 Anteprima
               </p>
               <h2 className="mt-1 text-xl font-black text-white">
-                Facebook 1200x630
+                {config.label} {config.ratioLabel}
               </h2>
             </div>
           </div>
@@ -882,12 +1051,13 @@ export default function FacebookImagesPage() {
           {previewUrl ? (
             <img
               src={previewUrl}
-              alt="Anteprima immagine Facebook"
-              className="w-full rounded-2xl border border-[#374151] bg-[#0B1220] shadow-2xl shadow-black/30"
+              alt={`Anteprima immagine ${config.label}`}
+              className="mx-auto max-h-[78vh] rounded-2xl border border-[#374151] bg-[#0B1220] object-contain shadow-2xl shadow-black/30"
+              style={{ width: platform === 'tiktok' ? 'min(420px, 100%)' : '100%' }}
             />
           ) : (
             <div className="grid min-h-[420px] place-items-center rounded-2xl border border-dashed border-[#374151] bg-[#0B1220] text-sm text-[#D1D5DB]/58">
-              Seleziona/genera un’immagine Facebook.
+              Seleziona/genera un’immagine social.
             </div>
           )}
         </section>

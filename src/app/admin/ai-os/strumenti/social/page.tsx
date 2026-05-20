@@ -114,8 +114,8 @@ function buildSocialOutputs(data: ToolPropertyData | null): SocialOutput[] {
   return [
     {
       id: 'facebook',
-      title: 'Post Facebook',
-      description: 'Testo completo, chiaro e commerciale per pagina Facebook.',
+      title: 'Post Facebook / Instagram / TikTok',
+      description: 'Testo completo, chiaro e commerciale per pagina Facebook / Instagram / TikTok.',
       content: [
         `🏠 ${title}`,
         '',
@@ -370,7 +370,7 @@ export default function AIOSSocialPage() {
             Social / Vetrina immobile
           </h1>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-[#D1D5DB]/68">
-            Genera testi per Facebook, Instagram, TikTok, WhatsApp, portali e voce breve partendo dai dati immobile.
+            Genera testi per Facebook / Instagram / TikTok, Instagram, TikTok, WhatsApp, portali e voce breve partendo dai dati immobile.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -389,7 +389,7 @@ export default function AIOSSocialPage() {
                   onClick={() => window.location.href = `/admin/ai-os/strumenti/social/facebook?propertyId=${propertyData.property.id}`}
                   className="rounded-full border border-[#A3BE8C]/40 bg-[#A3BE8C]/12 px-4 py-2 text-sm font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/20"
                 >
-                  Crea immagini Facebook
+                  Crea immagini social
                 </button>
 
                 <button
