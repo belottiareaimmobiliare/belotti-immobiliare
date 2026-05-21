@@ -47,3 +47,4 @@ tmp/
 data/imports/*.json
 data/imports/*.csv
 data/imports/debug-old-site/
+tmp/area-portali-audit/
