@@ -142,6 +142,17 @@ export default function AIOSStrumentiPage() {
         actionLabel: propertyId ? 'Apri moduli' : 'Seleziona immobile',
         href: propertyId ? `/admin/ai-os/strumenti/moduli?propertyId=${propertyId}` : undefined,
       },
+      {
+        id: 'agency-practices',
+        title: 'Pratiche agenzia / visure',
+        badge: 'Operativo',
+        description: 'Centro pratiche per visure, planimetrie, APE, conformità, documenti proprietario e richieste a tecnico.',
+        icon: '🏛️',
+        status: propertyId ? 'ready' : 'next',
+        actionLabel: propertyId ? 'Apri pratiche' : 'Seleziona immobile',
+        href: propertyId ? `/admin/ai-os/strumenti/pratiche?propertyId=${propertyId}` : undefined,
+      },
+
 
       {
         id: 'visure',
