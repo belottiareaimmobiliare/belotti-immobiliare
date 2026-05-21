@@ -708,6 +708,7 @@ function isGoogleDocsPreviewable(file: AIOSFile) {
   const mimeType = (file.mimeType ?? '').toLowerCase()
   const name = file.name.toLowerCase()
 
+
   return (
     mimeType === 'application/msword' ||
     mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
@@ -3727,9 +3728,8 @@ export default function AIOSDesktop() {
   const renderDriveRawEmbed = () => {
     const rawFolderId = String(
       (activeFolder ? driveFolder?.drive_folder_id : driveSettings?.drive_root_folder_id) ||
-      driveSettings?.drive_root_folder_id ||
-      driveFolder?.drive_folder_id ||
-      '',
+        driveFolder?.drive_folder_id ||
+        '',
     ).trim()
 
     const rawFolderUrl = buildRawDriveOpenUrl(
@@ -3741,20 +3741,45 @@ export default function AIOSDesktop() {
       ? activeFolder.name
       : driveSettings?.drive_root_name || 'Immobili'
 
-    if (!rawFolderId) {
-      return (
-        <div className="h-full rounded-3xl border border-[#EBCB8B]/25 bg-[#EBCB8B]/10 p-6 text-sm leading-6 text-[#EBCB8B]">
-          Cartella Drive non configurata. Apri le impostazioni Drive e collega la cartella root Immobili.
-        </div>
-      )
-    }
+    const propertyQuery = activeFolderId ? `?propertyId=${encodeURIComponent(activeFolderId)}` : ''
+
+    const agencyButtons = [
+      {
+        title: 'Pratiche / visure',
+        icon: '🏛️',
+        description: 'Visure, planimetrie, APE, conformità, documenti e richieste a tecnico/proprietario.',
+        href: `/admin/ai-os/strumenti/pratiche${propertyQuery}`,
+        tone: 'border-[#A3BE8C]/30 bg-[#A3BE8C]/10 hover:bg-[#A3BE8C]/16',
+      },
+      {
+        title: 'Moduli compilabili',
+        icon: '🧾',
+        description: 'Acquisisce dati immobile/proprietario, permette modifica manuale, revisione e PDF finale.',
+        href: `/admin/ai-os/strumenti/moduli${propertyQuery}`,
+        tone: 'border-[#EBCB8B]/30 bg-[#EBCB8B]/10 hover:bg-[#EBCB8B]/16',
+      },
+      {
+        title: 'Genera documenti',
+        icon: '📄',
+        description: 'Incarichi, schede raccolta dati, checklist, testi pronti e bozze operative.',
+        href: `/admin/ai-os/strumenti/documenti${propertyQuery}`,
+        tone: 'border-[#88C0D0]/30 bg-[#88C0D0]/10 hover:bg-[#88C0D0]/16',
+      },
+      {
+        title: 'Social / vetrina',
+        icon: '📣',
+        description: 'Testi, hashtag Belotti, immagini Facebook, Instagram e TikTok.',
+        href: `/admin/ai-os/strumenti/social${propertyQuery}`,
+        tone: 'border-[#B48EAD]/30 bg-[#B48EAD]/10 hover:bg-[#B48EAD]/16',
+      },
+    ]
 
     return (
-      <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-[#3B4252]/70 bg-[#202124] shadow-[0_28px_120px_rgba(0,0,0,0.56)]">
-        <div className="flex shrink-0 items-center gap-3 border-b border-white/10 bg-[#202124] px-4 py-3">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-[#3B4252]/70 bg-[#070A10]/94 shadow-[0_28px_120px_rgba(0,0,0,0.72),inset_0_1px_0_rgba(236,239,244,0.045)]">
+        <div className="flex shrink-0 items-center gap-3 border-b border-white/10 bg-[#0B1018]/96 px-4 py-3">
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#8FBCBB]/75">
-              Google Drive
+              Immobile selezionato
             </p>
             <h3 className="truncate text-base font-semibold text-white">
               {rawTitle}
@@ -3769,22 +3794,68 @@ export default function AIOSDesktop() {
             Aggiorna
           </button>
 
-          <a
-            href={rawFolderUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-full bg-[#8AB4F8] px-4 py-2 text-xs font-black text-[#202124] transition hover:brightness-110"
-          >
-            Apri in Drive
-          </a>
+          {rawFolderId ? (
+            <a
+              href={rawFolderUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full bg-[#8AB4F8] px-4 py-2 text-xs font-black text-[#202124] transition hover:brightness-110"
+            >
+              Apri in Drive
+            </a>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="rounded-full border border-[#4C566A]/70 bg-[#111827] px-4 py-2 text-xs font-black text-[#D8DEE9]/35"
+            >
+              Drive non configurato
+            </button>
+          )}
         </div>
 
-        <iframe
-          src={buildRawDriveEmbedUrl(rawFolderId)}
-          title={rawTitle}
-          className="min-h-[620px] flex-1 border-0 bg-white"
-          allow="clipboard-read; clipboard-write"
-        />
+        <div className="grid min-h-[620px] flex-1 place-items-center bg-[#0B1018] p-6">
+          <div className="w-full max-w-5xl rounded-[30px] border border-[#8FBCBB]/18 bg-[#111827]/92 p-6 shadow-2xl shadow-black/35">
+            <p className="text-xs font-bold uppercase tracking-[0.34em] text-[#8FBCBB]/70">
+              Strumenti agenzia
+            </p>
+
+            <h3 className="mt-3 text-2xl font-black text-white">
+              Lavora sull’immobile selezionato
+            </h3>
+
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[#D1D5DB]/64">
+              Drive si apre nel suo ambiente reale dal tasto in alto. Qui sotto trovi le funzioni operative AI-OS collegate alla cartella immobile selezionata sulla sinistra.
+            </p>
+
+            <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              {agencyButtons.map((button) => (
+                <button
+                  key={button.href}
+                  type="button"
+                  onClick={() => {
+                    window.location.href = button.href
+                  }}
+                  className={`rounded-3xl border p-5 text-left transition hover:-translate-y-0.5 ${button.tone}`}
+                >
+                  <span className="text-3xl">{button.icon}</span>
+                  <span className="mt-4 block text-base font-black text-white">
+                    {button.title}
+                  </span>
+                  <span className="mt-2 block text-xs leading-5 text-[#D1D5DB]/58">
+                    {button.description}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {!rawFolderId ? (
+              <div className="mt-5 rounded-2xl border border-[#EBCB8B]/25 bg-[#EBCB8B]/10 px-4 py-3 text-xs leading-5 text-[#EBCB8B]">
+                La cartella Drive di questo immobile non risulta configurata. Puoi comunque usare gli strumenti AI-OS, ma il tasto “Apri in Drive” verrà abilitato solo dopo il collegamento della cartella.
+              </div>
+            ) : null}
+          </div>
+        </div>
       </div>
     )
   }
