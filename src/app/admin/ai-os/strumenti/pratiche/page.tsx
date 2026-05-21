@@ -36,6 +36,31 @@ type PracticeState = Record<string, {
   note: string
 }>
 
+type PracticeOutput =
+  | 'pack'
+  | 'owner'
+  | 'technician'
+  | 'mail-visura-catastale'
+  | 'mail-planimetria-catastale'
+  | 'mail-visura-ipotecaria'
+  | 'mail-ape'
+  | 'mail-geometra'
+  | 'mail-amministratore'
+  | 'mail-notaio'
+
+const PRACTICE_OUTPUT_BUTTONS: Array<{ id: PracticeOutput; label: string }> = [
+  { id: 'pack', label: 'Pacchetto' },
+  { id: 'owner', label: 'Proprietario' },
+  { id: 'technician', label: 'Tecnico' },
+  { id: 'mail-visura-catastale', label: 'Mail visura' },
+  { id: 'mail-planimetria-catastale', label: 'Mail planimetria' },
+  { id: 'mail-visura-ipotecaria', label: 'Mail ipotecaria' },
+  { id: 'mail-ape', label: 'Mail APE' },
+  { id: 'mail-geometra', label: 'Mail geometra' },
+  { id: 'mail-amministratore', label: 'Mail condominio' },
+  { id: 'mail-notaio', label: 'Mail notaio' },
+]
+
 const PRACTICE_ITEMS: PracticeItem[] = [
   {
     id: 'visura-catastale',
@@ -388,6 +413,237 @@ function buildTechnicianRequestText(data: ToolPropertyData | null, state: Practi
   ].join('\n')
 }
 
+function buildPracticeEmailSubject(data: ToolPropertyData | null, output: PracticeOutput) {
+  const property = data?.property ?? {}
+  const ref = clean(property.reference_code, '')
+  const title = clean(property.title, 'immobile')
+
+  const prefix = ref ? `${ref} - ${title}` : title
+
+  if (output === 'mail-visura-catastale') return `Richiesta visura catastale - ${prefix}`
+  if (output === 'mail-planimetria-catastale') return `Richiesta planimetria catastale - ${prefix}`
+  if (output === 'mail-visura-ipotecaria') return `Richiesta ispezione ipotecaria/ipocatastale - ${prefix}`
+  if (output === 'mail-ape') return `Richiesta APE / verifica energetica - ${prefix}`
+  if (output === 'mail-geometra') return `Richiesta verifiche tecniche immobile - ${prefix}`
+  if (output === 'mail-amministratore') return `Richiesta documenti condominiali - ${prefix}`
+  if (output === 'mail-notaio') return `Richiesta documentazione notarile - ${prefix}`
+
+  return `Richiesta documenti immobile - ${prefix}`
+}
+
+function buildPracticeEmailDraft(
+  data: ToolPropertyData | null,
+  state: PracticeState,
+  output: PracticeOutput,
+  generalNote: string,
+) {
+  const property = data?.property ?? {}
+  const owner = data?.owners?.[0] ?? null
+
+  const ref = clean(property.reference_code, '—')
+  const title = clean(property.title, '—')
+  const address = [property.address, property.frazione, property.comune || property.city, property.province]
+    .filter(Boolean)
+    .join(', ') || '—'
+
+  const cadastral = [
+    property.foglio ? `Foglio: ${property.foglio}` : '',
+    property.particella ? `Particella: ${property.particella}` : '',
+    property.subalterno ? `Subalterno: ${property.subalterno}` : '',
+    property.categoria_catastale ? `Categoria catastale: ${property.categoria_catastale}` : '',
+    property.rendita_catastale ? `Rendita catastale: ${property.rendita_catastale}` : '',
+  ].filter(Boolean).join('\n') || 'Dati catastali non ancora presenti nella scheda AI-OS.'
+
+  const ownerBlock = [
+    `Nome: ${ownerName(owner) || '—'}`,
+    `Email: ${pickFirst(owner?.email, owner?.mail) || '—'}`,
+    `Telefono: ${pickFirst(owner?.phone, owner?.mobile, owner?.telephone, owner?.telefono) || '—'}`,
+    `Codice fiscale: ${pickFirst(owner?.fiscal_code, owner?.tax_code, owner?.codice_fiscale) || '—'}`,
+  ].join('\n')
+
+  const openItems = PRACTICE_ITEMS
+    .filter((item) => {
+      const status = state[item.id]?.status ?? item.defaultStatus
+      return status === 'todo' || status === 'requested'
+    })
+    .map((item) => `- ${item.title}: ${item.requestText}`)
+    .join('\n') || '- Nessuna attività aperta indicata.'
+
+  const subject = buildPracticeEmailSubject(data, output)
+
+  let recipientHint = 'A: [inserire destinatario]'
+  let body = ''
+
+  if (output === 'mail-visura-catastale') {
+    recipientHint = 'A: tecnico / servizio visure / referente catastale'
+    body = [
+      'Buongiorno,',
+      '',
+      'chiediamo cortesemente la visura catastale aggiornata per il seguente immobile:',
+      '',
+      `Riferimento agenzia: ${ref}`,
+      `Immobile: ${title}`,
+      `Indirizzo/Zona: ${address}`,
+      '',
+      'Dati catastali disponibili:',
+      cadastral,
+      '',
+      'Proprietario / referente:',
+      ownerBlock,
+      '',
+      'Se servono ulteriori dati, restiamo a disposizione.',
+      '',
+      'Grazie.',
+      'Area Immobiliare',
+    ].join('\n')
+  } else if (output === 'mail-planimetria-catastale') {
+    recipientHint = 'A: tecnico / servizio visure / referente catastale'
+    body = [
+      'Buongiorno,',
+      '',
+      'chiediamo cortesemente la planimetria catastale aggiornata dell’immobile sotto indicato, utile per confronto con lo stato di fatto e verifica di conformità.',
+      '',
+      `Riferimento agenzia: ${ref}`,
+      `Immobile: ${title}`,
+      `Indirizzo/Zona: ${address}`,
+      '',
+      'Dati catastali disponibili:',
+      cadastral,
+      '',
+      'Proprietario / referente:',
+      ownerBlock,
+      '',
+      'Grazie.',
+      'Area Immobiliare',
+    ].join('\n')
+  } else if (output === 'mail-visura-ipotecaria') {
+    recipientHint = 'A: notaio / consulente / servizio ispezioni ipotecarie'
+    body = [
+      'Buongiorno,',
+      '',
+      'chiediamo cortesemente ispezione ipotecaria/ipocatastale aggiornata per verificare formalità, gravami, ipoteche, pignoramenti o trascrizioni rilevanti.',
+      '',
+      `Riferimento agenzia: ${ref}`,
+      `Immobile: ${title}`,
+      `Indirizzo/Zona: ${address}`,
+      '',
+      'Proprietario / referente:',
+      ownerBlock,
+      '',
+      'Dati catastali disponibili:',
+      cadastral,
+      '',
+      'Grazie.',
+      'Area Immobiliare',
+    ].join('\n')
+  } else if (output === 'mail-ape') {
+    recipientHint = 'A: tecnico certificatore / geometra'
+    body = [
+      'Buongiorno,',
+      '',
+      'chiediamo verifica disponibilità APE oppure predisposizione di nuovo Attestato di Prestazione Energetica per il seguente immobile:',
+      '',
+      `Riferimento agenzia: ${ref}`,
+      `Immobile: ${title}`,
+      `Contratto: ${clean(property.contract_type)}`,
+      `Tipologia: ${clean(property.property_type)}`,
+      `Indirizzo/Zona: ${address}`,
+      `Superficie: ${property.surface ? `${property.surface} mq` : '—'}`,
+      `Classe energetica attuale in scheda: ${clean(property.energy_class)}`,
+      '',
+      'Proprietario / referente:',
+      ownerBlock,
+      '',
+      'Grazie.',
+      'Area Immobiliare',
+    ].join('\n')
+  } else if (output === 'mail-geometra') {
+    recipientHint = 'A: geometra / tecnico incaricato'
+    body = [
+      'Buongiorno,',
+      '',
+      'chiediamo supporto per le verifiche tecniche relative al seguente immobile:',
+      '',
+      buildPropertySummary(data),
+      '',
+      'Richieste aperte:',
+      openItems,
+      '',
+      generalNote ? `Note agenzia:\n${generalNote}\n` : '',
+      'L’obiettivo è verificare coerenza tra documentazione, stato di fatto, planimetria catastale e situazione urbanistica.',
+      '',
+      'Grazie.',
+      'Area Immobiliare',
+    ].filter(Boolean).join('\n')
+  } else if (output === 'mail-amministratore') {
+    recipientHint = 'A: amministratore condominio'
+    body = [
+      'Buongiorno,',
+      '',
+      'chiediamo cortesemente, per l’immobile sotto indicato, la documentazione condominiale utile alla gestione della pratica:',
+      '',
+      `Riferimento agenzia: ${ref}`,
+      `Immobile: ${title}`,
+      `Indirizzo/Zona: ${address}`,
+      '',
+      'Documenti richiesti:',
+      '- spese condominiali ordinarie aggiornate',
+      '- eventuali spese straordinarie deliberate o previste',
+      '- regolamento condominiale, se disponibile',
+      '- ultime delibere rilevanti',
+      '- dati amministratore e riferimenti condominio',
+      '',
+      'Proprietario / referente:',
+      ownerBlock,
+      '',
+      'Grazie.',
+      'Area Immobiliare',
+    ].join('\n')
+  } else if (output === 'mail-notaio') {
+    recipientHint = 'A: notaio / studio notarile'
+    body = [
+      'Buongiorno,',
+      '',
+      'chiediamo cortesemente supporto/documentazione per la verifica preliminare dell’immobile sotto indicato:',
+      '',
+      buildPropertySummary(data),
+      '',
+      'Documenti/verifiche utili:',
+      '- atto di provenienza / rogito',
+      '- eventuali trascrizioni o formalità rilevanti',
+      '- eventuali note su vincoli, gravami o provenienza',
+      '- documentazione utile per futura compravendita',
+      '',
+      generalNote ? `Note agenzia:\n${generalNote}\n` : '',
+      'Grazie.',
+      'Area Immobiliare',
+    ].filter(Boolean).join('\n')
+  } else {
+    return buildOwnerRequestText(data, state)
+  }
+
+  return [
+    recipientHint,
+    '',
+    `Oggetto: ${subject}`,
+    '',
+    'Testo mail:',
+    '',
+    body,
+  ].join('\n')
+}
+
+function buildPracticeMailTo(data: ToolPropertyData | null, output: PracticeOutput, body: string) {
+  const subject = buildPracticeEmailSubject(data, output)
+
+  const cleanBody = body
+    .replace(/^A:.*\n\n/iu, '')
+    .replace(/^Oggetto:.*\n\n/iu, '')
+    .replace(/^Testo mail:\n\n/iu, '')
+
+  return `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(cleanBody)}`
+}
+
 export default function AIOSPraticheAgenziaPage() {
   const [folders, setFolders] = useState<WorkspaceFolder[]>([])
   const [selectedPropertyId, setSelectedPropertyId] = useState('')
@@ -397,7 +653,7 @@ export default function AIOSPraticheAgenziaPage() {
   const [loadingProperty, setLoadingProperty] = useState(false)
   const [propertyData, setPropertyData] = useState<ToolPropertyData | null>(null)
   const [practiceState, setPracticeState] = useState<PracticeState>({})
-  const [selectedOutput, setSelectedOutput] = useState<'pack' | 'owner' | 'technician'>('pack')
+  const [selectedOutput, setSelectedOutput] = useState<PracticeOutput>('pack')
   const [generalNote, setGeneralNote] = useState('')
   const [notice, setNotice] = useState('')
 
@@ -425,6 +681,10 @@ export default function AIOSPraticheAgenziaPage() {
   const outputText = useMemo(() => {
     if (selectedOutput === 'owner') return buildOwnerRequestText(propertyData, practiceState)
     if (selectedOutput === 'technician') return buildTechnicianRequestText(propertyData, practiceState)
+    if (selectedOutput.startsWith('mail-')) {
+      return buildPracticeEmailDraft(propertyData, practiceState, selectedOutput, generalNote)
+    }
+
     return buildPracticePack(propertyData, practiceState, generalNote)
   }, [generalNote, practiceState, propertyData, selectedOutput])
 
@@ -538,6 +798,20 @@ export default function AIOSPraticheAgenziaPage() {
     } catch {
       setNotice('Copia non riuscita: seleziona il testo e copialo manualmente.')
     }
+  }
+
+  function openEmailClient() {
+    if (!propertyData) {
+      setNotice('Seleziona prima un immobile.')
+      return
+    }
+
+    if (!selectedOutput.startsWith('mail-') && selectedOutput !== 'owner' && selectedOutput !== 'technician') {
+      setNotice('Seleziona una mail operativa prima di aprire il client email.')
+      return
+    }
+
+    window.location.href = buildPracticeMailTo(propertyData, selectedOutput, outputText)
   }
 
   function downloadTxt() {
@@ -775,12 +1049,8 @@ export default function AIOSPraticheAgenziaPage() {
               Output operativo
             </p>
 
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              {([
-                ['pack', 'Pacchetto'],
-                ['owner', 'Proprietario'],
-                ['technician', 'Tecnico'],
-              ] as const).map(([id, label]) => (
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {PRACTICE_OUTPUT_BUTTONS.map(({ id, label }) => (
                 <button
                   key={id}
                   type="button"
@@ -825,6 +1095,15 @@ export default function AIOSPraticheAgenziaPage() {
                 className="rounded-full border border-[#EBCB8B]/35 bg-[#EBCB8B]/10 px-4 py-2 text-xs font-bold text-[#EBCB8B] transition hover:bg-[#EBCB8B]/18 disabled:opacity-40"
               >
                 Scarica TXT
+              </button>
+
+              <button
+                type="button"
+                disabled={!propertyData || (!selectedOutput.startsWith('mail-') && selectedOutput !== 'owner' && selectedOutput !== 'technician')}
+                onClick={openEmailClient}
+                className="rounded-full border border-[#88C0D0]/35 bg-[#88C0D0]/10 px-4 py-2 text-xs font-bold text-[#88C0D0] transition hover:bg-[#88C0D0]/18 disabled:opacity-40"
+              >
+                Apri email
               </button>
             </div>
 
