@@ -482,12 +482,163 @@ function buildTechnicianRequestText(data: ToolPropertyData | null, state: Practi
   ].join('\n')
 }
 
-function buildPracticeEmailSubject(data: ToolPropertyData | null, output: PracticeOutput) {
-  const property = data?.property ?? {}
-  const ref = clean(property.reference_code, '')
-  const title = clean(property.title, 'immobile')
+type PracticeMissingField = {
+  key: string
+  label: string
+  value: string
+  multiline?: boolean
+  contactKey?: keyof PracticeContacts
+}
 
-  const prefix = ref ? `${ref} - ${title}` : title
+function isPracticeEmailOutput(output: PracticeOutput) {
+  return output.startsWith('mail-') || output === 'owner' || output === 'technician'
+}
+
+function getManualField(overrides: Record<string, string>, key: string, fallback = '') {
+  return optional(overrides[key]) || fallback
+}
+
+function buildCadastralText(property: Record<string, any>, overrides: Record<string, string>) {
+  const manual = optional(overrides.cadastralData)
+  if (manual) return manual
+
+  return [
+    property.foglio ? `Foglio: ${property.foglio}` : '',
+    property.particella ? `Particella: ${property.particella}` : '',
+    property.subalterno ? `Subalterno: ${property.subalterno}` : '',
+    property.categoria_catastale ? `Categoria catastale: ${property.categoria_catastale}` : '',
+    property.rendita_catastale ? `Rendita catastale: ${property.rendita_catastale}` : '',
+  ].filter(Boolean).join('\n')
+}
+
+function buildEmailContext(data: ToolPropertyData | null, overrides: Record<string, string>) {
+  const property = data?.property ?? {}
+  const owner = data?.owners?.[0] ?? null
+
+  const addressFallback = [property.address, property.frazione, property.comune || property.city, property.province]
+    .filter(Boolean)
+    .join(', ')
+
+  return {
+    ref: getManualField(overrides, 'propertyReference', clean(property.reference_code, '')),
+    title: getManualField(overrides, 'propertyTitle', clean(property.title, '')),
+    address: getManualField(overrides, 'propertyAddress', addressFallback),
+    contract: getManualField(overrides, 'propertyContract', clean(property.contract_type, '')),
+    type: getManualField(overrides, 'propertyType', clean(property.property_type, '')),
+    surface: getManualField(overrides, 'propertySurface', property.surface ? `${property.surface} mq` : ''),
+    energyClass: getManualField(overrides, 'energyClass', clean(property.energy_class, '')),
+    price: getManualField(overrides, 'propertyPrice', formatCurrency(property.price)),
+    cadastralData: buildCadastralText(property, overrides),
+    ownerName: getManualField(overrides, 'ownerName', ownerName(owner)),
+    ownerEmail: getManualField(overrides, 'ownerEmail', pickFirst(owner?.email, owner?.mail)),
+    ownerPhone: getManualField(overrides, 'ownerPhone', pickFirst(owner?.phone, owner?.mobile, owner?.telephone, owner?.telefono)),
+    ownerFiscalCode: getManualField(overrides, 'ownerFiscalCode', pickFirst(owner?.fiscal_code, owner?.tax_code, owner?.codice_fiscale)),
+  }
+}
+
+function buildEmailPropertySummary(data: ToolPropertyData | null, overrides: Record<string, string>) {
+  const ctx = buildEmailContext(data, overrides)
+
+  return [
+    `Riferimento: ${ctx.ref || '—'}`,
+    `Titolo: ${ctx.title || '—'}`,
+    `Contratto: ${ctx.contract || '—'}`,
+    `Tipologia: ${ctx.type || '—'}`,
+    `Prezzo: ${ctx.price || '—'}`,
+    `Indirizzo/Zona: ${ctx.address || '—'}`,
+    `Superficie: ${ctx.surface || '—'}`,
+    `Classe energetica: ${ctx.energyClass || '—'}`,
+    '',
+    'PROPRIETARIO / REFERENTE',
+    `Nome: ${ctx.ownerName || '—'}`,
+    `Email: ${ctx.ownerEmail || '—'}`,
+    `Telefono: ${ctx.ownerPhone || '—'}`,
+    `Codice fiscale: ${ctx.ownerFiscalCode || '—'}`,
+    '',
+    'DATI CATASTALI',
+    ctx.cadastralData || 'Dati catastali non ancora presenti nella scheda AI-OS.',
+  ].join('\n')
+}
+
+function getMissingFieldsForOutput(
+  data: ToolPropertyData | null,
+  output: PracticeOutput,
+  contacts: PracticeContacts,
+  overrides: Record<string, string>,
+): PracticeMissingField[] {
+  if (!isPracticeEmailOutput(output)) return []
+
+  const ctx = buildEmailContext(data, overrides)
+  const missing: PracticeMissingField[] = []
+
+  function addIfMissing(
+    key: string,
+    label: string,
+    value: string,
+    options?: { multiline?: boolean; contactKey?: keyof PracticeContacts },
+  ) {
+    if (!optional(value)) {
+      missing.push({
+        key,
+        label,
+        value: '',
+        multiline: options?.multiline,
+        contactKey: options?.contactKey,
+      })
+    }
+  }
+
+  if (output === 'owner') {
+    addIfMissing('ownerEmail', 'Email proprietario', contacts.ownerEmail || ctx.ownerEmail, { contactKey: 'ownerEmail' })
+    addIfMissing('ownerName', 'Nome proprietario', ctx.ownerName)
+  }
+
+  if (output === 'technician' || output === 'mail-geometra') {
+    addIfMissing('technicianEmail', 'Email geometra / tecnico', contacts.technicianEmail, { contactKey: 'technicianEmail' })
+  }
+
+  if (
+    output === 'mail-visura-catastale' ||
+    output === 'mail-planimetria-catastale' ||
+    output === 'mail-visura-ipotecaria'
+  ) {
+    addIfMissing('visureEmail', 'Email servizio visure / catasto', contacts.visureEmail, { contactKey: 'visureEmail' })
+    addIfMissing('ownerName', 'Nome proprietario / referente', ctx.ownerName)
+    addIfMissing('ownerFiscalCode', 'Codice fiscale proprietario', ctx.ownerFiscalCode)
+    addIfMissing('cadastralData', 'Dati catastali disponibili', ctx.cadastralData, { multiline: true })
+  }
+
+  if (output === 'mail-ape') {
+    addIfMissing('apeEmail', 'Email tecnico APE', contacts.apeEmail || contacts.technicianEmail, { contactKey: 'apeEmail' })
+    addIfMissing('propertySurface', 'Superficie immobile', ctx.surface)
+  }
+
+  if (output === 'mail-amministratore') {
+    addIfMissing('condominiumEmail', 'Email amministratore condominio', contacts.condominiumEmail, { contactKey: 'condominiumEmail' })
+    addIfMissing('ownerName', 'Nome proprietario / referente', ctx.ownerName)
+  }
+
+  if (output === 'mail-notaio') {
+    addIfMissing('notaryEmail', 'Email notaio', contacts.notaryEmail, { contactKey: 'notaryEmail' })
+    addIfMissing('ownerName', 'Nome proprietario / referente', ctx.ownerName)
+    addIfMissing('ownerFiscalCode', 'Codice fiscale proprietario', ctx.ownerFiscalCode)
+    addIfMissing('cadastralData', 'Dati catastali disponibili', ctx.cadastralData, { multiline: true })
+  }
+
+  addIfMissing('propertyReference', 'Riferimento immobile', ctx.ref)
+  addIfMissing('propertyTitle', 'Titolo immobile', ctx.title)
+  addIfMissing('propertyAddress', 'Indirizzo / zona immobile', ctx.address)
+
+  return missing
+}
+
+function buildPracticeEmailSubject(
+  data: ToolPropertyData | null,
+  output: PracticeOutput,
+  overrides: Record<string, string> = {},
+) {
+  const ctx = buildEmailContext(data, overrides)
+  const prefix = ctx.ref ? `${ctx.ref} - ${ctx.title || 'immobile'}` : ctx.title || 'immobile'
 
   if (output === 'mail-visura-catastale') return `Richiesta visura catastale - ${prefix}`
   if (output === 'mail-planimetria-catastale') return `Richiesta planimetria catastale - ${prefix}`
@@ -505,29 +656,15 @@ function buildPracticeEmailDraft(
   state: PracticeState,
   output: PracticeOutput,
   generalNote: string,
+  overrides: Record<string, string> = {},
 ) {
-  const property = data?.property ?? {}
-  const owner = data?.owners?.[0] ?? null
-
-  const ref = clean(property.reference_code, '—')
-  const title = clean(property.title, '—')
-  const address = [property.address, property.frazione, property.comune || property.city, property.province]
-    .filter(Boolean)
-    .join(', ') || '—'
-
-  const cadastral = [
-    property.foglio ? `Foglio: ${property.foglio}` : '',
-    property.particella ? `Particella: ${property.particella}` : '',
-    property.subalterno ? `Subalterno: ${property.subalterno}` : '',
-    property.categoria_catastale ? `Categoria catastale: ${property.categoria_catastale}` : '',
-    property.rendita_catastale ? `Rendita catastale: ${property.rendita_catastale}` : '',
-  ].filter(Boolean).join('\n') || 'Dati catastali non ancora presenti nella scheda AI-OS.'
+  const ctx = buildEmailContext(data, overrides)
 
   const ownerBlock = [
-    `Nome: ${ownerName(owner) || '—'}`,
-    `Email: ${pickFirst(owner?.email, owner?.mail) || '—'}`,
-    `Telefono: ${pickFirst(owner?.phone, owner?.mobile, owner?.telephone, owner?.telefono) || '—'}`,
-    `Codice fiscale: ${pickFirst(owner?.fiscal_code, owner?.tax_code, owner?.codice_fiscale) || '—'}`,
+    `Nome: ${ctx.ownerName || '—'}`,
+    `Email: ${ctx.ownerEmail || '—'}`,
+    `Telefono: ${ctx.ownerPhone || '—'}`,
+    `Codice fiscale: ${ctx.ownerFiscalCode || '—'}`,
   ].join('\n')
 
   const openItems = PRACTICE_ITEMS
@@ -538,7 +675,7 @@ function buildPracticeEmailDraft(
     .map((item) => `- ${item.title}: ${item.requestText}`)
     .join('\n') || '- Nessuna attività aperta indicata.'
 
-  const subject = buildPracticeEmailSubject(data, output)
+  const subject = buildPracticeEmailSubject(data, output, overrides)
 
   let recipientHint = 'A: [inserire destinatario]'
   let body = ''
@@ -550,12 +687,12 @@ function buildPracticeEmailDraft(
       '',
       'chiediamo cortesemente la visura catastale aggiornata per il seguente immobile:',
       '',
-      `Riferimento agenzia: ${ref}`,
-      `Immobile: ${title}`,
-      `Indirizzo/Zona: ${address}`,
+      `Riferimento agenzia: ${ctx.ref || '—'}`,
+      `Immobile: ${ctx.title || '—'}`,
+      `Indirizzo/Zona: ${ctx.address || '—'}`,
       '',
       'Dati catastali disponibili:',
-      cadastral,
+      ctx.cadastralData || '—',
       '',
       'Proprietario / referente:',
       ownerBlock,
@@ -572,12 +709,12 @@ function buildPracticeEmailDraft(
       '',
       'chiediamo cortesemente la planimetria catastale aggiornata dell’immobile sotto indicato, utile per confronto con lo stato di fatto e verifica di conformità.',
       '',
-      `Riferimento agenzia: ${ref}`,
-      `Immobile: ${title}`,
-      `Indirizzo/Zona: ${address}`,
+      `Riferimento agenzia: ${ctx.ref || '—'}`,
+      `Immobile: ${ctx.title || '—'}`,
+      `Indirizzo/Zona: ${ctx.address || '—'}`,
       '',
       'Dati catastali disponibili:',
-      cadastral,
+      ctx.cadastralData || '—',
       '',
       'Proprietario / referente:',
       ownerBlock,
@@ -592,15 +729,15 @@ function buildPracticeEmailDraft(
       '',
       'chiediamo cortesemente ispezione ipotecaria/ipocatastale aggiornata per verificare formalità, gravami, ipoteche, pignoramenti o trascrizioni rilevanti.',
       '',
-      `Riferimento agenzia: ${ref}`,
-      `Immobile: ${title}`,
-      `Indirizzo/Zona: ${address}`,
+      `Riferimento agenzia: ${ctx.ref || '—'}`,
+      `Immobile: ${ctx.title || '—'}`,
+      `Indirizzo/Zona: ${ctx.address || '—'}`,
       '',
       'Proprietario / referente:',
       ownerBlock,
       '',
       'Dati catastali disponibili:',
-      cadastral,
+      ctx.cadastralData || '—',
       '',
       'Grazie.',
       'Area Immobiliare',
@@ -612,13 +749,13 @@ function buildPracticeEmailDraft(
       '',
       'chiediamo verifica disponibilità APE oppure predisposizione di nuovo Attestato di Prestazione Energetica per il seguente immobile:',
       '',
-      `Riferimento agenzia: ${ref}`,
-      `Immobile: ${title}`,
-      `Contratto: ${clean(property.contract_type)}`,
-      `Tipologia: ${clean(property.property_type)}`,
-      `Indirizzo/Zona: ${address}`,
-      `Superficie: ${property.surface ? `${property.surface} mq` : '—'}`,
-      `Classe energetica attuale in scheda: ${clean(property.energy_class)}`,
+      `Riferimento agenzia: ${ctx.ref || '—'}`,
+      `Immobile: ${ctx.title || '—'}`,
+      `Contratto: ${ctx.contract || '—'}`,
+      `Tipologia: ${ctx.type || '—'}`,
+      `Indirizzo/Zona: ${ctx.address || '—'}`,
+      `Superficie: ${ctx.surface || '—'}`,
+      `Classe energetica attuale in scheda: ${ctx.energyClass || '—'}`,
       '',
       'Proprietario / referente:',
       ownerBlock,
@@ -633,7 +770,7 @@ function buildPracticeEmailDraft(
       '',
       'chiediamo supporto per le verifiche tecniche relative al seguente immobile:',
       '',
-      buildPropertySummary(data),
+      buildEmailPropertySummary(data, overrides),
       '',
       'Richieste aperte:',
       openItems,
@@ -651,9 +788,9 @@ function buildPracticeEmailDraft(
       '',
       'chiediamo cortesemente, per l’immobile sotto indicato, la documentazione condominiale utile alla gestione della pratica:',
       '',
-      `Riferimento agenzia: ${ref}`,
-      `Immobile: ${title}`,
-      `Indirizzo/Zona: ${address}`,
+      `Riferimento agenzia: ${ctx.ref || '—'}`,
+      `Immobile: ${ctx.title || '—'}`,
+      `Indirizzo/Zona: ${ctx.address || '—'}`,
       '',
       'Documenti richiesti:',
       '- spese condominiali ordinarie aggiornate',
@@ -675,7 +812,7 @@ function buildPracticeEmailDraft(
       '',
       'chiediamo cortesemente supporto/documentazione per la verifica preliminare dell’immobile sotto indicato:',
       '',
-      buildPropertySummary(data),
+      buildEmailPropertySummary(data, overrides),
       '',
       'Documenti/verifiche utili:',
       '- atto di provenienza / rogito',
@@ -707,8 +844,9 @@ function buildPracticeMailTo(
   output: PracticeOutput,
   body: string,
   contacts: PracticeContacts,
+  overrides: Record<string, string> = {},
 ) {
-  const subject = buildPracticeEmailSubject(data, output)
+  const subject = buildPracticeEmailSubject(data, output, overrides)
   const recipient = getRecipientForPracticeOutput(output, contacts)
 
   const cleanBody = body
@@ -731,6 +869,9 @@ export default function AIOSPraticheAgenziaPage() {
   const [selectedOutput, setSelectedOutput] = useState<PracticeOutput>('pack')
   const [generalNote, setGeneralNote] = useState('')
   const [practiceContacts, setPracticeContacts] = useState<PracticeContacts>(() => createEmptyPracticeContacts())
+  const [mailFieldOverrides, setMailFieldOverrides] = useState<Record<string, string>>({})
+  const [mailFieldsModalOutput, setMailFieldsModalOutput] = useState<PracticeOutput | null>(null)
+  const [modalFieldValues, setModalFieldValues] = useState<Record<string, string>>({})
   const [notice, setNotice] = useState('')
 
   const filteredFolders = useMemo(() => {
@@ -758,11 +899,77 @@ export default function AIOSPraticheAgenziaPage() {
     if (selectedOutput === 'owner') return buildOwnerRequestText(propertyData, practiceState)
     if (selectedOutput === 'technician') return buildTechnicianRequestText(propertyData, practiceState)
     if (selectedOutput.startsWith('mail-')) {
-      return buildPracticeEmailDraft(propertyData, practiceState, selectedOutput, generalNote)
+      return buildPracticeEmailDraft(propertyData, practiceState, selectedOutput, generalNote, mailFieldOverrides)
     }
 
     return buildPracticePack(propertyData, practiceState, generalNote)
-  }, [generalNote, practiceState, propertyData, selectedOutput])
+  }, [generalNote, mailFieldOverrides, practiceState, propertyData, selectedOutput])
+
+  const selectedOutputMissingFields = useMemo(() => {
+    return getMissingFieldsForOutput(propertyData, selectedOutput, practiceContacts, mailFieldOverrides)
+  }, [mailFieldOverrides, practiceContacts, propertyData, selectedOutput])
+
+  const modalMissingFields = useMemo(() => {
+    if (!mailFieldsModalOutput) return []
+    return getMissingFieldsForOutput(propertyData, mailFieldsModalOutput, practiceContacts, mailFieldOverrides)
+  }, [mailFieldOverrides, mailFieldsModalOutput, practiceContacts, propertyData])
+
+  function openPracticeOutput(output: PracticeOutput) {
+    setSelectedOutput(output)
+
+    const missing = getMissingFieldsForOutput(propertyData, output, practiceContacts, mailFieldOverrides)
+
+    if (isPracticeEmailOutput(output) && missing.length > 0) {
+      setModalFieldValues(Object.fromEntries(missing.map((field) => [field.key, field.value || ''])))
+      setMailFieldsModalOutput(output)
+      return
+    }
+  }
+
+  function saveMissingMailFields() {
+    const nextOverrides = { ...mailFieldOverrides }
+    const nextContacts = { ...practiceContacts }
+
+    for (const field of modalMissingFields) {
+      const value = optional(modalFieldValues[field.key])
+      if (!value) continue
+
+      if (field.contactKey) {
+        nextContacts[field.contactKey] = value
+      } else {
+        nextOverrides[field.key] = value
+      }
+    }
+
+    setPracticeContacts(nextContacts)
+    setMailFieldOverrides(nextOverrides)
+    setMailFieldsModalOutput(null)
+    setModalFieldValues({})
+    setNotice('Campi mancanti salvati e mail aggiornata.')
+  }
+
+  function openEmailFromModal() {
+    if (!mailFieldsModalOutput) return
+
+    const missing = getMissingFieldsForOutput(propertyData, mailFieldsModalOutput, practiceContacts, mailFieldOverrides)
+
+    if (missing.length > 0) {
+      setNotice('Compila e salva prima i campi mancanti.')
+      return
+    }
+
+    const draft = mailFieldsModalOutput.startsWith('mail-')
+      ? buildPracticeEmailDraft(propertyData, practiceState, mailFieldsModalOutput, generalNote, mailFieldOverrides)
+      : outputText
+
+    window.location.href = buildPracticeMailTo(
+      propertyData,
+      mailFieldsModalOutput,
+      draft,
+      practiceContacts,
+      mailFieldOverrides,
+    )
+  }
 
   async function loadFolders() {
     setLoadingFolders(true)
@@ -819,6 +1026,7 @@ export default function AIOSPraticheAgenziaPage() {
         ...loadedContacts,
         ownerEmail: loadedContacts.ownerEmail || ownerEmail,
       })
+      setMailFieldOverrides({})
 
       setPropertyData(nextData)
 
@@ -832,6 +1040,9 @@ export default function AIOSPraticheAgenziaPage() {
               ...current,
               ...parsed.practiceContacts,
             }))
+          }
+          if (parsed.mailFieldOverrides) {
+            setMailFieldOverrides(parsed.mailFieldOverrides)
           }
           setNotice('Pratica caricata con stato salvato localmente.')
         } catch {
@@ -897,6 +1108,7 @@ export default function AIOSPraticheAgenziaPage() {
         practiceState,
         generalNote,
         practiceContacts,
+        mailFieldOverrides,
       }),
     )
 
@@ -923,14 +1135,16 @@ export default function AIOSPraticheAgenziaPage() {
       return
     }
 
-    const recipient = getRecipientForPracticeOutput(selectedOutput, practiceContacts)
+    const missing = getMissingFieldsForOutput(propertyData, selectedOutput, practiceContacts, mailFieldOverrides)
 
-    if (!recipient) {
-      setNotice('Inserisci prima il destinatario nella rubrica pratica.')
+    if (missing.length > 0) {
+      setModalFieldValues(Object.fromEntries(missing.map((field) => [field.key, field.value || ''])))
+      setMailFieldsModalOutput(selectedOutput)
+      setNotice('Compila i campi mancanti prima di aprire la mail.')
       return
     }
 
-    window.location.href = buildPracticeMailTo(propertyData, selectedOutput, outputText, practiceContacts)
+    window.location.href = buildPracticeMailTo(propertyData, selectedOutput, outputText, practiceContacts, mailFieldOverrides)
   }
 
   function downloadTxt() {
@@ -1169,20 +1383,34 @@ export default function AIOSPraticheAgenziaPage() {
             </p>
 
             <div className="mt-4 grid grid-cols-2 gap-2">
-              {PRACTICE_OUTPUT_BUTTONS.map(({ id, label }) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => setSelectedOutput(id)}
-                  className={`rounded-2xl border px-3 py-2 text-xs font-black transition ${
-                    selectedOutput === id
-                      ? 'border-[#A3BE8C]/60 bg-[#A3BE8C]/18 text-[#A3BE8C]'
-                      : 'border-[#374151] bg-[#111827] text-[#D1D5DB]/72 hover:border-[#8FBCBB]/45'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+              {PRACTICE_OUTPUT_BUTTONS.map(({ id, label }) => {
+                const missingCount = getMissingFieldsForOutput(propertyData, id, practiceContacts, mailFieldOverrides).length
+                const isSelected = selectedOutput === id
+                const isMailButton = isPracticeEmailOutput(id)
+
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => openPracticeOutput(id)}
+                    title={missingCount > 0 ? `${missingCount} campi da completare` : undefined}
+                    className={`rounded-2xl border px-3 py-2 text-xs font-black transition ${
+                      missingCount > 0 && isMailButton
+                        ? 'border-[#D08770]/70 bg-[#D08770]/18 text-[#FFD6C2] hover:bg-[#D08770]/28'
+                        : isSelected
+                          ? 'border-[#A3BE8C]/60 bg-[#A3BE8C]/18 text-[#A3BE8C]'
+                          : 'border-[#374151] bg-[#111827] text-[#D1D5DB]/72 hover:border-[#8FBCBB]/45'
+                    }`}
+                  >
+                    <span>{label}</span>
+                    {missingCount > 0 && isMailButton ? (
+                      <span className="ml-1 rounded-full bg-[#D08770]/25 px-1.5 py-0.5 text-[10px] text-[#FFD6C2]">
+                        {missingCount}
+                      </span>
+                    ) : null}
+                  </button>
+                )
+              })}
             </div>
 
             <div className="mt-4 rounded-2xl border border-[#8FBCBB]/15 bg-[#111827]/70 p-4">
@@ -1264,9 +1492,13 @@ export default function AIOSPraticheAgenziaPage() {
                 type="button"
                 disabled={!propertyData || (!selectedOutput.startsWith('mail-') && selectedOutput !== 'owner' && selectedOutput !== 'technician')}
                 onClick={openEmailClient}
-                className="rounded-full border border-[#88C0D0]/35 bg-[#88C0D0]/10 px-4 py-2 text-xs font-bold text-[#88C0D0] transition hover:bg-[#88C0D0]/18 disabled:opacity-40"
+                className={`rounded-full border px-4 py-2 text-xs font-bold transition disabled:opacity-40 ${
+                  selectedOutputMissingFields.length > 0
+                    ? 'border-[#D08770]/45 bg-[#D08770]/14 text-[#FFD6C2] hover:bg-[#D08770]/22'
+                    : 'border-[#88C0D0]/35 bg-[#88C0D0]/10 text-[#88C0D0] hover:bg-[#88C0D0]/18'
+                }`}
               >
-                Apri email
+                {selectedOutputMissingFields.length > 0 ? `Completa campi (${selectedOutputMissingFields.length})` : 'Apri email'}
               </button>
             </div>
 
@@ -1279,6 +1511,118 @@ export default function AIOSPraticheAgenziaPage() {
           </aside>
         </section>
       </div>
+
+        {mailFieldsModalOutput ? (
+          <div className="fixed inset-0 z-[12000] grid place-items-center bg-black/72 px-4 py-6 backdrop-blur-sm">
+            <div className="max-h-[92vh] w-full max-w-6xl overflow-hidden rounded-[30px] border border-[#D08770]/35 bg-[#111827] shadow-[0_30px_120px_rgba(0,0,0,0.75)]">
+              <div className="flex items-start justify-between gap-4 border-b border-[#374151] bg-[#0B1220] px-5 py-4">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.28em] text-[#D08770]">
+                    Campi mancanti
+                  </p>
+                  <h3 className="mt-1 text-xl font-black text-white">
+                    Completa la mail prima dell’invio
+                  </h3>
+                  <p className="mt-1 text-xs leading-5 text-[#D1D5DB]/58">
+                    AI-OS ha preparato la bozza con i dati disponibili. Compila qui ciò che non è riuscito a recuperare dalla scheda o dai documenti caricati.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMailFieldsModalOutput(null)
+                    setModalFieldValues({})
+                  }}
+                  className="rounded-full border border-[#BF616A]/35 bg-[#BF616A]/10 px-4 py-2 text-xs font-bold text-[#FFCCD2] transition hover:bg-[#BF616A]/20"
+                >
+                  Chiudi
+                </button>
+              </div>
+
+              <div className="grid max-h-[calc(92vh-88px)] gap-0 overflow-y-auto xl:grid-cols-[420px_minmax(0,1fr)]">
+                <section className="border-b border-[#374151] p-5 xl:border-b-0 xl:border-r">
+                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#D08770]/85">
+                    Da compilare
+                  </p>
+
+                  {modalMissingFields.length > 0 ? (
+                    <div className="mt-4 grid gap-3">
+                      {modalMissingFields.map((field) => (
+                        <label key={field.key} className="block">
+                          <span className="mb-1 block text-[11px] font-bold uppercase tracking-[0.14em] text-[#D1D5DB]/55">
+                            {field.label}
+                          </span>
+
+                          {field.multiline ? (
+                            <textarea
+                              value={modalFieldValues[field.key] ?? ''}
+                              onChange={(event) => setModalFieldValues((current) => ({
+                                ...current,
+                                [field.key]: event.target.value,
+                              }))}
+                              className="min-h-[112px] w-full resize-y rounded-2xl border border-[#D08770]/35 bg-[#0B1220] px-3 py-2 text-xs leading-5 text-white outline-none transition placeholder:text-[#6B7280] focus:border-[#D08770]/70"
+                              placeholder="Inserisci dato mancante..."
+                            />
+                          ) : (
+                            <input
+                              value={modalFieldValues[field.key] ?? ''}
+                              onChange={(event) => setModalFieldValues((current) => ({
+                                ...current,
+                                [field.key]: event.target.value,
+                              }))}
+                              className="w-full rounded-2xl border border-[#D08770]/35 bg-[#0B1220] px-3 py-2 text-xs font-semibold text-white outline-none transition placeholder:text-[#6B7280] focus:border-[#D08770]/70"
+                              placeholder="Inserisci dato mancante..."
+                            />
+                          )}
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="mt-4 rounded-2xl border border-[#A3BE8C]/30 bg-[#A3BE8C]/10 p-4 text-sm text-[#A3BE8C]">
+                      Tutti i campi necessari risultano compilati.
+                    </div>
+                  )}
+
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={saveMissingMailFields}
+                      className="rounded-full border border-[#A3BE8C]/35 bg-[#A3BE8C]/10 px-4 py-2 text-xs font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/18"
+                    >
+                      Salva campi
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={openEmailFromModal}
+                      className="rounded-full border border-[#88C0D0]/35 bg-[#88C0D0]/10 px-4 py-2 text-xs font-bold text-[#88C0D0] transition hover:bg-[#88C0D0]/18"
+                    >
+                      Apri email
+                    </button>
+                  </div>
+                </section>
+
+                <section className="p-5">
+                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#8FBCBB]/70">
+                    Anteprima mail
+                  </p>
+
+                  <textarea
+                    readOnly
+                    value={
+                      mailFieldsModalOutput.startsWith('mail-')
+                        ? buildPracticeEmailDraft(propertyData, practiceState, mailFieldsModalOutput, generalNote, mailFieldOverrides)
+                        : outputText
+                    }
+                    className="mt-4 min-h-[620px] w-full resize-y rounded-2xl border border-[#374151] bg-[#0B1220] p-4 font-mono text-xs leading-5 text-[#E5E7EB] outline-none"
+                  />
+                </section>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
     </main>
   )
 }
