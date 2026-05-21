@@ -48,6 +48,15 @@ type PracticeOutput =
   | 'mail-amministratore'
   | 'mail-notaio'
 
+type PracticeContacts = {
+  visureEmail: string
+  technicianEmail: string
+  apeEmail: string
+  condominiumEmail: string
+  notaryEmail: string
+  ownerEmail: string
+}
+
 const PRACTICE_OUTPUT_BUTTONS: Array<{ id: PracticeOutput; label: string }> = [
   { id: 'pack', label: 'Pacchetto' },
   { id: 'owner', label: 'Proprietario' },
@@ -215,6 +224,66 @@ function ownerName(owner: Record<string, any> | null | undefined) {
     owner.owner_name,
     [owner.first_name, owner.last_name].filter(Boolean).join(' '),
   )
+}
+
+function createEmptyPracticeContacts(): PracticeContacts {
+  return {
+    visureEmail: '',
+    technicianEmail: '',
+    apeEmail: '',
+    condominiumEmail: '',
+    notaryEmail: '',
+    ownerEmail: '',
+  }
+}
+
+function practiceContactsStorageKey(propertyId?: string) {
+  return propertyId ? `aios-practice-contacts:${propertyId}` : 'aios-practice-contacts:global'
+}
+
+function loadPracticeContacts(propertyId?: string): PracticeContacts {
+  const fallback = createEmptyPracticeContacts()
+
+  if (typeof window === 'undefined') return fallback
+
+  const keys = [
+    practiceContactsStorageKey(propertyId),
+    practiceContactsStorageKey(),
+  ]
+
+  for (const key of keys) {
+    const raw = localStorage.getItem(key)
+    if (!raw) continue
+
+    try {
+      return {
+        ...fallback,
+        ...JSON.parse(raw),
+      }
+    } catch {
+      // ignoro JSON rotto
+    }
+  }
+
+  return fallback
+}
+
+function getRecipientForPracticeOutput(output: PracticeOutput, contacts: PracticeContacts) {
+  if (output === 'owner') return contacts.ownerEmail
+  if (output === 'technician' || output === 'mail-geometra') return contacts.technicianEmail
+  if (
+    output === 'mail-visura-catastale' ||
+    output === 'mail-planimetria-catastale' ||
+    output === 'mail-visura-ipotecaria'
+  ) {
+    return contacts.visureEmail
+  }
+
+  if (output === 'mail-ape') return contacts.apeEmail || contacts.technicianEmail
+  if (output === 'mail-amministratore') return contacts.condominiumEmail
+  if (output === 'mail-notaio') return contacts.notaryEmail
+
+  return ''
 }
 
 function buildInitialPracticeState(property: Record<string, any> | null): PracticeState {
@@ -633,15 +702,21 @@ function buildPracticeEmailDraft(
   ].join('\n')
 }
 
-function buildPracticeMailTo(data: ToolPropertyData | null, output: PracticeOutput, body: string) {
+function buildPracticeMailTo(
+  data: ToolPropertyData | null,
+  output: PracticeOutput,
+  body: string,
+  contacts: PracticeContacts,
+) {
   const subject = buildPracticeEmailSubject(data, output)
+  const recipient = getRecipientForPracticeOutput(output, contacts)
 
   const cleanBody = body
     .replace(/^A:.*\n\n/iu, '')
     .replace(/^Oggetto:.*\n\n/iu, '')
     .replace(/^Testo mail:\n\n/iu, '')
 
-  return `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(cleanBody)}`
+  return `mailto:${encodeURIComponent(recipient)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(cleanBody)}`
 }
 
 export default function AIOSPraticheAgenziaPage() {
@@ -655,6 +730,7 @@ export default function AIOSPraticheAgenziaPage() {
   const [practiceState, setPracticeState] = useState<PracticeState>({})
   const [selectedOutput, setSelectedOutput] = useState<PracticeOutput>('pack')
   const [generalNote, setGeneralNote] = useState('')
+  const [practiceContacts, setPracticeContacts] = useState<PracticeContacts>(() => createEmptyPracticeContacts())
   const [notice, setNotice] = useState('')
 
   const filteredFolders = useMemo(() => {
@@ -735,6 +811,15 @@ export default function AIOSPraticheAgenziaPage() {
       const localKey = `aios-pratiche:${propertyId}`
       const saved = localStorage.getItem(localKey)
 
+      const loadedContacts = loadPracticeContacts(propertyId)
+      const owner = nextData.owners?.[0] ?? null
+      const ownerEmail = pickFirst(owner?.email, owner?.mail)
+
+      setPracticeContacts({
+        ...loadedContacts,
+        ownerEmail: loadedContacts.ownerEmail || ownerEmail,
+      })
+
       setPropertyData(nextData)
 
       if (saved) {
@@ -742,6 +827,12 @@ export default function AIOSPraticheAgenziaPage() {
           const parsed = JSON.parse(saved)
           setPracticeState(parsed.practiceState ?? buildInitialPracticeState(nextData.property))
           setGeneralNote(parsed.generalNote ?? '')
+          if (parsed.practiceContacts) {
+            setPracticeContacts((current) => ({
+              ...current,
+              ...parsed.practiceContacts,
+            }))
+          }
           setNotice('Pratica caricata con stato salvato localmente.')
         } catch {
           setPracticeState(buildInitialPracticeState(nextData.property))
@@ -756,6 +847,7 @@ export default function AIOSPraticheAgenziaPage() {
     } catch (error) {
       setPropertyData(null)
       setPracticeState({})
+                    setPracticeContacts(createEmptyPracticeContacts())
       setGeneralNote('')
       setNotice(error instanceof Error ? error.message : 'Errore caricamento dati immobile')
     } finally {
@@ -773,6 +865,25 @@ export default function AIOSPraticheAgenziaPage() {
     }))
   }
 
+  function updatePracticeContact(key: keyof PracticeContacts, value: string) {
+    setPracticeContacts((current) => ({
+      ...current,
+      [key]: value,
+    }))
+  }
+
+  function savePracticeContacts() {
+    const key = practiceContactsStorageKey(selectedPropertyId || undefined)
+
+    localStorage.setItem(key, JSON.stringify(practiceContacts))
+
+    if (!selectedPropertyId) {
+      localStorage.setItem(practiceContactsStorageKey(), JSON.stringify(practiceContacts))
+    }
+
+    setNotice('Contatti pratica salvati.')
+  }
+
   function saveLocal() {
     if (!selectedPropertyId) {
       setNotice('Seleziona prima un immobile.')
@@ -785,6 +896,7 @@ export default function AIOSPraticheAgenziaPage() {
         savedAt: new Date().toISOString(),
         practiceState,
         generalNote,
+        practiceContacts,
       }),
     )
 
@@ -811,7 +923,14 @@ export default function AIOSPraticheAgenziaPage() {
       return
     }
 
-    window.location.href = buildPracticeMailTo(propertyData, selectedOutput, outputText)
+    const recipient = getRecipientForPracticeOutput(selectedOutput, practiceContacts)
+
+    if (!recipient) {
+      setNotice('Inserisci prima il destinatario nella rubrica pratica.')
+      return
+    }
+
+    window.location.href = buildPracticeMailTo(propertyData, selectedOutput, outputText, practiceContacts)
   }
 
   function downloadTxt() {
@@ -1064,6 +1183,50 @@ export default function AIOSPraticheAgenziaPage() {
                   {label}
                 </button>
               ))}
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-[#8FBCBB]/15 bg-[#111827]/70 p-4">
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#8FBCBB]/65">
+                    Rubrica pratica
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-[#D1D5DB]/52">
+                    Questi indirizzi vengono usati dal tasto Apri email.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={savePracticeContacts}
+                  className="rounded-full border border-[#A3BE8C]/35 bg-[#A3BE8C]/10 px-3 py-1.5 text-[11px] font-bold text-[#A3BE8C] transition hover:bg-[#A3BE8C]/18"
+                >
+                  Salva contatti
+                </button>
+              </div>
+
+              <div className="grid gap-2">
+                {([
+                  ['visureEmail', 'Servizio visure / catasto'],
+                  ['technicianEmail', 'Geometra / tecnico'],
+                  ['apeEmail', 'Tecnico APE'],
+                  ['condominiumEmail', 'Amministratore condominio'],
+                  ['notaryEmail', 'Notaio'],
+                  ['ownerEmail', 'Proprietario'],
+                ] as Array<[keyof PracticeContacts, string]>).map(([key, label]) => (
+                  <label key={key} className="block">
+                    <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.14em] text-[#D1D5DB]/45">
+                      {label}
+                    </span>
+                    <input
+                      value={practiceContacts[key]}
+                      onChange={(event) => updatePracticeContact(key, event.target.value)}
+                      className="w-full rounded-2xl border border-[#374151] bg-[#0B1220] px-3 py-2 text-xs font-semibold text-white outline-none transition placeholder:text-[#6B7280] focus:border-[#8FBCBB]/55"
+                      placeholder="email@dominio.it"
+                    />
+                  </label>
+                ))}
+              </div>
             </div>
 
             <label className="mt-4 block">
