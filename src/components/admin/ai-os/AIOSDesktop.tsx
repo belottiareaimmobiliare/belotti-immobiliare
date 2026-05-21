@@ -5982,7 +5982,7 @@ export default function AIOSDesktop() {
                 </div>
 
                 <div className="ml-5 mr-auto hidden w-[min(520px,38vw)] md:block">
-                  <div className="flex h-10 items-center gap-3 rounded-full border border-[#8FBCBB]/35 bg-[#202632]/84 px-3 shadow-[0_0_18px_rgba(143,188,187,0.10)] transition focus-within:border-[#A3BE8C]/75 focus-within:bg-[#1B202B]/95 focus-within:shadow-[0_0_24px_rgba(163,190,140,0.18)]">
+                  <div className="flex min-w-[320px] max-w-[560px] flex-1 items-center gap-3 rounded-full border border-[#263241]/90 bg-[#0B1018]/96 px-4 py-2 shadow-[0_12px_34px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(236,239,244,0.035)] transition focus-within:border-[#8FBCBB]/55 focus-within:bg-[#0B1018]/96">
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#A3BE8C]/35 bg-[#A3BE8C]/12 text-[11px] font-bold text-[#A3BE8C]">
                       ⌕
                     </span>
@@ -5990,7 +5990,7 @@ export default function AIOSDesktop() {
                     <input
                       value={folderSearchQuery}
                       onChange={(event) => setFolderSearchQuery(event.target.value)}
-                      className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#E5E9F0] outline-none placeholder:text-[#D8DEE9]/38"
+                      className="min-w-0 flex-1 appearance-none border-0 bg-transparent p-0 font-mono text-[12px] font-semibold tracking-[0.04em] text-[#D8DEE9] outline-none ring-0 placeholder:text-[#6B7280] focus:border-0 focus:bg-transparent focus:outline-none focus:ring-0"
                       placeholder="Titolo o codice immobile..."
                     />
 
