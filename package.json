@@ -31,7 +31,8 @@
     "drive:immobili:duplicates:quarantine": "node scripts/cleanup-drive-immobili-duplicates.mjs --confirm=MOVE_DUPLICATE_DRIVE_FOLDERS",
     "audit:portali:area": "node scripts/audit-area-portali.mjs",
     "audit:portali:compare": "node scripts/compare-portali-sito.mjs",
-    "audit:portali:features": "node scripts/audit-portali-features.mjs"
+    "audit:portali:features": "node scripts/audit-portali-features.mjs",
+    "audit:portali:import-plan": "node scripts/prepare-portali-import-plan.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
