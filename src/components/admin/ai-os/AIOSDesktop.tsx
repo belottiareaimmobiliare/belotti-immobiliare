@@ -3749,13 +3749,17 @@ export default function AIOSDesktop() {
         icon: '🏛️',
         description: 'Visure, planimetrie, APE, conformità, documenti e richieste a tecnico/proprietario.',
         href: `/admin/ai-os/strumenti/pratiche${propertyQuery}`,
+        external: false,
+        disabled: false,
         tone: 'border-[#A3BE8C]/30 bg-[#A3BE8C]/10 hover:bg-[#A3BE8C]/16',
       },
       {
         title: 'Moduli compilabili',
         icon: '🧾',
-        description: 'Acquisisce dati immobile/proprietario, permette modifica manuale, revisione e PDF finale.',
+        description: 'Acquisisce dati immobile/proprietario, modifica manuale, revisione e PDF finale.',
         href: `/admin/ai-os/strumenti/moduli${propertyQuery}`,
+        external: false,
+        disabled: false,
         tone: 'border-[#EBCB8B]/30 bg-[#EBCB8B]/10 hover:bg-[#EBCB8B]/16',
       },
       {
@@ -3763,6 +3767,8 @@ export default function AIOSDesktop() {
         icon: '📄',
         description: 'Incarichi, schede raccolta dati, checklist, testi pronti e bozze operative.',
         href: `/admin/ai-os/strumenti/documenti${propertyQuery}`,
+        external: false,
+        disabled: false,
         tone: 'border-[#88C0D0]/30 bg-[#88C0D0]/10 hover:bg-[#88C0D0]/16',
       },
       {
@@ -3770,52 +3776,70 @@ export default function AIOSDesktop() {
         icon: '📣',
         description: 'Testi, hashtag Belotti, immagini Facebook, Instagram e TikTok.',
         href: `/admin/ai-os/strumenti/social${propertyQuery}`,
+        external: false,
+        disabled: false,
         tone: 'border-[#B48EAD]/30 bg-[#B48EAD]/10 hover:bg-[#B48EAD]/16',
+      },
+      {
+        title: 'App Center strumenti',
+        icon: '🧰',
+        description: 'Apre tutti gli strumenti AI-OS disponibili per l’agenzia.',
+        href: `/admin/ai-os/strumenti${propertyQuery}`,
+        external: false,
+        disabled: false,
+        tone: 'border-[#5E81AC]/30 bg-[#5E81AC]/10 hover:bg-[#5E81AC]/16',
+      },
+      {
+        title: 'Scheda immobile',
+        icon: '🏠',
+        description: 'Apre la scheda amministrativa dell’immobile selezionato.',
+        href: activeFolderId ? `/admin/immobili/${activeFolderId}` : '/admin/immobili',
+        external: false,
+        disabled: false,
+        tone: 'border-[#D08770]/30 bg-[#D08770]/10 hover:bg-[#D08770]/16',
+      },
+      {
+        title: 'Apri Drive reale',
+        icon: '📁',
+        description: 'Apre la cartella Drive reale in una nuova scheda, con permessi Google.',
+        href: rawFolderUrl || '#',
+        external: true,
+        disabled: !rawFolderId,
+        tone: 'border-[#8AB4F8]/30 bg-[#8AB4F8]/10 hover:bg-[#8AB4F8]/16',
       },
     ]
 
     return (
       <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-[#3B4252]/70 bg-[#070A10]/94 shadow-[0_28px_120px_rgba(0,0,0,0.72),inset_0_1px_0_rgba(236,239,244,0.045)]">
-        <div className="flex shrink-0 items-center gap-3 border-b border-white/10 bg-[#0B1018]/96 px-4 py-3">
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#8FBCBB]/75">
-              Immobile selezionato
-            </p>
+        <div className="shrink-0 border-b border-white/10 bg-[#0B1018]/96 px-4 py-3">
+          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#8FBCBB]/75">
+            Immobile selezionato
+          </p>
+
+          <div className="mt-1 flex flex-wrap items-center gap-3">
             <h3 className="truncate text-base font-semibold text-white">
               {rawTitle}
             </h3>
+
+            {rawFolderId ? (
+              <a
+                href={rawFolderUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full bg-[#8AB4F8] px-4 py-2 text-xs font-black text-[#202124] transition hover:brightness-110"
+              >
+                Apri in Drive
+              </a>
+            ) : (
+              <span className="rounded-full border border-[#4C566A]/70 bg-[#111827] px-4 py-2 text-xs font-black text-[#D8DEE9]/35">
+                Drive non configurato
+              </span>
+            )}
           </div>
-
-          <button
-            type="button"
-            onClick={() => loadDriveFolder(activeFolderId)}
-            className="rounded-full border border-[#8FBCBB]/30 bg-[#8FBCBB]/10 px-3 py-2 text-xs font-bold text-[#8FBCBB] transition hover:bg-[#8FBCBB]/18"
-          >
-            Aggiorna
-          </button>
-
-          {rawFolderId ? (
-            <a
-              href={rawFolderUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full bg-[#8AB4F8] px-4 py-2 text-xs font-black text-[#202124] transition hover:brightness-110"
-            >
-              Apri in Drive
-            </a>
-          ) : (
-            <button
-              type="button"
-              disabled
-              className="rounded-full border border-[#4C566A]/70 bg-[#111827] px-4 py-2 text-xs font-black text-[#D8DEE9]/35"
-            >
-              Drive non configurato
-            </button>
-          )}
         </div>
 
         <div className="grid min-h-[620px] flex-1 place-items-center bg-[#0B1018] p-6">
-          <div className="w-full max-w-5xl rounded-[30px] border border-[#8FBCBB]/18 bg-[#111827]/92 p-6 shadow-2xl shadow-black/35">
+          <div className="w-full max-w-6xl rounded-[30px] border border-[#8FBCBB]/18 bg-[#111827]/92 p-6 shadow-2xl shadow-black/35">
             <p className="text-xs font-bold uppercase tracking-[0.34em] text-[#8FBCBB]/70">
               Strumenti agenzia
             </p>
@@ -3824,19 +3848,27 @@ export default function AIOSDesktop() {
               Lavora sull’immobile selezionato
             </h3>
 
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-[#D1D5DB]/64">
-              Drive si apre nel suo ambiente reale dal tasto in alto. Qui sotto trovi le funzioni operative AI-OS collegate alla cartella immobile selezionata sulla sinistra.
+            <p className="mt-2 max-w-4xl text-sm leading-6 text-[#D1D5DB]/64">
+              Drive si apre nel suo ambiente reale dal tasto accanto al nome immobile. Qui sotto trovi tutte le funzioni operative AI-OS collegate alla cartella selezionata sulla sinistra.
             </p>
 
             <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               {agencyButtons.map((button) => (
                 <button
-                  key={button.href}
+                  key={button.title}
                   type="button"
+                  disabled={Boolean(button.disabled)}
                   onClick={() => {
+                    if (button.disabled) return
+
+                    if (button.external) {
+                      window.open(button.href, '_blank', 'noopener,noreferrer')
+                      return
+                    }
+
                     window.location.href = button.href
                   }}
-                  className={`rounded-3xl border p-5 text-left transition hover:-translate-y-0.5 ${button.tone}`}
+                  className={`rounded-3xl border p-5 text-left transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 ${button.tone}`}
                 >
                   <span className="text-3xl">{button.icon}</span>
                   <span className="mt-4 block text-base font-black text-white">
@@ -3851,7 +3883,7 @@ export default function AIOSDesktop() {
 
             {!rawFolderId ? (
               <div className="mt-5 rounded-2xl border border-[#EBCB8B]/25 bg-[#EBCB8B]/10 px-4 py-3 text-xs leading-5 text-[#EBCB8B]">
-                La cartella Drive di questo immobile non risulta configurata. Puoi comunque usare gli strumenti AI-OS, ma il tasto “Apri in Drive” verrà abilitato solo dopo il collegamento della cartella.
+                La cartella Drive di questo immobile non risulta configurata. Puoi comunque usare gli strumenti AI-OS; il tasto Drive verrà abilitato dopo il collegamento della cartella.
               </div>
             ) : null}
           </div>
@@ -3928,13 +3960,7 @@ export default function AIOSDesktop() {
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => activeFolderId && loadDocumentRequests(activeFolderId)}
-                  className="rounded-full border border-[#8FBCBB]/25 bg-[#A3BE8C]/10 px-3 py-1.5 text-xs font-semibold text-[#E5E9F0] transition hover:bg-[#A3BE8C]/18"
-                >
-                  Aggiorna
-                </button>
+                
               </div>
 
               {documentRequestsLoading ? (
@@ -5229,13 +5255,7 @@ export default function AIOSDesktop() {
                 />
               </label>
 
-              <button
-                type="button"
-                onClick={createTxtFile}
-                className="rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-xs font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.18)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
-              >
-                + Nuovo TXT
-              </button>
+              
 
               <button
                 type="button"
@@ -5785,15 +5805,7 @@ export default function AIOSDesktop() {
                     <input type="file" multiple accept={getUploadAccept(activeSection)} className="hidden" onChange={handleFileInput} />
                   </label>
 
-                  <button
-                    type="button"
-                    onClick={createTxtFile}
-                    className={`rounded-2xl border border-[#8FBCBB]/25 bg-[#A3BE8C]/10 px-3 py-3 text-sm font-semibold text-[#D8DEE9] transition active:scale-[0.98] ${
-                      activeSection === 'images' ? 'hidden' : ''
-                    }`}
-                  >
-                    Nuovo TXT
-                  </button>
+                  
 
                   <label className="flex cursor-pointer items-center justify-center rounded-2xl border border-[#8FBCBB]/25 bg-[#2E3440]/30 px-3 py-3 text-sm font-semibold text-[#D8DEE9] transition active:scale-[0.98]">
                     Fotocamera
@@ -6009,7 +6021,7 @@ export default function AIOSDesktop() {
                 </button>
               </div>
 
-              <div className="grid h-[calc(100%-53px)] grid-cols-1 overflow-hidden lg:grid-cols-[320px_minmax(0,1fr)_390px]">
+              <div className="grid h-[calc(100%-53px)] grid-cols-1 overflow-hidden lg:grid-cols-[320px_minmax(0,1fr)]">
                 <aside className="border-b border-[#8FBCBB]/10 bg-[#1F2530]/72 p-4 lg:border-b-0 lg:border-r flex min-h-0 flex-col overflow-hidden">
                   <div className="mb-4 flex items-center justify-between">
                     <div>
@@ -6242,15 +6254,7 @@ export default function AIOSDesktop() {
                         Aggiorna
                       </button>
 
-                      <button
-                        type="button"
-                        onClick={createTxtFile}
-                        className={`rounded-full border border-[#A3BE8C]/45 bg-[#A3BE8C]/18 px-4 py-2 text-sm font-semibold text-[#DFF2D6] shadow-[0_0_18px_rgba(163,190,140,0.14)] transition hover:bg-[#A3BE8C]/30 hover:text-white ${
-                          activeSection === 'images' ? 'hidden' : ''
-                        }`}
-                      >
-                        + Nuovo TXT
-                      </button>
+                      
                     </div>
                   </div>
 
@@ -6299,13 +6303,7 @@ export default function AIOSDesktop() {
                           />
                         </label>
 
-                        <button
-                          type="button"
-                          onClick={createTxtFile}
-                          className="rounded-full border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-2 text-sm font-bold text-[#1F2A24] shadow-[0_0_18px_rgba(163,190,140,0.24)] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
-                        >
-                          + Nuovo TXT
-                        </button>
+                        
 
                         <button
                           type="button"
@@ -6367,45 +6365,7 @@ export default function AIOSDesktop() {
                   )}
                 </section>
 
-                <aside className="min-h-0 overflow-auto border-t border-[#8FBCBB]/10 bg-[#1E2430]/74 p-4 lg:border-l lg:border-t-0">
-                  <div className="mb-4">
-                    <p className="text-xs uppercase tracking-[0.32em] text-[#8FBCBB]/70">
-                      Editor TXT
-                    </p>
-                    <h3 className="truncate text-lg font-semibold text-white">
-                      {selectedTxt?.name ?? 'Nessun file aperto'}
-                    </h3>
-                  </div>
-
-                  {selectedTxt ? (
-                    <div className="space-y-3">
-                      <textarea
-                        value={txtDraft}
-                        onChange={(event) => setTxtDraft(event.target.value)}
-                        className="min-h-[330px] w-full resize-none rounded-2xl border border-[#8FBCBB]/15 bg-[#2E3440]/80 p-4 font-mono text-sm text-[#D8DEE9] outline-none transition placeholder:text-[#D8DEE9]/30 focus:border-[#B48EAD]/60"
-                        placeholder="Scrivi le note del fotografo..."
-                      />
-
-                      <button
-                        type="button"
-                        onClick={saveTxtDraft}
-                        className="w-full rounded-2xl border border-[#A3BE8C]/55 bg-[#A3BE8C] px-4 py-3 font-semibold text-[#1F2A24] transition hover:bg-[#1F2A24] hover:text-[#A3BE8C] hover:border-[#A3BE8C]/75"
-                      >
-                        Salva TXT
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="rounded-2xl border border-[#8FBCBB]/10 bg-[#2E3440]/25 p-4 text-sm text-[#D8DEE9]/60">
-                      Apri un file `.txt` dalla cartella per modificarlo.
-                    </div>
-                  )}
-
-                  <div className="mt-4 rounded-2xl border border-[#8FBCBB]/10 bg-[#A3BE8C]/5 p-4 text-xs leading-relaxed text-[#D8DEE9]/65">
-                    Sistema reale:
-                    <br />
-                    Supabase Storage, quote DB, signed URL, TXT nel database.
-                  </div>
-                </aside>
+                
               </div>
             </section>
           ) : null}
