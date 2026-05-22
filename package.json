@@ -36,7 +36,10 @@
     "audit:portali:create-drafts": "node scripts/create-portali-drafts.mjs",
     "audit:portali:images": "node scripts/audit-portali-images.mjs",
     "audit:portali:images-by-ref": "node scripts/match-portali-images-to-refs.mjs",
-    "audit:portali:import-ok-images": "node scripts/import-portali-ok-images.mjs"
+    "audit:portali:import-ok-images": "node scripts/import-portali-ok-images.mjs",
+    "audit:portali:descriptions": "node scripts/audit-portali-descriptions.mjs",
+    "audit:portali:detail-descriptions": "node scripts/audit-portali-detail-descriptions.mjs",
+    "audit:portali:clean-descriptions": "node scripts/generate-portali-clean-descriptions.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
