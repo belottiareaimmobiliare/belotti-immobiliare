@@ -48,7 +48,8 @@
     "audit:portali:export-manual-descriptions": "node scripts/export-portali-manual-descriptions.mjs",
     "audit:portali:apply-manual-descriptions": "node scripts/apply-portali-manual-descriptions.mjs",
     "audit:immobiliare:capture-details": "node scripts/capture-immobiliare-detail-pages.mjs",
-    "audit:immobiliare:extract-saved-descriptions": "node scripts/extract-immobiliare-saved-detail-descriptions.mjs"
+    "audit:immobiliare:extract-saved-descriptions": "node scripts/extract-immobiliare-saved-detail-descriptions.mjs",
+    "audit:portali:apply-final-descriptions": "node scripts/apply-final-portali-descriptions.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
