@@ -33,7 +33,10 @@
     "audit:portali:compare": "node scripts/compare-portali-sito.mjs",
     "audit:portali:features": "node scripts/audit-portali-features.mjs",
     "audit:portali:import-plan": "node scripts/prepare-portali-import-plan.mjs",
-    "audit:portali:create-drafts": "node scripts/create-portali-drafts.mjs"
+    "audit:portali:create-drafts": "node scripts/create-portali-drafts.mjs",
+    "audit:portali:images": "node scripts/audit-portali-images.mjs",
+    "audit:portali:images-by-ref": "node scripts/match-portali-images-to-refs.mjs",
+    "audit:portali:import-ok-images": "node scripts/import-portali-ok-images.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
