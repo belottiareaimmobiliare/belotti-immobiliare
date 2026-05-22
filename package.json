@@ -32,7 +32,8 @@
     "audit:portali:area": "node scripts/audit-area-portali.mjs",
     "audit:portali:compare": "node scripts/compare-portali-sito.mjs",
     "audit:portali:features": "node scripts/audit-portali-features.mjs",
-    "audit:portali:import-plan": "node scripts/prepare-portali-import-plan.mjs"
+    "audit:portali:import-plan": "node scripts/prepare-portali-import-plan.mjs",
+    "audit:portali:create-drafts": "node scripts/create-portali-drafts.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
