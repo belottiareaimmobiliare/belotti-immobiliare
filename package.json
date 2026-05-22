@@ -39,7 +39,16 @@
     "audit:portali:import-ok-images": "node scripts/import-portali-ok-images.mjs",
     "audit:portali:descriptions": "node scripts/audit-portali-descriptions.mjs",
     "audit:portali:detail-descriptions": "node scripts/audit-portali-detail-descriptions.mjs",
-    "audit:portali:clean-descriptions": "node scripts/generate-portali-clean-descriptions.mjs"
+    "audit:portali:clean-descriptions": "node scripts/generate-portali-clean-descriptions.mjs",
+    "audit:portali:real-descriptions": "node scripts/extract-portali-real-descriptions.mjs",
+    "audit:portali:browser-descriptions": "node scripts/audit-portali-browser-descriptions.mjs",
+    "audit:portali:descriptions-by-id": "node scripts/extract-portali-descriptions-by-id.mjs",
+    "audit:portali:debug-id-segments": "node scripts/debug-portali-id-segments.mjs",
+    "audit:portali:casa-descriptions-strict": "node scripts/extract-casa-strict-descriptions.mjs",
+    "audit:portali:export-manual-descriptions": "node scripts/export-portali-manual-descriptions.mjs",
+    "audit:portali:apply-manual-descriptions": "node scripts/apply-portali-manual-descriptions.mjs",
+    "audit:immobiliare:capture-details": "node scripts/capture-immobiliare-detail-pages.mjs",
+    "audit:immobiliare:extract-saved-descriptions": "node scripts/extract-immobiliare-saved-detail-descriptions.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
