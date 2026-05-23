@@ -49,7 +49,14 @@
     "audit:portali:apply-manual-descriptions": "node scripts/apply-portali-manual-descriptions.mjs",
     "audit:immobiliare:capture-details": "node scripts/capture-immobiliare-detail-pages.mjs",
     "audit:immobiliare:extract-saved-descriptions": "node scripts/extract-immobiliare-saved-detail-descriptions.mjs",
-    "audit:portali:apply-final-descriptions": "node scripts/apply-final-portali-descriptions.mjs"
+    "audit:portali:apply-final-descriptions": "node scripts/apply-final-portali-descriptions.mjs",
+    "audit:portali:duplicates": "node scripts/audit-doppioni-immobili-importati.mjs",
+    "audit:old-0001-duplicate": "node scripts/audit-old-0001-duplicate.mjs",
+    "audit:fix-old-0001-duplicate": "node scripts/fix-old-0001-duplicate.mjs",
+    "audit:portali:remaining-duplicates": "node scripts/audit-doppioni-rimasti-portali.mjs",
+    "audit:portali:fix-titles-geo": "node scripts/fix-titoli-geo-doppioni-rimasti-portali.mjs",
+    "audit:portali:fix-geo-post-import": "node scripts/fix-geo-post-import-portali.mjs",
+    "audit:portali:duplicates-final": "node scripts/audit-doppioni-immobili-importati-final.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
