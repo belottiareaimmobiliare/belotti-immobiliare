@@ -56,7 +56,13 @@
     "audit:portali:remaining-duplicates": "node scripts/audit-doppioni-rimasti-portali.mjs",
     "audit:portali:fix-titles-geo": "node scripts/fix-titoli-geo-doppioni-rimasti-portali.mjs",
     "audit:portali:fix-geo-post-import": "node scripts/fix-geo-post-import-portali.mjs",
-    "audit:portali:duplicates-final": "node scripts/audit-doppioni-immobili-importati-final.mjs"
+    "audit:portali:duplicates-final": "node scripts/audit-doppioni-immobili-importati-final.mjs",
+    "audit:media:missing": "node scripts/audit-immobili-senza-foto.mjs",
+    "audit:media:missing-review": "node scripts/review-immagini-mancanti-portali.mjs",
+    "audit:media:manual-prepare": "node scripts/prepare-import-immagini-manuali-portali.mjs",
+    "audit:media:manual-import": "node scripts/import-immagini-manuali-portali.mjs",
+    "audit:portali:check-ref-links": "node scripts/check-ref-link-titoli-portali.mjs",
+    "audit:media:manual-ui": "node scripts/import-immagini-manuali-ui-portali.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
