@@ -8,6 +8,7 @@ const PORT = Number(process.env.PORT || 8787)
 const ROOT = path.resolve('tmp/area-portali-audit/immagini-manuali-da-importare')
 const INPUT = path.resolve('tmp/area-portali-audit/descrizioni-finali-portali-manuali.json')
 const BUCKET = 'property-media'
+const DELETE_FLAGS_FILE = path.resolve('tmp/area-portali-audit/immobili-da-eliminare.json')
 
 function loadEnvFile(file) {
   if (!fs.existsSync(file)) return
@@ -90,6 +91,41 @@ function text(res, status, body) {
     'cache-control': 'no-store',
   })
   res.end(body)
+}
+
+
+function readDeleteFlags() {
+  if (!fs.existsSync(DELETE_FLAGS_FILE)) return {}
+
+  try {
+    const parsed = JSON.parse(fs.readFileSync(DELETE_FLAGS_FILE, 'utf8'))
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
+function writeDeleteFlags(flags) {
+  fs.mkdirSync(path.dirname(DELETE_FLAGS_FILE), { recursive: true })
+  fs.writeFileSync(DELETE_FLAGS_FILE, JSON.stringify(flags, null, 2) + '\n', 'utf8')
+}
+
+function updateDeleteFlag(ref, deleteMarked, reason = '') {
+  const flags = readDeleteFlags()
+
+  if (deleteMarked) {
+    flags[ref] = {
+      ref,
+      delete_marked: true,
+      reason: compact(reason) || 'Da eliminare',
+      updated_at: new Date().toISOString(),
+    }
+  } else {
+    delete flags[ref]
+  }
+
+  writeDeleteFlags(flags)
+  return flags
 }
 
 async function readBody(req) {
@@ -353,6 +389,7 @@ async function importRef(job, ref, replace) {
 
 async function refsPayload() {
   const rows = rowsFromInput()
+  const deleteFlags = readDeleteFlags()
   const enriched = []
 
   for (const row of rows) {
@@ -478,6 +515,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
 }
 .card.has-local{border-color:rgba(34,197,94,.45)}
 .card.has-existing{border-color:rgba(245,158,11,.5)}
+.card.delete-marked{border-color:rgba(239,68,68,.75);background:rgba(127,29,29,.22)}
+.deletebox{margin-top:12px;padding:12px;border-radius:16px;border:1px solid rgba(239,68,68,.45);background:rgba(127,29,29,.18)}
+.deletebox label{display:flex;align-items:center;gap:8px;color:#fecaca;font-weight:950}
+.deletebox input[type="text"]{width:100%;margin-top:8px;padding:10px 12px;border-radius:12px;border:1px solid rgba(239,68,68,.35);background:#020617;color:#e5e7eb;outline:none}
+.deletehint{margin:8px 0 0;color:#fecaca;font-size:12px;line-height:1.35}
 .ref{
   display:inline-flex;
   padding:6px 10px;
@@ -650,6 +692,25 @@ async function pollJob(ref, jobId) {
   }
 }
 
+
+async function toggleDelete(ref) {
+  const checkbox = document.querySelector('#delete-' + ref)
+  const reasonInput = document.querySelector('#delete-reason-' + ref)
+  const deleteMarked = Boolean(checkbox?.checked)
+  const reason = reasonInput?.value || ''
+
+  await api('/api/flag-delete', {
+    method: 'POST',
+    body: JSON.stringify({
+      ref,
+      delete_marked: deleteMarked,
+      reason,
+    }),
+  })
+
+  await refresh()
+}
+
 function render(rows) {
   const grid = document.getElementById('grid')
 
@@ -660,6 +721,7 @@ function render(rows) {
       'card',
       hasLocal ? 'has-local' : '',
       hasExisting ? 'has-existing' : '',
+      row.delete_marked ? 'delete-marked' : '',
     ].join(' ')
 
     const fileList = row.local_files?.length
@@ -680,6 +742,21 @@ function render(rows) {
         <p class="small">Titolo Supabase: \${escapeHtml(row.site_title || '-')}</p>
         <p class="dir">\${escapeHtml(row.import_dir)}</p>
 
+        <div class="deletebox">
+          <label>
+            <input type="checkbox" id="delete-\${escapeHtml(row.ref)}" \${row.delete_marked ? 'checked' : ''} onchange="toggleDelete('\${escapeHtml(row.ref)}')">
+            Da eliminare
+          </label>
+          <input
+            type="text"
+            id="delete-reason-\${escapeHtml(row.ref)}"
+            value="\${escapeHtml(row.delete_reason || '')}"
+            placeholder="Motivo, esempio: annuncio non più presente / non vendibile / duplicato"
+            onblur="toggleDelete('\${escapeHtml(row.ref)}')"
+          >
+          <p class="deletehint">Se spuntato, questo REF non verrà importato. Dopo la revisione faremo report e cancellazione controllata.</p>
+        </div>
+
         <div class="actions">
           \${row.source_url ? '<a class="btn secondary" href="' + escapeHtml(row.source_url) + '" target="_blank" rel="noreferrer">Apri annuncio</a>' : '<button class="secondary" disabled>Link assente</button>'}
           <button class="secondary" onclick="openFolder('\${escapeHtml(row.ref)}')">Apri cartella importate</button>
@@ -697,8 +774,8 @@ function render(rows) {
             <input type="checkbox" id="replace-\${escapeHtml(row.ref)}">
             sostituisci immagini importate già presenti
           </label>
-          <button class="primary import-btn" onclick="startImport('\${escapeHtml(row.ref)}')" \${hasLocal ? '' : 'disabled'}>
-            Importa questo REF
+          <button class="primary import-btn" onclick="startImport('\${escapeHtml(row.ref)}')" \${row.delete_marked || !hasLocal ? 'disabled' : ''}>
+            \${row.delete_marked ? 'Segnato da eliminare' : 'Importa questo REF'}
           </button>
         </div>
 
