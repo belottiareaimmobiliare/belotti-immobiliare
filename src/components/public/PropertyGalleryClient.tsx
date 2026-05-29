@@ -25,6 +25,10 @@ export default function PropertyGalleryClient({ images }: Props) {
 
   const cover = images.find((item) => item.is_cover) || images[0] || null
   const coverIndex = cover ? images.findIndex((img) => img.id === cover.id) : 0
+  const previewThumbnails = images
+    .filter((image) => image.id !== cover?.id)
+    .slice(0, 3)
+  const remainingImagesCount = Math.max(images.length - 4, 0)
 
   return (
     <>
@@ -40,22 +44,33 @@ export default function PropertyGalleryClient({ images }: Props) {
           />
 
           <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-            {images
-              .filter((image) => image.id !== cover?.id)
-              .slice(0, 3)
-              .map((image) => {
-                const imageIndex = images.findIndex((img) => img.id === image.id)
+            {previewThumbnails.map((image, thumbnailIndex) => {
+              const imageIndex = images.findIndex((img) => img.id === image.id)
+              const showRemainingOverlay =
+                remainingImagesCount > 0 &&
+                thumbnailIndex === previewThumbnails.length - 1
 
-                return (
-                  <button
-                    key={image.id}
-                    type="button"
-                    onClick={() => openLightbox(imageIndex >= 0 ? imageIndex : 0)}
-                    className="min-h-[130px] rounded-[28px] border border-white/10 bg-cover bg-center text-left transition hover:opacity-95"
-                    style={{ backgroundImage: `url('${image.file_url}')` }}
-                  />
-                )
-              })}
+              return (
+                <button
+                  key={image.id}
+                  type="button"
+                  onClick={() => openLightbox(imageIndex >= 0 ? imageIndex : 0)}
+                  className="relative min-h-[130px] overflow-hidden rounded-[28px] border border-white/10 bg-cover bg-center text-left transition hover:opacity-95"
+                  style={{ backgroundImage: `url('${image.file_url}')` }}
+                  aria-label={
+                    showRemainingOverlay
+                      ? `Apri galleria: altre ${remainingImagesCount} immagini`
+                      : 'Apri immagine immobile'
+                  }
+                >
+                  {showRemainingOverlay ? (
+                    <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-4xl font-semibold tracking-[-0.04em] text-white shadow-2xl backdrop-blur-[2px]">
+                      +{remainingImagesCount}
+                    </span>
+                  ) : null}
+                </button>
+              )
+            })}
           </div>
         </div>
       ) : (
