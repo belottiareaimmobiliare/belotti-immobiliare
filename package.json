@@ -65,7 +65,8 @@
     "audit:media:manual-ui": "node scripts/import-immagini-manuali-ui-portali.mjs",
     "audit:media:manual-status": "node scripts/audit-stato-import-immagini-manuali-portali.mjs",
     "audit:portali:delete-flagged": "node scripts/delete-immobili-flaggati-portali.mjs",
-    "audit:portali:switch-status": "node scripts/switch-stati-immobili-importati-portali.mjs"
+    "audit:portali:switch-status": "node scripts/switch-stati-immobili-importati-portali.mjs",
+    "audit:portali:curate-published": "node scripts/curate-immobili-pubblicati-portali.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
