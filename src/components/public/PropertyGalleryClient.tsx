@@ -56,7 +56,11 @@ export default function PropertyGalleryClient({ images }: Props) {
                   type="button"
                   onClick={() => openLightbox(imageIndex >= 0 ? imageIndex : 0)}
                   className="relative min-h-[130px] overflow-hidden rounded-[28px] border border-white/10 bg-cover bg-center text-left transition hover:opacity-95"
-                  style={{ backgroundImage: `url('${image.file_url}')` }}
+                  style={{
+                    backgroundImage: showRemainingOverlay
+                      ? `linear-gradient(rgba(0, 0, 0, 0.68), rgba(0, 0, 0, 0.68)), url('${image.file_url}')`
+                      : `url('${image.file_url}')`,
+                  }}
                   aria-label={
                     showRemainingOverlay
                       ? `Apri galleria: altre ${remainingImagesCount} immagini`
@@ -64,7 +68,7 @@ export default function PropertyGalleryClient({ images }: Props) {
                   }
                 >
                   {showRemainingOverlay ? (
-                    <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-4xl font-semibold tracking-[-0.04em] text-white shadow-2xl backdrop-blur-[2px]">
+                    <span className="absolute inset-0 flex items-center justify-center text-4xl font-semibold tracking-[-0.04em] text-white drop-shadow-2xl">
                       +{remainingImagesCount}
                     </span>
                   ) : null}
