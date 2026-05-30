@@ -32,6 +32,17 @@ export default function PropertyGalleryClient({ images }: Props) {
 
   return (
     <>
+      <style jsx global>{`
+        .property-gallery-count-button .property-gallery-count-overlay,
+        .property-gallery-count-button:hover .property-gallery-count-overlay,
+        .property-gallery-count-button:focus .property-gallery-count-overlay,
+        .property-gallery-count-button:focus-visible .property-gallery-count-overlay,
+        .property-gallery-count-button:active .property-gallery-count-overlay {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+          text-shadow: 0 3px 18px rgba(0, 0, 0, 0.85) !important;
+        }
+      `}</style>
       {images.length > 0 ? (
         <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
           <button
@@ -55,7 +66,7 @@ export default function PropertyGalleryClient({ images }: Props) {
                   key={image.id}
                   type="button"
                   onClick={() => openLightbox(imageIndex >= 0 ? imageIndex : 0)}
-                  className="relative min-h-[130px] overflow-hidden rounded-[28px] border border-white/10 bg-cover bg-center text-left transition hover:opacity-95"
+                  className="property-gallery-count-button relative min-h-[130px] overflow-hidden rounded-[28px] border border-white/10 bg-cover bg-center text-left text-white transition hover:text-white hover:opacity-95 focus-visible:text-white active:text-white"
                   style={{
                     backgroundImage: showRemainingOverlay
                       ? `linear-gradient(rgba(0, 0, 0, 0.68), rgba(0, 0, 0, 0.68)), url('${image.file_url}')`
@@ -68,7 +79,13 @@ export default function PropertyGalleryClient({ images }: Props) {
                   }
                 >
                   {showRemainingOverlay ? (
-                    <span className="absolute inset-0 flex items-center justify-center text-4xl font-semibold tracking-[-0.04em] text-white drop-shadow-2xl">
+                    <span
+                      className="property-gallery-count-overlay absolute inset-0 flex items-center justify-center text-4xl font-semibold tracking-[-0.04em] !text-white drop-shadow-2xl"
+                      style={{
+                        color: '#ffffff',
+                        WebkitTextFillColor: '#ffffff',
+                      }}
+                    >
                       +{remainingImagesCount}
                     </span>
                   ) : null}
