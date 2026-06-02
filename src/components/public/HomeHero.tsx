@@ -242,13 +242,17 @@ export default function HomeHero() {
             <div className="absolute -left-8 top-10 h-32 w-32 rounded-full bg-white/18 blur-3xl" />
             <div className="absolute -right-6 bottom-4 h-40 w-40 rounded-full bg-white/12 blur-3xl" />
 
-            <div className="relative overflow-hidden rounded-[34px] border border-white/20 bg-white/[0.08] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.26)] backdrop-blur-md">
+            <Link
+              href="/immobili/mappa-area"
+              aria-label="Apri la mappa interattiva e disegna la tua area"
+              className="group relative block cursor-pointer overflow-hidden rounded-[34px] border border-white/20 bg-white/[0.08] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.26)] backdrop-blur-md transition duration-300 hover:border-white/35 hover:bg-white/[0.11] hover:shadow-[0_28px_90px_rgba(0,0,0,0.34)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/80"
+            >
               <div className="absolute inset-0 bg-white/[0.06]" />
 
               <div className="relative grid gap-4">
                 <div className="overflow-hidden rounded-[26px] border border-white/18">
                   <div
-                    className="h-[240px] w-full bg-cover bg-center"
+                    className="h-[240px] w-full bg-cover bg-center transition duration-300 group-hover:scale-[1.025]"
                     style={{ backgroundImage: "url('/images/bergamo-map.jpg')" }}
                   />
                 </div>
@@ -267,10 +271,7 @@ export default function HomeHero() {
                     </p>
                   </div>
 
-                  <Link
-                    href="/immobili/mappa-area"
-                    className="home-map-preview-card group relative overflow-hidden rounded-[26px] border border-white/18 bg-white/[0.10] shadow-[0_10px_28px_rgba(0,0,0,0.16)] backdrop-blur-sm transition hover:border-white/24"
-                  >
+                  <div className="home-map-preview-card relative overflow-hidden rounded-[26px] border border-white/18 bg-white/[0.10] shadow-[0_10px_28px_rgba(0,0,0,0.16)] backdrop-blur-sm transition group-hover:border-white/24">
                     <div
                       className="absolute inset-0 bg-cover bg-center opacity-100"
                       style={{ backgroundImage: "url('/images/bergamo-map.jpg')" }}
@@ -295,10 +296,10 @@ export default function HomeHero() {
                         Apri
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
