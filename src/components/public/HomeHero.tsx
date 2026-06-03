@@ -130,6 +130,45 @@ export default function HomeHero() {
 
   return (
     <section className="relative min-h-[92vh] overflow-hidden border-b border-white/10 bg-[#09101b]">
+      <style jsx global>{`
+        .home-map-link-stable,
+        .home-map-link-stable:hover,
+        .home-map-link-stable:focus,
+        .home-map-link-stable:focus-visible,
+        .home-map-link-stable:active {
+          background-color: rgba(255, 255, 255, 0.08) !important;
+          border-color: rgba(255, 255, 255, 0.20) !important;
+          box-shadow: 0 24px 80px rgba(0, 0, 0, 0.26) !important;
+          filter: none !important;
+          opacity: 1 !important;
+        }
+
+        .home-map-link-stable:hover .home-map-copy-card,
+        .home-map-link-stable:focus .home-map-copy-card,
+        .home-map-link-stable:active .home-map-copy-card {
+          background-color: rgba(255, 255, 255, 0.10) !important;
+          border-color: rgba(255, 255, 255, 0.18) !important;
+          filter: none !important;
+          opacity: 1 !important;
+        }
+
+        .home-map-link-stable:hover .home-map-cta-card,
+        .home-map-link-stable:focus .home-map-cta-card,
+        .home-map-link-stable:active .home-map-cta-card {
+          background-color: rgba(255, 255, 255, 0.10) !important;
+          border-color: rgba(255, 255, 255, 0.18) !important;
+          filter: none !important;
+          opacity: 1 !important;
+        }
+
+        .home-map-link-stable:hover .home-map-cta-frost,
+        .home-map-link-stable:focus .home-map-cta-frost,
+        .home-map-link-stable:active .home-map-cta-frost {
+          background-color: rgba(255, 255, 255, 0.68) !important;
+          filter: none !important;
+          opacity: 1 !important;
+        }
+      `}</style>
       <div className="absolute inset-0">
         <div className="absolute inset-0 overflow-hidden">
           {previous !== null && (
@@ -245,20 +284,20 @@ export default function HomeHero() {
             <Link
               href="/immobili/mappa-area"
               aria-label="Apri la mappa interattiva e disegna la tua area"
-              className="group relative block cursor-pointer overflow-hidden rounded-[34px] border border-white/20 bg-white/[0.08] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.26)] backdrop-blur-md transition duration-300 hover:border-white/35 hover:bg-white/[0.11] hover:shadow-[0_28px_90px_rgba(0,0,0,0.34)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/80"
+              className="home-map-link-stable group/map relative block cursor-pointer overflow-hidden rounded-[34px] border border-white/20 bg-white/[0.08] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.26)] backdrop-blur-md transition duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/80"
             >
               <div className="absolute inset-0 bg-white/[0.06]" />
 
               <div className="relative grid gap-4">
                 <div className="overflow-hidden rounded-[26px] border border-white/18">
                   <div
-                    className="h-[240px] w-full bg-cover bg-center transition duration-300 group-hover:scale-[1.025]"
+                    className="home-map-image-zoom h-[240px] w-full bg-cover bg-center transition-transform duration-500 ease-out group-hover/map:scale-[1.045]"
                     style={{ backgroundImage: "url('/images/bergamo-map.jpg')" }}
                   />
                 </div>
 
                 <div className="grid grid-cols-[1.1fr_0.9fr] gap-4">
-                  <div className="rounded-[24px] border border-white/18 bg-white/[0.10] p-4 backdrop-blur-sm">
+                  <div className="home-map-copy-card rounded-[24px] border border-white/18 bg-white/[0.10] p-4 backdrop-blur-sm">
                     <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-white/82 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
                       Ricerca su mappa
                     </p>
@@ -271,12 +310,12 @@ export default function HomeHero() {
                     </p>
                   </div>
 
-                  <div className="home-map-preview-card relative overflow-hidden rounded-[26px] border border-white/18 bg-white/[0.10] shadow-[0_10px_28px_rgba(0,0,0,0.16)] backdrop-blur-sm transition group-hover:border-white/24">
+                  <div className="home-map-cta-card relative overflow-hidden rounded-[26px] border border-white/18 bg-white/[0.10] shadow-[0_10px_28px_rgba(0,0,0,0.16)] backdrop-blur-sm transition">
                     <div
                       className="absolute inset-0 bg-cover bg-center opacity-100"
                       style={{ backgroundImage: "url('/images/bergamo-map.jpg')" }}
                     />
-                    <div className="absolute inset-0 bg-white/68 backdrop-blur-[4px]" />
+                    <div className="home-map-cta-frost absolute inset-0 bg-white/68 backdrop-blur-[4px]" />
                     <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.42)_0%,rgba(255,255,255,0.18)_100%)]" />
 
                     <div className="relative flex h-full min-h-[220px] flex-col justify-between p-5">
@@ -292,7 +331,7 @@ export default function HomeHero() {
                         </p>
                       </div>
 
-                      <div className="mt-6 inline-flex w-fit items-center rounded-full border border-black/10 bg-black px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(0,0,0,0.18)] transition group-hover:translate-x-0.5">
+                      <div className="mt-6 inline-flex w-fit items-center rounded-full border border-black/10 bg-black px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(0,0,0,0.18)] transition">
                         Apri
                       </div>
                     </div>
