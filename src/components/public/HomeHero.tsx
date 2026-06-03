@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   HOME_CONTENT_KEY,
   defaultHomeContent,
@@ -20,6 +21,7 @@ export default function HomeHero() {
   const [previous, setPrevious] = useState<number | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
   const [scrollY, setScrollY] = useState(0)
+  const router = useRouter()
 
   useEffect(() => {
     let active = true
@@ -130,45 +132,6 @@ export default function HomeHero() {
 
   return (
     <section className="relative min-h-[92vh] overflow-hidden border-b border-white/10 bg-[#09101b]">
-      <style jsx global>{`
-        .home-map-link-stable,
-        .home-map-link-stable:hover,
-        .home-map-link-stable:focus,
-        .home-map-link-stable:focus-visible,
-        .home-map-link-stable:active {
-          background-color: rgba(255, 255, 255, 0.08) !important;
-          border-color: rgba(255, 255, 255, 0.20) !important;
-          box-shadow: 0 24px 80px rgba(0, 0, 0, 0.26) !important;
-          filter: none !important;
-          opacity: 1 !important;
-        }
-
-        .home-map-link-stable:hover .home-map-copy-card,
-        .home-map-link-stable:focus .home-map-copy-card,
-        .home-map-link-stable:active .home-map-copy-card {
-          background-color: rgba(255, 255, 255, 0.10) !important;
-          border-color: rgba(255, 255, 255, 0.18) !important;
-          filter: none !important;
-          opacity: 1 !important;
-        }
-
-        .home-map-link-stable:hover .home-map-cta-card,
-        .home-map-link-stable:focus .home-map-cta-card,
-        .home-map-link-stable:active .home-map-cta-card {
-          background-color: rgba(255, 255, 255, 0.10) !important;
-          border-color: rgba(255, 255, 255, 0.18) !important;
-          filter: none !important;
-          opacity: 1 !important;
-        }
-
-        .home-map-link-stable:hover .home-map-cta-frost,
-        .home-map-link-stable:focus .home-map-cta-frost,
-        .home-map-link-stable:active .home-map-cta-frost {
-          background-color: rgba(255, 255, 255, 0.68) !important;
-          filter: none !important;
-          opacity: 1 !important;
-        }
-      `}</style>
       <div className="absolute inset-0">
         <div className="absolute inset-0 overflow-hidden">
           {previous !== null && (
@@ -281,23 +244,31 @@ export default function HomeHero() {
             <div className="absolute -left-8 top-10 h-32 w-32 rounded-full bg-white/18 blur-3xl" />
             <div className="absolute -right-6 bottom-4 h-40 w-40 rounded-full bg-white/12 blur-3xl" />
 
-            <Link
-              href="/immobili/mappa-area"
+            <div
+              role="link"
+              tabIndex={0}
               aria-label="Apri la mappa interattiva e disegna la tua area"
-              className="home-map-link-stable group/map relative block cursor-pointer overflow-hidden rounded-[34px] border border-white/20 bg-white/[0.08] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.26)] backdrop-blur-md transition duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/80"
+              onClick={() => router.push('/immobili/mappa-area')}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  router.push('/immobili/mappa-area')
+                }
+              }}
+              className="group/map relative block cursor-pointer overflow-hidden rounded-[34px] border border-white/20 bg-white/[0.08] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.26)] backdrop-blur-md transition duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/80"
             >
               <div className="absolute inset-0 bg-white/[0.06]" />
 
               <div className="relative grid gap-4">
                 <div className="overflow-hidden rounded-[26px] border border-white/18">
                   <div
-                    className="home-map-image-zoom h-[240px] w-full bg-cover bg-center transition-transform duration-500 ease-out group-hover/map:scale-[1.045]"
+                    className="h-[240px] w-full bg-cover bg-center transition-transform duration-500 ease-out group-hover/map:scale-[1.045]"
                     style={{ backgroundImage: "url('/images/bergamo-map.jpg')" }}
                   />
                 </div>
 
                 <div className="grid grid-cols-[1.1fr_0.9fr] gap-4">
-                  <div className="home-map-copy-card rounded-[24px] border border-white/18 bg-white/[0.10] p-4 backdrop-blur-sm">
+                  <div className="rounded-[24px] border border-white/18 bg-white/[0.10] p-4 backdrop-blur-sm">
                     <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-white/82 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
                       Ricerca su mappa
                     </p>
@@ -310,12 +281,12 @@ export default function HomeHero() {
                     </p>
                   </div>
 
-                  <div className="home-map-cta-card relative overflow-hidden rounded-[26px] border border-white/18 bg-white/[0.10] shadow-[0_10px_28px_rgba(0,0,0,0.16)] backdrop-blur-sm transition">
+                  <div className="relative overflow-hidden rounded-[26px] border border-white/18 bg-white/[0.10] shadow-[0_10px_28px_rgba(0,0,0,0.16)] backdrop-blur-sm transition">
                     <div
                       className="absolute inset-0 bg-cover bg-center opacity-100"
                       style={{ backgroundImage: "url('/images/bergamo-map.jpg')" }}
                     />
-                    <div className="home-map-cta-frost absolute inset-0 bg-white/68 backdrop-blur-[4px]" />
+                    <div className="absolute inset-0 bg-white/68 backdrop-blur-[4px]" />
                     <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.42)_0%,rgba(255,255,255,0.18)_100%)]" />
 
                     <div className="relative flex h-full min-h-[220px] flex-col justify-between p-5">
@@ -338,7 +309,7 @@ export default function HomeHero() {
                   </div>
                 </div>
               </div>
-            </Link>
+            </div>
           </div>
         </div>
       </div>
