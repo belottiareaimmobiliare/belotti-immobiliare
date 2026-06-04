@@ -150,7 +150,6 @@ export async function POST(request: Request) {
       features_preferred: verification.features_preferred || {},
       expires_at: calculateSubscriptionExpiresAt(verification.contract_type),
       unsubscribe_token: unsubscribeToken,
-      is_active: true,
 
       privacy_accepted: verification.privacy_accepted === true,
       privacy_accepted_at: verification.privacy_accepted_at || null,
@@ -159,12 +158,13 @@ export async function POST(request: Request) {
       privacy_user_agent: verification.privacy_user_agent || null,
     }
 
-    const { data: existingSearch, error: existingSearchError } = await supabase
+    const { data: existingSearchRows, error: existingSearchError } = await supabase
       .from('saved_searches')
       .select('id')
-      .eq('is_active', true)
       .ilike('email', verification.email)
-      .maybeSingle()
+      .limit(1)
+
+    const existingSearch = existingSearchRows?.[0] ?? null
 
     if (existingSearchError) {
       console.error('Errore controllo ricerca salvata esistente:', existingSearchError)
@@ -197,7 +197,6 @@ export async function POST(request: Request) {
           const { error: duplicateUpdateError } = await supabase
             .from('saved_searches')
             .update(savedSearchPayload)
-            .eq('is_active', true)
             .ilike('email', verification.email)
 
           if (duplicateUpdateError) {
