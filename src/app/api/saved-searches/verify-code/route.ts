@@ -159,31 +159,61 @@ export async function POST(request: Request) {
       privacy_user_agent: verification.privacy_user_agent || null,
     }
 
-    const { error: insertError } = await supabase
+    const { data: existingSearch, error: existingSearchError } = await supabase
       .from('saved_searches')
-      .insert(savedSearchPayload)
+      .select('id')
+      .eq('is_active', true)
+      .ilike('email', verification.email)
+      .maybeSingle()
 
-    if (insertError) {
-      if (insertError.code === '23505') {
-        const { error: updateError } = await supabase
-          .from('saved_searches')
-          .update(savedSearchPayload)
-          .eq('email', verification.email)
-          .eq('is_active', true)
+    if (existingSearchError) {
+      console.error('Errore controllo ricerca salvata esistente:', existingSearchError)
+      return NextResponse.json(
+        { error: 'Errore verifica ricerca salvata.' },
+        { status: 500 }
+      )
+    }
 
-        if (updateError) {
-          console.error(updateError)
+    if (existingSearch?.id) {
+      const { error: updateError } = await supabase
+        .from('saved_searches')
+        .update(savedSearchPayload)
+        .eq('id', existingSearch.id)
+
+      if (updateError) {
+        console.error('Errore aggiornamento ricerca salvata esistente:', updateError)
+        return NextResponse.json(
+          { error: 'Errore aggiornamento ricerca salvata.' },
+          { status: 500 }
+        )
+      }
+    } else {
+      const { error: insertError } = await supabase
+        .from('saved_searches')
+        .insert(savedSearchPayload)
+
+      if (insertError) {
+        if (insertError.code === '23505') {
+          const { error: duplicateUpdateError } = await supabase
+            .from('saved_searches')
+            .update(savedSearchPayload)
+            .eq('is_active', true)
+            .ilike('email', verification.email)
+
+          if (duplicateUpdateError) {
+            console.error('Errore aggiornamento ricerca salvata duplicata:', duplicateUpdateError)
+            return NextResponse.json(
+              { error: 'Errore aggiornamento ricerca salvata.' },
+              { status: 500 }
+            )
+          }
+        } else {
+          console.error('Errore creazione ricerca salvata:', insertError)
           return NextResponse.json(
-            { error: 'Errore aggiornamento ricerca salvata.' },
+            { error: 'Errore creazione ricerca salvata.' },
             { status: 500 }
           )
         }
-      } else {
-        console.error(insertError)
-        return NextResponse.json(
-          { error: 'Errore creazione ricerca salvata.' },
-          { status: 500 }
-        )
       }
     }
 
