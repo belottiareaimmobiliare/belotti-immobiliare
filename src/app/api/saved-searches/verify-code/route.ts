@@ -120,8 +120,7 @@ export async function POST(request: Request) {
     }
 
     const unsubscribeToken = crypto.randomUUID()
-
-    const { error: insertError } = await supabase.from('saved_searches').insert({
+    const savedSearchPayload = {
       full_name: verification.full_name,
       email: verification.email,
       phone: verification.phone,
@@ -151,20 +150,41 @@ export async function POST(request: Request) {
       features_preferred: verification.features_preferred || {},
       expires_at: calculateSubscriptionExpiresAt(verification.contract_type),
       unsubscribe_token: unsubscribeToken,
+      is_active: true,
 
       privacy_accepted: verification.privacy_accepted === true,
       privacy_accepted_at: verification.privacy_accepted_at || null,
       privacy_policy_version: verification.privacy_policy_version || null,
       privacy_ip: verification.privacy_ip || null,
       privacy_user_agent: verification.privacy_user_agent || null,
-    })
+    }
+
+    const { error: insertError } = await supabase
+      .from('saved_searches')
+      .insert(savedSearchPayload)
 
     if (insertError) {
-      console.error(insertError)
-      return NextResponse.json(
-        { error: 'Errore creazione ricerca salvata.' },
-        { status: 500 }
-      )
+      if (insertError.code === '23505') {
+        const { error: updateError } = await supabase
+          .from('saved_searches')
+          .update(savedSearchPayload)
+          .eq('email', verification.email)
+          .eq('is_active', true)
+
+        if (updateError) {
+          console.error(updateError)
+          return NextResponse.json(
+            { error: 'Errore aggiornamento ricerca salvata.' },
+            { status: 500 }
+          )
+        }
+      } else {
+        console.error(insertError)
+        return NextResponse.json(
+          { error: 'Errore creazione ricerca salvata.' },
+          { status: 500 }
+        )
+      }
     }
 
     await supabase
