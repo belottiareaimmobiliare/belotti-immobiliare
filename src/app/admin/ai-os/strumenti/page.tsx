@@ -33,6 +33,7 @@ type ToolCard = {
   actionLabel: string
   href?: string
   autoChecks: string[]
+  needsManualOk?: boolean
 }
 
 function normalize(value: unknown) {
@@ -191,6 +192,7 @@ export default function AIOSStrumentiPage() {
           'Pratica collegata all’immobile selezionato.',
           hasDriveFolder ? 'Controlla in Drive i documenti proprietario.' : 'Prima prepara o collega la cartella Drive.',
         ],
+        needsManualOk: true,
       },
       {
         id: 'fillable-modules',
@@ -219,6 +221,7 @@ export default function AIOSStrumentiPage() {
           'Pratica pronta per controllo documentale.',
           'Verifica presenza di visura, planimetria, APE e documentazione proprietario.',
         ],
+        needsManualOk: true,
       },
       {
         id: 'visure',
@@ -348,8 +351,9 @@ export default function AIOSStrumentiPage() {
     window.location.href = tool.href
   }
 
-  const completedChecks = tools.filter((tool) => checksBySection.get(tool.id)?.is_ok).length
-  const totalChecks = tools.length
+  const manualCheckTools = tools.filter((tool) => tool.needsManualOk)
+  const completedChecks = manualCheckTools.filter((tool) => checksBySection.get(tool.id)?.is_ok).length
+  const totalChecks = manualCheckTools.length
 
   return (
     <main className="min-h-screen bg-[#111827] px-4 py-6 text-[#E5E7EB] md:px-8">
@@ -362,7 +366,7 @@ export default function AIOSStrumentiPage() {
             Wizard operativo agenzia
           </h1>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-[#D1D5DB]/68">
-            Prima selezioni l’immobile. Poi AI-OS mostra solo le sezioni operative di quella pratica, con controllo rapido e OK controllato.
+            Prima selezioni l’immobile. Poi AI-OS mostra le sezioni operative di quella pratica, con OK controllato solo dove serve: documenti e pratiche.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -502,7 +506,7 @@ export default function AIOSStrumentiPage() {
               Seleziona un immobile per caricare gli strumenti operativi
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[#D1D5DB]/62">
-              Così chi gestisce lavora sempre sulla pratica giusta e può segnare OK solo sulle sezioni realmente controllate.
+              Così chi gestisce lavora sempre sulla pratica giusta e può segnare OK solo sulle sezioni documentali o operative che richiedono davvero verifica.
             </p>
           </section>
         ) : checksLoading ? (
@@ -525,8 +529,8 @@ export default function AIOSStrumentiPage() {
                 <p className="mt-2 text-sm text-[#D1D5DB]/68">Caselle operative caricate.</p>
               </div>
               <div className="rounded-2xl border border-[#8FBCBB]/18 bg-[#1F2937]/70 p-4">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8FBCBB]/70">Controlli OK</p>
-                <p className="mt-2 text-sm text-[#D1D5DB]/68">{completedChecks}/{totalChecks} sezioni approvate.</p>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8FBCBB]/70">OK documenti/pratiche</p>
+                <p className="mt-2 text-sm text-[#D1D5DB]/68">{completedChecks}/{totalChecks} controlli manuali approvati.</p>
               </div>
               <div className="rounded-2xl border border-[#8FBCBB]/18 bg-[#1F2937]/70 p-4">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8FBCBB]/70">Drive</p>
@@ -542,8 +546,9 @@ export default function AIOSStrumentiPage() {
 
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {tools.map((tool) => {
-                const check = checksBySection.get(tool.id)
-                const isOk = check?.is_ok === true
+                const needsManualOk = tool.needsManualOk === true
+                const check = needsManualOk ? checksBySection.get(tool.id) : undefined
+                const isOk = needsManualOk && check?.is_ok === true
                 const disabled = !tool.href
                 const saving = savingCheckKey === tool.id
 
@@ -590,25 +595,36 @@ export default function AIOSStrumentiPage() {
                       </ul>
                     </div>
 
-                    <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border border-[#8FBCBB]/18 bg-[#0B1220]/70 p-4 transition hover:border-[#A3BE8C]/35">
-                      <input
-                        type="checkbox"
-                        checked={isOk}
-                        disabled={saving}
-                        onChange={(event) => void saveOperationalCheck(tool, event.target.checked)}
-                        className="mt-1 h-5 w-5 accent-[#A3BE8C]"
-                      />
-                      <span>
-                        <span className="block text-sm font-black text-white">
-                          OK controllato
+                    {needsManualOk ? (
+                      <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border border-[#8FBCBB]/18 bg-[#0B1220]/70 p-4 transition hover:border-[#A3BE8C]/35">
+                        <input
+                          type="checkbox"
+                          checked={isOk}
+                          disabled={saving}
+                          onChange={(event) => void saveOperationalCheck(tool, event.target.checked)}
+                          className="mt-1 h-5 w-5 accent-[#A3BE8C]"
+                        />
+                        <span>
+                          <span className="block text-sm font-black text-white">
+                            OK controllato
+                          </span>
+                          <span className="mt-1 block text-xs leading-5 text-[#D1D5DB]/58">
+                            {isOk
+                              ? `Confermato${check?.checked_by ? ` da ${check.checked_by}` : ''}${check?.checked_at ? ` il ${formatDateTime(check.checked_at)}` : ''}.`
+                              : 'Spunta solo quando documenti, visure o pratica sono stati verificati e possono considerarsi a posto.'}
+                          </span>
                         </span>
-                        <span className="mt-1 block text-xs leading-5 text-[#D1D5DB]/58">
-                          {isOk
-                            ? `Confermato${check?.checked_by ? ` da ${check.checked_by}` : ''}${check?.checked_at ? ` il ${formatDateTime(check.checked_at)}` : ''}.`
-                            : 'Spunta solo quando questa sezione è stata controllata e può considerarsi a posto.'}
-                        </span>
-                      </span>
-                    </label>
+                      </label>
+                    ) : (
+                      <div className="mt-4 rounded-2xl border border-[#374151]/80 bg-[#0B1220]/50 p-4">
+                        <p className="text-sm font-black text-[#CBD5E1]">
+                          Nessun OK manuale richiesto
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-[#D1D5DB]/52">
+                          Questa sezione serve per aprire o consultare lo strumento. Il controllo manuale resta solo su documenti e pratiche.
+                        </p>
+                      </div>
+                    )}
 
                     <button
                       type="button"
