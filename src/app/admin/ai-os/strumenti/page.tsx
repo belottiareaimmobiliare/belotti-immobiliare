@@ -203,7 +203,7 @@ export default function AIOSStrumentiPage() {
         href: `/admin/ai-os/strumenti/moduli?propertyId=${propertyId}`,
         autoChecks: [
           'Modulo collegato alla pratica selezionata.',
-          'La segreteria può segnare OK dopo revisione dati e proprietario.',
+          'Chi gestisce può segnare OK controllato dopo revisione dati e proprietario.',
         ],
       },
       {
@@ -318,7 +318,7 @@ export default function AIOSStrumentiPage() {
         return [...others, nextCheck]
       })
 
-      setNotice(isOk ? `${tool.title}: segnato come OK segreteria.` : `${tool.title}: OK segreteria rimosso.`)
+      setNotice(isOk ? `${tool.title}: segnato come OK controllato.` : `${tool.title}: OK controllato rimosso.`)
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Errore salvataggio OK operativo')
     } finally {
@@ -362,7 +362,7 @@ export default function AIOSStrumentiPage() {
             Wizard operativo agenzia
           </h1>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-[#D1D5DB]/68">
-            Prima selezioni l’immobile. Poi AI-OS mostra solo le sezioni operative di quella pratica, con controllo rapido e OK segreteria.
+            Prima selezioni l’immobile. Poi AI-OS mostra solo le sezioni operative di quella pratica, con controllo rapido e OK controllato.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -502,7 +502,7 @@ export default function AIOSStrumentiPage() {
               Seleziona un immobile per caricare gli strumenti operativi
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[#D1D5DB]/62">
-              Così la segreteria lavora sempre sulla pratica giusta e può segnare OK solo sulle sezioni realmente controllate.
+              Così chi gestisce lavora sempre sulla pratica giusta e può segnare OK solo sulle sezioni realmente controllate.
             </p>
           </section>
         ) : checksLoading ? (
@@ -514,7 +514,7 @@ export default function AIOSStrumentiPage() {
               Sto caricando lo stato operativo della pratica...
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[#D1D5DB]/62">
-              Verifico Drive, sezioni operative e OK già dati dalla segreteria.
+              Verifico Drive, sezioni operative e OK controllati già salvati.
             </p>
           </section>
         ) : (
@@ -564,7 +564,7 @@ export default function AIOSStrumentiPage() {
                       </span>
 
                       <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] ${isOk ? badgeClass('ready') : badgeClass(tool.status)}`}>
-                        {isOk ? 'OK segreteria' : tool.badge}
+                        {isOk ? 'OK controllato' : tool.badge}
                       </span>
                     </div>
 
@@ -600,7 +600,7 @@ export default function AIOSStrumentiPage() {
                       />
                       <span>
                         <span className="block text-sm font-black text-white">
-                          OK segreteria
+                          OK controllato
                         </span>
                         <span className="mt-1 block text-xs leading-5 text-[#D1D5DB]/58">
                           {isOk
