@@ -271,7 +271,7 @@ export default function AIOSStrumentiPage() {
         href: `/admin/ai-os/strumenti/moduli?propertyId=${propertyId}`,
         autoChecks: [
           'Modulo collegato alla pratica selezionata.',
-          'Chi gestisce può segnare OK controllato dopo revisione dati e proprietario.',
+          'Apri i moduli per compilare, correggere e preparare le informazioni finali.',
         ],
       },
       {
@@ -489,7 +489,7 @@ export default function AIOSStrumentiPage() {
             Wizard operativo agenzia
           </h1>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-[#D1D5DB]/68">
-            Prima selezioni l’immobile. Poi AI-OS mostra le sezioni operative di quella pratica, con checklist operativa solo dove serve: documenti e pratiche.
+            Prima selezioni l’immobile. Poi AI-OS mostra le sezioni operative di quella pratica, con checklist documentale solo dove serve.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -527,7 +527,7 @@ export default function AIOSStrumentiPage() {
                 Seleziona immobile
               </h2>
               <p className="mt-2 text-sm leading-6 text-[#D1D5DB]/62">
-                Cerca o filtra per vendita/affitto. Le caselle operative compaiono solo dopo la selezione.
+                Cerca o filtra per vendita/affitto. Le sezioni operative compaiono solo dopo la selezione.
               </p>
             </div>
 
@@ -709,7 +709,7 @@ export default function AIOSStrumentiPage() {
 
                     <div className="mt-4 rounded-2xl border border-[#374151]/80 bg-[#111827]/70 p-4">
                       <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#8FBCBB]/70">
-                        Check rapido
+                        Controllo rapido
                       </p>
                       <ul className="mt-3 space-y-2 text-xs leading-5 text-[#CBD5E1]/72">
                         {tool.autoChecks.map((item) => (
@@ -788,16 +788,7 @@ export default function AIOSStrumentiPage() {
                           ))}
                         </div>
                       </div>
-                    ) : (
-                      <div className="mt-4 rounded-2xl border border-[#374151]/80 bg-[#0B1220]/50 p-4">
-                        <p className="text-sm font-black text-[#CBD5E1]">
-                          Nessuna checklist richiesta
-                        </p>
-                        <p className="mt-1 text-xs leading-5 text-[#D1D5DB]/52">
-                          Questa sezione serve per aprire o consultare lo strumento. La checklist resta solo su documenti e pratiche.
-                        </p>
-                      </div>
-                    )}
+                    ) : null}
 
                     <button
                       type="button"
