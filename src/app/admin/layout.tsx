@@ -17,6 +17,18 @@ export default async function AdminRootLayout({
 
   let links = getSidebarLinks(profile)
 
+  // Versione Belotti: menu admin semplificato.
+  // Le sezioni restano nel codice per la suite completa, ma non vengono mostrate nel menu operativo.
+  const belottiHiddenAdminHrefs = new Set([
+    '/admin/autori',
+    '/admin/kpi',
+    '/admin/logs',
+  ])
+
+  links = links.filter(
+    (link) => typeof link.href !== 'string' || !belottiHiddenAdminHrefs.has(link.href)
+  )
+
   if (profile.can_manage_properties) {
     const supabase = await createClient()
 
