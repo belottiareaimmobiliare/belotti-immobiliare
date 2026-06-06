@@ -14,6 +14,15 @@ type WorkspaceFolder = {
   } | null
 }
 
+type OperationalCheck = {
+  section_key: string
+  is_ok: boolean
+  checked_by?: string | null
+  checked_at?: string | null
+  notes?: string | null
+  updated_at?: string | null
+}
+
 type ToolCard = {
   id: string
   title: string
@@ -23,7 +32,7 @@ type ToolCard = {
   status: 'ready' | 'waiting' | 'warning' | 'next'
   actionLabel: string
   href?: string
-  requiresProperty?: boolean
+  autoChecks: string[]
 }
 
 function normalize(value: unknown) {
@@ -37,17 +46,37 @@ function badgeClass(status: ToolCard['status']) {
   return 'border-[#64748B]/45 bg-[#64748B]/12 text-[#CBD5E1]'
 }
 
+function formatDateTime(value?: string | null) {
+  if (!value) return ''
+
+  try {
+    return new Intl.DateTimeFormat('it-IT', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    }).format(new Date(value))
+  } catch {
+    return value
+  }
+}
+
 export default function AIOSStrumentiPage() {
   const [folders, setFolders] = useState<WorkspaceFolder[]>([])
   const [selectedPropertyId, setSelectedPropertyId] = useState('')
   const [query, setQuery] = useState('')
   const [contractFilter, setContractFilter] = useState<'all' | 'vendita' | 'affitto'>('all')
   const [loading, setLoading] = useState(true)
+  const [checksLoading, setChecksLoading] = useState(false)
+  const [savingCheckKey, setSavingCheckKey] = useState('')
+  const [checks, setChecks] = useState<OperationalCheck[]>([])
   const [notice, setNotice] = useState('')
 
   const selectedProperty = useMemo(() => {
     return folders.find((folder) => folder.id === selectedPropertyId) ?? null
   }, [folders, selectedPropertyId])
+
+  const checksBySection = useMemo(() => {
+    return new Map(checks.map((check) => [check.section_key, check]))
+  }, [checks])
 
   const filteredFolders = useMemo(() => {
     const q = normalize(query)
@@ -82,127 +111,127 @@ export default function AIOSStrumentiPage() {
   }, [contractFilter, folders, query])
 
   const tools = useMemo<ToolCard[]>(() => {
-    const propertyId = selectedProperty?.id || ''
-    const hasSelectedProperty = Boolean(propertyId)
-    const driveFolderId = selectedProperty?.driveFolder?.drive_folder_id || ''
-    const driveSyncStatus = normalize(selectedProperty?.driveFolder?.sync_status)
+    if (!selectedProperty) return []
+
+    const propertyId = selectedProperty.id
+    const driveFolderId = selectedProperty.driveFolder?.drive_folder_id || ''
+    const driveSyncStatus = normalize(selectedProperty.driveFolder?.sync_status)
     const hasDriveFolder = Boolean(driveFolderId)
     const driveLooksReady = hasDriveFolder && ['linked', 'ready', 'synced', 'created'].includes(driveSyncStatus)
-
-    const propertyRequiredBadge = hasSelectedProperty ? 'Pronto' : 'Seleziona immobile'
-    const propertyRequiredStatus: ToolCard['status'] = hasSelectedProperty ? 'ready' : 'waiting'
-    const propertyRequiredAction = hasSelectedProperty ? undefined : 'Scegli immobile'
 
     return [
       {
         id: 'property-edit',
         title: 'Scheda immobile',
-        badge: propertyRequiredBadge,
-        description: hasSelectedProperty
-          ? 'Apri la scheda dell’immobile selezionato per controllare prezzo, descrizione, stato e pubblicazione.'
-          : 'Scegli prima l’immobile su cui lavorare: poi potrai aprire subito la sua scheda.',
+        badge: 'Pronto',
+        description: 'Controlla prezzo, descrizione, stato pubblicazione e dati principali della scheda.',
         icon: '🏠',
-        status: propertyRequiredStatus,
-        actionLabel: hasSelectedProperty ? 'Apri scheda' : propertyRequiredAction || 'Scegli immobile',
-        href: propertyId ? `/admin/immobili/${propertyId}` : undefined,
-        requiresProperty: true,
+        status: 'ready',
+        actionLabel: 'Apri scheda',
+        href: `/admin/immobili/${propertyId}`,
+        autoChecks: [
+          'Immobile selezionato correttamente.',
+          selectedProperty.propertyRef ? `Codice: ${selectedProperty.propertyRef}` : 'Codice immobile non indicato.',
+          selectedProperty.contractType ? `Contratto: ${selectedProperty.contractType}` : 'Tipo contratto non indicato.',
+        ],
       },
       {
         id: 'drive-share',
-        title: 'Condivisioni Drive',
-        badge: !hasSelectedProperty
-          ? 'Seleziona immobile'
-          : driveLooksReady
-            ? 'Drive collegato'
-            : 'Drive da verificare',
-        description: !hasSelectedProperty
-          ? 'Scegli l’immobile per controllare cartella Drive, sottocartelle e condivisioni operative.'
-          : driveLooksReady
-            ? 'Cartella Drive collegata: puoi condividere immagini, video, documenti proprietario o sottocartelle precise.'
-            : 'L’immobile è selezionato, ma la cartella Drive va controllata o preparata prima della condivisione.',
+        title: 'Cartella Drive e condivisioni',
+        badge: driveLooksReady ? 'Drive collegato' : 'Da verificare',
+        description: 'Verifica cartella operativa, sottocartelle e accessi condivisi con fotografo, tecnico o proprietario.',
         icon: '☁️',
-        status: !hasSelectedProperty ? 'waiting' : driveLooksReady ? 'ready' : 'warning',
-        actionLabel: !hasSelectedProperty
-          ? 'Scegli immobile'
-          : driveLooksReady
-            ? 'Apri condivisioni'
-            : 'Verifica Drive',
-        href: propertyId ? `/admin/ai-os/condivisioni?propertyId=${propertyId}` : undefined,
-        requiresProperty: true,
+        status: driveLooksReady ? 'ready' : 'warning',
+        actionLabel: driveLooksReady ? 'Apri condivisioni' : 'Verifica Drive',
+        href: `/admin/ai-os/condivisioni?propertyId=${propertyId}`,
+        autoChecks: [
+          hasDriveFolder ? 'Cartella Drive collegata all’immobile.' : 'Cartella Drive non ancora collegata.',
+          driveSyncStatus ? `Stato Drive: ${driveSyncStatus}` : 'Stato Drive non disponibile.',
+          'Controlla che Bozze immagini/video, Documenti proprietario e materiali tecnici siano presenti.',
+        ],
       },
       {
         id: 'lead-note',
         title: 'Nota rapida immobile',
-        badge: propertyRequiredBadge,
-        description: hasSelectedProperty
-          ? 'Apri la nota collegata all’immobile: utile per telefonate, clienti, appuntamenti e follow-up.'
-          : 'Dopo aver scelto un immobile, qui apri la nota rapida collegata a quella specifica scheda.',
+        badge: 'Pronto',
+        description: 'Apri la nota collegata all’immobile per telefonate, appuntamenti, clienti e follow-up.',
         icon: '📝',
-        status: propertyRequiredStatus,
-        actionLabel: hasSelectedProperty ? 'Apri nota' : propertyRequiredAction || 'Scegli immobile',
-        href: propertyId ? `/admin/immobili/${propertyId}/apri-nota` : undefined,
-        requiresProperty: true,
+        status: 'ready',
+        actionLabel: 'Apri nota',
+        href: `/admin/immobili/${propertyId}/apri-nota`,
+        autoChecks: [
+          'Nota collegata alla scheda immobile.',
+          'Utile per telefonate, appuntamenti e aggiornamenti interni.',
+        ],
       },
       {
         id: 'social-card',
         title: 'Social / vetrina',
-        badge: propertyRequiredBadge,
-        description: hasSelectedProperty
-          ? 'Genera testi e materiale vetrina per Facebook, Instagram, TikTok, WhatsApp e scheda grafica.'
-          : 'Scegli un immobile per generare contenuti social e materiale vetrina coerenti con quella scheda.',
+        badge: 'Da preparare',
+        description: 'Prepara testi e materiale per Facebook, Instagram, TikTok, WhatsApp e vetrina immobile.',
         icon: '📣',
-        status: propertyRequiredStatus,
-        actionLabel: hasSelectedProperty ? 'Apri social' : propertyRequiredAction || 'Scegli immobile',
-        href: propertyId ? `/admin/ai-os/strumenti/social?propertyId=${propertyId}` : undefined,
-        requiresProperty: true,
+        status: 'warning',
+        actionLabel: 'Apri social',
+        href: `/admin/ai-os/strumenti/social?propertyId=${propertyId}`,
+        autoChecks: [
+          'Immobile selezionato per generare contenuti coerenti.',
+          hasDriveFolder ? 'Drive disponibile per recuperare immagini e video.' : 'Drive non collegato: controllare immagini e video prima della pubblicazione.',
+        ],
       },
       {
         id: 'documents',
-        title: 'Genera documenti',
-        badge: propertyRequiredBadge,
-        description: hasSelectedProperty
-          ? 'Prepara mandato, incarico, scheda raccolta dati proprietario, checklist e bozze operative.'
-          : 'Scegli un immobile per generare documenti già collegati alla pratica corretta.',
+        title: 'Documenti agenzia',
+        badge: 'Da controllare',
+        description: 'Mandato, incarico, raccolta dati proprietario, checklist documentale e bozze operative.',
         icon: '📄',
-        status: propertyRequiredStatus,
-        actionLabel: hasSelectedProperty ? 'Apri documenti' : propertyRequiredAction || 'Scegli immobile',
-        href: propertyId ? `/admin/ai-os/strumenti/documenti?propertyId=${propertyId}` : undefined,
-        requiresProperty: true,
+        status: 'warning',
+        actionLabel: 'Apri documenti',
+        href: `/admin/ai-os/strumenti/documenti?propertyId=${propertyId}`,
+        autoChecks: [
+          'Pratica collegata all’immobile selezionato.',
+          hasDriveFolder ? 'Controlla in Drive i documenti proprietario.' : 'Prima prepara o collega la cartella Drive.',
+        ],
       },
       {
         id: 'fillable-modules',
         title: 'Moduli compilabili',
-        badge: propertyRequiredBadge,
-        description: hasSelectedProperty
-          ? 'Compila e rivedi dati immobile/proprietario prima della generazione finale dei moduli.'
-          : 'Scegli un immobile per aprire i moduli già collegati al relativo proprietario e alla pratica.',
+        badge: 'Da compilare',
+        description: 'Compila dati immobile/proprietario, rivedi le informazioni e prepara i moduli finali.',
         icon: '🧾',
-        status: propertyRequiredStatus,
-        actionLabel: hasSelectedProperty ? 'Apri moduli' : propertyRequiredAction || 'Scegli immobile',
-        href: propertyId ? `/admin/ai-os/strumenti/moduli?propertyId=${propertyId}` : undefined,
-        requiresProperty: true,
+        status: 'warning',
+        actionLabel: 'Apri moduli',
+        href: `/admin/ai-os/strumenti/moduli?propertyId=${propertyId}`,
+        autoChecks: [
+          'Modulo collegato alla pratica selezionata.',
+          'La segreteria può segnare OK dopo revisione dati e proprietario.',
+        ],
       },
       {
         id: 'agency-practices',
-        title: 'Pratiche agenzia / visure',
-        badge: hasSelectedProperty ? 'Da controllare' : 'Seleziona immobile',
-        description: hasSelectedProperty
-          ? 'Centro pratiche per visure, planimetrie, APE, conformità, documenti proprietario e richieste a tecnico.'
-          : 'Scegli l’immobile per vedere quali pratiche/documenti servono e cosa manca nella cartella operativa.',
+        title: 'Pratiche / visure',
+        badge: 'Da controllare',
+        description: 'Centro operativo per visure, planimetrie, APE, conformità e richieste a tecnico.',
         icon: '🏛️',
-        status: hasSelectedProperty ? 'warning' : 'waiting',
-        actionLabel: hasSelectedProperty ? 'Apri pratiche' : 'Scegli immobile',
-        href: propertyId ? `/admin/ai-os/strumenti/pratiche?propertyId=${propertyId}` : undefined,
-        requiresProperty: true,
+        status: 'warning',
+        actionLabel: 'Apri pratiche',
+        href: `/admin/ai-os/strumenti/pratiche?propertyId=${propertyId}`,
+        autoChecks: [
+          'Pratica pronta per controllo documentale.',
+          'Verifica presenza di visura, planimetria, APE e documentazione proprietario.',
+        ],
       },
       {
         id: 'visure',
-        title: 'Visure e richieste',
+        title: 'Richieste automatiche',
         badge: 'Prossimo step',
         description: 'Workflow guidato per richieste catastali, documenti proprietario e controllo materiale ricevuto.',
         icon: '🔎',
         status: 'next',
         actionLabel: 'In sviluppo',
+        autoChecks: [
+          'Modulo previsto come prossimo step.',
+          'Per ora usa la sezione Pratiche / visure.',
+        ],
       },
     ]
   }, [selectedProperty])
@@ -230,23 +259,97 @@ export default function AIOSStrumentiPage() {
     }
   }
 
+  async function loadOperationalChecks(propertyId: string) {
+    setChecksLoading(true)
+    setNotice('')
+
+    try {
+      const response = await fetch(`/api/admin/ai-os/operational-checks?propertyId=${encodeURIComponent(propertyId)}`, {
+        cache: 'no-store',
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore caricamento check operativi')
+      }
+
+      setChecks(Array.isArray(payload?.checks) ? payload.checks : [])
+    } catch (error) {
+      setChecks([])
+      setNotice(error instanceof Error ? error.message : 'Errore caricamento check operativi')
+    } finally {
+      setChecksLoading(false)
+    }
+  }
+
+  async function saveOperationalCheck(tool: ToolCard, isOk: boolean) {
+    if (!selectedProperty) {
+      setNotice('Seleziona prima un immobile.')
+      return
+    }
+
+    setSavingCheckKey(tool.id)
+    setNotice('')
+
+    try {
+      const response = await fetch('/api/admin/ai-os/operational-checks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          propertyId: selectedProperty.id,
+          sectionKey: tool.id,
+          isOk,
+        }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore salvataggio OK operativo')
+      }
+
+      const nextCheck = payload?.check as OperationalCheck
+
+      setChecks((currentChecks) => {
+        const others = currentChecks.filter((check) => check.section_key !== tool.id)
+        return [...others, nextCheck]
+      })
+
+      setNotice(isOk ? `${tool.title}: segnato come OK segreteria.` : `${tool.title}: OK segreteria rimosso.`)
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Errore salvataggio OK operativo')
+    } finally {
+      setSavingCheckKey('')
+    }
+  }
+
   useEffect(() => {
     void loadFolders()
   }, [])
 
+  useEffect(() => {
+    if (!selectedPropertyId) {
+      setChecks([])
+      return
+    }
+
+    void loadOperationalChecks(selectedPropertyId)
+  }, [selectedPropertyId])
+
   function openTool(tool: ToolCard) {
     if (!tool.href) {
-      if (tool.requiresProperty) {
-        setNotice('Prima scegli un immobile di lavoro: gli strumenti si attivano sulla pratica selezionata.')
-        return
-      }
-
       setNotice('Strumento non ancora attivo: è segnato come prossimo step di sviluppo.')
       return
     }
 
     window.location.href = tool.href
   }
+
+  const completedChecks = tools.filter((tool) => checksBySection.get(tool.id)?.is_ok).length
+  const totalChecks = tools.length
 
   return (
     <main className="min-h-screen bg-[#111827] px-4 py-6 text-[#E5E7EB] md:px-8">
@@ -256,10 +359,10 @@ export default function AIOSStrumentiPage() {
             AI-OS
           </p>
           <h1 className="mt-2 text-3xl font-black text-white">
-            Strumenti Agenzia
+            Wizard operativo agenzia
           </h1>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-[#D1D5DB]/68">
-            Scegli un immobile e apri solo gli strumenti utili per quella pratica: Drive, note, social, documenti e visure.
+            Prima selezioni l’immobile. Poi AI-OS mostra solo le sezioni operative di quella pratica, con controllo rapido e OK segreteria.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -291,13 +394,13 @@ export default function AIOSStrumentiPage() {
           <div className="grid gap-4 lg:grid-cols-[420px_minmax(0,1fr)]">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#8FBCBB]/65">
-                Immobile di lavoro
+                Step 1
               </p>
               <h2 className="mt-1 text-xl font-black text-white">
                 Seleziona immobile
               </h2>
               <p className="mt-2 text-sm leading-6 text-[#D1D5DB]/62">
-                Prima scegli l’immobile su cui lavorare. Dopo la selezione i riquadri sotto mostrano cosa è pronto, cosa va verificato e cosa è ancora in sviluppo.
+                Cerca o filtra per vendita/affitto. Le caselle operative compaiono solo dopo la selezione.
               </p>
             </div>
 
@@ -377,7 +480,7 @@ export default function AIOSStrumentiPage() {
                 </div>
               ) : (
                 <div className="rounded-2xl border border-[#64748B]/25 bg-[#111827]/70 px-4 py-3 text-sm leading-6 text-[#CBD5E1]/72">
-                  Nessun immobile selezionato. Cerca per codice, titolo o indirizzo e scegli la pratica da lavorare.
+                  Nessun immobile selezionato. Le caselle operative non vengono mostrate finché non scegli una pratica.
                 </div>
               )}
 
@@ -390,61 +493,141 @@ export default function AIOSStrumentiPage() {
           </div>
         </section>
 
-        <section className="mb-5 grid gap-3 md:grid-cols-3">
-          <div className="rounded-2xl border border-[#8FBCBB]/18 bg-[#1F2937]/70 p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8FBCBB]/70">1. Scegli</p>
-            <p className="mt-2 text-sm text-[#D1D5DB]/68">Seleziona l’immobile di lavoro.</p>
-          </div>
-          <div className="rounded-2xl border border-[#8FBCBB]/18 bg-[#1F2937]/70 p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8FBCBB]/70">2. Controlla</p>
-            <p className="mt-2 text-sm text-[#D1D5DB]/68">Verifica Drive, documenti e pratiche.</p>
-          </div>
-          <div className="rounded-2xl border border-[#8FBCBB]/18 bg-[#1F2937]/70 p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8FBCBB]/70">3. Lavora</p>
-            <p className="mt-2 text-sm text-[#D1D5DB]/68">Apri lo strumento giusto senza cercare altrove.</p>
-          </div>
-        </section>
-
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {tools.map((tool) => {
-            const disabled = !tool.href
-
-            return (
-            <button
-              key={tool.id}
-              type="button"
-              onClick={() => openTool(tool)}
-              className={`group rounded-[28px] border p-5 text-left shadow-xl shadow-black/18 transition ${
-                disabled
-                  ? 'border-[#374151] bg-[#1F2937]/58 opacity-80 hover:border-[#64748B]/45'
-                  : 'border-[#374151] bg-[#1F2937]/84 hover:-translate-y-0.5 hover:border-[#8FBCBB]/45 hover:bg-[#243244]'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#8FBCBB]/18 bg-[#111827] text-2xl shadow-inner">
-                  {tool.icon}
-                </span>
-
-                <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] ${badgeClass(tool.status)}`}>
-                  {tool.badge}
-                </span>
+        {!selectedProperty ? (
+          <section className="rounded-[28px] border border-dashed border-[#64748B]/40 bg-[#111827]/60 p-8 text-center shadow-xl shadow-black/20">
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#8FBCBB]/65">
+              Step 2 bloccato
+            </p>
+            <h2 className="mt-3 text-2xl font-black text-white">
+              Seleziona un immobile per caricare gli strumenti operativi
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[#D1D5DB]/62">
+              Così la segreteria lavora sempre sulla pratica giusta e può segnare OK solo sulle sezioni realmente controllate.
+            </p>
+          </section>
+        ) : checksLoading ? (
+          <section className="rounded-[28px] border border-[#8FBCBB]/18 bg-[#1F2937]/82 p-8 text-center shadow-xl shadow-black/20">
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#8FBCBB]/65">
+              Controllo rapido
+            </p>
+            <h2 className="mt-3 text-2xl font-black text-white">
+              Sto caricando lo stato operativo della pratica...
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[#D1D5DB]/62">
+              Verifico Drive, sezioni operative e OK già dati dalla segreteria.
+            </p>
+          </section>
+        ) : (
+          <>
+            <section className="mb-5 grid gap-3 md:grid-cols-4">
+              <div className="rounded-2xl border border-[#8FBCBB]/18 bg-[#1F2937]/70 p-4">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8FBCBB]/70">Step 2</p>
+                <p className="mt-2 text-sm text-[#D1D5DB]/68">Caselle operative caricate.</p>
               </div>
+              <div className="rounded-2xl border border-[#8FBCBB]/18 bg-[#1F2937]/70 p-4">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8FBCBB]/70">Controlli OK</p>
+                <p className="mt-2 text-sm text-[#D1D5DB]/68">{completedChecks}/{totalChecks} sezioni approvate.</p>
+              </div>
+              <div className="rounded-2xl border border-[#8FBCBB]/18 bg-[#1F2937]/70 p-4">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8FBCBB]/70">Drive</p>
+                <p className="mt-2 text-sm text-[#D1D5DB]/68">
+                  {selectedProperty.driveFolder?.drive_folder_id ? 'Cartella collegata.' : 'Da preparare.'}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-[#8FBCBB]/18 bg-[#1F2937]/70 p-4">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8FBCBB]/70">Step 3</p>
+                <p className="mt-2 text-sm text-[#D1D5DB]/68">Apri lo strumento e completa la pratica.</p>
+              </div>
+            </section>
 
-              <h3 className="mt-5 text-lg font-black text-white">
-                {tool.title}
-              </h3>
+            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {tools.map((tool) => {
+                const check = checksBySection.get(tool.id)
+                const isOk = check?.is_ok === true
+                const disabled = !tool.href
+                const saving = savingCheckKey === tool.id
 
-              <p className="mt-2 min-h-[72px] text-sm leading-6 text-[#D1D5DB]/62">
-                {tool.description}
-              </p>
+                return (
+                  <article
+                    key={tool.id}
+                    className={`rounded-[28px] border p-5 shadow-xl shadow-black/18 transition ${
+                      isOk
+                        ? 'border-[#A3BE8C]/45 bg-[#1F2937]/90'
+                        : disabled
+                          ? 'border-[#374151] bg-[#1F2937]/58 opacity-80'
+                          : 'border-[#374151] bg-[#1F2937]/84 hover:border-[#8FBCBB]/45'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#8FBCBB]/18 bg-[#111827] text-2xl shadow-inner">
+                        {tool.icon}
+                      </span>
 
-              <span className="mt-5 inline-flex rounded-full border border-[#8FBCBB]/30 bg-[#8FBCBB]/10 px-4 py-2 text-xs font-black text-[#8FBCBB] transition group-hover:bg-[#8FBCBB]/18">
-                {tool.actionLabel}
-              </span>
-            </button>
-            )
-          })}
-        </section>
+                      <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] ${isOk ? badgeClass('ready') : badgeClass(tool.status)}`}>
+                        {isOk ? 'OK segreteria' : tool.badge}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-5 text-lg font-black text-white">
+                      {tool.title}
+                    </h3>
+
+                    <p className="mt-2 min-h-[72px] text-sm leading-6 text-[#D1D5DB]/62">
+                      {tool.description}
+                    </p>
+
+                    <div className="mt-4 rounded-2xl border border-[#374151]/80 bg-[#111827]/70 p-4">
+                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#8FBCBB]/70">
+                        Check rapido
+                      </p>
+                      <ul className="mt-3 space-y-2 text-xs leading-5 text-[#CBD5E1]/72">
+                        {tool.autoChecks.map((item) => (
+                          <li key={item} className="flex gap-2">
+                            <span className="mt-0.5 text-[#8FBCBB]">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border border-[#8FBCBB]/18 bg-[#0B1220]/70 p-4 transition hover:border-[#A3BE8C]/35">
+                      <input
+                        type="checkbox"
+                        checked={isOk}
+                        disabled={saving}
+                        onChange={(event) => void saveOperationalCheck(tool, event.target.checked)}
+                        className="mt-1 h-5 w-5 accent-[#A3BE8C]"
+                      />
+                      <span>
+                        <span className="block text-sm font-black text-white">
+                          OK segreteria
+                        </span>
+                        <span className="mt-1 block text-xs leading-5 text-[#D1D5DB]/58">
+                          {isOk
+                            ? `Confermato${check?.checked_by ? ` da ${check.checked_by}` : ''}${check?.checked_at ? ` il ${formatDateTime(check.checked_at)}` : ''}.`
+                            : 'Spunta solo quando questa sezione è stata controllata e può considerarsi a posto.'}
+                        </span>
+                      </span>
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={() => openTool(tool)}
+                      disabled={disabled}
+                      className={`mt-5 inline-flex rounded-full border px-4 py-2 text-xs font-black transition ${
+                        disabled
+                          ? 'cursor-not-allowed border-[#64748B]/30 bg-[#64748B]/10 text-[#CBD5E1]/55'
+                          : 'border-[#8FBCBB]/30 bg-[#8FBCBB]/10 text-[#8FBCBB] hover:bg-[#8FBCBB]/18'
+                      }`}
+                    >
+                      {tool.actionLabel}
+                    </button>
+                  </article>
+                )
+              })}
+            </section>
+          </>
+        )}
       </div>
     </main>
   )
