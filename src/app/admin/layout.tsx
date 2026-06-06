@@ -21,6 +21,7 @@ export default async function AdminRootLayout({
   // Le sezioni restano nel codice per la suite completa, ma non vengono mostrate nel menu operativo.
   const belottiHiddenAdminHrefs = new Set([
     '/admin/autori',
+    '/admin/exports',
     '/admin/kpi',
     '/admin/logs',
   ])
