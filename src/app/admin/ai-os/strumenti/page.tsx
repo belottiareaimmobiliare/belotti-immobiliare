@@ -111,10 +111,6 @@ export default function AIOSStrumentiPage() {
         return false
       }
 
-      if (q.length < 3 && contractFilter === 'all') {
-        return false
-      }
-
       if (q.length < 3) {
         return true
       }
@@ -132,6 +128,13 @@ export default function AIOSStrumentiPage() {
       return haystack.includes(q)
     })
   }, [contractFilter, folders, query])
+
+  const selectedFilterLabel =
+    contractFilter === 'all'
+      ? 'immobili pubblicati'
+      : contractFilter === 'vendita'
+        ? 'immobili in vendita pubblicati'
+        : 'immobili in affitto pubblicati'
 
   const tools = useMemo<ToolCard[]>(() => {
     if (!selectedProperty) return []
@@ -556,10 +559,10 @@ export default function AIOSStrumentiPage() {
                   setSelectedPropertyId('')
                 }}
                 className="w-full rounded-2xl border border-[#8FBCBB]/45 bg-[#111827] px-4 py-3 text-sm font-semibold text-white outline-none transition placeholder:text-[#6B7280] focus:border-[#A3BE8C]/70"
-                placeholder="Cerca da 3 caratteri per codice, titolo o indirizzo..."
+                placeholder="Cerca per codice, titolo o indirizzo..."
               />
 
-              {(query.trim().length >= 3 || contractFilter !== 'all') ? (
+              {!loading ? (
                 <select
                   value={selectedPropertyId}
                   onChange={(event) => setSelectedPropertyId(event.target.value)}
@@ -567,7 +570,7 @@ export default function AIOSStrumentiPage() {
                 >
                   <option value="">
                     {filteredFolders.length > 0
-                      ? `Seleziona immobile (${filteredFolders.length} risultati)...`
+                      ? `Seleziona immobile (${filteredFolders.length} ${selectedFilterLabel || 'risultati'})...`
                       : 'Nessun immobile trovato'}
                   </option>
 
