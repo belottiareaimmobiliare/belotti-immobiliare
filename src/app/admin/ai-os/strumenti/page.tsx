@@ -23,6 +23,23 @@ type OperationalCheck = {
   updated_at?: string | null
 }
 
+type OperationalCheckItem = {
+  section_key: string
+  item_key: string
+  item_label: string
+  is_ok: boolean
+  checked_by?: string | null
+  checked_at?: string | null
+  updated_at?: string | null
+}
+
+type ChecklistItemDefinition = {
+  key: string
+  label: string
+  group: string
+  required?: boolean
+}
+
 type ToolCard = {
   id: string
   title: string
@@ -33,7 +50,7 @@ type ToolCard = {
   actionLabel: string
   href?: string
   autoChecks: string[]
-  needsManualOk?: boolean
+  checklist?: ChecklistItemDefinition[]
 }
 
 function normalize(value: unknown) {
@@ -69,6 +86,7 @@ export default function AIOSStrumentiPage() {
   const [checksLoading, setChecksLoading] = useState(false)
   const [savingCheckKey, setSavingCheckKey] = useState('')
   const [checks, setChecks] = useState<OperationalCheck[]>([])
+  const [checkItems, setCheckItems] = useState<OperationalCheckItem[]>([])
   const [notice, setNotice] = useState('')
 
   const selectedProperty = useMemo(() => {
@@ -78,6 +96,10 @@ export default function AIOSStrumentiPage() {
   const checksBySection = useMemo(() => {
     return new Map(checks.map((check) => [check.section_key, check]))
   }, [checks])
+
+  const checkItemsByKey = useMemo(() => {
+    return new Map(checkItems.map((item) => [`${item.section_key}:${item.item_key}`, item]))
+  }, [checkItems])
 
   const filteredFolders = useMemo(() => {
     const q = normalize(query)
@@ -119,6 +141,47 @@ export default function AIOSStrumentiPage() {
     const driveSyncStatus = normalize(selectedProperty.driveFolder?.sync_status)
     const hasDriveFolder = Boolean(driveFolderId)
     const driveLooksReady = hasDriveFolder && ['linked', 'ready', 'synced', 'created'].includes(driveSyncStatus)
+
+    const documentChecklist: ChecklistItemDefinition[] = [
+      { key: 'id-owner', group: 'Documenti personali proprietario', label: 'Carta d’identità proprietario / intestatari', required: true },
+      { key: 'tax-code-owner', group: 'Documenti personali proprietario', label: 'Codice fiscale / tessera sanitaria proprietario', required: true },
+      { key: 'marital-status', group: 'Documenti personali proprietario', label: 'Stato civile e regime patrimoniale', required: true },
+      { key: 'company-docs', group: 'Documenti personali proprietario', label: 'Se società: visura camerale e poteri di firma' },
+      { key: 'proxy-docs', group: 'Documenti personali proprietario', label: 'Se delegato/procuratore: procura o delega valida' },
+
+      { key: 'ownership-title', group: 'Provenienza immobile', label: 'Atto di provenienza / rogito / donazione / successione', required: true },
+      { key: 'inheritance-docs', group: 'Provenienza immobile', label: 'Se successione: dichiarazione successione e volture' },
+      { key: 'mortgage-status', group: 'Provenienza immobile', label: 'Mutuo residuo, ipoteche, vincoli o pignoramenti verificati' },
+
+      { key: 'agency-mandate', group: 'Documenti agenzia', label: 'Incarico / mandato firmato', required: true },
+      { key: 'privacy-consent', group: 'Documenti agenzia', label: 'Privacy e consenso trattamento dati firmati', required: true },
+      { key: 'aml-check', group: 'Documenti agenzia', label: 'Antiriciclaggio / adeguata verifica cliente', required: true },
+      { key: 'data-collection-form', group: 'Documenti agenzia', label: 'Scheda raccolta dati immobile/proprietario compilata' },
+    ]
+
+    const practiceChecklist: ChecklistItemDefinition[] = [
+      { key: 'catastal-record', group: 'Catasto', label: 'Visura catastale aggiornata', required: true },
+      { key: 'floor-plan', group: 'Catasto', label: 'Planimetria catastale aggiornata', required: true },
+      { key: 'catastal-compliance', group: 'Catasto', label: 'Conformità catastale verificata', required: true },
+      { key: 'subalterns', group: 'Catasto', label: 'Elaborato planimetrico / elenco subalterni se necessario' },
+
+      { key: 'urban-title', group: 'Urbanistica', label: 'Titolo edilizio / concessione / licenza / permesso verificato', required: true },
+      { key: 'urban-compliance', group: 'Urbanistica', label: 'Conformità urbanistica o relazione tecnica', required: true },
+      { key: 'habitability', group: 'Urbanistica', label: 'Agibilità / abitabilità se disponibile' },
+      { key: 'building-practices', group: 'Urbanistica', label: 'CILA / SCIA / condoni / sanatorie verificati se presenti' },
+
+      { key: 'ape', group: 'Energia e impianti', label: 'APE valido', required: true },
+      { key: 'systems-cert', group: 'Energia e impianti', label: 'Dichiarazioni conformità impianti se presenti' },
+      { key: 'boiler-booklet', group: 'Energia e impianti', label: 'Libretto caldaia e manutenzioni se presenti' },
+
+      { key: 'condo-expenses', group: 'Condominio', label: 'Spese condominiali consuntivo/preventivo' },
+      { key: 'condo-rules', group: 'Condominio', label: 'Regolamento condominiale' },
+      { key: 'extraordinary-works', group: 'Condominio', label: 'Delibere lavori straordinari verificate' },
+      { key: 'admin-release', group: 'Condominio', label: 'Liberatoria amministratore prima del rogito' },
+
+      { key: 'rental-contract', group: 'Se immobile locato', label: 'Contratto di locazione e scadenze verificate' },
+      { key: 'tenant-status', group: 'Se immobile locato', label: 'Situazione inquilino, cauzione e disdetta verificate' },
+    ]
 
     return [
       {
@@ -192,7 +255,7 @@ export default function AIOSStrumentiPage() {
           'Pratica collegata all’immobile selezionato.',
           hasDriveFolder ? 'Controlla in Drive i documenti proprietario.' : 'Prima prepara o collega la cartella Drive.',
         ],
-        needsManualOk: true,
+        checklist: documentChecklist,
       },
       {
         id: 'fillable-modules',
@@ -221,7 +284,7 @@ export default function AIOSStrumentiPage() {
           'Pratica pronta per controllo documentale.',
           'Verifica presenza di visura, planimetria, APE e documentazione proprietario.',
         ],
-        needsManualOk: true,
+        checklist: practiceChecklist,
       },
       {
         id: 'visure',
@@ -278,11 +341,61 @@ export default function AIOSStrumentiPage() {
       }
 
       setChecks(Array.isArray(payload?.checks) ? payload.checks : [])
+      setCheckItems(Array.isArray(payload?.items) ? payload.items : [])
     } catch (error) {
       setChecks([])
+      setCheckItems([])
       setNotice(error instanceof Error ? error.message : 'Errore caricamento check operativi')
     } finally {
       setChecksLoading(false)
+    }
+  }
+
+  async function saveChecklistItem(tool: ToolCard, item: ChecklistItemDefinition, isOk: boolean) {
+    if (!selectedProperty) {
+      setNotice('Seleziona prima un immobile.')
+      return
+    }
+
+    setSavingCheckKey(`${tool.id}:${item.key}`)
+    setNotice('')
+
+    try {
+      const response = await fetch('/api/admin/ai-os/operational-checks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          propertyId: selectedProperty.id,
+          sectionKey: tool.id,
+          itemKey: item.key,
+          itemLabel: item.label,
+          isOk,
+        }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Errore salvataggio voce checklist')
+      }
+
+      const nextItem = payload?.item as OperationalCheckItem
+
+      setCheckItems((currentItems) => {
+        const others = currentItems.filter(
+          (currentItem) => !(currentItem.section_key === tool.id && currentItem.item_key === item.key)
+        )
+
+        return [...others, nextItem]
+      })
+
+      setNotice(isOk ? `${item.label}: check completato.` : `${item.label}: check rimosso.`)
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Errore salvataggio voce checklist')
+    } finally {
+      setSavingCheckKey('')
     }
   }
 
@@ -336,6 +449,7 @@ export default function AIOSStrumentiPage() {
   useEffect(() => {
     if (!selectedPropertyId) {
       setChecks([])
+      setCheckItems([])
       return
     }
 
@@ -351,9 +465,15 @@ export default function AIOSStrumentiPage() {
     window.location.href = tool.href
   }
 
-  const manualCheckTools = tools.filter((tool) => tool.needsManualOk)
-  const completedChecks = manualCheckTools.filter((tool) => checksBySection.get(tool.id)?.is_ok).length
-  const totalChecks = manualCheckTools.length
+  const checklistTools = tools.filter((tool) => Array.isArray(tool.checklist) && tool.checklist.length > 0)
+  const totalChecklistItems = checklistTools.reduce((total, tool) => total + (tool.checklist?.length ?? 0), 0)
+  const completedChecklistItems = checklistTools.reduce((total, tool) => {
+    const completedForTool = (tool.checklist ?? []).filter((item) => {
+      return checkItemsByKey.get(`${tool.id}:${item.key}`)?.is_ok === true
+    }).length
+
+    return total + completedForTool
+  }, 0)
 
   return (
     <main className="min-h-screen bg-[#111827] px-4 py-6 text-[#E5E7EB] md:px-8">
@@ -366,7 +486,7 @@ export default function AIOSStrumentiPage() {
             Wizard operativo agenzia
           </h1>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-[#D1D5DB]/68">
-            Prima selezioni l’immobile. Poi AI-OS mostra le sezioni operative di quella pratica, con OK controllato solo dove serve: documenti e pratiche.
+            Prima selezioni l’immobile. Poi AI-OS mostra le sezioni operative di quella pratica, con checklist operativa solo dove serve: documenti e pratiche.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -518,7 +638,7 @@ export default function AIOSStrumentiPage() {
               Sto caricando lo stato operativo della pratica...
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[#D1D5DB]/62">
-              Verifico Drive, sezioni operative e OK controllati già salvati.
+              Verifico Drive, sezioni operative e check già salvati.
             </p>
           </section>
         ) : (
@@ -529,8 +649,8 @@ export default function AIOSStrumentiPage() {
                 <p className="mt-2 text-sm text-[#D1D5DB]/68">Caselle operative caricate.</p>
               </div>
               <div className="rounded-2xl border border-[#8FBCBB]/18 bg-[#1F2937]/70 p-4">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8FBCBB]/70">OK documenti/pratiche</p>
-                <p className="mt-2 text-sm text-[#D1D5DB]/68">{completedChecks}/{totalChecks} controlli manuali approvati.</p>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8FBCBB]/70">Checklist pratica</p>
+                <p className="mt-2 text-sm text-[#D1D5DB]/68">{completedChecklistItems}/{totalChecklistItems} check completati.</p>
               </div>
               <div className="rounded-2xl border border-[#8FBCBB]/18 bg-[#1F2937]/70 p-4">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8FBCBB]/70">Drive</p>
@@ -546,9 +666,12 @@ export default function AIOSStrumentiPage() {
 
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {tools.map((tool) => {
-                const needsManualOk = tool.needsManualOk === true
-                const check = needsManualOk ? checksBySection.get(tool.id) : undefined
-                const isOk = needsManualOk && check?.is_ok === true
+                const checklist = tool.checklist ?? []
+                const hasChecklist = checklist.length > 0
+                const completedForTool = checklist.filter((item) => {
+                  return checkItemsByKey.get(`${tool.id}:${item.key}`)?.is_ok === true
+                }).length
+                const isOk = hasChecklist && completedForTool === checklist.length
                 const disabled = !tool.href
                 const saving = savingCheckKey === tool.id
 
@@ -569,7 +692,7 @@ export default function AIOSStrumentiPage() {
                       </span>
 
                       <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] ${isOk ? badgeClass('ready') : badgeClass(tool.status)}`}>
-                        {isOk ? 'OK controllato' : tool.badge}
+                        {isOk ? 'Checklist completa' : tool.badge}
                       </span>
                     </div>
 
@@ -595,33 +718,80 @@ export default function AIOSStrumentiPage() {
                       </ul>
                     </div>
 
-                    {needsManualOk ? (
-                      <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border border-[#8FBCBB]/18 bg-[#0B1220]/70 p-4 transition hover:border-[#A3BE8C]/35">
-                        <input
-                          type="checkbox"
-                          checked={isOk}
-                          disabled={saving}
-                          onChange={(event) => void saveOperationalCheck(tool, event.target.checked)}
-                          className="mt-1 h-5 w-5 accent-[#A3BE8C]"
-                        />
-                        <span>
-                          <span className="block text-sm font-black text-white">
-                            OK controllato
+                    {hasChecklist ? (
+                      <div className="mt-4 rounded-2xl border border-[#8FBCBB]/18 bg-[#0B1220]/70 p-4">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <p className="text-sm font-black text-white">
+                              Checklist agenzia
+                            </p>
+                            <p className="mt-1 text-xs leading-5 text-[#D1D5DB]/58">
+                              {completedForTool}/{checklist.length} check completati. Spunta solo ciò che è stato davvero verificato.
+                            </p>
+                          </div>
+
+                          <span className={`w-fit rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] ${
+                            isOk
+                              ? 'border-[#A3BE8C]/35 bg-[#A3BE8C]/10 text-[#A3BE8C]'
+                              : 'border-[#EBCB8B]/35 bg-[#EBCB8B]/10 text-[#EBCB8B]'
+                          }`}>
+                            {isOk ? 'Checklist completa' : 'Da completare'}
                           </span>
-                          <span className="mt-1 block text-xs leading-5 text-[#D1D5DB]/58">
-                            {isOk
-                              ? `Confermato${check?.checked_by ? ` da ${check.checked_by}` : ''}${check?.checked_at ? ` il ${formatDateTime(check.checked_at)}` : ''}.`
-                              : 'Spunta solo quando documenti, visure o pratica sono stati verificati e possono considerarsi a posto.'}
-                          </span>
-                        </span>
-                      </label>
+                        </div>
+
+                        <div className="mt-4 space-y-4">
+                          {Object.entries(
+                            checklist.reduce<Record<string, ChecklistItemDefinition[]>>((groups, item) => {
+                              groups[item.group] = [...(groups[item.group] ?? []), item]
+                              return groups
+                            }, {})
+                          ).map(([group, items]) => (
+                            <div key={group} className="rounded-2xl border border-[#374151]/70 bg-[#111827]/60 p-3">
+                              <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#8FBCBB]/70">
+                                {group}
+                              </p>
+
+                              <div className="mt-3 space-y-2">
+                                {items.map((item) => {
+                                  const itemState = checkItemsByKey.get(`${tool.id}:${item.key}`)
+                                  const itemOk = itemState?.is_ok === true
+                                  const itemSaving = savingCheckKey === `${tool.id}:${item.key}`
+
+                                  return (
+                                    <label key={item.key} className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#374151]/55 bg-[#0B1220]/55 px-3 py-2 transition hover:border-[#8FBCBB]/35">
+                                      <input
+                                        type="checkbox"
+                                        checked={itemOk}
+                                        disabled={itemSaving}
+                                        onChange={(event) => void saveChecklistItem(tool, item, event.target.checked)}
+                                        className="mt-1 h-4 w-4 accent-[#A3BE8C]"
+                                      />
+                                      <span className="min-w-0">
+                                        <span className="block text-xs font-bold leading-5 text-[#E5E7EB]">
+                                          {item.label}
+                                          {item.required ? <span className="ml-1 text-[#EBCB8B]">*</span> : null}
+                                        </span>
+                                        {itemOk ? (
+                                          <span className="mt-0.5 block text-[11px] leading-4 text-[#A3BE8C]/85">
+                                            Verificato{itemState?.checked_by ? ` da ${itemState.checked_by}` : ''}{itemState?.checked_at ? ` il ${formatDateTime(itemState.checked_at)}` : ''}.
+                                          </span>
+                                        ) : null}
+                                      </span>
+                                    </label>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     ) : (
                       <div className="mt-4 rounded-2xl border border-[#374151]/80 bg-[#0B1220]/50 p-4">
                         <p className="text-sm font-black text-[#CBD5E1]">
-                          Nessun OK manuale richiesto
+                          Nessuna checklist richiesta
                         </p>
                         <p className="mt-1 text-xs leading-5 text-[#D1D5DB]/52">
-                          Questa sezione serve per aprire o consultare lo strumento. Il controllo manuale resta solo su documenti e pratiche.
+                          Questa sezione serve per aprire o consultare lo strumento. La checklist resta solo su documenti e pratiche.
                         </p>
                       </div>
                     )}
