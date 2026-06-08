@@ -2,6 +2,7 @@ import { formatPropertyTypeLabel } from '@/lib/propertyOptions'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import StatusToggleButton from './StatusToggleButton'
+import AdminPropertiesFilters from './AdminPropertiesFilters'
 
 type SearchParams = Promise<{
   q?: string
@@ -288,76 +289,11 @@ export default async function AdminPropertiesPage({
         </div>
       </div>
 
-      <div className="theme-admin-card mt-8 rounded-3xl p-5 md:p-6">
-        <div className="mb-5 grid max-w-md grid-cols-3 gap-2 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-1">
-          <Link
-            href={buildAdminPropertiesHref({ q: rawSearch, status })}
-            className={`rounded-xl px-4 py-3 text-center text-sm font-medium transition ${
-              contractType === '' ? 'theme-admin-chip-active' : 'theme-admin-chip'
-            }`}
-          >
-            Tutti
-          </Link>
-
-          <Link
-            href={buildAdminPropertiesHref({ q: rawSearch, status, contractType: 'vendita' })}
-            className={`rounded-xl px-4 py-3 text-center text-sm font-medium transition ${
-              contractType === 'vendita' ? 'theme-admin-chip-active' : 'theme-admin-chip'
-            }`}
-          >
-            Vendita
-          </Link>
-
-          <Link
-            href={buildAdminPropertiesHref({ q: rawSearch, status, contractType: 'affitto' })}
-            className={`rounded-xl px-4 py-3 text-center text-sm font-medium transition ${
-              contractType === 'affitto' ? 'theme-admin-chip-active' : 'theme-admin-chip'
-            }`}
-          >
-            Affitto
-          </Link>
-        </div>
-
-        <form method="GET">
-          <input type="hidden" name="contractType" value={contractType} />
-
-          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px_auto]">
-            <input
-              type="text"
-              name="q"
-              defaultValue={rawSearch}
-              placeholder="Cerca per RIF, codice, titolo, comune, provincia..."
-              className="theme-admin-input rounded-2xl px-4 py-3"
-            />
-
-            <select
-              name="status"
-              defaultValue={status}
-              className="theme-admin-select rounded-2xl px-4 py-3"
-            >
-              <option value="">Tutti gli stati</option>
-              <option value="draft">Solo bozze</option>
-              <option value="published">Solo pubblicati</option>
-            </select>
-
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                className="theme-admin-button-primary flex-1 rounded-2xl px-5 py-3 font-medium transition hover:opacity-95"
-              >
-                Filtra
-              </button>
-
-              <Link
-                href="/admin/immobili"
-                className="theme-admin-button-secondary flex-1 rounded-2xl px-5 py-3 text-center font-medium transition hover:opacity-95"
-              >
-                Reset
-              </Link>
-            </div>
-          </div>
-        </form>
-      </div>
+      <AdminPropertiesFilters
+        initialQuery={rawSearch}
+        initialStatus={status}
+        initialContractType={contractType}
+      />
 
       {error && (
         <div className="mt-8 rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-700 dark:text-red-300">
