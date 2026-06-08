@@ -8,6 +8,7 @@ type WorkspaceFolder = {
   propertyRef?: string
   address?: string
   contractType?: string | null
+  status?: string | null
   driveFolder?: {
     drive_folder_id?: string | null
     sync_status?: string | null
@@ -121,6 +122,13 @@ export default function AIOSCondivisioniPage() {
   const showPropertyDropdown =
     propertySearchQuery.trim().length >= 3 || contractFilter !== 'all'
 
+
+  const selectedFilterLabel =
+    contractFilter === 'all'
+      ? 'immobili pubblicati'
+      : contractFilter === 'vendita'
+        ? 'immobili in vendita pubblicati'
+        : 'immobili in affitto pubblicati'
 
   async function loadShareHistory(nextPropertyId = propertyId) {
     setHistoryLoading(true)
@@ -374,7 +382,7 @@ export default function AIOSCondivisioniPage() {
 
         <section className="rounded-[28px] border border-[#8FBCBB]/18 bg-[#1F2937]/82 p-5 shadow-xl shadow-black/20">
           <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#8FBCBB]/65">
-            Procedura segreteria
+            Procedura operativa
           </p>
           <h2 className="mt-1 text-xl font-black text-white">Scegli la cartella da condividere</h2>
 
@@ -456,7 +464,7 @@ export default function AIOSCondivisioniPage() {
                       setSharedAiOsUrl('')
                     }}
                     className="w-full rounded-2xl border border-[#8FBCBB]/45 bg-[#111827] px-4 py-3 pr-24 text-sm font-semibold text-white outline-none transition placeholder:text-[#6B7280] focus:border-[#A3BE8C]/70"
-                    placeholder="Cerca immobile per codice, titolo o indirizzo..."
+                    placeholder="Cerca o filtra per codice, titolo o indirizzo..."
                   />
                   <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#8FBCBB]/65">
                     min 3
