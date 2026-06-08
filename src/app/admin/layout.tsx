@@ -3,6 +3,7 @@ import AdminShell from '@/components/admin/AdminShell'
 import { getSidebarLinks, getCurrentAdminProfile } from '@/lib/admin-auth'
 import { createClient } from '@/lib/supabase/server'
 import DriveFolderJobsAutoProcessor from '@/components/admin/DriveFolderJobsAutoProcessor'
+import AdminAiOsThemeBridge from '@/components/admin/AdminAiOsThemeBridge'
 
 export default async function AdminRootLayout({
   children,
@@ -79,6 +80,7 @@ export default async function AdminRootLayout({
       }}
       links={links}
     >
+      <AdminAiOsThemeBridge />
       <DriveFolderJobsAutoProcessor />
       {children}
     </AdminShell>

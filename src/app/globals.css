@@ -4563,3 +4563,54 @@ body:has(.aios-drive-manager) .aios-drive-manager button[class*="min-h-[118px]"]
 }
 
 /* === AI-OS Drive No Gold Final END === */
+
+
+/* AI-OS admin shell dark override */
+body.admin-aios-shell {
+  background: #0b1120 !important;
+  color: #e5e7eb !important;
+}
+
+body.admin-aios-shell .theme-admin-page,
+body.admin-aios-shell [class*="theme-admin-page"] {
+  background: #0b1120 !important;
+  color: #e5e7eb !important;
+}
+
+body.admin-aios-shell aside,
+body.admin-aios-shell header {
+  background: #111827 !important;
+  border-color: rgba(143, 188, 187, 0.18) !important;
+  color: #e5e7eb !important;
+}
+
+body.admin-aios-shell aside a,
+body.admin-aios-shell aside button,
+body.admin-aios-shell header a,
+body.admin-aios-shell header button {
+  color: #d8dee9 !important;
+}
+
+body.admin-aios-shell aside a:hover,
+body.admin-aios-shell aside button:hover {
+  background: rgba(143, 188, 187, 0.10) !important;
+  color: #ffffff !important;
+}
+
+body.admin-aios-shell .theme-admin-card,
+body.admin-aios-shell .theme-admin-input,
+body.admin-aios-shell .theme-admin-select,
+body.admin-aios-shell .theme-admin-chip {
+  background-color: rgba(15, 23, 42, 0.88) !important;
+  border-color: rgba(143, 188, 187, 0.18) !important;
+  color: #e5e7eb !important;
+}
+
+body.admin-aios-shell .theme-admin-muted {
+  color: rgba(209, 213, 219, 0.72) !important;
+}
+
+body.admin-aios-shell .theme-admin-faint {
+  color: rgba(143, 188, 187, 0.72) !important;
+}
+
