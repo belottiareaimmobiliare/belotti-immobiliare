@@ -102,7 +102,7 @@ export default function AIOSCondivisioniPage() {
       }
 
       if (query.length < 3) {
-        return contractFilter !== 'all'
+        return true
       }
 
       const haystack = [
@@ -120,7 +120,7 @@ export default function AIOSCondivisioniPage() {
   }, [contractFilter, propertySearchQuery, readyFolders])
 
   const showPropertyDropdown =
-    propertySearchQuery.trim().length >= 3 || contractFilter !== 'all'
+    true
 
 
   const selectedFilterLabel =
@@ -343,7 +343,7 @@ export default function AIOSCondivisioniPage() {
             Condividi cartella Drive
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-[#D1D5DB]/68">
-            La segreteria sceglie immobile, sottocartella ed email Gmail. AI-OS condivide solo la cartella selezionata: il destinatario può usare quella e le sottocartelle, ma non può salire alla cartella padre.
+            L’agenzia sceglie immobile, sottocartella ed email Gmail. AI-OS condivide solo la cartella selezionata: il destinatario può usare quella e le sottocartelle, ma non può salire alla cartella padre.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
