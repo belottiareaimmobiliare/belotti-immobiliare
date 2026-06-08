@@ -4614,3 +4614,26 @@ body.admin-aios-shell .theme-admin-faint {
   color: rgba(143, 188, 187, 0.72) !important;
 }
 
+
+/* AI-OS remove inner quadrant */
+body.admin-aios-shell {
+  background: #0b1120 !important;
+}
+
+body.admin-aios-shell .aios-admin-page {
+  background: transparent !important;
+  color: #e5e7eb !important;
+}
+
+body.admin-aios-shell .aios-admin-page > div {
+  width: 100%;
+}
+
+body.admin-aios-shell main:has(.aios-admin-page) {
+  background: #0b1120 !important;
+}
+
+body.admin-aios-shell .theme-admin-page {
+  background: #0b1120 !important;
+}
+

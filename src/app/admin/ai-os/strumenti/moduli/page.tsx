@@ -599,7 +599,7 @@ export default function AIOSModuliCompilabiliPage() {
   const fieldEntries = Object.entries(fields)
 
   return (
-    <main className="min-h-screen bg-[#111827] px-4 py-6 text-[#E5E7EB] md:px-8">
+    <main className="aios-admin-page min-h-[calc(100vh-96px)] bg-transparent px-4 py-6 text-[#E5E7EB] md:px-8">
       <div className="mx-auto max-w-7xl">
         <header className="mb-6 rounded-[30px] border border-[#8FBCBB]/20 bg-[#1F2937]/88 p-5 shadow-2xl shadow-black/30">
           <p className="text-xs font-bold uppercase tracking-[0.36em] text-[#8FBCBB]/75">
