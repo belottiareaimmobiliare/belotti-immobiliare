@@ -112,6 +112,83 @@ function formatCoordinate(value: number | null) {
   return value.toFixed(6)
 }
 
+
+function normalizeAdminSearchValue(value: unknown) {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\brif\.?\b/g, ' ')
+    .replace(/\briferimento\b/g, ' ')
+    .replace(/\bcodice\b/g, ' ')
+    .replace(/\bannuncio\b/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}
+
+function compactAdminSearchValue(value: unknown) {
+  return normalizeAdminSearchValue(value).replace(/\s+/g, '')
+}
+
+function buildAdminPropertiesHref({
+  q,
+  status,
+  contractType,
+}: {
+  q?: string
+  status?: string
+  contractType?: string
+}) {
+  const params = new URLSearchParams()
+
+  if (q?.trim()) params.set('q', q.trim())
+  if (status?.trim()) params.set('status', status.trim())
+  if (contractType?.trim()) params.set('contractType', contractType.trim())
+
+  const queryString = params.toString()
+
+  return `/admin/immobili${queryString ? `?${queryString}` : ''}`
+}
+
+function propertyMatchesAdminSearch(property: Property, searchValue: string) {
+  const terms = normalizeAdminSearchValue(searchValue)
+    .split(' ')
+    .filter(Boolean)
+
+  if (terms.length === 0) return true
+
+  const searchableValues = [
+    property.reference_code,
+    property.reference_code ? `rif ${property.reference_code}` : '',
+    property.reference_code ? `riferimento ${property.reference_code}` : '',
+    property.reference_code ? `codice annuncio ${property.reference_code}` : '',
+    property.slug,
+    property.title,
+    property.comune,
+    property.province,
+    property.frazione,
+    property.address,
+    property.contract_type,
+    property.property_type,
+    property.status,
+    property.condition,
+    property.availability,
+    property.price,
+    property.surface,
+    property.rooms,
+  ]
+
+  const haystack = normalizeAdminSearchValue(searchableValues.join(' '))
+  const compactHaystack = compactAdminSearchValue(searchableValues.join(' '))
+
+  return terms.every((term) => {
+    const compactTerm = compactAdminSearchValue(term)
+
+    return haystack.includes(term) || compactHaystack.includes(compactTerm)
+  })
+}
+
+
 function getLocationBadge(property: Property) {
   const hasCoordinates =
     typeof property.latitude === 'number' &&
@@ -153,7 +230,8 @@ export default async function AdminPropertiesPage({
   searchParams: SearchParams
 }) {
   const params = await searchParams
-  const q = params.q?.trim().toLowerCase() || ''
+  const rawSearch = params.q?.trim() || ''
+  const q = normalizeAdminSearchValue(rawSearch)
   const status = params.status?.trim() || ''
   const contractType = params.contractType?.trim() || ''
 
@@ -176,23 +254,9 @@ export default async function AdminPropertiesPage({
   }
 
   const { data, error } = await query
-  const properties = ((data || []) as Property[]).filter((property) => {
-    if (!q) return true
-
-    const haystack = [
-      property.title || '',
-      property.comune || '',
-      property.province || '',
-      property.frazione || '',
-      property.address || '',
-      property.contract_type || '',
-      property.property_type || '',
-    ]
-      .join(' ')
-      .toLowerCase()
-
-    return haystack.includes(q)
-  })
+  const properties = ((data || []) as Property[]).filter((property) =>
+    propertyMatchesAdminSearch(property, q)
+  )
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 text-[var(--site-text)]">
@@ -227,7 +291,7 @@ export default async function AdminPropertiesPage({
       <div className="theme-admin-card mt-8 rounded-3xl p-5 md:p-6">
         <div className="mb-5 grid max-w-md grid-cols-3 gap-2 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface-strong)] p-1">
           <Link
-            href={`/admin/immobili${status ? `?status=${status}` : ''}`}
+            href={buildAdminPropertiesHref({ q: rawSearch, status })}
             className={`rounded-xl px-4 py-3 text-center text-sm font-medium transition ${
               contractType === '' ? 'theme-admin-chip-active' : 'theme-admin-chip'
             }`}
@@ -236,7 +300,7 @@ export default async function AdminPropertiesPage({
           </Link>
 
           <Link
-            href={`/admin/immobili?contractType=vendita${status ? `&status=${status}` : ''}`}
+            href={buildAdminPropertiesHref({ q: rawSearch, status, contractType: 'vendita' })}
             className={`rounded-xl px-4 py-3 text-center text-sm font-medium transition ${
               contractType === 'vendita' ? 'theme-admin-chip-active' : 'theme-admin-chip'
             }`}
@@ -245,7 +309,7 @@ export default async function AdminPropertiesPage({
           </Link>
 
           <Link
-            href={`/admin/immobili?contractType=affitto${status ? `&status=${status}` : ''}`}
+            href={buildAdminPropertiesHref({ q: rawSearch, status, contractType: 'affitto' })}
             className={`rounded-xl px-4 py-3 text-center text-sm font-medium transition ${
               contractType === 'affitto' ? 'theme-admin-chip-active' : 'theme-admin-chip'
             }`}
@@ -261,8 +325,8 @@ export default async function AdminPropertiesPage({
             <input
               type="text"
               name="q"
-              defaultValue={params.q || ''}
-              placeholder="Cerca per titolo, comune, provincia..."
+              defaultValue={rawSearch}
+              placeholder="Cerca per RIF, codice, titolo, comune, provincia..."
               className="theme-admin-input rounded-2xl px-4 py-3"
             />
 
