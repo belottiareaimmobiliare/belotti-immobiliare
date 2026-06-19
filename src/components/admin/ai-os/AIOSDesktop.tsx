@@ -1454,7 +1454,7 @@ export default function AIOSDesktop() {
 
   async function deleteCustomFolder(folderId: string, folderName: string) {
     const confirmed = window.confirm(
-      `Eliminare la cartella "${folderName}"?\n\nLa cartella deve essere vuota.`,
+      `Eliminare la cartella "${folderName}"?La cartella deve essere vuota.`,
     )
 
     if (!confirmed) return
@@ -7325,7 +7325,7 @@ export default function AIOSDesktop() {
                 </button>
 
 
-                ) : null}\n\n                <button
+                ) : null}                <button
                   type="button"
                   onClick={() => {
                     window.location.href = '/admin/ai-os/condivisioni'
@@ -7393,7 +7393,7 @@ export default function AIOSDesktop() {
                   className="w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[#D8DEE9] transition hover:bg-[#A3BE8C]/10"
                 >
                   Gestisci accessi Workspace
-                </button>\n\n                <button
+                </button>                <button
                   type="button"
                   onClick={() => {
                     window.location.href = '/admin'
