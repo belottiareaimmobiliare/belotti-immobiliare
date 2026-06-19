@@ -455,12 +455,6 @@ const desktopFolders = [
     icon: '🧰',
     hint: 'Gestionale agenzia',
   },
-  {
-    id: 'settings',
-    label: 'Theme',
-    icon: '🎨',
-    hint: 'Solo admin',
-  },
 ]
 
 function getFileKind(file: File): AIOSFileKind {
@@ -5905,15 +5899,6 @@ export default function AIOSDesktop() {
                   setDesktopWindowOpen(true)
                   setStartOpen(false)
                   setNotice('Strumenti Agenzia pronto: dopo Drive qui costruiamo il gestionale stile Getrix migliorato.')
-                  return
-                }
-
-                if (item.id === 'settings') {
-                  setDriveSettingsOpen(false)
-                  setActiveAgencyToolId(null)
-                  setDesktopWindowOpen(true)
-                  setStartOpen(false)
-                  setNotice('Theme AI-OS riservato admin: lo colleghiamo dopo il Drive Workspace.')
                   return
                 }
 
