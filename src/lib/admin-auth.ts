@@ -97,6 +97,7 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
           { href: '/admin/contenuti/chi-siamo', label: 'Modifica Chi siamo' },
           { href: '/admin/contenuti/gianfederico-belotti', label: 'Modifica Gianfederico' },
           { href: '/admin/contenuti/contatti', label: 'Modifica Contatti' },
+          { href: '/admin/ai-os/configurazione', label: 'Config. AI-OS' },
         ],
       },
     ]
@@ -142,6 +143,7 @@ export function getSidebarLinks(profile: AdminProfile | null): SidebarLink[] {
         { href: '/admin/contenuti/chi-siamo', label: 'Modifica Chi siamo' },
         { href: '/admin/contenuti/gianfederico-belotti', label: 'Modifica Gianfederico' },
         { href: '/admin/contenuti/contatti', label: 'Modifica Contatti' },
+        { href: '/admin/ai-os/configurazione', label: 'Config. AI-OS' },
       ],
     },
     {
