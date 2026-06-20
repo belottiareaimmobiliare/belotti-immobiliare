@@ -151,10 +151,10 @@ export default function AIOSConfigurazionePage() {
   }
 
   return (
-    <main className="theme-admin-page min-h-screen px-6 py-8">
+    <main className="aios-config-page min-h-screen px-6 py-8 text-[#E5E7EB]">
       <div className="mx-auto max-w-7xl space-y-6">
-        <section className="theme-admin-card rounded-[2rem] border p-6">
-          <p className="theme-admin-faint text-xs font-semibold uppercase tracking-[0.35em]">
+        <section className="aios-config-card rounded-[2rem] border p-6">
+          <p className="aios-config-faint text-xs font-semibold uppercase tracking-[0.35em]">
             AI-OS
           </p>
 
@@ -163,7 +163,7 @@ export default function AIOSConfigurazionePage() {
               <h1 className="text-3xl font-black tracking-tight">
                 Configurazione check strumenti
               </h1>
-              <p className="theme-admin-muted mt-2 max-w-3xl text-sm leading-6">
+              <p className="aios-config-muted mt-2 max-w-3xl text-sm leading-6">
                 Qui modifichi le checklist operative usate da Documenti agenzia,
                 Pratiche e Social. I check salvati qui saranno poi agganciati agli
                 strumenti AI-OS.
@@ -194,10 +194,10 @@ export default function AIOSConfigurazionePage() {
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-          <div className="theme-admin-card rounded-[2rem] border p-6">
+          <div className="aios-config-card rounded-[2rem] border p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="theme-admin-faint text-xs font-semibold uppercase tracking-[0.3em]">
+                <p className="aios-config-faint text-xs font-semibold uppercase tracking-[0.3em]">
                   Checklist
                 </p>
                 <h2 className="mt-2 text-2xl font-black">Check modificabili</h2>
@@ -213,7 +213,7 @@ export default function AIOSConfigurazionePage() {
             </div>
 
             {loading ? (
-              <p className="theme-admin-muted mt-6 text-sm">Caricamento...</p>
+              <p className="aios-config-muted mt-6 text-sm">Caricamento...</p>
             ) : (
               <div className="mt-6 space-y-7">
                 {sections.map((section) => {
@@ -226,10 +226,10 @@ export default function AIOSConfigurazionePage() {
                     >
                       <div>
                         <h3 className="text-xl font-black">{section.title}</h3>
-                        <p className="theme-admin-muted mt-1 text-sm">
+                        <p className="aios-config-muted mt-1 text-sm">
                           {section.description}
                         </p>
-                        <p className="theme-admin-faint mt-2 text-xs uppercase tracking-[0.2em]">
+                        <p className="aios-config-faint mt-2 text-xs uppercase tracking-[0.2em]">
                           {section.section_key}
                         </p>
                       </div>
@@ -325,8 +325,8 @@ export default function AIOSConfigurazionePage() {
             )}
           </div>
 
-          <form onSubmit={addItem} className="theme-admin-card h-fit rounded-[2rem] border p-6">
-            <p className="theme-admin-faint text-xs font-semibold uppercase tracking-[0.3em]">
+          <form onSubmit={addItem} className="aios-config-card h-fit rounded-[2rem] border p-6">
+            <p className="aios-config-faint text-xs font-semibold uppercase tracking-[0.3em]">
               Nuovo check
             </p>
             <h2 className="mt-2 text-2xl font-black">Aggiungi voce</h2>
