@@ -4637,3 +4637,174 @@ body.admin-aios-shell .theme-admin-page {
   background: #0b1120 !important;
 }
 
+
+/* Fix leggibilità pagina Configurazione AI-OS */
+html[data-theme='light'] body:not(.admin-aios-shell) .theme-admin-page {
+  background: #f7f2e8 !important;
+  color: #111827 !important;
+}
+
+html[data-theme='light'] body:not(.admin-aios-shell) .theme-admin-card {
+  background: rgba(255, 252, 246, 0.96) !important;
+  border-color: rgba(120, 90, 32, 0.18) !important;
+  color: #111827 !important;
+}
+
+html[data-theme='light'] body:not(.admin-aios-shell) .theme-admin-muted {
+  color: rgba(17, 24, 39, 0.72) !important;
+}
+
+html[data-theme='light'] body:not(.admin-aios-shell) .theme-admin-faint {
+  color: rgba(92, 71, 39, 0.72) !important;
+}
+
+html[data-theme='light'] body:not(.admin-aios-shell) .theme-admin-input,
+html[data-theme='light'] body:not(.admin-aios-shell) .theme-admin-select {
+  background: #ffffff !important;
+  border-color: rgba(120, 90, 32, 0.22) !important;
+  color: #111827 !important;
+}
+
+html[data-theme='light'] body:not(.admin-aios-shell) .theme-admin-input::placeholder {
+  color: rgba(17, 24, 39, 0.44) !important;
+}
+
+html[data-theme='light'] body:not(.admin-aios-shell) .theme-admin-page input[type='checkbox'] {
+  accent-color: #5f7f63;
+}
+
+html[data-theme='dark'] .theme-admin-page {
+  background: #0b1120 !important;
+  color: #e5e7eb !important;
+}
+
+html[data-theme='dark'] .theme-admin-card {
+  background: rgba(15, 23, 42, 0.88) !important;
+  border-color: rgba(143, 188, 187, 0.22) !important;
+  color: #e5e7eb !important;
+}
+
+html[data-theme='dark'] .theme-admin-muted {
+  color: rgba(209, 213, 219, 0.72) !important;
+}
+
+html[data-theme='dark'] .theme-admin-faint {
+  color: rgba(143, 188, 187, 0.74) !important;
+}
+
+html[data-theme='dark'] .theme-admin-input,
+html[data-theme='dark'] .theme-admin-select {
+  background: rgba(17, 24, 39, 0.92) !important;
+  border-color: rgba(143, 188, 187, 0.24) !important;
+  color: #e5e7eb !important;
+}
+
+html[data-theme='dark'] .theme-admin-input::placeholder {
+  color: rgba(209, 213, 219, 0.44) !important;
+}
+
+/* Admin force dark shell override - START */
+body.admin-force-dark {
+  background: #09090b !important;
+  color: #f4f4f5 !important;
+}
+
+body.admin-force-dark .theme-toggle-button {
+  display: none !important;
+}
+
+body.admin-news-theme-preview .theme-toggle-button {
+  display: inline-flex !important;
+}
+
+body.admin-force-dark aside,
+body.admin-force-dark header {
+  background: #0b0b0f !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f4f4f5 !important;
+}
+
+body.admin-force-dark aside a,
+body.admin-force-dark aside button,
+body.admin-force-dark header a,
+body.admin-force-dark header button {
+  color: #e5e7eb !important;
+}
+
+body.admin-force-dark aside a:hover,
+body.admin-force-dark aside button:hover {
+  background: rgba(255, 255, 255, 0.07) !important;
+  color: #ffffff !important;
+}
+
+body.admin-force-dark .theme-admin-page {
+  background: #09090b !important;
+  color: #f4f4f5 !important;
+}
+
+body.admin-force-dark .theme-admin-card,
+body.admin-force-dark .theme-panel {
+  background: #111216 !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+  color: #f4f4f5 !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42) !important;
+}
+
+body.admin-force-dark .theme-admin-card [class*="bg-black/10"],
+body.admin-force-dark .theme-admin-card [class*="bg-[var(--site-surface-strong)]"],
+body.admin-force-dark .theme-panel [class*="bg-black/10"],
+body.admin-force-dark .theme-panel [class*="bg-[var(--site-surface-strong)]"] {
+  background: #15171d !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+body.admin-force-dark .theme-admin-muted {
+  color: #a1a1aa !important;
+}
+
+body.admin-force-dark .theme-admin-faint {
+  color: #8b8b92 !important;
+}
+
+body.admin-force-dark .theme-admin-input,
+body.admin-force-dark .theme-admin-select,
+body.admin-force-dark .theme-input,
+body.admin-force-dark .theme-select,
+body.admin-force-dark input,
+body.admin-force-dark select,
+body.admin-force-dark textarea {
+  background: #1a1c22 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f4f4f5 !important;
+}
+
+body.admin-force-dark input::placeholder,
+body.admin-force-dark textarea::placeholder,
+body.admin-force-dark .theme-admin-input::placeholder {
+  color: rgba(244, 244, 245, 0.42) !important;
+}
+
+body.admin-force-dark option {
+  background: #111216 !important;
+  color: #f4f4f5 !important;
+}
+
+body.admin-force-dark .theme-admin-button-secondary,
+body.admin-force-dark .theme-button-secondary {
+  background: #181a20 !important;
+  border-color: rgba(255, 255, 255, 0.13) !important;
+  color: #f4f4f5 !important;
+}
+
+body.admin-force-dark .theme-admin-button-primary,
+body.admin-force-dark .theme-button-primary {
+  background: #f1dec0 !important;
+  border-color: rgba(241, 222, 192, 0.55) !important;
+  color: #111216 !important;
+}
+
+body.admin-force-dark .theme-admin-button-primary *,
+body.admin-force-dark .theme-button-primary * {
+  color: #111216 !important;
+}
+/* Admin force dark shell override - END */
