@@ -4808,3 +4808,130 @@ body.admin-force-dark .theme-button-primary * {
   color: #111216 !important;
 }
 /* Admin force dark shell override - END */
+
+/* AI-OS dark black mode - START */
+body.admin-aios-shell,
+body.admin-force-dark.admin-aios-shell {
+  background: #050506 !important;
+  color: #f4f4f5 !important;
+}
+
+body.admin-aios-shell main,
+body.admin-aios-shell .theme-admin-page,
+body.admin-aios-shell [class*="min-h-screen"],
+body.admin-aios-shell [class*="bg-\[\#0B1120\]"],
+body.admin-aios-shell [class*="bg-\[\#0b1120\]"],
+body.admin-aios-shell [class*="bg-\[\#111827\]"],
+body.admin-aios-shell [class*="bg-\[\#0F172A\]"],
+body.admin-aios-shell [class*="bg-\[\#0f172a\]"] {
+  background: #050506 !important;
+  color: #f4f4f5 !important;
+}
+
+body.admin-aios-shell aside,
+body.admin-aios-shell header,
+body.admin-aios-shell footer {
+  background: #070708 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f4f4f5 !important;
+}
+
+body.admin-aios-shell [class*="border-\[\#8FBCBB\]"],
+body.admin-aios-shell [class*="border-\[\#88C0D0\]"],
+body.admin-aios-shell [class*="border-\[\#81A1C1\]"],
+body.admin-aios-shell [class*="border-\[\#A3BE8C\]"],
+body.admin-aios-shell [class*="border-\[\#B48EAD\]"] {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+body.admin-aios-shell [class*="bg-\[\#1F2937\]"],
+body.admin-aios-shell [class*="bg-\[\#1f2937\]"],
+body.admin-aios-shell [class*="bg-\[\#1E293B\]"],
+body.admin-aios-shell [class*="bg-\[\#1e293b\]"],
+body.admin-aios-shell [class*="bg-\[\#162032\]"],
+body.admin-aios-shell [class*="bg-\[\#172033\]"],
+body.admin-aios-shell .theme-admin-card,
+body.admin-aios-shell .theme-panel {
+  background: #101115 !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+  color: #f4f4f5 !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.48) !important;
+}
+
+body.admin-aios-shell [class*="bg-\[\#A3BE8C\]"],
+body.admin-aios-shell [class*="bg-\[\#8FBCBB\]"],
+body.admin-aios-shell [class*="bg-\[\#B48EAD\]"],
+body.admin-aios-shell [class*="bg-\[\#D08770\]"],
+body.admin-aios-shell [class*="bg-\[\#EBCB8B\]"] {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.admin-aios-shell [class*="text-\[\#8FBCBB\]"],
+body.admin-aios-shell [class*="text-\[\#88C0D0\]"],
+body.admin-aios-shell [class*="text-\[\#81A1C1\]"],
+body.admin-aios-shell [class*="text-\[\#A3BE8C\]"],
+body.admin-aios-shell [class*="text-\[\#B48EAD\]"] {
+  color: #a1a1aa !important;
+}
+
+body.admin-aios-shell [class*="text-\[\#ECEFF4\]"],
+body.admin-aios-shell [class*="text-\[\#E5E7EB\]"],
+body.admin-aios-shell h1,
+body.admin-aios-shell h2,
+body.admin-aios-shell h3,
+body.admin-aios-shell h4 {
+  color: #f4f4f5 !important;
+}
+
+body.admin-aios-shell p,
+body.admin-aios-shell span,
+body.admin-aios-shell small {
+  color: inherit;
+}
+
+body.admin-aios-shell input,
+body.admin-aios-shell select,
+body.admin-aios-shell textarea {
+  background: #17181d !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f4f4f5 !important;
+}
+
+body.admin-aios-shell input::placeholder,
+body.admin-aios-shell textarea::placeholder {
+  color: rgba(244, 244, 245, 0.42) !important;
+}
+
+body.admin-aios-shell option {
+  background: #111216 !important;
+  color: #f4f4f5 !important;
+}
+
+body.admin-aios-shell button,
+body.admin-aios-shell a {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+body.admin-aios-shell button:hover,
+body.admin-aios-shell a:hover {
+  background-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+body.admin-aios-shell .theme-toggle-button {
+  display: none !important;
+}
+
+/* Spegne l'effetto griglia/cyber troppo blu dentro AI-OS */
+body.admin-aios-shell [class*="bg-\[linear-gradient"],
+body.admin-aios-shell [style*="linear-gradient"],
+body.admin-aios-shell [style*="radial-gradient"] {
+  background-color: #050506 !important;
+}
+
+/* Barra Start / finestre / dock AI-OS in nero opaco */
+body.admin-aios-shell [class*="backdrop-blur"],
+body.admin-aios-shell [class*="shadow-"],
+body.admin-aios-shell [class*="rounded-\["] {
+  border-color: rgba(255, 255, 255, 0.10) !important;
+}
+/* AI-OS dark black mode - END */
